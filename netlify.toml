@@ -1,0 +1,8 @@
+[[edge_functions]]
+  path = "/p/*"
+  function = "product-share"
+
+[[redirects]]
+  from = "/"
+  to = "/index-23.html"
+  status = 200
