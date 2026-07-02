@@ -642,6 +642,16 @@ window.onload=async function(){
 // ══════════ IMAGE UPLOAD (via ImgBB) ══════════
 const IMGBB_API_KEY = "16b4262b9ff85a10c0f3a4834a847184";
 
+// ══════════ ADMIN WHATSAPP NOTIFICATIONS (via CallMeBot) ══════════
+const ADMIN_NOTIFY_PHONE = "249966009977";
+const ADMIN_NOTIFY_APIKEY = "7899312";
+function notifyAdmin(text){
+  try{
+    const url=`https://api.callmebot.com/whatsapp.php?phone=${ADMIN_NOTIFY_PHONE}&text=${encodeURIComponent(text)}&apikey=${ADMIN_NOTIFY_APIKEY}`;
+    fetch(url,{mode:"no-cors"}).catch(()=>{});
+  }catch(e){}
+}
+
 async function handleImgUpload(input){
   const file=input.files[0];if(!file)return;
   console.log("[IMG] selected file:", file.name, file.size, file.type);
@@ -795,6 +805,7 @@ async function submitDirectOrder(){
   const orderId="ORD-"+Date.now().toString().slice(-6);
   const order={id:orderId,buyerName:name,buyerPhone:phone,buyerAddress:address,notes,items:[{productId:p.id,name:p.name,price:p.price,qty,sellerId:p.sellerId,sellerName:p.sellerName}],total,date:TODAY(),status:"new"};
   await dbSave("orders",orderId,order);
+  notifyAdmin(`🛒 طلب جديد على منصة الريان!\n━━━━━━━━━━\nرقم الطلب: ${orderId}\nالمنتج: ${p.name} × ${qty}\nالإجمالي: ${SDG(total)}\nالمتجر: ${p.sellerName}\n━━━━━━━━━━\nالزبون: ${name}\nالهاتف: ${phone}\nالعنوان: ${address}`);
   const seller=sellers.find(s=>s.id===p.sellerId);
   let waLink="";
   if(seller){
@@ -866,6 +877,7 @@ function regBack(){regStep--;updateRegUI();}
 async function regSubmit(){
   const seller={id:Date.now().toString(),ownerName:document.getElementById("r-name").value.trim(),phone:document.getElementById("r-phone").value.trim(),storeName:document.getElementById("r-store").value.trim(),category:document.getElementById("r-cat").value,plan:selectedPlan,description:document.getElementById("r-desc").value.trim(),storeImage:currentStoreImage,joinedAt:TODAY()};
   await dbSave("sellers",seller.id,seller);
+  notifyAdmin(`🆕 تاجر جديد سجّل في منصة الريان!\n━━━━━━━━━━\nالمتجر: ${seller.storeName}\nالمالك: ${seller.ownerName}\nالهاتف: ${seller.phone}\nالتصنيف: ${seller.category}\nالباقة: ${PLANS.find(p=>p.id===seller.plan)?.name||seller.plan}`);
   currentSeller=seller;isAdmin=false;
   closeModal("modal-register");showView("dashboard");renderDashboard();
   showToast(`أهلاً ${seller.storeName}! تم إنشاء متجرك 🎉`);
