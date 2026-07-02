@@ -120,6 +120,14 @@ textarea.inp{height:64px;resize:none}
 /* WA NOTICE */
 .wa-notice{background:#E7FBF0;border:1px solid #B7EBD0;border-radius:9px;padding:11px 14px;margin-bottom:14px;font-size:0.82rem;color:#1A5C3A;line-height:1.6}
 
+/* CHAT */
+.chat-messages{max-height:340px;min-height:120px;overflow-y:auto;padding:8px 4px;margin-bottom:12px;display:flex;flex-direction:column;background:#FAFAF7;border-radius:10px}
+.chat-input-row{display:flex;gap:8px;align-items:center}
+.chat-input{flex:1;padding:10px 14px;border:1.5px solid #E5E0D8;border-radius:22px;font-size:0.87rem;outline:none;color:#1A2744;background:#fff;direction:rtl;font-family:Tajawal,sans-serif}
+.chat-input:focus{border-color:#C9933A}
+.chat-send-btn{background:linear-gradient(135deg,#C9933A,#E8B660);color:#1A2744;border:none;border-radius:50%;width:40px;height:40px;font-size:1.05rem;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.store-chat-btn{background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2);border-radius:9px;padding:10px 20px;font-weight:700;font-size:0.88rem;cursor:pointer;font-family:Tajawal,sans-serif}
+
 /* DASHBOARD */
 #dashboard{min-height:100vh;background:#F4F6FA}
 .dash-nav{background:#1A2744;padding:11px 16px;display:flex;align-items:center;justify-content:space-between}
@@ -270,6 +278,7 @@ textarea.inp{height:64px;resize:none}
           <div class="store-meta" id="store-meta"></div>
           <div class="store-actions">
             <a class="store-wa-btn" id="store-wa-btn" href="#" target="_blank">📱 تواصل عبر واتساب</a>
+            <button class="store-chat-btn" onclick="openStartChat(currentStoreId)">💬 راسل التاجر</button>
             <button class="store-share-btn" onclick="shareCurrentStore()">🔗 شارك المتجر</button>
           </div>
         </div>
@@ -318,6 +327,7 @@ textarea.inp{height:64px;resize:none}
       </div>
       <div id="tab-products"></div>
       <div id="tab-orders" class="hidden"></div>
+      <div id="tab-messages" class="hidden"></div>
       <div id="tab-admin" class="hidden"></div>
       <div id="tab-manage" class="hidden"></div>
     </div>
@@ -425,7 +435,8 @@ textarea.inp{height:64px;resize:none}
   <div class="modal modal-sm">
     <div id="direct-prod-img" style="width:100%;height:170px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:52px;background:#F5F5F5;overflow:hidden;margin-bottom:12px"></div>
     <h3 style="color:#1A2744;font-weight:900;font-size:1.05rem;margin-bottom:4px" id="direct-prod-name">—</h3>
-    <div style="color:#C9933A;font-weight:900;font-size:1.1rem;margin-bottom:16px" id="direct-prod-price">—</div>
+    <div style="color:#C9933A;font-weight:900;font-size:1.1rem;margin-bottom:10px" id="direct-prod-price">—</div>
+    <button type="button" onclick="startChatFromDirectOrder()" style="width:100%;padding:9px;border-radius:9px;border:1.5px solid #E5E0D8;background:#FAFAF7;color:#1A2744;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:Tajawal,sans-serif;margin-bottom:16px">💬 عندك سؤال؟ راسل التاجر أولاً</button>
     <div class="field"><label class="lbl">اسمك الكامل</label><input class="inp" id="co-name" placeholder="أحمد محمد"></div>
     <div class="field"><label class="lbl">رقم الهاتف</label><input class="inp" id="co-phone" placeholder="0912345678"></div>
     <div class="field"><label class="lbl">العنوان / المدينة</label><input class="inp" id="co-address" placeholder="الخرطوم، حي الرياض"></div>
@@ -450,6 +461,62 @@ textarea.inp{height:64px;resize:none}
     <p style="color:#6B7280;font-size:0.79rem;margin-bottom:14px">إذا لم يفتح واتساب تلقائياً:</p>
     <a id="wa-fallback-btn" href="#" target="_blank" class="share-btn share-wa" style="justify-content:center;margin-bottom:10px">📱 إرسال للتاجر عبر واتساب</a>
     <button class="btn-gold" style="width:100%;padding:10px" onclick="closeModal('modal-order-success')">حسناً</button>
+  </div>
+</div>
+
+<!-- WELCOME TRADER -->
+<div class="overlay hidden" id="modal-welcome-trader">
+  <div class="modal modal-sm" style="text-align:center">
+    <div style="font-size:2.8rem;margin-bottom:8px">🎉</div>
+    <h3 style="color:#1A2744;font-weight:900;font-size:1.2rem;margin-bottom:4px" id="wt-name">أهلاً بك!</h3>
+    <p style="color:#6B7280;font-size:0.85rem;margin-bottom:18px" id="wt-store">متجرك جاهز الآن على منصة الريان 🛒</p>
+    <div style="background:#F4F6FA;border-radius:11px;padding:14px;margin-bottom:18px;text-align:right">
+      <div style="font-weight:800;color:#1A2744;font-size:0.88rem;margin-bottom:10px">خطواتك التالية:</div>
+      <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:9px"><span style="font-size:1rem">📷</span><span style="color:#4B5563;font-size:0.82rem;line-height:1.5">أضف أول منتج بصورة واضحة وسعر مناسب</span></div>
+      <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:9px"><span style="font-size:1rem">📣</span><span style="color:#4B5563;font-size:0.82rem;line-height:1.5">شارك رابط متجرك مع عملائك على واتساب</span></div>
+      <div style="display:flex;align-items:flex-start;gap:8px"><span style="font-size:1rem">📋</span><span style="color:#4B5563;font-size:0.82rem;line-height:1.5">استقبل الطلبات مباشرة عبر واتساب من لوحتك</span></div>
+    </div>
+    <button class="btn-gold" style="width:100%;padding:11px;margin-bottom:8px" onclick="closeWelcomeAndAddProduct()">➕ أضف أول منتج الآن</button>
+    <button style="width:100%;padding:9px;border-radius:9px;border:1.5px solid #E5E0D8;background:transparent;font-weight:700;color:#6B7280;cursor:pointer;font-family:Tajawal,sans-serif" onclick="closeModal('modal-welcome-trader')">لاحقاً</button>
+  </div>
+</div>
+
+<!-- START CHAT -->
+<div class="overlay hidden" id="modal-start-chat">
+  <div class="modal modal-sm">
+    <h3 style="color:#1A2744;font-weight:900;font-size:1.05rem;margin-bottom:4px">💬 راسل التاجر</h3>
+    <p style="color:#6B7280;font-size:0.82rem;margin-bottom:16px">للاستفسار قبل الطلب — مش لتأكيد الشراء</p>
+    <input type="hidden" id="sc-seller-id">
+    <div class="field"><label class="lbl">اسمك</label><input class="inp" id="sc-name" placeholder="أحمد محمد"></div>
+    <div class="field"><label class="lbl">رقم هاتفك</label><input class="inp" id="sc-phone" placeholder="0912345678"></div>
+    <div id="sc-err" class="err-box hidden"></div>
+    <div class="modal-btns">
+      <button class="btn-back" onclick="closeModal('modal-start-chat')">إلغاء</button>
+      <button class="btn-next" onclick="submitStartChat()">✓ ابدأ المحادثة</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHAT WINDOW -->
+<div class="overlay hidden" id="modal-chat-window">
+  <div class="modal modal-sm" style="display:flex;flex-direction:column">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <h3 style="color:#1A2744;font-weight:900;font-size:1rem" id="cw-title">—</h3>
+      <button onclick="closeModal('modal-chat-window')" style="background:none;border:none;font-size:1.3rem;color:#9CA3AF;cursor:pointer;line-height:1">×</button>
+    </div>
+    <div id="cw-link-box" class="hidden" style="background:#FFF8EE;border:1px solid #FFE8C2;border-radius:9px;padding:9px 12px;margin-bottom:10px">
+      <div style="font-size:0.74rem;color:#C9933A;font-weight:700;margin-bottom:5px">💾 احفظ هذا الرابط عشان ترجع للمحادثة لاحقاً:</div>
+      <div style="display:flex;align-items:center;gap:7px">
+        <span id="cw-link-text" style="flex:1;font-size:0.72rem;color:#1A2744;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:ltr;text-align:right"></span>
+        <button onclick="copyChatLink()" style="background:#1A2744;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-family:Tajawal,sans-serif;font-weight:700;font-size:0.72rem;cursor:pointer;flex-shrink:0">نسخ</button>
+      </div>
+    </div>
+    <div class="chat-messages" id="cw-messages"></div>
+    <div id="cw-readonly-note" class="hidden" style="text-align:center;color:#9CA3AF;font-size:0.76rem;padding:6px">👁 عرض فقط — أنت تتابع كمالك المنصة</div>
+    <div class="chat-input-row" id="cw-input-row">
+      <input class="chat-input" id="cw-input" placeholder="اكتب رسالتك..." onkeydown="if(event.key==='Enter'){event.preventDefault();sendChatMessage();}">
+      <button class="chat-send-btn" onclick="sendChatMessage()">➤</button>
+    </div>
   </div>
 </div>
 
@@ -553,7 +620,8 @@ const TODAY=()=>new Date().toLocaleDateString("ar",{year:"numeric",month:"long",
 const validSD=p=>/^(09|01)\d{8}$/.test(p.replace(/\s/g,""));
 
 // ══════════ STATE ══════════
-let sellers=[], products=[], orders=[];
+let sellers=[], products=[], orders=[], chats=[];
+let currentChatId="", chatViewerRole="";
 let visits={total:0,today:0,lastDate:""};
 let cart={};
 let currentSeller=null;
@@ -591,6 +659,12 @@ function listenAll(){
   onSnapshot(collection(db,"orders"), snap=>{
     orders = snap.docs.map(d=>d.data());
     if(currentSeller||isAdmin) renderDashboard();
+  });
+  // chats
+  onSnapshot(collection(db,"chats"), snap=>{
+    chats = snap.docs.map(d=>d.data());
+    if(currentChatId && !document.getElementById("modal-chat-window").classList.contains("hidden")) renderChatWindow();
+    if(currentSeller && activeTab==="messages") renderDashboard();
   });
   // visits
   onSnapshot(doc(db,"meta","visits"), snap=>{
@@ -638,6 +712,7 @@ window.onload=async function(){
   renderFilters();
   checkUrlProduct();
   checkUrlStore();
+  checkUrlChat();
 };
 
 // ══════════ IMAGE UPLOAD (via ImgBB) ══════════
@@ -881,7 +956,13 @@ async function regSubmit(){
   notifyAdmin(`🆕 تاجر جديد سجّل في منصة الريان!\n━━━━━━━━━━\nالمتجر: ${seller.storeName}\nالمالك: ${seller.ownerName}\nالهاتف: ${seller.phone}\nالتصنيف: ${seller.category}\nالباقة: ${PLANS.find(p=>p.id===seller.plan)?.name||seller.plan}`);
   currentSeller=seller;isAdmin=false;
   closeModal("modal-register");showView("dashboard");renderDashboard();
-  showToast(`أهلاً ${seller.storeName}! تم إنشاء متجرك 🎉`);
+  document.getElementById("wt-name").textContent=`أهلاً بك يا ${seller.ownerName}! 👋`;
+  document.getElementById("wt-store").textContent=`متجر "${seller.storeName}" جاهز الآن على منصة الريان 🛒`;
+  document.getElementById("modal-welcome-trader").classList.remove("hidden");
+}
+function closeWelcomeAndAddProduct(){
+  closeModal("modal-welcome-trader");
+  openAddProduct();
 }
 
 // ══════════ ADD / EDIT PRODUCT ══════════
@@ -959,7 +1040,7 @@ function switchTab(tab){
   activeTab=tab;
   document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
   event.target.classList.add("active");
-  ["tab-products","tab-orders","tab-admin"].forEach(id=>document.getElementById(id).classList.add("hidden"));
+  ["tab-products","tab-orders","tab-admin","tab-messages"].forEach(id=>document.getElementById(id).classList.add("hidden"));
   document.getElementById("tab-"+tab).classList.remove("hidden");
 }
 
@@ -978,13 +1059,16 @@ function renderDashboard(){
   document.getElementById("dash-share-strip").classList.remove("hidden");
   const myProds=products.filter(p=>p.sellerId===currentSeller.id);
   const myOrders=orders.filter(o=>o.items.some(i=>i.sellerId===currentSeller.id));
+  const myChats=chats.filter(c=>c.sellerId===currentSeller.id);
+  const unreadChats=myChats.filter(c=>!c.sellerRead).length;
   const myRevenue=myOrders.filter(o=>o.status==="done").reduce((s,o)=>{
     const t=o.items.filter(i=>i.sellerId===currentSeller.id).reduce((x,i)=>x+(i.price*i.qty),0);
     return s+(plan.type==="rent"?t:Math.round(t*(1-plan.commission/100)));
   },0);
   document.getElementById("dash-tabs").innerHTML=`
     <button class="tab-btn ${activeTab==="products"?"active":""}" onclick="switchTab('products')">📦 منتجاتي (${myProds.length})</button>
-    <button class="tab-btn ${activeTab==="orders"?"active":""}" onclick="switchTab('orders')">📋 الطلبات (${myOrders.length})</button>`;
+    <button class="tab-btn ${activeTab==="orders"?"active":""}" onclick="switchTab('orders')">📋 الطلبات (${myOrders.length})</button>
+    <button class="tab-btn ${activeTab==="messages"?"active":""}" onclick="switchTab('messages')">💬 الاستفسارات (${myChats.length})${unreadChats?' <span style="color:#C9933A">●</span>':""}</button>`;
   const totalProdViews=myProds.reduce((s,p)=>s+(p.views||0),0);
   document.getElementById("dash-stats").innerHTML=`
     <div class="stat-card"><div class="stat-icon">📦</div><div class="stat-val">${myProds.length}</div><div class="stat-lbl">المنتجات</div></div>
@@ -1034,6 +1118,25 @@ function renderDashboard(){
         <a class="order-wa-btn" href="https://wa.me/${waNum}?text=${waMsg}" target="_blank">📱 واتساب</a>
       </div></div>`;
     }).join("")+"</div>";}
+  const mTab=document.getElementById("tab-messages");
+  mTab.classList.toggle("hidden",activeTab!=="messages");
+  if(myChats.length===0){
+    mTab.innerHTML=`<div class="panel"><div class="no-items"><div class="icon">💬</div><div style="font-weight:700;margin-bottom:3px">لا توجد استفسارات بعد</div></div></div>`;
+  } else {
+    mTab.innerHTML=`<div class="panel"><div class="panel-head"><span class="panel-title">الاستفسارات (${myChats.length})</span></div>`+
+      myChats.slice().sort((a,b)=>(b.lastMessageAt||0)-(a.lastMessageAt||0)).map(c=>{
+        const msgs=c.messages||[];
+        const lastMsg=msgs.length?msgs[msgs.length-1].text:"لا توجد رسائل بعد";
+        const unread=!c.sellerRead;
+        return `<div class="prod-row" style="cursor:pointer${unread?";border-color:#C9933A":""}" onclick="openChatWindow('${c.id}','seller')">
+          <div class="prod-row-left">
+            <div class="prod-emoji-box" style="background:#EEF0FF">👤</div>
+            <div><div class="prod-title">${c.customerName}${unread?' <span style="color:#C9933A">●</span>':""}</div><div class="prod-meta" style="max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${lastMsg}</div></div>
+          </div>
+          <div style="font-size:0.7rem;color:#9CA3AF;flex-shrink:0">${c.customerPhone}</div>
+        </div>`;
+      }).join("")+"</div>";
+  }
 }
 
 function renderAdminDashboard(){
@@ -1055,6 +1158,7 @@ function renderAdminDashboard(){
   document.getElementById("dash-tabs").innerHTML=`
     <button class="tab-btn ${activeTab==="admin"?"active":""}" onclick="switchTab('admin')">📊 الإحصائيات</button>
     <button class="tab-btn ${activeTab==="orders"?"active":""}" onclick="switchTab('orders')">📋 الطلبات</button>
+    <button class="tab-btn ${activeTab==="messages"?"active":""}" onclick="switchTab('messages')">💬 المحادثات (${chats.length})</button>
     <button class="tab-btn ${activeTab==="manage"?"active":""}" onclick="switchTab('manage')">🏪 التجار</button>`;
   const aTab=document.getElementById("tab-admin");
   aTab.classList.toggle("hidden",activeTab!=="admin");
@@ -1120,6 +1224,25 @@ function renderAdminDashboard(){
         ${sp.length===0?`<div style="text-align:center;color:#9CA3AF;font-size:0.8rem;padding:8px">لا توجد منتجات</div>`:""}
       </div>`;
     }).join("")+"</div>";
+  }
+  const cTab=document.getElementById("tab-messages");
+  cTab.classList.toggle("hidden",activeTab!=="messages");
+  if(chats.length===0){
+    cTab.innerHTML=`<div class="panel"><div class="no-items"><div class="icon">💬</div><div style="font-weight:700;margin-bottom:3px">لا توجد محادثات بعد</div></div></div>`;
+  } else {
+    cTab.innerHTML=`<div class="panel"><div class="panel-head"><span class="panel-title">كل المحادثات (${chats.length})</span></div>`+
+      chats.slice().sort((a,b)=>(b.lastMessageAt||0)-(a.lastMessageAt||0)).map(c=>{
+        const msgs=c.messages||[];
+        const lastMsg=msgs.length?msgs[msgs.length-1].text:"لا توجد رسائل بعد";
+        const pending=c.lastSender==="customer" && !c.sellerRead;
+        return `<div class="prod-row" style="cursor:pointer${pending?";border-color:#C62828;background:#FFF6F6":""}" onclick="openChatWindow('${c.id}','admin')">
+          <div class="prod-row-left">
+            <div class="prod-emoji-box" style="background:#EEF0FF">💬</div>
+            <div><div class="prod-title">${c.customerName} ← ${c.sellerName}${pending?' <span style="color:#C62828;font-size:0.68rem;font-weight:700">(بانتظار رد التاجر)</span>':""}</div><div class="prod-meta" style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${lastMsg}</div></div>
+          </div>
+          <div style="font-size:0.7rem;color:#9CA3AF;flex-shrink:0">${c.customerPhone}</div>
+        </div>`;
+      }).join("")+"</div>";
   }
 }
 
@@ -1308,6 +1431,126 @@ function checkUrlStore(){
   }
 }
 
+// ══════════ CHAT (INQUIRIES) ══════════
+function startChatFromDirectOrder(){
+  const p=products.find(x=>x.id===directProductId);
+  if(!p)return;
+  closeModal("modal-order-direct");
+  openStartChat(p.sellerId);
+}
+function openStartChat(sellerId){
+  if(!sellerId)return;
+  const existingId = localStorage.getItem("rayan_chat_"+sellerId);
+  if(existingId){
+    const tryReopen=()=>{
+      const c=chats.find(x=>x.id===existingId);
+      if(c){ openChatWindow(existingId,"customer"); }
+      else { showStartChatForm(sellerId); }
+    };
+    tryReopen();
+    return;
+  }
+  showStartChatForm(sellerId);
+}
+function showStartChatForm(sellerId){
+  const s=sellers.find(x=>x.id===sellerId);if(!s)return;
+  document.getElementById("sc-seller-id").value=sellerId;
+  document.getElementById("sc-name").value="";
+  document.getElementById("sc-phone").value="";
+  hideErr("sc-err");
+  document.getElementById("modal-start-chat").classList.remove("hidden");
+}
+async function submitStartChat(){
+  const sellerId=document.getElementById("sc-seller-id").value;
+  const name=document.getElementById("sc-name").value.trim();
+  const phone=document.getElementById("sc-phone").value.trim();
+  if(!name)return showErr("sc-err","يرجى إدخال اسمك");
+  if(!phone)return showErr("sc-err","يرجى إدخال رقم الهاتف");
+  if(!validSD(phone))return showErr("sc-err","رقم الهاتف يبدأ بـ 09 أو 01 ويكون 10 أرقام");
+  const s=sellers.find(x=>x.id===sellerId);if(!s)return;
+  const chatId="chat_"+Date.now().toString()+Math.random().toString(36).slice(2,6);
+  const chat={id:chatId,sellerId,sellerName:s.storeName,sellerImage:s.storeImage||"",customerName:name,customerPhone:phone,messages:[],lastMessageAt:Date.now(),lastSender:"",sellerRead:true,customerRead:true};
+  await dbSave("chats",chatId,chat);
+  chats.push(chat);
+  try{ localStorage.setItem("rayan_chat_"+sellerId, chatId); }catch(e){}
+  closeModal("modal-start-chat");
+  openChatWindow(chatId,"customer");
+}
+function openChatWindow(chatId,role){
+  currentChatId=chatId;
+  chatViewerRole=role;
+  const chat=chats.find(c=>c.id===chatId);
+  if(chat){
+    if(role==="seller" && !chat.sellerRead) dbUpdate("chats",chatId,{sellerRead:true}).catch(()=>{});
+    if(role==="customer" && !chat.customerRead) dbUpdate("chats",chatId,{customerRead:true}).catch(()=>{});
+  }
+  renderChatWindow();
+  document.getElementById("modal-chat-window").classList.remove("hidden");
+}
+function renderChatWindow(){
+  const chat=chats.find(c=>c.id===currentChatId);
+  if(!chat)return;
+  document.getElementById("cw-title").textContent = chatViewerRole==="customer" ? (chat.sellerName||"التاجر") : chatViewerRole==="admin" ? `${chat.customerName} ← ${chat.sellerName}` : (chat.customerName||"الزبون");
+  const wrap=document.getElementById("cw-messages");
+  const msgs=chat.messages||[];
+  if(msgs.length===0){
+    wrap.innerHTML=`<div style="text-align:center;color:#9CA3AF;font-size:0.82rem;padding:24px 10px">ابدأ المحادثة بإرسال أول رسالة 👋</div>`;
+  } else {
+    wrap.innerHTML=msgs.map(m=>{
+      const mine = chatViewerRole==="admin" ? m.sender==="seller" : m.sender===chatViewerRole;
+      return `<div style="display:flex;justify-content:${mine?"flex-end":"flex-start"};margin-bottom:8px">
+        <div style="max-width:75%;background:${mine?"#1A2744":"#fff"};color:${mine?"#fff":"#1A2744"};padding:8px 13px;border-radius:13px;font-size:0.85rem;line-height:1.55;border:${mine?"none":"1px solid #E5E0D8"}">${escapeHtmlChat(m.text)}</div>
+      </div>`;
+    }).join("");
+  }
+  wrap.scrollTop=wrap.scrollHeight;
+  const linkBox=document.getElementById("cw-link-box");
+  if(chatViewerRole==="customer"){
+    linkBox.classList.remove("hidden");
+    const link=window.location.href.split("?")[0]+"?chat="+currentChatId;
+    document.getElementById("cw-link-text").textContent=link;
+  } else {
+    linkBox.classList.add("hidden");
+  }
+  document.getElementById("cw-input-row").classList.toggle("hidden", chatViewerRole==="admin");
+  document.getElementById("cw-readonly-note").classList.toggle("hidden", chatViewerRole!=="admin");
+}
+function escapeHtmlChat(str){
+  return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+async function sendChatMessage(){
+  const input=document.getElementById("cw-input");
+  const text=input.value.trim();
+  if(!text)return;
+  const chat=chats.find(c=>c.id===currentChatId);
+  if(!chat)return;
+  const newMsg={sender:chatViewerRole,text,time:Date.now()};
+  const updatedMessages=[...(chat.messages||[]),newMsg];
+  const updates={messages:updatedMessages,lastMessageAt:Date.now(),lastSender:chatViewerRole};
+  if(chatViewerRole==="customer"){updates.sellerRead=false;updates.customerRead=true;}
+  else{updates.customerRead=false;updates.sellerRead=true;}
+  input.value="";
+  chat.messages=updatedMessages;
+  renderChatWindow();
+  await dbUpdate("chats",currentChatId,updates);
+}
+function copyChatLink(){
+  navigator.clipboard.writeText(document.getElementById("cw-link-text").textContent).catch(()=>{});
+  showToast("تم نسخ رابط المحادثة ✓");
+}
+function checkUrlChat(){
+  const params=new URLSearchParams(window.location.search);
+  const cid=params.get("chat");
+  if(cid){
+    const tryOpen=()=>{
+      const c=chats.find(x=>x.id===cid);
+      if(c){ openChatWindow(cid,"customer"); }
+      else{ setTimeout(tryOpen,600); }
+    };
+    setTimeout(tryOpen,1000);
+  }
+}
+
 // ══════════ RATING ══════════
 let ratingTarget={sellerId:"",sellerName:""};
 let currentRating=0;
@@ -1418,6 +1661,8 @@ window.openDirectOrder=openDirectOrder;window.submitDirectOrder=submitDirectOrde
 window.updateOrderStatus=updateOrderStatus;window.switchTab=switchTab;
 window.openShare=openShare;window.shareProduct=shareProduct;window.copyProductLink=copyProductLink;window.shareProductOther=shareProductOther;window.openStore=openStore;window.closeStore=closeStore;window.shareCurrentStore=shareCurrentStore;window.openRating=openRating;window.setRating=setRating;window.submitRating=submitRating;window.adminEditProduct=adminEditProduct;window.adminDeleteProduct=adminDeleteProduct;window.adminDeleteSeller=adminDeleteSeller;window.adminEditSeller=adminEditSeller;window.submitEditSeller=submitEditSeller;window.adminAddProductForSeller=adminAddProductForSeller;window.copyLink=copyLink;window.shareOther=shareOther;
 window.handleImgUpload=handleImgUpload;window.handleStoreImgUpload=handleStoreImgUpload;window.closeModal=closeModal;
+window.closeWelcomeAndAddProduct=closeWelcomeAndAddProduct;
+window.openStartChat=openStartChat;window.submitStartChat=submitStartChat;window.openChatWindow=openChatWindow;window.sendChatMessage=sendChatMessage;window.copyChatLink=copyChatLink;window.startChatFromDirectOrder=startChatFromDirectOrder;
 </script>
 </body>
 </html>
