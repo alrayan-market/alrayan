@@ -340,6 +340,14 @@ textarea.inp{height:64px;resize:none}
       <h3 style="color:#1A2744;font-weight:900;font-size:1.15rem;margin-bottom:4px">بيانات المتجر 🏪</h3>
       <p style="color:#6B7280;font-size:0.84rem;margin-bottom:16px">ما الذي ستبيعه؟</p>
       <div class="field"><label class="lbl">اسم المتجر</label><input class="inp" id="r-store" placeholder="متجر الخرطوم"></div>
+      <div class="field">
+        <label class="lbl">صورة المتجر (اختياري)</label>
+        <div class="img-upload-box">
+          <input type="file" accept="image/*" id="r-img-input" onchange="handleStoreImgUpload(this,'register')">
+          <div id="r-img-placeholder"><div style="font-size:1.8rem;margin-bottom:4px">🏪</div><div style="color:#6B7280;font-size:0.82rem">اضغط لرفع صورة المتجر</div></div>
+          <img id="r-img-preview" class="img-preview">
+        </div>
+      </div>
       <div class="field"><label class="lbl">التصنيف</label><select class="inp" id="r-cat"></select></div>
       <div class="field"><label class="lbl">وصف المتجر (اختياري)</label><textarea class="inp" id="r-desc" placeholder="اشرح ما تبيعه..."></textarea></div>
     </div>
@@ -485,6 +493,32 @@ textarea.inp{height:64px;resize:none}
   </div>
 </div>
 
+<!-- ADMIN EDIT SELLER -->
+<div class="overlay hidden" id="modal-edit-seller">
+  <div class="modal modal-sm">
+    <h3 style="color:#1A2744;font-weight:900;font-size:1.05rem;margin-bottom:14px">✏️ تعديل بيانات التاجر</h3>
+    <input type="hidden" id="es-id">
+    <div class="field"><label class="lbl">اسم المتجر</label><input class="inp" id="es-store"></div>
+    <div class="field">
+      <label class="lbl">صورة المتجر</label>
+      <div class="img-upload-box">
+        <input type="file" accept="image/*" id="es-img-input" onchange="handleStoreImgUpload(this,'edit')">
+        <div id="es-img-placeholder"><div style="font-size:1.8rem;margin-bottom:4px">🏪</div><div style="color:#6B7280;font-size:0.82rem">اضغط لرفع صورة المتجر</div></div>
+        <img id="es-img-preview" class="img-preview">
+      </div>
+    </div>
+    <div class="field"><label class="lbl">اسم صاحب المتجر</label><input class="inp" id="es-owner"></div>
+    <div class="field"><label class="lbl">رقم الهاتف</label><input class="inp" id="es-phone"></div>
+    <div class="field"><label class="lbl">التصنيف</label><select class="inp" id="es-cat"></select></div>
+    <div class="field"><label class="lbl">وصف المتجر</label><textarea class="inp" id="es-desc"></textarea></div>
+    <div id="es-err" class="err-box hidden"></div>
+    <div class="modal-btns">
+      <button class="btn-back" onclick="closeModal('modal-edit-seller')">إلغاء</button>
+      <button class="btn-next" onclick="submitEditSeller()">✓ حفظ التعديلات</button>
+    </div>
+  </div>
+</div>
+
 
 
 <div class="toast hidden" id="toast"><span class="tick">✓</span><span id="toast-msg"></span></div>
@@ -526,6 +560,8 @@ let isAdmin=false;
 let regStep=1;
 let selectedPlan="commission";
 let currentImgBase64="";
+let currentStoreImage="";
+let editStoreImage="";
 let directProductId="";
 let activeTab="products";
 
@@ -579,6 +615,7 @@ window.onload=async function(){
   CATS.forEach(c=>{
     document.getElementById("r-cat").innerHTML+=`<option value="${c}">${c}</option>`;
     document.getElementById("p-cat").innerHTML+=`<option value="${c}">${c}</option>`;
+    document.getElementById("es-cat").innerHTML+=`<option value="${c}">${c}</option>`;
   });
   const pl=document.getElementById("plans-list");
   PLANS.forEach((p,i)=>{
@@ -643,6 +680,38 @@ async function handleImgUpload(input){
     console.error("[IMG] error:", err);
     placeholder.innerHTML = `<div style="font-size:1.8rem;margin-bottom:4px">📷</div><div style="color:#6B7280;font-size:0.82rem">اضغط لرفع صورة</div>`;
     showErr("prod-err","فشل رفع الصورة: "+(err.message||"خطأ غير معروف"));
+  }
+}
+
+async function handleStoreImgUpload(input, target){
+  const file=input.files[0];if(!file)return;
+  if(file.size>5*1024*1024){showErr(target==="register"?"reg-err":"es-err","حجم الصورة كبير (الحد 5MB)");return;}
+  const previewId=target==="register"?"r-img-preview":"es-img-preview";
+  const placeholderId=target==="register"?"r-img-placeholder":"es-img-placeholder";
+  const errId=target==="register"?"reg-err":"es-err";
+  const placeholder=document.getElementById(placeholderId);
+  const preview=document.getElementById(previewId);
+  placeholder.innerHTML = `<div style="font-size:1.8rem;margin-bottom:4px">⏳</div><div style="color:#6B7280;font-size:0.82rem">جاري رفع الصورة...</div>`;
+  placeholder.style.display = "block";
+  preview.style.display = "none";
+  try{
+    const formData = new FormData();
+    formData.append("image", file);
+    const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method:"POST", body: formData });
+    const data = await res.json();
+    if(data.success){
+      const url = data.data.url;
+      if(target==="register") currentStoreImage=url; else editStoreImage=url;
+      preview.src = url;
+      preview.style.display = "block";
+      placeholder.style.display = "none";
+      showToast("تم رفع صورة المتجر ✓");
+    } else {
+      throw new Error(data.error?.message || "upload failed");
+    }
+  } catch(err){
+    placeholder.innerHTML = `<div style="font-size:1.8rem;margin-bottom:4px">🏪</div><div style="color:#6B7280;font-size:0.82rem">اضغط لرفع صورة المتجر</div>`;
+    showErr(errId,"فشل رفع الصورة: "+(err.message||"خطأ غير معروف"));
   }
 }
 
@@ -751,8 +820,12 @@ function closeModal(id){document.getElementById(id).classList.add("hidden");}
 
 // ══════════ REGISTER ══════════
 function openRegister(){
-  regStep=1;selectedPlan="commission";
+  regStep=1;selectedPlan="commission";currentStoreImage="";
   ["r-name","r-phone","r-store","r-desc"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("r-img-input").value="";
+  document.getElementById("r-img-preview").style.display="none";
+  document.getElementById("r-img-placeholder").style.display="block";
+  document.getElementById("r-img-placeholder").innerHTML=`<div style="font-size:1.8rem;margin-bottom:4px">🏪</div><div style="color:#6B7280;font-size:0.82rem">اضغط لرفع صورة المتجر</div>`;
   hideErr("reg-err");updateRegUI();
   document.getElementById("modal-register").classList.remove("hidden");
 }
@@ -791,7 +864,7 @@ function regNext(){
 }
 function regBack(){regStep--;updateRegUI();}
 async function regSubmit(){
-  const seller={id:Date.now().toString(),ownerName:document.getElementById("r-name").value.trim(),phone:document.getElementById("r-phone").value.trim(),storeName:document.getElementById("r-store").value.trim(),category:document.getElementById("r-cat").value,plan:selectedPlan,description:document.getElementById("r-desc").value.trim(),joinedAt:TODAY()};
+  const seller={id:Date.now().toString(),ownerName:document.getElementById("r-name").value.trim(),phone:document.getElementById("r-phone").value.trim(),storeName:document.getElementById("r-store").value.trim(),category:document.getElementById("r-cat").value,plan:selectedPlan,description:document.getElementById("r-desc").value.trim(),storeImage:currentStoreImage,joinedAt:TODAY()};
   await dbSave("sellers",seller.id,seller);
   currentSeller=seller;isAdmin=false;
   closeModal("modal-register");showView("dashboard");renderDashboard();
@@ -983,7 +1056,7 @@ function renderAdminDashboard(){
     <div class="panel"><div class="panel-head"><span class="panel-title">التجار</span></div>
     ${sellers.length===0?"<div class=\"no-items\"><div>لا يوجد تجار</div></div>":
     sellers.map(s=>{const sp=products.filter(p=>p.sellerId===s.id).length;const so=orders.filter(o=>o.items.some(i=>i.sellerId===s.id)).length;const plan=PLANS.find(p=>p.id===s.plan)||PLANS[0];
-    return `<div class="prod-row"><div class="prod-row-left"><div class="prod-emoji-box" style="background:#EEF0FF">🏪</div><div><div class="prod-title">${s.storeName}</div><div class="prod-meta">${s.ownerName} · ${s.phone} · باقة ${plan.name}</div></div></div>
+    return `<div class="prod-row"><div class="prod-row-left">${s.storeImage?`<img class="prod-thumb" src="${s.storeImage}">`:`<div class="prod-emoji-box" style="background:#EEF0FF">🏪</div>`}<div><div class="prod-title">${s.storeName}</div><div class="prod-meta">${s.ownerName} · ${s.phone} · باقة ${plan.name}</div></div></div>
     <div style="text-align:left;flex-shrink:0"><div style="font-size:0.76rem;color:#6B7280">${sp} منتج · ${so} طلب</div></div></div>`;}).join("")}
     </div>`;
   const oTab=document.getElementById("tab-orders");
@@ -1015,7 +1088,11 @@ function renderAdminDashboard(){
             <div style="font-size:0.75rem;color:#6B7280">${s.ownerName} · ${s.phone} · باقة ${plan.name}</div>
             ${s.ratingCount?`<div style="color:#F59E0B;font-size:0.78rem">⭐ ${avg} (${s.ratingCount} تقييم)</div>`:""}
           </div>
-          <button onclick="adminDeleteSeller('${s.id}')" class="btn-red" style="font-size:0.72rem">🗑 حذف التاجر</button>
+          <div style="display:flex;gap:5px;flex-wrap:wrap">
+            <button onclick="adminEditSeller('${s.id}')" class="btn-edit" style="font-size:0.72rem">✏️ تعديل التاجر</button>
+            <button onclick="adminAddProductForSeller('${s.id}')" class="btn-add-sm" style="font-size:0.72rem">➕ أضف منتج</button>
+            <button onclick="adminDeleteSeller('${s.id}')" class="btn-red" style="font-size:0.72rem">🗑 حذف التاجر</button>
+          </div>
         </div>
         ${sp.map(p=>`<div class="prod-row" style="margin-bottom:6px">
           <div class="prod-row-left">
@@ -1118,7 +1195,7 @@ async function openStore(sellerId){
   window.history.pushState({}, "", url);
 
   // fill header
-  document.getElementById("store-avatar").textContent = EMOJIS[seller.category]||"🏪";
+  document.getElementById("store-avatar").innerHTML = seller.storeImage ? `<img src="${seller.storeImage}" style="width:100%;height:100%;object-fit:cover;border-radius:15px">` : (EMOJIS[seller.category]||"🏪");
   document.getElementById("store-name").textContent = seller.storeName;
   document.getElementById("store-cat").textContent = seller.category;
   document.getElementById("store-desc").textContent = seller.description||"";
@@ -1258,6 +1335,53 @@ async function adminDeleteProduct(productId){
   await dbDelete("products",productId);
   showToast("تم حذف المنتج ✓");
 }
+function adminEditSeller(sellerId){
+  const s=sellers.find(x=>x.id===sellerId);if(!s)return;
+  document.getElementById("es-id").value=s.id;
+  document.getElementById("es-store").value=s.storeName||"";
+  document.getElementById("es-owner").value=s.ownerName||"";
+  document.getElementById("es-phone").value=s.phone||"";
+  document.getElementById("es-cat").value=s.category||CATS[0];
+  document.getElementById("es-desc").value=s.description||"";
+  editStoreImage=s.storeImage||"";
+  document.getElementById("es-img-input").value="";
+  if(s.storeImage){
+    document.getElementById("es-img-preview").src=s.storeImage;
+    document.getElementById("es-img-preview").style.display="block";
+    document.getElementById("es-img-placeholder").style.display="none";
+  } else {
+    document.getElementById("es-img-preview").style.display="none";
+    document.getElementById("es-img-placeholder").style.display="block";
+    document.getElementById("es-img-placeholder").innerHTML=`<div style="font-size:1.8rem;margin-bottom:4px">🏪</div><div style="color:#6B7280;font-size:0.82rem">اضغط لرفع صورة المتجر</div>`;
+  }
+  hideErr("es-err");
+  document.getElementById("modal-edit-seller").classList.remove("hidden");
+}
+async function submitEditSeller(){
+  const id=document.getElementById("es-id").value;
+  const storeName=document.getElementById("es-store").value.trim();
+  const ownerName=document.getElementById("es-owner").value.trim();
+  const phone=document.getElementById("es-phone").value.trim();
+  const category=document.getElementById("es-cat").value;
+  const description=document.getElementById("es-desc").value.trim();
+  if(!storeName)return showErr("es-err","اسم المتجر مطلوب");
+  if(!phone)return showErr("es-err","رقم الهاتف مطلوب");
+  if(!validSD(phone))return showErr("es-err","رقم الهاتف يبدأ بـ 09 أو 01 ويكون 10 أرقام");
+  const existing=sellers.find(x=>x.id===id)||{};
+  await dbSave("sellers",id,{...existing,storeName,ownerName,phone,category,description,storeImage:editStoreImage});
+  // keep product sellerName in sync with any renamed store
+  const sellerProducts=products.filter(p=>p.sellerId===id);
+  for(const p of sellerProducts){
+    if(p.sellerName!==storeName) await dbUpdate("products",p.id,{sellerName:storeName});
+  }
+  closeModal("modal-edit-seller");
+  showToast("تم تحديث بيانات التاجر ✓");
+}
+function adminAddProductForSeller(sellerId){
+  const s=sellers.find(x=>x.id===sellerId);if(!s)return;
+  currentSeller=s;
+  openAddProduct();
+}
 async function adminDeleteSeller(sellerId){
   if(!confirm("حذف هذا التاجر وجميع منتجاته نهائياً؟"))return;
   // delete all products
@@ -1279,8 +1403,8 @@ window.regNext=regNext;window.regBack=regBack;window.regSubmit=regSubmit;window.
 window.openAddProduct=openAddProduct;window.openEditProduct=openEditProduct;window.submitProduct=submitProduct;window.deleteProduct=deleteProduct;
 window.openDirectOrder=openDirectOrder;window.submitDirectOrder=submitDirectOrder;
 window.updateOrderStatus=updateOrderStatus;window.switchTab=switchTab;
-window.openShare=openShare;window.shareProduct=shareProduct;window.copyProductLink=copyProductLink;window.shareProductOther=shareProductOther;window.openStore=openStore;window.closeStore=closeStore;window.shareCurrentStore=shareCurrentStore;window.openRating=openRating;window.setRating=setRating;window.submitRating=submitRating;window.adminEditProduct=adminEditProduct;window.adminDeleteProduct=adminDeleteProduct;window.adminDeleteSeller=adminDeleteSeller;window.copyLink=copyLink;window.shareOther=shareOther;
-window.handleImgUpload=handleImgUpload;window.closeModal=closeModal;
+window.openShare=openShare;window.shareProduct=shareProduct;window.copyProductLink=copyProductLink;window.shareProductOther=shareProductOther;window.openStore=openStore;window.closeStore=closeStore;window.shareCurrentStore=shareCurrentStore;window.openRating=openRating;window.setRating=setRating;window.submitRating=submitRating;window.adminEditProduct=adminEditProduct;window.adminDeleteProduct=adminDeleteProduct;window.adminDeleteSeller=adminDeleteSeller;window.adminEditSeller=adminEditSeller;window.submitEditSeller=submitEditSeller;window.adminAddProductForSeller=adminAddProductForSeller;window.copyLink=copyLink;window.shareOther=shareOther;
+window.handleImgUpload=handleImgUpload;window.handleStoreImgUpload=handleStoreImgUpload;window.closeModal=closeModal;
 </script>
 </body>
 </html>
