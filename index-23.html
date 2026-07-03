@@ -267,7 +267,7 @@ textarea.inp{height:64px;resize:none}
     <div class="hero-badge" id="hero-counts">🟢 0 تاجر · 0 منتج</div>
     <h1><span style="font-size:1.3em">🛒</span> سوق <span>الريان</span> <span style="font-size:1.3em">🛒</span><br>السوق السوداني الموثوق</h1>
     <p>منتجات حقيقية من تجار سودانيين</p>
-    <a href="/alrayan.apk" download style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#C9933A,#E8B660);color:#1A2744;border-radius:10px;padding:10px 22px;font-weight:800;font-size:0.9rem;text-decoration:none;margin-top:16px">📲 حمّل تطبيق الريان</a>
+    <button type="button" id="install-app-btn" onclick="triggerAppInstall()" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#C9933A,#E8B660);color:#1A2744;border:none;border-radius:10px;padding:10px 22px;font-weight:800;font-size:0.9rem;cursor:pointer;margin-top:16px;font-family:Tajawal,sans-serif">📲 ثبّت تطبيق الريان</button>
   </div>
   <div class="filters-wrap"><div class="filters" id="filters-bar"></div></div>
   <div id="products-container"></div>
@@ -1998,6 +1998,34 @@ if("serviceWorker" in navigator){
     navigator.serviceWorker.register("/service-worker.js").catch(()=>{});
   });
 }
+
+// ══════════ PWA: direct install button ══════════
+let deferredInstallPrompt=null;
+window.addEventListener("beforeinstallprompt",(e)=>{
+  e.preventDefault();
+  deferredInstallPrompt=e;
+});
+window.addEventListener("appinstalled",()=>{
+  deferredInstallPrompt=null;
+  const btn=document.getElementById("install-app-btn");
+  if(btn){btn.textContent="✓ تم تثبيت التطبيق";btn.disabled=true;btn.style.opacity="0.6";}
+});
+async function triggerAppInstall(){
+  if(deferredInstallPrompt){
+    deferredInstallPrompt.prompt();
+    const choice=await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt=null;
+    return;
+  }
+  // fallback: browser doesn't support auto-prompt (e.g. iOS Safari) or already installed
+  const isIos=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  if(isIos){
+    alert("لتثبيت التطبيق: اضغط زر المشاركة ⬆️ في المتصفح، ثم اختر \"إضافة إلى الشاشة الرئيسية\"");
+  } else {
+    alert("لتثبيت التطبيق: افتح قائمة المتصفح (⋮) واختر \"تثبيت التطبيق\" أو \"إضافة إلى الشاشة الرئيسية\"");
+  }
+}
+window.triggerAppInstall=triggerAppInstall;
 </script>
 </body>
 </html>
