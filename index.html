@@ -813,6 +813,20 @@ async function handleStoreImgUpload(input, target){
 }
 
 // ══════════ RENDER MARKET ══════════
+// ══════════ PRODUCT POPULARITY (views + orders) ══════════
+function getProductPopularity(p){
+  const views = p.views||0;
+  const orderedQty = orders.reduce((sum,o)=>{
+    const items = o.items||[];
+    const matched = items.filter(i=>i.productId===p.id);
+    return sum + matched.reduce((s,i)=>s+(i.qty||0),0);
+  },0);
+  return views + orderedQty*5; // orders weigh more than plain views
+}
+function sortByPopularity(list){
+  return list.slice().sort((a,b)=>getProductPopularity(b)-getProductPopularity(a));
+}
+
 function renderFilters(){
   const bar=document.getElementById("filters-bar");bar.innerHTML="";
   ["الكل",...CATS].forEach(c=>{
@@ -826,7 +840,7 @@ function renderFilters(){
 
 function renderProducts(filter){
   const wrap=document.getElementById("products-container");
-  const list=filter==="الكل"?products:products.filter(p=>p.category===filter);
+  const list=sortByPopularity(filter==="الكل"?products:products.filter(p=>p.category===filter));
   document.getElementById("hero-counts").textContent=`🟢 ${sellers.length} تاجر · ${products.length} منتج`;
   if(list.length===0){
     wrap.innerHTML=`<div style="text-align:center;padding:60px 20px;color:#9CA3AF"><div style="font-size:2.6rem;margin-bottom:12px">🏪</div><div style="font-weight:800;color:#6B7280;margin-bottom:7px">لا توجد منتجات بعد</div><div style="font-size:0.83rem;margin-bottom:16px">كن أول تاجر ينشر منتجات هنا!</div><button class="btn-gold" onclick="openRegister()">افتح متجرك الآن</button></div>`;
@@ -1373,7 +1387,7 @@ async function openStore(sellerId){
   currentStoreId = sellerId;
   const seller = sellers.find(s=>s.id===sellerId);
   if(!seller) return;
-  const storeProds = products.filter(p=>p.sellerId===sellerId);
+  const storeProds = sortByPopularity(products.filter(p=>p.sellerId===sellerId));
   const avg = seller.ratingCount ? Math.round((seller.ratingSum/seller.ratingCount)*10)/10 : 0;
   const cnt = seller.ratingCount || 0;
 
