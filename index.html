@@ -398,6 +398,10 @@ textarea.inp{height:64px;resize:none}
     </div>
     <div class="field"><label class="lbl">اسم المنتج</label><input class="inp" id="p-name" placeholder="عسل نحل طبيعي"></div>
     <div class="field"><label class="lbl">السعر (ج.س)</label><input class="inp" type="number" id="p-price" placeholder="5000" min="1"></div>
+    <div class="field" style="display:flex;align-items:center;gap:8px">
+      <input type="checkbox" id="p-price-on-request" onchange="togglePriceOnRequest()" style="width:17px;height:17px;flex-shrink:0">
+      <label style="margin:0;font-size:0.82rem;color:#1A2744;font-weight:700;cursor:pointer" for="p-price-on-request">🔒 السعر عند الطلب — يخفي السعر ويوجّه الزبون للاستفسار مباشرة</label>
+    </div>
     <div class="field"><label class="lbl">التصنيف</label><select class="inp" id="p-cat"></select></div>
     <div class="field"><label class="lbl">وصف المنتج (اختياري)</label><textarea class="inp" id="p-desc" placeholder="مميزات منتجك..."></textarea></div>
     <div id="prod-err" class="err-box hidden"></div>
@@ -629,6 +633,7 @@ const validSD=p=>/^(09|01)\d{8}$/.test(p.replace(/\s/g,""));
 // ══════════ STATE ══════════
 let sellers=[], products=[], orders=[], chats=[];
 let currentChatId="", chatViewerRole="";
+let chatPrefillText="";
 let visits={total:0,today:0,lastDate:""};
 let cart={};
 let currentSeller=null;
@@ -860,8 +865,8 @@ function renderProducts(filter){
         <div class="product-name">${p.name}</div>
         ${p.desc?'<div class="product-desc">'+p.desc+'</div>':''}
         <div class="product-footer">
-          <span class="product-price">${SDG(p.price)}</span>
-          <button class="order-now-btn" onclick="openDirectOrder('${p.id}')">اطلب الآن</button>
+          <span class="product-price" ${p.priceOnRequest?'style="font-size:0.82rem;color:#C9933A"':''}>${p.priceOnRequest?"السعر عند الطلب":SDG(p.price)}</span>
+          <button class="order-now-btn" onclick="${p.priceOnRequest?`inquirePrice('${p.id}')`:`openDirectOrder('${p.id}')`}">${p.priceOnRequest?"💬 استفسر":"اطلب الآن"}</button>
         </div>
         <div style="display:flex;gap:6px;margin-top:8px">
           <button onclick="shareProduct('${p.id}')" style="flex:1;padding:7px;border-radius:8px;border:1.5px solid #E5E0D8;background:#fff;color:#6B7280;font-size:0.76rem;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">🔗 شارك</button>
@@ -875,8 +880,9 @@ function renderProducts(filter){
 
 // ══════════ DIRECT ORDER ══════════
 function openDirectOrder(productId){
-  directProductId=productId;
   const p=products.find(x=>x.id===productId);if(!p)return;
+  if(p.priceOnRequest){ inquirePrice(productId); return; }
+  directProductId=productId;
   // track product view
   try{
     const pRef=doc(db,"products",productId);
@@ -1035,6 +1041,8 @@ function openAddProduct(){
   document.getElementById("product-modal-title").textContent="➕ إضافة منتج جديد";
   document.getElementById("p-submit-btn").textContent="✓ نشر المنتج";
   ["p-name","p-price","p-desc"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("p-price-on-request").checked=false;
+  togglePriceOnRequest();
   document.getElementById("p-video").value="";
   document.getElementById("p-img-input").value="";
   renderProductImagesUI();
@@ -1051,29 +1059,40 @@ function openEditProduct(productId){
   document.getElementById("p-price").value=p.price;
   document.getElementById("p-desc").value=p.desc||"";
   document.getElementById("p-cat").value=p.category;
+  document.getElementById("p-price-on-request").checked=!!p.priceOnRequest;
+  togglePriceOnRequest();
   document.getElementById("p-video").value=p.videoUrl||"";
   document.getElementById("p-img-input").value="";
   renderProductImagesUI();
   hideErr("prod-err");
   document.getElementById("modal-product").classList.remove("hidden");
 }
+function togglePriceOnRequest(){
+  const on=document.getElementById("p-price-on-request").checked;
+  const priceInput=document.getElementById("p-price");
+  priceInput.disabled=on;
+  priceInput.style.opacity=on?"0.5":"1";
+  if(on)priceInput.placeholder="اختياري — للاستخدام الداخلي فقط";
+  else priceInput.placeholder="5000";
+}
 async function submitProduct(){
   const name=document.getElementById("p-name").value.trim();
-  const price=parseFloat(document.getElementById("p-price").value);
+  const priceOnRequest=document.getElementById("p-price-on-request").checked;
+  const price=parseFloat(document.getElementById("p-price").value)||0;
   const cat=document.getElementById("p-cat").value;
   const desc=document.getElementById("p-desc").value.trim();
   const videoUrl=document.getElementById("p-video").value.trim();
   const editId=document.getElementById("p-edit-id").value;
   if(!name)return showErr("prod-err","اسم المنتج مطلوب");
-  if(!price||price<=0)return showErr("prod-err","يرجى إدخال سعر صحيح");
+  if(!priceOnRequest && price<=0)return showErr("prod-err","يرجى إدخال سعر صحيح");
   const images=[...currentProductImages];
   const mainImage=images[0]||"";
   if(editId){
     const existing=products.find(x=>x.id===editId)||{};
-    await dbSave("products",editId,{...existing,name,price,category:cat,desc,image:mainImage,images,videoUrl});
+    await dbSave("products",editId,{...existing,name,price,priceOnRequest,category:cat,desc,image:mainImage,images,videoUrl});
     showToast("تم تحديث المنتج ✓");
   } else {
-    const prod={id:Date.now().toString(),name,price,category:cat,desc,image:mainImage,images,videoUrl,sellerId:currentSeller.id,sellerName:currentSeller.storeName,addedAt:TODAY()};
+    const prod={id:Date.now().toString(),name,price,priceOnRequest,category:cat,desc,image:mainImage,images,videoUrl,sellerId:currentSeller.id,sellerName:currentSeller.storeName,addedAt:TODAY()};
     await dbSave("products",prod.id,prod);
     showToast("تم نشر المنتج ✓");
   }
@@ -1150,7 +1169,7 @@ function renderDashboard(){
     const thumb=p.image?`<img class="prod-thumb" src="${p.image}">`:`<div class="prod-emoji-box" style="background:${BG[p.category]||"#F5F5F5"}">${EMOJIS[p.category]||"📦"}</div>`;
     return `<div class="prod-row"><div class="prod-row-left">${thumb}<div><div class="prod-title">${p.name}</div><div class="prod-meta">${p.category} · ${p.addedAt}</div></div></div>
       <div style="display:flex;align-items:center;gap:7px;flex-shrink:0">
-        <div class="prod-price-col"><div class="prod-price-val">${SDG(p.price)}</div><div class="prod-net">${plan.type==="rent"?"صافيك: "+SDG(p.price):"صافيك: "+SDG(Math.round(p.price*(1-plan.commission/100)))}</div></div>
+        <div class="prod-price-col"><div class="prod-price-val">${p.priceOnRequest?"عند الطلب":SDG(p.price)}</div><div class="prod-net">${p.priceOnRequest?"🔒 يتفاوض التاجر":(plan.type==="rent"?"صافيك: "+SDG(p.price):"صافيك: "+SDG(Math.round(p.price*(1-plan.commission/100))))}</div></div>
         <button class="btn-edit" onclick="openEditProduct('${p.id}')">✏️</button>
         <button class="btn-red" onclick="deleteProduct('${p.id}')">🗑</button>
       </div></div>`;
@@ -1279,7 +1298,7 @@ function renderAdminDashboard(){
         ${sp.map(p=>`<div class="prod-row" style="margin-bottom:6px">
           <div class="prod-row-left">
             ${p.image?`<img class="prod-thumb" src="${p.image}">`:`<div class="prod-emoji-box" style="background:#F5F5F5">${EMOJIS[p.category]||"📦"}</div>`}
-            <div><div class="prod-title">${p.name}</div><div class="prod-meta">${SDG(p.price)}</div></div>
+            <div><div class="prod-title">${p.name}</div><div class="prod-meta">${p.priceOnRequest?"🔒 عند الطلب":SDG(p.price)}</div></div>
           </div>
           <div style="display:flex;gap:5px">
             <button onclick="adminEditProduct('${p.id}')" class="btn-edit">✏️</button>
@@ -1342,12 +1361,13 @@ function shareOther(){const link=document.getElementById("share-link-text").text
 function shareProduct(productId){
   const p=products.find(x=>x.id===productId);if(!p)return;
   const link=window.location.href.split("?")[0].replace(/\/$/,"")+"/p/"+productId;
+  const priceText=p.priceOnRequest?"السعر عند الطلب":SDG(p.price);
   document.getElementById("sp-name").textContent=p.name;
-  document.getElementById("sp-price").textContent=SDG(p.price);
+  document.getElementById("sp-price").textContent=priceText;
   document.getElementById("sp-link").textContent=link;
   const imgEl=document.getElementById("sp-img");
   imgEl.innerHTML=p.image?`<img src="${p.image}" style="width:100%;height:100%;object-fit:cover;border-radius:9px">`:(EMOJIS[p.category]||"📦");
-  document.getElementById("sp-wa").href=`https://wa.me/?text=${encodeURIComponent("🛒 "+p.name+"\n💰 "+SDG(p.price)+"\n\nاطلب الآن من منصة الريان:\n"+link)}`;
+  document.getElementById("sp-wa").href=`https://wa.me/?text=${encodeURIComponent("🛒 "+p.name+"\n💰 "+priceText+"\n\nاطلب الآن من منصة الريان:\n"+link)}`;
   document.getElementById("sp-copy-btn").textContent="نسخ";
   document.getElementById("modal-share-product").classList.remove("hidden");
 }
@@ -1437,8 +1457,8 @@ async function openStore(sellerId){
           <div style="color:#9CA3AF;font-size:0.72rem;margin-bottom:3px" id="pv_${p.id}">${(p.views||0)>0?"👁 "+(p.views||0).toLocaleString("ar")+" مشاهدة":""}</div>
           ${p.desc?'<div class="product-desc">'+p.desc+'</div>':''}
           <div class="product-footer">
-            <span class="product-price">${SDG(p.price)}</span>
-            <button class="order-now-btn" onclick="openDirectOrder('${p.id}')">اطلب الآن</button>
+            <span class="product-price" ${p.priceOnRequest?'style="font-size:0.82rem;color:#C9933A"':''}>${p.priceOnRequest?"السعر عند الطلب":SDG(p.price)}</span>
+            <button class="order-now-btn" onclick="${p.priceOnRequest?`inquirePrice('${p.id}')`:`openDirectOrder('${p.id}')`}">${p.priceOnRequest?"💬 استفسر":"اطلب الآن"}</button>
           </div>
           <div style="display:flex;gap:6px;margin-top:8px">
             <button onclick="shareProduct('${p.id}')" style="flex:1;padding:7px;border-radius:8px;border:1.5px solid #E5E0D8;background:#fff;color:#6B7280;font-size:0.76rem;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">🔗 شارك</button>
@@ -1504,6 +1524,11 @@ function startChatFromDirectOrder(){
   closeModal("modal-order-direct");
   openStartChat(p.sellerId);
 }
+function inquirePrice(productId){
+  const p=products.find(x=>x.id===productId);if(!p)return;
+  chatPrefillText=`مرحباً، أنا مهتم بمعرفة سعر: ${p.name}`;
+  openStartChat(p.sellerId);
+}
 function openStartChat(sellerId){
   if(!sellerId)return;
   const existingId = localStorage.getItem("rayan_chat_"+sellerId);
@@ -1551,6 +1576,10 @@ function openChatWindow(chatId,role){
     if(role==="customer" && !chat.customerRead) dbUpdate("chats",chatId,{customerRead:true}).catch(()=>{});
   }
   renderChatWindow();
+  if(role==="customer" && chatPrefillText){
+    document.getElementById("cw-input").value=chatPrefillText;
+    chatPrefillText="";
+  }
   document.getElementById("modal-chat-window").classList.remove("hidden");
 }
 function renderChatWindow(){
@@ -1727,6 +1756,7 @@ window.openDirectOrder=openDirectOrder;window.submitDirectOrder=submitDirectOrde
 window.updateOrderStatus=updateOrderStatus;window.switchTab=switchTab;
 window.openShare=openShare;window.shareProduct=shareProduct;window.copyProductLink=copyProductLink;window.shareProductOther=shareProductOther;window.openStore=openStore;window.closeStore=closeStore;window.shareCurrentStore=shareCurrentStore;window.openRating=openRating;window.setRating=setRating;window.submitRating=submitRating;window.adminEditProduct=adminEditProduct;window.adminDeleteProduct=adminDeleteProduct;window.adminDeleteSeller=adminDeleteSeller;window.adminEditSeller=adminEditSeller;window.submitEditSeller=submitEditSeller;window.adminAddProductForSeller=adminAddProductForSeller;window.copyLink=copyLink;window.shareOther=shareOther;
 window.handleImgUpload=handleImgUpload;window.handleStoreImgUpload=handleStoreImgUpload;window.closeModal=closeModal;
+window.togglePriceOnRequest=togglePriceOnRequest;window.inquirePrice=inquirePrice;
 window.removeProductImage=removeProductImage;window.shiftDirectGallery=shiftDirectGallery;
 window.closeWelcomeAndAddProduct=closeWelcomeAndAddProduct;
 window.openStartChat=openStartChat;window.submitStartChat=submitStartChat;window.openChatWindow=openChatWindow;window.sendChatMessage=sendChatMessage;window.copyChatLink=copyChatLink;window.startChatFromDirectOrder=startChatFromDirectOrder;
