@@ -414,6 +414,8 @@ textarea.inp{height:64px;resize:none}
       <input type="checkbox" id="p-price-on-request" onchange="togglePriceOnRequest()" style="width:17px;height:17px;flex-shrink:0">
       <label style="margin:0;font-size:0.82rem;color:#1A2744;font-weight:700;cursor:pointer" for="p-price-on-request">🔒 السعر عند الطلب — يخفي السعر ويوجّه الزبون للاستفسار مباشرة</label>
     </div>
+    <div class="field"><label class="lbl">مكان المنتج (اختياري)</label><input class="inp" id="p-location" placeholder="مثال: الخرطوم، السوق العربي"></div>
+    <div class="field"><label class="lbl">سعر التوصيل (ج.س) — اختياري</label><input class="inp" type="number" id="p-delivery-price" placeholder="اتركه فارغاً لو التوصيل بالتفاوض، أو 0 لو مجاني" min="0"></div>
     <div class="field"><label class="lbl">التصنيف</label><select class="inp" id="p-cat"></select></div>
     <div class="field"><label class="lbl">وصف المنتج (اختياري)</label><textarea class="inp" id="p-desc" placeholder="مميزات منتجك..."></textarea></div>
     <div id="prod-err" class="err-box hidden"></div>
@@ -458,7 +460,8 @@ textarea.inp{height:64px;resize:none}
     <div id="direct-prod-dots" style="display:flex;justify-content:center;gap:5px;margin:8px 0"></div>
     <div id="direct-prod-video" class="hidden" style="margin-bottom:12px"></div>
     <h3 style="color:#1A2744;font-weight:900;font-size:1.05rem;margin-bottom:4px" id="direct-prod-name">—</h3>
-    <div style="color:#C9933A;font-weight:900;font-size:1.1rem;margin-bottom:10px" id="direct-prod-price">—</div>
+    <div style="color:#C9933A;font-weight:900;font-size:1.1rem;margin-bottom:4px" id="direct-prod-price">—</div>
+    <div id="direct-prod-meta" style="color:#6B7280;font-size:0.78rem;margin-bottom:14px;display:flex;flex-wrap:wrap;gap:10px"></div>
     <div style="display:flex;gap:8px;margin-bottom:18px">
       <button type="button" onclick="startChatFromDirectOrder()" style="flex:1;padding:11px;border-radius:9px;border:1.5px solid #E5E0D8;background:#FAFAF7;color:#1A2744;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:Tajawal,sans-serif">💬 استفسر</button>
       <button type="button" onclick="focusOrderForm()" style="flex:1;padding:11px;border-radius:9px;border:none;background:linear-gradient(135deg,#C9933A,#E8B660);color:#1A2744;font-weight:800;font-size:0.85rem;cursor:pointer;font-family:Tajawal,sans-serif">🛒 اطلب الآن</button>
@@ -902,6 +905,7 @@ function renderProducts(filter){
         <div class="seller-row" onclick="openStore('${p.sellerId}')" style="cursor:pointer"><div class="seller-dot"></div><span class="seller-nm" style="text-decoration:underline;text-decoration-style:dotted">${p.sellerName}</span><span style="color:#C9933A;font-size:0.65rem;margin-right:3px">↗</span></div>
         ${(()=>{const s=sellers.find(x=>x.id===p.sellerId);const avg=s&&s.ratingCount?Math.round((s.ratingSum/s.ratingCount)*10)/10:0;const cnt=s&&s.ratingCount?s.ratingCount:0;if(!cnt)return "";const stars="★".repeat(Math.round(avg))+"☆".repeat(5-Math.round(avg));return '<div class="seller-rating"><span style="color:#F59E0B;font-size:0.9rem">'+stars+'</span><span class="rating-num">'+avg+'</span><span class="rating-count">('+cnt+')</span></div>';})()}
         <div class="product-name">${p.name}</div>
+        ${p.location?'<div style="color:#9CA3AF;font-size:0.72rem;margin-bottom:3px">📍 '+p.location+'</div>':''}
         ${p.desc?'<div class="product-desc">'+p.desc+'</div>':''}
         <div class="product-footer">
           <span class="product-price" ${p.priceOnRequest?'style="font-size:0.82rem;color:#C9933A"':''}>${p.priceOnRequest?"السعر عند الطلب":SDG(p.price)}</span>
@@ -929,6 +933,10 @@ function openDirectOrder(productId){
   }catch(e){}
   document.getElementById("direct-prod-name").textContent=p.name;
   document.getElementById("direct-prod-price").textContent=p.priceOnRequest?"السعر عند الطلب":SDG(p.price);
+  const metaParts=[];
+  if(p.location)metaParts.push("📍 "+p.location);
+  if(p.deliveryPrice!=null)metaParts.push(p.deliveryPrice===0?"🚚 توصيل مجاني":"🚚 توصيل "+SDG(p.deliveryPrice));
+  document.getElementById("direct-prod-meta").innerHTML=metaParts.map(m=>`<span>${m}</span>`).join("");
   directGalleryImages = (p.images && p.images.length) ? p.images : (p.image ? [p.image] : []);
   directGalleryIndex = 0;
   renderDirectGallery(p);
@@ -986,17 +994,19 @@ async function submitDirectOrder(){
   if(!phone)return showErr("co-err","يرجى إدخال رقم الهاتف");
   if(!address)return showErr("co-err","يرجى إدخال عنوانك");
   const p=products.find(x=>x.id===directProductId);if(!p)return;
-  const total=p.priceOnRequest?0:p.price*qty;
+  const deliveryFee=p.deliveryPrice||0;
+  const total=p.priceOnRequest?0:(p.price*qty)+deliveryFee;
+  const deliveryText=p.deliveryPrice!=null?(p.deliveryPrice===0?"\nالتوصيل: مجاني":"\nالتوصيل: "+SDG(deliveryFee)):"";
   const totalText=p.priceOnRequest?"يُحدد عند التواصل":SDG(total);
   const orderId="ORD-"+Date.now().toString().slice(-6);
-  const order={id:orderId,buyerName:name,buyerPhone:phone,buyerAddress:address,notes,items:[{productId:p.id,name:p.name,price:p.price,qty,sellerId:p.sellerId,sellerName:p.sellerName}],total,priceOnRequest:!!p.priceOnRequest,date:TODAY(),status:"new"};
+  const order={id:orderId,buyerName:name,buyerPhone:phone,buyerAddress:address,notes,items:[{productId:p.id,name:p.name,price:p.price,qty,sellerId:p.sellerId,sellerName:p.sellerName}],deliveryFee,total,priceOnRequest:!!p.priceOnRequest,date:TODAY(),status:"new"};
   await dbSave("orders",orderId,order);
-  notifyAdmin(`🛒 طلب جديد على منصة الريان!\n━━━━━━━━━━\nرقم الطلب: ${orderId}\nالمنتج: ${p.name} × ${qty}\nالإجمالي: ${totalText}\nالمتجر: ${p.sellerName}\n━━━━━━━━━━\nالزبون: ${name}\nالهاتف: ${phone}\nالعنوان: ${address}`);
+  notifyAdmin(`🛒 طلب جديد على منصة الريان!\n━━━━━━━━━━\nرقم الطلب: ${orderId}\nالمنتج: ${p.name} × ${qty}${deliveryText}\nالإجمالي: ${totalText}\nالمتجر: ${p.sellerName}\n━━━━━━━━━━\nالزبون: ${name}\nالهاتف: ${phone}\nالعنوان: ${address}`);
   const seller=sellers.find(s=>s.id===p.sellerId);
   let waLink="";
   if(seller){
     const waNum="249"+seller.phone.replace(/^0/,"");
-    const waMsg=encodeURIComponent(`🛒 طلب جديد من منصة الريان!\n━━━━━━━━━━\nرقم الطلب: ${orderId}\nالزبون: ${name}\nالهاتف: ${phone}\nالعنوان: ${address}\n${notes?"ملاحظات: "+notes+"\n":""}━━━━━━━━━━\n${p.name} × ${qty}\nالإجمالي: ${totalText}`);
+    const waMsg=encodeURIComponent(`🛒 طلب جديد من منصة الريان!\n━━━━━━━━━━\nرقم الطلب: ${orderId}\nالزبون: ${name}\nالهاتف: ${phone}\nالعنوان: ${address}\n${notes?"ملاحظات: "+notes+"\n":""}━━━━━━━━━━\n${p.name} × ${qty}${deliveryText}\nالإجمالي: ${totalText}`);
     waLink=`https://wa.me/${waNum}?text=${waMsg}`;
   }
   closeModal("modal-order-direct");
@@ -1081,6 +1091,8 @@ function openAddProduct(){
   document.getElementById("product-modal-title").textContent="➕ إضافة منتج جديد";
   document.getElementById("p-submit-btn").textContent="✓ نشر المنتج";
   ["p-name","p-price","p-desc"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("p-location").value="";
+  document.getElementById("p-delivery-price").value="";
   document.getElementById("p-price-on-request").checked=false;
   togglePriceOnRequest();
   document.getElementById("p-video").value="";
@@ -1098,6 +1110,8 @@ function openEditProduct(productId){
   document.getElementById("p-name").value=p.name;
   document.getElementById("p-price").value=p.price;
   document.getElementById("p-desc").value=p.desc||"";
+  document.getElementById("p-location").value=p.location||"";
+  document.getElementById("p-delivery-price").value=(p.deliveryPrice!=null)?p.deliveryPrice:"";
   document.getElementById("p-cat").value=p.category;
   document.getElementById("p-price-on-request").checked=!!p.priceOnRequest;
   togglePriceOnRequest();
@@ -1121,6 +1135,9 @@ async function submitProduct(){
   const price=parseFloat(document.getElementById("p-price").value)||0;
   const cat=document.getElementById("p-cat").value;
   const desc=document.getElementById("p-desc").value.trim();
+  const location=document.getElementById("p-location").value.trim();
+  const deliveryPriceRaw=document.getElementById("p-delivery-price").value;
+  const deliveryPrice=deliveryPriceRaw===""?null:parseFloat(deliveryPriceRaw);
   const videoUrl=document.getElementById("p-video").value.trim();
   const editId=document.getElementById("p-edit-id").value;
   if(!name)return showErr("prod-err","اسم المنتج مطلوب");
@@ -1129,10 +1146,10 @@ async function submitProduct(){
   const mainImage=images[0]||"";
   if(editId){
     const existing=products.find(x=>x.id===editId)||{};
-    await dbSave("products",editId,{...existing,name,price,priceOnRequest,category:cat,desc,image:mainImage,images,videoUrl});
+    await dbSave("products",editId,{...existing,name,price,priceOnRequest,category:cat,desc,location,deliveryPrice,image:mainImage,images,videoUrl});
     showToast("تم تحديث المنتج ✓");
   } else {
-    const prod={id:Date.now().toString(),name,price,priceOnRequest,category:cat,desc,image:mainImage,images,videoUrl,sellerId:currentSeller.id,sellerName:currentSeller.storeName,addedAt:TODAY()};
+    const prod={id:Date.now().toString(),name,price,priceOnRequest,category:cat,desc,location,deliveryPrice,image:mainImage,images,videoUrl,sellerId:currentSeller.id,sellerName:currentSeller.storeName,addedAt:TODAY()};
     await dbSave("products",prod.id,prod);
     showToast("تم نشر المنتج ✓");
   }
@@ -1499,6 +1516,7 @@ async function openStore(sellerId){
         <div class="product-img" style="background:${BG[p.category]||"#F5F5F5"}">${imgHtml}${mediaBadge}</div>
         <div class="product-body">
           <div class="product-name">${p.name}</div>
+          ${p.location?'<div style="color:#9CA3AF;font-size:0.72rem;margin-bottom:3px">📍 '+p.location+'</div>':''}
           <div style="color:#9CA3AF;font-size:0.72rem;margin-bottom:3px" id="pv_${p.id}">${(p.views||0)>0?"👁 "+(p.views||0).toLocaleString("ar")+" مشاهدة":""}</div>
           ${p.desc?'<div class="product-desc">'+p.desc+'</div>':''}
           <div class="product-footer">
