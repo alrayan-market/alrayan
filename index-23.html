@@ -678,6 +678,7 @@ let selectedPlan="commission";
 let currentImgBase64="";
 let currentProductImages=[];
 let directGalleryImages=[], directGalleryIndex=0;
+let currentShareProductId="";
 let currentStoreImage="";
 let editStoreImage="";
 let directProductId="";
@@ -1208,6 +1209,7 @@ function renderDashboard(){
     return `<div class="prod-row"><div class="prod-row-left">${thumb}<div><div class="prod-title">${p.name}</div><div class="prod-meta">${p.category} · ${p.addedAt}</div></div></div>
       <div style="display:flex;align-items:center;gap:7px;flex-shrink:0">
         <div class="prod-price-col"><div class="prod-price-val">${p.priceOnRequest?"عند الطلب":SDG(p.price)}</div><div class="prod-net">${p.priceOnRequest?"🔒 يتفاوض التاجر":(plan.type==="rent"?"صافيك: "+SDG(p.price):"صافيك: "+SDG(Math.round(p.price*(1-plan.commission/100))))}</div></div>
+        <button onclick="shareProduct('${p.id}')" class="btn-edit" style="background:#EEF8EE;color:#2E7D5E">🔗</button>
         <button class="btn-edit" onclick="openEditProduct('${p.id}')">✏️</button>
         <button class="btn-red" onclick="deleteProduct('${p.id}')">🗑</button>
       </div></div>`;
@@ -1340,6 +1342,7 @@ function renderAdminDashboard(){
             <div><div class="prod-title">${p.name}</div><div class="prod-meta">${p.priceOnRequest?"🔒 عند الطلب":SDG(p.price)}</div></div>
           </div>
           <div style="display:flex;gap:5px">
+            <button onclick="shareProduct('${p.id}')" class="btn-edit" style="background:#EEF8EE;color:#2E7D5E">🔗</button>
             <button onclick="adminEditProduct('${p.id}')" class="btn-edit">✏️</button>
             <button onclick="adminDeleteProduct('${p.id}')" class="btn-red" style="font-size:0.72rem">🗑</button>
           </div>
@@ -1400,6 +1403,7 @@ function shareOther(){const link=document.getElementById("share-link-text").text
 // ══════════ SHARE PRODUCT ══════════
 function shareProduct(productId){
   const p=products.find(x=>x.id===productId);if(!p)return;
+  currentShareProductId=productId;
   const link=window.location.href.split("?")[0].replace(/\/$/,"")+"/p/"+productId;
   const priceText=p.priceOnRequest?"السعر عند الطلب":SDG(p.price);
   document.getElementById("sp-name").textContent=p.name;
@@ -1418,7 +1422,7 @@ function copyProductLink(){
 }
 function shareProductOther(){
   const link=document.getElementById("sp-link").textContent;
-  const p=products.find(x=>x.id===directProductId)||{name:"منتج"};
+  const p=products.find(x=>x.id===currentShareProductId)||{name:"منتج"};
   if(navigator.share)navigator.share({title:p.name,text:"🛒 "+p.name+" على منصة الريان\n"+link,url:link});
   else navigator.clipboard.writeText(link).catch(()=>{});
 }
