@@ -774,6 +774,69 @@ window.onload=async function(){
 // ══════════ IMAGE UPLOAD (via ImgBB) ══════════
 const IMGBB_API_KEY = "16b4262b9ff85a10c0f3a4834a847184";
 
+// ══════════ PUSH NOTIFICATIONS (real, works even when app is closed) ══════════
+const VAPID_PUBLIC_KEY = "BDgZAf-eaLJm0AShq2UJXqP4eideizd2OUWM3e12vNFFvVRbG1wYuonGFnjQQlKA2s9khgzSkJtC1iVrd1sXuVU";
+
+function urlBase64ToUint8Array(base64String){
+  const padding="=".repeat((4-base64String.length%4)%4);
+  const base64=(base64String+padding).replace(/-/g,"+").replace(/_/g,"/");
+  const rawData=atob(base64);
+  const outputArray=new Uint8Array(rawData.length);
+  for(let i=0;i<rawData.length;i++)outputArray[i]=rawData.charCodeAt(i);
+  return outputArray;
+}
+async function subscribeToPush(){
+  try{
+    if(!("serviceWorker" in navigator) || !("PushManager" in window))return null;
+    if(!("Notification" in window))return null;
+    const permission=await Notification.requestPermission();
+    if(permission!=="granted")return null;
+    const reg=await navigator.serviceWorker.ready;
+    let sub=await reg.pushManager.getSubscription();
+    if(!sub){
+      sub=await reg.pushManager.subscribe({
+        userVisibleOnly:true,
+        applicationServerKey:urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+      });
+    }
+    return sub.toJSON();
+  }catch(e){ return null; }
+}
+async function enableSellerPushNotifications(sellerId){
+  const sub=await subscribeToPush();
+  if(sub){ try{ await dbUpdate("sellers",sellerId,{pushSubscription:sub}); }catch(e){} }
+}
+async function enableCustomerPushNotifications(phone){
+  if(!phone)return;
+  const sub=await subscribeToPush();
+  if(sub){ try{ await dbSave("customerPush",phone,{phone,subscription:sub,updatedAt:Date.now()}); }catch(e){} }
+}
+async function sendPushNotification(subscription,title,body,url){
+  if(!subscription)return;
+  try{
+    await fetch("/.netlify/functions/send-push",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({subscription,title,body,url:url||"/"})
+    });
+  }catch(e){}
+}
+async function notifyChatRecipient(chat,senderRole,previewText){
+  try{
+    if(senderRole==="customer"){
+      const seller=sellers.find(s=>s.id===chat.sellerId);
+      if(seller && seller.pushSubscription){
+        sendPushNotification(seller.pushSubscription,`💬 رسالة جديدة من ${chat.customerName}`,previewText,"/");
+      }
+    } else if(senderRole==="seller"){
+      const snap=await getDoc(doc(db,"customerPush",chat.customerPhone));
+      if(snap.exists()){
+        sendPushNotification(snap.data().subscription,`💬 رد من ${chat.sellerName}`,previewText,"/?chat="+chat.id);
+      }
+    }
+  }catch(e){}
+}
+
 // ══════════ ADMIN WHATSAPP NOTIFICATIONS (via CallMeBot) ══════════
 const ADMIN_NOTIFY_PHONE = "249966009977";
 const ADMIN_NOTIFY_APIKEY = "7899312";
@@ -1008,6 +1071,9 @@ async function submitDirectOrder(){
     const waNum="249"+seller.phone.replace(/^0/,"");
     const waMsg=encodeURIComponent(`🛒 طلب جديد من منصة الريان!\n━━━━━━━━━━\nرقم الطلب: ${orderId}\nالزبون: ${name}\nالهاتف: ${phone}\nالعنوان: ${address}\n${notes?"ملاحظات: "+notes+"\n":""}━━━━━━━━━━\n${p.name} × ${qty}${deliveryText}\nالإجمالي: ${totalText}`);
     waLink=`https://wa.me/${waNum}?text=${waMsg}`;
+    if(seller.pushSubscription){
+      sendPushNotification(seller.pushSubscription,"🛒 طلب جديد!",`${p.name} × ${qty} — ${totalText}`,"/");
+    }
   }
   closeModal("modal-order-direct");
   document.getElementById("success-order-id").textContent=orderId;
@@ -1075,6 +1141,7 @@ async function regSubmit(){
   await dbSave("sellers",seller.id,seller);
   notifyAdmin(`🆕 تاجر جديد سجّل في منصة الريان!\n━━━━━━━━━━\nالمتجر: ${seller.storeName}\nالمالك: ${seller.ownerName}\nالهاتف: ${seller.phone}\nالتصنيف: ${seller.category}\nالباقة: ${PLANS.find(p=>p.id===seller.plan)?.name||seller.plan}`);
   currentSeller=seller;isAdmin=false;
+  enableSellerPushNotifications(seller.id);
   closeModal("modal-register");showView("dashboard");renderDashboard();
   document.getElementById("wt-name").textContent=`أهلاً بك يا ${seller.ownerName}! 👋`;
   document.getElementById("wt-store").textContent=`متجر "${seller.storeName}" جاهز الآن على منصة الريان 🛒`;
@@ -1399,6 +1466,7 @@ function doLogin(){
   const found=sellers.find(s=>s.phone===val);
   if(!found)return showErr("login-err","رقم الهاتف غير مسجل");
   currentSeller=found;isAdmin=false;activeTab="products";
+  enableSellerPushNotifications(found.id);
   closeModal("modal-login");showView("dashboard");renderDashboard();
 }
 document.getElementById("l-phone").addEventListener("keydown",e=>{if(e.key==="Enter")doLogin();});
@@ -1646,6 +1714,7 @@ async function submitStartChat(){
   }catch(e){}
   customerPhone=phone;
   updateMyChatsBadge();
+  enableCustomerPushNotifications(phone);
   closeModal("modal-start-chat");
   openChatWindow(chatId,"customer");
 }
@@ -1721,6 +1790,7 @@ async function sendChatMessage(){
   chat.messages=updatedMessages;
   renderChatWindow();
   await dbUpdate("chats",currentChatId,updates);
+  notifyChatRecipient(chat,chatViewerRole,text.slice(0,80));
 }
 function copyChatLink(){
   navigator.clipboard.writeText(document.getElementById("cw-link-text").textContent).catch(()=>{});
@@ -1787,6 +1857,7 @@ async function sendVoiceMessage(base64){
   renderChatWindow();
   try{
     await dbUpdate("chats",currentChatId,updates);
+    notifyChatRecipient(chat,chatViewerRole,"🎤 رسالة صوتية");
   }catch(err){
     showToast("فشل إرسال الرسالة الصوتية");
   }
@@ -1812,6 +1883,7 @@ async function sendChatImage(input){
     chat.messages=updatedMessages;
     renderChatWindow();
     await dbUpdate("chats",currentChatId,updates);
+    notifyChatRecipient(chat,chatViewerRole,"📷 صورة");
   }catch(err){
     showToast("فشل إرسال الصورة، حاول مجدداً");
   }
@@ -1859,6 +1931,7 @@ function loginMyChats(){
   customerPhone=phone;
   try{ localStorage.setItem("rayan_customer_phone",phone); }catch(e){}
   updateMyChatsBadge();
+  enableCustomerPushNotifications(phone);
   renderMyChats();
 }
 function logoutMyChats(){
