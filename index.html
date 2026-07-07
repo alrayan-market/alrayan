@@ -259,12 +259,13 @@ textarea.inp{height:64px;resize:none}
     </div>
     <div style="display:flex;gap:7px;align-items:center">
       <div class="cart-badge hidden" id="cart-count-badge" onclick="openCart()">🛒 0</div>
+      <button class="chats-nav-btn" onclick="showStoresPage()">🏪</button>
       <button class="chats-nav-btn" id="my-chats-btn" onclick="openMyChats()">💬</button>
       <button class="btn-gold" onclick="openRegister()">انضم كتاجر</button>
     </div>
   </nav>
   <div class="hero">
-    <div class="hero-badge" id="hero-counts">🟢 0 تاجر · 0 منتج</div>
+    <div class="hero-badge" id="hero-counts">🟢 سوق نشط يومياً</div>
     <h1><span style="font-size:1.3em">🛒</span> سوق <span>الريان</span> <span style="font-size:1.3em">🛒</span><br>السوق السوداني الموثوق</h1>
     <p>منتجات حقيقية من تجار سودانيين</p>
     <button type="button" id="install-app-btn" onclick="triggerAppInstall()" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#C9933A,#E8B660);color:#1A2744;border:none;border-radius:10px;padding:10px 22px;font-weight:800;font-size:0.9rem;cursor:pointer;margin-top:16px;font-family:Tajawal,sans-serif">📲 ثبّت تطبيق الريان</button>
@@ -301,6 +302,18 @@ textarea.inp{height:64px;resize:none}
     <div class="store-products-title" id="store-products-title">منتجات المتجر</div>
     <div id="store-products-grid"></div>
   </div>
+</div>
+
+<!-- ═══ STORES DIRECTORY ═══ -->
+<div id="view-stores" class="hidden">
+  <div class="store-hero" style="padding:28px 5%">
+    <div style="max-width:900px;margin:0 auto">
+      <button class="store-back-btn" onclick="closeStoresPage()">← رجوع للسوق</button>
+      <div style="color:#fff;font-weight:900;font-size:1.3rem;margin-bottom:4px">🏪 المتاجر</div>
+      <div style="color:rgba(255,255,255,0.6);font-size:0.85rem">تصفّح كل متاجر منصة الريان</div>
+    </div>
+  </div>
+  <div style="padding:20px 4%;max-width:1000px;margin:0 auto" id="stores-directory-grid"></div>
 </div>
 
 <!-- ═══ DASHBOARD ═══ -->
@@ -363,6 +376,7 @@ textarea.inp{height:64px;resize:none}
       <h3 style="color:#1A2744;font-weight:900;font-size:1.15rem;margin-bottom:4px">بيانات المتجر 🏪</h3>
       <p style="color:#6B7280;font-size:0.84rem;margin-bottom:16px">ما الذي ستبيعه؟</p>
       <div class="field"><label class="lbl">اسم المتجر</label><input class="inp" id="r-store" placeholder="متجر الخرطوم"></div>
+      <div class="field"><label class="lbl">المدينة</label><input class="inp" id="r-city" placeholder="مثال: الخرطوم، بحري، أم درمان"></div>
       <div class="field">
         <label class="lbl">صورة المتجر (اختياري)</label>
         <div class="img-upload-box">
@@ -615,6 +629,7 @@ textarea.inp{height:64px;resize:none}
     <h3 style="color:#1A2744;font-weight:900;font-size:1.05rem;margin-bottom:14px">✏️ تعديل بيانات التاجر</h3>
     <input type="hidden" id="es-id">
     <div class="field"><label class="lbl">اسم المتجر</label><input class="inp" id="es-store"></div>
+    <div class="field"><label class="lbl">المدينة</label><input class="inp" id="es-city"></div>
     <div class="field">
       <label class="lbl">صورة المتجر</label>
       <div class="img-upload-box">
@@ -700,13 +715,12 @@ function listenAll(){
   onSnapshot(collection(db,"sellers"), snap=>{
     sellers = snap.docs.map(d=>d.data());
     renderProducts(document.querySelector(".filter-btn.active")?.textContent||"الكل");
-    document.getElementById("hero-counts").textContent=`🟢 ${sellers.length} تاجر · ${products.length} منتج`;
+    if(!document.getElementById("view-stores").classList.contains("hidden")) renderStoresDirectory();
   });
   // products
   onSnapshot(collection(db,"products"), snap=>{
     products = snap.docs.map(d=>d.data());
     renderProducts(document.querySelector(".filter-btn.active")?.textContent||"الكل");
-    document.getElementById("hero-counts").textContent=`🟢 ${sellers.length} تاجر · ${products.length} منتج`;
     if(currentSeller||isAdmin) renderDashboard();
   });
   // orders
@@ -937,6 +951,65 @@ function sortByPopularity(list){
   return list.slice().sort((a,b)=>getProductPopularity(b)-getProductPopularity(a));
 }
 
+// ══════════ STORES DIRECTORY ══════════
+function getSellerSalesQty(sellerId){
+  return orders.reduce((sum,o)=>{
+    const items=(o.items||[]).filter(i=>i.sellerId===sellerId);
+    return sum+items.reduce((s,i)=>s+(i.qty||0),0);
+  },0);
+}
+function getTopSellerIds(n){
+  return sellers
+    .map(s=>({id:s.id,qty:getSellerSalesQty(s.id)}))
+    .filter(x=>x.qty>0)
+    .sort((a,b)=>b.qty-a.qty)
+    .slice(0,n)
+    .map(x=>x.id);
+}
+function showStoresPage(){
+  showView("stores");
+  renderStoresDirectory();
+  window.scrollTo(0,0);
+}
+function closeStoresPage(){
+  showView("market");
+}
+function renderStoresDirectory(){
+  const grid=document.getElementById("stores-directory-grid");
+  if(sellers.length===0){
+    grid.innerHTML=`<div class="store-empty"><div style="font-size:2.5rem;margin-bottom:12px">🏪</div><div style="font-weight:700;color:#6B7280">لا توجد متاجر بعد</div></div>`;
+    return;
+  }
+  const topSellerIds=getTopSellerIds(3);
+  grid.innerHTML=`<div class="products-grid"></div>`;
+  const wrap=grid.querySelector(".products-grid");
+  sellers.forEach(s=>{
+    const prodCount=products.filter(p=>p.sellerId===s.id).length;
+    const avg=s.ratingCount?Math.round((s.ratingSum/s.ratingCount)*10)/10:0;
+    const cnt=s.ratingCount||0;
+    const isBestSeller=topSellerIds.includes(s.id);
+    const badges=[];
+    if(s.verified)badges.push('<span style="background:#EEF8EE;color:#2E7D5E;font-size:0.66rem;font-weight:700;padding:2px 7px;border-radius:100px">⭐ متجر موثّق</span>');
+    if(s.featured)badges.push('<span style="background:#FFF8EE;color:#C9933A;font-size:0.66rem;font-weight:700;padding:2px 7px;border-radius:100px">🏆 بائع مميز</span>');
+    if(isBestSeller)badges.push('<span style="background:#FFF0EC;color:#C0392B;font-size:0.66rem;font-weight:700;padding:2px 7px;border-radius:100px">🔥 الأكثر مبيعاً</span>');
+    const avatarHtml=s.storeImage?`<img src="${s.storeImage}" style="width:100%;height:100%;object-fit:cover">`:`<span style="font-size:2rem">${EMOJIS[s.category]||"🏪"}</span>`;
+    const div=document.createElement("div");
+    div.className="product-card";
+    div.style.cursor="pointer";
+    div.onclick=()=>{ closeStoresPage(); openStore(s.id); };
+    div.innerHTML=`
+      <div style="height:110px;display:flex;align-items:center;justify-content:center;background:${BG[s.category]||"#F5F5F5"};overflow:hidden">${avatarHtml}</div>
+      <div class="product-body">
+        <div class="product-name">${s.storeName}</div>
+        ${s.city?'<div style="color:#9CA3AF;font-size:0.72rem;margin-bottom:5px">📍 '+s.city+'</div>':''}
+        ${cnt>0?`<div class="seller-rating"><span style="color:#F59E0B;font-size:0.85rem">${"★".repeat(Math.round(avg))}${"☆".repeat(5-Math.round(avg))}</span><span class="rating-num">${avg}</span><span class="rating-count">(${cnt})</span></div>`:'<div style="color:#9CA3AF;font-size:0.72rem;margin-bottom:5px">لا توجد تقييمات بعد</div>'}
+        <div style="color:#6B7280;font-size:0.76rem;margin:5px 0">📦 ${prodCount} منتج</div>
+        ${badges.length?'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">'+badges.join("")+'</div>':''}
+      </div>`;
+    wrap.appendChild(div);
+  });
+}
+
 function renderFilters(){
   const bar=document.getElementById("filters-bar");bar.innerHTML="";
   ["الكل",...CATS].forEach(c=>{
@@ -951,7 +1024,6 @@ function renderFilters(){
 function renderProducts(filter){
   const wrap=document.getElementById("products-container");
   const list=sortByPopularity(filter==="الكل"?products:products.filter(p=>p.category===filter));
-  document.getElementById("hero-counts").textContent=`🟢 ${sellers.length} تاجر · ${products.length} منتج`;
   if(list.length===0){
     wrap.innerHTML=`<div style="text-align:center;padding:60px 20px;color:#9CA3AF"><div style="font-size:2.6rem;margin-bottom:12px">🏪</div><div style="font-weight:800;color:#6B7280;margin-bottom:7px">لا توجد منتجات بعد</div><div style="font-size:0.83rem;margin-bottom:16px">كن أول تاجر ينشر منتجات هنا!</div><button class="btn-gold" onclick="openRegister()">افتح متجرك الآن</button></div>`;
     return;
@@ -1088,6 +1160,7 @@ function showView(v){
   document.getElementById("view-market").classList.toggle("hidden",v!=="market");
   document.getElementById("view-dashboard").classList.toggle("hidden",v!=="dashboard");
   document.getElementById("view-store").classList.toggle("hidden",v!=="store");
+  document.getElementById("view-stores").classList.toggle("hidden",v!=="stores");
 }
 function closeModal(id){document.getElementById(id).classList.add("hidden");}
 
@@ -1137,7 +1210,7 @@ function regNext(){
 }
 function regBack(){regStep--;updateRegUI();}
 async function regSubmit(){
-  const seller={id:Date.now().toString(),ownerName:document.getElementById("r-name").value.trim(),phone:document.getElementById("r-phone").value.trim(),storeName:document.getElementById("r-store").value.trim(),category:document.getElementById("r-cat").value,plan:selectedPlan,description:document.getElementById("r-desc").value.trim(),storeImage:currentStoreImage,joinedAt:TODAY()};
+  const seller={id:Date.now().toString(),ownerName:document.getElementById("r-name").value.trim(),phone:document.getElementById("r-phone").value.trim(),storeName:document.getElementById("r-store").value.trim(),city:document.getElementById("r-city").value.trim(),category:document.getElementById("r-cat").value,plan:selectedPlan,description:document.getElementById("r-desc").value.trim(),storeImage:currentStoreImage,verified:false,featured:false,joinedAt:TODAY()};
   await dbSave("sellers",seller.id,seller);
   notifyAdmin(`🆕 تاجر جديد سجّل في منصة الريان!\n━━━━━━━━━━\nالمتجر: ${seller.storeName}\nالمالك: ${seller.ownerName}\nالهاتف: ${seller.phone}\nالتصنيف: ${seller.category}\nالباقة: ${PLANS.find(p=>p.id===seller.plan)?.name||seller.plan}`);
   currentSeller=seller;isAdmin=false;
@@ -1418,6 +1491,8 @@ function renderAdminDashboard(){
           <div style="display:flex;gap:5px;flex-wrap:wrap">
             <button onclick="adminEditSeller('${s.id}')" class="btn-edit" style="font-size:0.72rem">✏️ تعديل التاجر</button>
             <button onclick="adminAddProductForSeller('${s.id}')" class="btn-add-sm" style="font-size:0.72rem">➕ أضف منتج</button>
+            <button onclick="toggleSellerBadge('${s.id}','verified')" class="btn-edit" style="font-size:0.72rem;${s.verified?"background:#EEF8EE;color:#2E7D5E":""}">⭐ ${s.verified?"إلغاء التوثيق":"توثيق"}</button>
+            <button onclick="toggleSellerBadge('${s.id}','featured')" class="btn-edit" style="font-size:0.72rem;${s.featured?"background:#FFF8EE;color:#C9933A":""}">🏆 ${s.featured?"إلغاء التمييز":"تمييز"}</button>
             <button onclick="adminDeleteSeller('${s.id}')" class="btn-red" style="font-size:0.72rem">🗑 حذف التاجر</button>
           </div>
         </div>
@@ -2010,6 +2085,7 @@ function adminEditSeller(sellerId){
   const s=sellers.find(x=>x.id===sellerId);if(!s)return;
   document.getElementById("es-id").value=s.id;
   document.getElementById("es-store").value=s.storeName||"";
+  document.getElementById("es-city").value=s.city||"";
   document.getElementById("es-owner").value=s.ownerName||"";
   document.getElementById("es-phone").value=s.phone||"";
   document.getElementById("es-cat").value=s.category||CATS[0];
@@ -2031,6 +2107,7 @@ function adminEditSeller(sellerId){
 async function submitEditSeller(){
   const id=document.getElementById("es-id").value;
   const storeName=document.getElementById("es-store").value.trim();
+  const city=document.getElementById("es-city").value.trim();
   const ownerName=document.getElementById("es-owner").value.trim();
   const phone=document.getElementById("es-phone").value.trim();
   const category=document.getElementById("es-cat").value;
@@ -2039,7 +2116,7 @@ async function submitEditSeller(){
   if(!phone)return showErr("es-err","رقم الهاتف مطلوب");
   if(!validSD(phone))return showErr("es-err","رقم الهاتف يبدأ بـ 09 أو 01 ويكون 10 أرقام");
   const existing=sellers.find(x=>x.id===id)||{};
-  await dbSave("sellers",id,{...existing,storeName,ownerName,phone,category,description,storeImage:editStoreImage});
+  await dbSave("sellers",id,{...existing,storeName,city,ownerName,phone,category,description,storeImage:editStoreImage});
   // keep product sellerName in sync with any renamed store
   const sellerProducts=products.filter(p=>p.sellerId===id);
   for(const p of sellerProducts){
@@ -2047,6 +2124,11 @@ async function submitEditSeller(){
   }
   closeModal("modal-edit-seller");
   showToast("تم تحديث بيانات التاجر ✓");
+}
+async function toggleSellerBadge(sellerId,field){
+  const s=sellers.find(x=>x.id===sellerId);if(!s)return;
+  await dbUpdate("sellers",sellerId,{[field]:!s[field]});
+  showToast(field==="verified"?"تم تحديث حالة التوثيق ✓":"تم تحديث حالة التمييز ✓");
 }
 function adminAddProductForSeller(sellerId){
   const s=sellers.find(x=>x.id===sellerId);if(!s)return;
@@ -2076,6 +2158,7 @@ window.openDirectOrder=openDirectOrder;window.submitDirectOrder=submitDirectOrde
 window.updateOrderStatus=updateOrderStatus;window.switchTab=switchTab;
 window.openShare=openShare;window.shareProduct=shareProduct;window.copyProductLink=copyProductLink;window.shareProductOther=shareProductOther;window.openStore=openStore;window.closeStore=closeStore;window.shareCurrentStore=shareCurrentStore;window.openRating=openRating;window.setRating=setRating;window.submitRating=submitRating;window.adminEditProduct=adminEditProduct;window.adminDeleteProduct=adminDeleteProduct;window.adminDeleteSeller=adminDeleteSeller;window.adminEditSeller=adminEditSeller;window.submitEditSeller=submitEditSeller;window.adminAddProductForSeller=adminAddProductForSeller;window.copyLink=copyLink;window.shareOther=shareOther;
 window.handleImgUpload=handleImgUpload;window.handleStoreImgUpload=handleStoreImgUpload;window.closeModal=closeModal;
+window.showStoresPage=showStoresPage;window.closeStoresPage=closeStoresPage;window.toggleSellerBadge=toggleSellerBadge;
 window.togglePriceOnRequest=togglePriceOnRequest;window.inquirePrice=inquirePrice;window.inquireAboutProduct=inquireAboutProduct;window.focusOrderForm=focusOrderForm;
 window.removeProductImage=removeProductImage;window.shiftDirectGallery=shiftDirectGallery;
 window.closeWelcomeAndAddProduct=closeWelcomeAndAddProduct;
