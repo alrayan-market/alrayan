@@ -285,7 +285,9 @@ textarea.inp{height:64px;resize:none}
         <div class="store-avatar" id="store-avatar">🏪</div>
         <div class="store-info">
           <div class="store-name" id="store-name">—</div>
+          <div id="store-badges" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px"></div>
           <div class="store-cat" id="store-cat">—</div>
+          <div id="store-city" style="color:rgba(255,255,255,0.55);font-size:0.8rem;margin-bottom:4px"></div>
           <div class="store-desc" id="store-desc"></div>
           <div class="store-rating-bar" id="store-rating-bar"></div>
           <div class="store-meta" id="store-meta"></div>
@@ -306,14 +308,18 @@ textarea.inp{height:64px;resize:none}
 
 <!-- ═══ STORES DIRECTORY ═══ -->
 <div id="view-stores" class="hidden">
-  <div class="store-hero" style="padding:28px 5%">
+  <div class="store-hero" style="padding:32px 5% 26px;text-align:center">
     <div style="max-width:900px;margin:0 auto">
-      <button class="store-back-btn" onclick="closeStoresPage()">← رجوع للسوق</button>
-      <div style="color:#fff;font-weight:900;font-size:1.3rem;margin-bottom:4px">🏪 المتاجر</div>
-      <div style="color:rgba(255,255,255,0.6);font-size:0.85rem">تصفّح كل متاجر منصة الريان</div>
+      <button class="store-back-btn" onclick="closeStoresPage()" style="margin-bottom:16px">← رجوع للسوق</button>
+      <div class="hero-badge" style="margin-bottom:10px">🏪 دليل المتاجر</div>
+      <div style="color:#fff;font-weight:900;font-size:1.6rem;margin-bottom:6px">كل متاجر منصة الريان في مكان واحد</div>
+      <div style="color:rgba(255,255,255,0.6);font-size:0.88rem">تصفّح، قارن، واختر التاجر المناسب لك</div>
     </div>
   </div>
-  <div style="padding:20px 4%;max-width:1000px;margin:0 auto" id="stores-directory-grid"></div>
+  <div style="background:#F4F6FA;padding:16px 4% 6px;max-width:1000px;margin:0 auto">
+    <div style="font-weight:900;color:#1A2744;font-size:0.95rem" id="stores-count-label">جاري التحميل...</div>
+  </div>
+  <div style="background:#F4F6FA;padding:6px 4% 24px;max-width:1000px;margin:0 auto" id="stores-directory-grid"></div>
 </div>
 
 <!-- ═══ DASHBOARD ═══ -->
@@ -976,10 +982,13 @@ function closeStoresPage(){
 }
 function renderStoresDirectory(){
   const grid=document.getElementById("stores-directory-grid");
+  const countLabel=document.getElementById("stores-count-label");
   if(sellers.length===0){
+    countLabel.textContent="لا توجد متاجر بعد";
     grid.innerHTML=`<div class="store-empty"><div style="font-size:2.5rem;margin-bottom:12px">🏪</div><div style="font-weight:700;color:#6B7280">لا توجد متاجر بعد</div></div>`;
     return;
   }
+  countLabel.textContent=`📋 ${sellers.length} متجر متاح`;
   const topSellerIds=getTopSellerIds(3);
   grid.innerHTML=`<div class="products-grid"></div>`;
   const wrap=grid.querySelector(".products-grid");
@@ -1624,7 +1633,16 @@ async function openStore(sellerId){
   document.getElementById("store-avatar").innerHTML = seller.storeImage ? `<img src="${seller.storeImage}" style="width:100%;height:100%;object-fit:cover;border-radius:15px">` : (EMOJIS[seller.category]||"🏪");
   document.getElementById("store-name").textContent = seller.storeName;
   document.getElementById("store-cat").textContent = seller.category;
+  document.getElementById("store-city").innerHTML = seller.city ? "📍 "+seller.city : "";
   document.getElementById("store-desc").textContent = seller.description||"";
+
+  // badges
+  const isTopSeller = getTopSellerIds(3).includes(seller.id);
+  const badgesHtml=[];
+  if(seller.verified)badgesHtml.push('<span style="background:rgba(46,125,94,0.25);color:#7FE8B8;font-size:0.7rem;font-weight:700;padding:3px 9px;border-radius:100px;border:1px solid rgba(127,232,184,0.4)">⭐ متجر موثّق</span>');
+  if(seller.featured)badgesHtml.push('<span style="background:rgba(201,147,58,0.25);color:#E8B660;font-size:0.7rem;font-weight:700;padding:3px 9px;border-radius:100px;border:1px solid rgba(232,182,96,0.4)">🏆 بائع مميز</span>');
+  if(isTopSeller)badgesHtml.push('<span style="background:rgba(192,57,43,0.25);color:#FF8A75;font-size:0.7rem;font-weight:700;padding:3px 9px;border-radius:100px;border:1px solid rgba(255,138,117,0.4)">🔥 الأكثر مبيعاً</span>');
+  document.getElementById("store-badges").innerHTML = badgesHtml.join("");
 
   // rating
   const ratingBar = document.getElementById("store-rating-bar");
@@ -1633,10 +1651,12 @@ async function openStore(sellerId){
     : `<span class="store-rating-txt">لا توجد تقييمات بعد</span>`;
 
   // meta
+  const salesQty=getSellerSalesQty(seller.id);
   document.getElementById("store-meta").innerHTML = `
     <div class="store-meta-item"><div class="store-meta-num">${storeProds.length}</div><div class="store-meta-lbl">منتج</div></div>
+    <div class="store-meta-item"><div class="store-meta-num">${salesQty.toLocaleString("ar")}</div><div class="store-meta-lbl">مبيعات</div></div>
     <div class="store-meta-item"><div class="store-meta-num">${(seller.storeViews||0).toLocaleString("ar")}</div><div class="store-meta-lbl">مشاهدة</div></div>
-    <div class="store-meta-item"><div class="store-meta-num">${seller.joinedAt}</div><div class="store-meta-lbl">انضم</div></div>`;
+    <div class="store-meta-item"><div class="store-meta-num" style="font-size:0.8rem">${seller.joinedAt}</div><div class="store-meta-lbl">عضو منذ</div></div>`;
 
   // whatsapp
   const waNum = "249"+seller.phone.replace(/^0/,"");
