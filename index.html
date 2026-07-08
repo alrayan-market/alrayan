@@ -2114,6 +2114,11 @@ function checkUrlProduct(){
     };
     setTimeout(tryOpen,1000);
   }
+  // direct "join as merchant" link
+  const join=params.get("join");
+  if(join==="1"||join==="store"){ setTimeout(()=>openRegister(),600); }
+  else if(join==="ad"){ setTimeout(()=>openPostAd(),600); }
+  else if(join==="choice"){ setTimeout(()=>openJoinChoice(),600); }
 }
 
 
