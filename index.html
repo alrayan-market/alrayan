@@ -1424,10 +1424,7 @@ function submitUpgradeRequest(){
   if(!currentSeller || !pendingUpgradePlanId)return;
   if(!upgradeReceiptImage)return showErr("upg-pay-err","يرجى رفع صورة إشعار الدفع أولاً");
   const plan=PLANS.find(p=>p.id===pendingUpgradePlanId);if(!plan)return;
-  const waNum="249"+ADMIN_NOTIFY_PHONE.replace(/^249/,"");
-  const msg=encodeURIComponent(`🚀 طلب ترقية باقة — بانتظار تأكيد الدفع\n━━━━━━━━━━\nالمتجر: ${currentSeller.storeName}\nصاحب المتجر: ${currentSeller.ownerName}\nالهاتف: ${currentSeller.phone}\n━━━━━━━━━━\nالباقة المطلوبة: ${plan.name} (${SDG(plan.price)})\n━━━━━━━━━━\nصورة إشعار الدفع:\n${upgradeReceiptImage}`);
-  window.open(`https://wa.me/${waNum}?text=${msg}`,"_blank");
-  notifyAdmin(`🚀 طلب ترقية باقة من ${currentSeller.storeName}!\nالهاتف: ${currentSeller.phone}\nالباقة المطلوبة: ${plan.name} (${SDG(plan.price)})`);
+  notifyAdmin(`🚀 طلب ترقية باقة — بانتظار تأكيد الدفع\n━━━━━━━━━━\nالمتجر: ${currentSeller.storeName}\nصاحب المتجر: ${currentSeller.ownerName}\nالهاتف: ${currentSeller.phone}\n━━━━━━━━━━\nالباقة المطلوبة: ${plan.name} (${SDG(plan.price)})\n━━━━━━━━━━\nصورة إشعار الدفع:\n${upgradeReceiptImage}`);
   closeModal("modal-upgrade-payment");
   showToast("تم إرسال طلب الترقية، هيتواصل معاك فريق المنصة قريباً ✓");
   pendingUpgradePlanId="";
@@ -1479,12 +1476,7 @@ async function regSubmit(){
   const plan=PLANS.find(p=>p.id===selectedPlan);
   const seller={id:Date.now().toString(),ownerName:document.getElementById("r-name").value.trim(),phone:document.getElementById("r-phone").value.trim(),storeName:document.getElementById("r-store").value.trim(),city:document.getElementById("r-city").value.trim(),category:document.getElementById("r-cat").value,plan:selectedPlan,description:document.getElementById("r-desc").value.trim(),storeImage:currentStoreImage,verified:false,featured:false,paymentPending:isPaid,paymentReceipt:regReceiptImage||"",trialStartedAt:selectedPlan==="trial"?Date.now():null,joinedAt:TODAY()};
   await dbSave("sellers",seller.id,seller);
-  if(isPaid){
-    const waNum="249"+ADMIN_NOTIFY_PHONE.replace(/^249/,"");
-    const waMsg=encodeURIComponent(`🆕 طلب تسجيل تاجر جديد — بانتظار تأكيد الدفع\n━━━━━━━━━━\nالمتجر: ${seller.storeName}\nالمالك: ${seller.ownerName}\nالهاتف: ${seller.phone}\nالتصنيف: ${seller.category}\nالمدينة: ${seller.city}\nالباقة: ${plan.name} (${SDG(plan.price)})\n━━━━━━━━━━\nصورة إشعار الدفع:\n${regReceiptImage}`);
-    window.open(`https://wa.me/${waNum}?text=${waMsg}`,"_blank");
-  }
-  notifyAdmin(`🆕 تاجر جديد سجّل في منصة الريان!\n━━━━━━━━━━\nالمتجر: ${seller.storeName}\nالمالك: ${seller.ownerName}\nالهاتف: ${seller.phone}\nالتصنيف: ${seller.category}\nالباقة: ${plan.name}${isPaid?" (بانتظار تأكيد الدفع)":""}`);
+  notifyAdmin(`🆕 تاجر جديد سجّل في منصة الريان!\n━━━━━━━━━━\nالمتجر: ${seller.storeName}\nالمالك: ${seller.ownerName}\nالهاتف: ${seller.phone}\nالتصنيف: ${seller.category}\nالمدينة: ${seller.city}\nالباقة: ${plan.name}${isPaid?" (بانتظار تأكيد الدفع)":""}${isPaid?"\n━━━━━━━━━━\nصورة إشعار الدفع:\n"+regReceiptImage:""}`);
   currentSeller=seller;isAdmin=false;
   enableSellerPushNotifications(seller.id);
   closeModal("modal-register");showView("dashboard");renderDashboard();
