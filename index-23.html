@@ -1663,7 +1663,17 @@ function checkUrlStore(){
 function checkUrlRegister(){
   const params = new URLSearchParams(window.location.search);
   if(params.get("register")==="1" || window.location.pathname==="/join"){
-    setTimeout(()=>{ if(typeof openRegister==="function") openRegister(); }, 800);
+    let tries=0;
+    const tryOpen=()=>{
+      tries++;
+      const modal=document.getElementById("modal-register");
+      if(typeof openRegister==="function" && modal){
+        openRegister();
+      } else if(tries<20){
+        setTimeout(tryOpen,300);
+      }
+    };
+    setTimeout(tryOpen,1500);
   }
 }
 
