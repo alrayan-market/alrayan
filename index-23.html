@@ -776,6 +776,7 @@ window.onload=async function(){
   checkUrlProduct();
   checkUrlStore();
   checkUrlChat();
+  checkUrlRegister();
 };
 
 // ══════════ IMAGE UPLOAD (via ImgBB) ══════════
@@ -1657,6 +1658,12 @@ function checkUrlStore(){
       else { setTimeout(tryOpen, 600); }
     };
     setTimeout(tryOpen, 1000);
+  }
+}
+function checkUrlRegister(){
+  const params = new URLSearchParams(window.location.search);
+  if(params.get("register")==="1" || window.location.pathname==="/join"){
+    setTimeout(()=>{ if(typeof openRegister==="function") openRegister(); }, 800);
   }
 }
 
