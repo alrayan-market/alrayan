@@ -2063,7 +2063,7 @@ function doLogout(){currentSeller=null;isAdmin=false;showView("market");renderPr
 // ══════════ SHARE ══════════
 function openShare(){
   if(!currentSeller)return;
-  const link=window.location.href.split("?")[0]+"?store="+currentSeller.id;
+  const link=window.location.href.split("?")[0].replace(/\/$/,"")+"/s/"+currentSeller.id;
   document.getElementById("share-link-text").textContent=link;
   document.getElementById("share-wa").href=`https://wa.me/?text=${encodeURIComponent("🛒 تفضل وتسوق من متجر "+currentSeller.storeName+" على منصة الريان:\n"+link)}`;
   document.getElementById("share-tw").href=`https://twitter.com/intent/tweet?text=${encodeURIComponent("🛒 متجر "+currentSeller.storeName+" 🌟\n"+link)}`;
@@ -2237,7 +2237,7 @@ function closeStore(){
 function shareCurrentStore(){
   const seller = sellers.find(s=>s.id===currentStoreId);
   if(!seller) return;
-  const link = window.location.href.split("?")[0]+"?store="+currentStoreId;
+  const link = window.location.href.split("?")[0].replace(/\/$/,"")+"/s/"+currentStoreId;
   const text = `🛒 تفضل وتسوق من متجر ${seller.storeName} على منصة الريان:\n${link}`;
   if(navigator.share) navigator.share({title:seller.storeName, text, url:link});
   else { navigator.clipboard.writeText(link).catch(()=>{}); showToast("تم نسخ رابط المتجر ✓"); }
@@ -2248,9 +2248,13 @@ function checkUrlStore(){
   const params = new URLSearchParams(window.location.search);
   const sid = params.get("store");
   if(sid){
+    let tries=0;
     const tryOpen = ()=>{
+      tries++;
       const s = sellers.find(x=>x.id===sid);
-      if(s){ openStore(sid); }
+      const hasProducts = products.some(p=>p.sellerId===sid);
+      // wait until the seller AND their products have loaded (or give up after ~12s)
+      if(s && (hasProducts || tries>20)){ openStore(sid); }
       else { setTimeout(tryOpen, 600); }
     };
     setTimeout(tryOpen, 1000);
