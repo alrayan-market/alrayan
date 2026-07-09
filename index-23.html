@@ -137,7 +137,6 @@ textarea.inp{height:64px;resize:none}
 .chats-nav-dot{position:absolute;top:1px;left:1px;width:9px;height:9px;background:#C9933A;border-radius:50%;border:1.5px solid #1A2744}
 .chat-img-btn{background:#F5F5F5;border:1.5px solid #E5E0D8;border-radius:50%;width:38px;height:38px;font-size:1rem;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
 @keyframes cwPulse{0%{opacity:1}50%{opacity:0.25}100%{opacity:1}}
-@keyframes upgradeShine{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 
 /* DASHBOARD */
 #dashboard{min-height:100vh;background:#F4F6FA}
@@ -260,19 +259,17 @@ textarea.inp{height:64px;resize:none}
     </div>
     <div style="display:flex;gap:7px;align-items:center">
       <div class="cart-badge hidden" id="cart-count-badge" onclick="openCart()">🛒 0</div>
-      <button class="chats-nav-btn" onclick="showStoresPage()">🏪</button>
       <button class="chats-nav-btn" id="my-chats-btn" onclick="openMyChats()">💬</button>
-      <button class="btn-gold" onclick="openJoinChoice()">انضم كتاجر</button>
+      <button class="btn-gold" onclick="openRegister()">انضم كتاجر</button>
     </div>
   </nav>
   <div class="hero">
-    <div class="hero-badge" id="hero-counts">🟢 سوق نشط يومياً</div>
+    <div class="hero-badge" id="hero-counts">🟢 0 تاجر · 0 منتج</div>
     <h1><span style="font-size:1.3em">🛒</span> سوق <span>الريان</span> <span style="font-size:1.3em">🛒</span><br>السوق السوداني الموثوق</h1>
     <p>منتجات حقيقية من تجار سودانيين</p>
     <button type="button" id="install-app-btn" onclick="triggerAppInstall()" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#C9933A,#E8B660);color:#1A2744;border:none;border-radius:10px;padding:10px 22px;font-weight:800;font-size:0.9rem;cursor:pointer;margin-top:16px;font-family:Tajawal,sans-serif">📲 ثبّت تطبيق الريان</button>
   </div>
   <div class="filters-wrap"><div class="filters" id="filters-bar"></div></div>
-  <div id="ads-strip" class="hidden" style="padding:0 4% 4px"></div>
   <div id="products-container"></div>
   <button class="float-btn" onclick="openLogin()">🏪 دخول التجار</button>
 </div>
@@ -287,10 +284,7 @@ textarea.inp{height:64px;resize:none}
         <div class="store-avatar" id="store-avatar">🏪</div>
         <div class="store-info">
           <div class="store-name" id="store-name">—</div>
-          <div id="store-badges" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px"></div>
-          <div id="store-closed-banner" class="hidden" style="background:rgba(198,40,40,0.2);border:1px solid rgba(198,40,40,0.4);color:#FF8A75;font-size:0.82rem;font-weight:700;padding:9px 14px;border-radius:9px;margin-bottom:10px">🔒 هذا المتجر مغلق مؤقتاً — انتهت فترة تجربة التاجر المجانية</div>
           <div class="store-cat" id="store-cat">—</div>
-          <div id="store-city" style="color:rgba(255,255,255,0.55);font-size:0.8rem;margin-bottom:4px"></div>
           <div class="store-desc" id="store-desc"></div>
           <div class="store-rating-bar" id="store-rating-bar"></div>
           <div class="store-meta" id="store-meta"></div>
@@ -307,22 +301,6 @@ textarea.inp{height:64px;resize:none}
     <div class="store-products-title" id="store-products-title">منتجات المتجر</div>
     <div id="store-products-grid"></div>
   </div>
-</div>
-
-<!-- ═══ STORES DIRECTORY ═══ -->
-<div id="view-stores" class="hidden">
-  <div class="store-hero" style="padding:32px 5% 26px;text-align:center">
-    <div style="max-width:900px;margin:0 auto">
-      <button class="store-back-btn" onclick="closeStoresPage()" style="margin-bottom:16px">← رجوع للسوق</button>
-      <div class="hero-badge" style="margin-bottom:10px">🏪 دليل المتاجر</div>
-      <div style="color:#fff;font-weight:900;font-size:1.6rem;margin-bottom:6px">كل متاجر منصة الريان في مكان واحد</div>
-      <div style="color:rgba(255,255,255,0.6);font-size:0.88rem">تصفّح، قارن، واختر التاجر المناسب لك</div>
-    </div>
-  </div>
-  <div style="background:#F4F6FA;padding:16px 4% 6px;max-width:1000px;margin:0 auto">
-    <div style="font-weight:900;color:#1A2744;font-size:0.95rem" id="stores-count-label">جاري التحميل...</div>
-  </div>
-  <div style="background:#F4F6FA;padding:6px 4% 24px;max-width:1000px;margin:0 auto" id="stores-directory-grid"></div>
 </div>
 
 <!-- ═══ DASHBOARD ═══ -->
@@ -351,13 +329,6 @@ textarea.inp{height:64px;resize:none}
         <button class="btn-gold" id="dash-main-btn" onclick="openAddProduct()">➕ أضف منتجاً</button>
       </div>
       <div class="stats-grid" id="dash-stats"></div>
-      <div id="upgrade-banner" class="hidden" onclick="openUpgradePlan()" style="cursor:pointer;background:linear-gradient(120deg,#1A2744,#2A1F0E,#1A2744);background-size:200% 200%;animation:upgradeShine 4s ease infinite;border-radius:13px;padding:16px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1.5px solid #C9933A">
-        <div>
-          <div style="color:#E8B660;font-weight:900;font-size:1rem;margin-bottom:2px">🚀 رقّي متجرك لباقة أعلى</div>
-          <div style="color:rgba(255,255,255,0.7);font-size:0.78rem" id="upgrade-banner-sub">اظهر أعلى، بيع أكتر، ووثّق متجرك</div>
-        </div>
-        <div style="background:linear-gradient(135deg,#C9933A,#E8B660);color:#1A2744;border-radius:8px;padding:8px 16px;font-weight:900;font-size:0.85rem;white-space:nowrap">رقّي الآن</div>
-      </div>
       <div class="share-strip" id="dash-share-strip">
         <div><div style="font-weight:800;color:#1A2744;margin-bottom:2px;font-size:0.93rem">🔗 رابط متجرك</div><div style="color:#6B7280;font-size:0.78rem">شاركه للتسويق</div></div>
         <button class="btn-navy" onclick="openShare()">📣 مشاركة</button>
@@ -371,7 +342,6 @@ textarea.inp{height:64px;resize:none}
       <div id="tab-messages" class="hidden"></div>
       <div id="tab-admin" class="hidden"></div>
       <div id="tab-manage" class="hidden"></div>
-      <div id="tab-requests" class="hidden"></div>
     </div>
   </div>
 </div>
@@ -379,76 +349,9 @@ textarea.inp{height:64px;resize:none}
 <!-- ═══ MODALS ═══ -->
 
 <!-- REGISTER -->
-<!-- JOIN CHOICE -->
-<div class="overlay hidden" id="modal-join-choice">
-  <div class="modal modal-sm">
-    <h3 style="color:#1A2744;font-weight:900;font-size:1.15rem;margin-bottom:4px">انضم إلى منصة الريان</h3>
-    <p style="color:#6B7280;font-size:0.84rem;margin-bottom:18px">اختر الطريقة المناسبة لك</p>
-    <div onclick="closeModal('modal-join-choice');openRegister()" style="cursor:pointer;border:1.5px solid #E5E0D8;border-radius:13px;padding:16px;margin-bottom:12px;display:flex;align-items:center;gap:13px;transition:all 0.2s" onmouseover="this.style.borderColor='#C9933A'" onmouseout="this.style.borderColor='#E5E0D8'">
-      <div style="font-size:2rem;flex-shrink:0">🏪</div>
-      <div>
-        <div style="font-weight:900;color:#1A2744;font-size:0.98rem">أنشئ متجرك</div>
-        <div style="color:#6B7280;font-size:0.8rem;line-height:1.5">متجر دائم بمنتجات متعددة، طلبات، ومحادثات — عبر باقات شهرية</div>
-      </div>
-    </div>
-    <div onclick="closeModal('modal-join-choice');openPostAd()" style="cursor:pointer;border:1.5px solid #E5E0D8;border-radius:13px;padding:16px;display:flex;align-items:center;gap:13px;transition:all 0.2s" onmouseover="this.style.borderColor='#C9933A'" onmouseout="this.style.borderColor='#E5E0D8'">
-      <div style="font-size:2rem;flex-shrink:0">📢</div>
-      <div>
-        <div style="font-weight:900;color:#1A2744;font-size:0.98rem">انشر إعلاناً لمرة واحدة <span style="color:#C9933A">· 5,000 ج.س</span></div>
-        <div style="color:#6B7280;font-size:0.8rem;line-height:1.5">إعلان واحد سريع بدون إنشاء متجر — مناسب للعروض المؤقتة</div>
-      </div>
-    </div>
-    <button style="width:100%;margin-top:14px;padding:9px;border-radius:9px;border:1.5px solid #E5E0D8;background:transparent;font-weight:700;color:#6B7280;cursor:pointer;font-family:Tajawal,sans-serif" onclick="closeModal('modal-join-choice')">إلغاء</button>
-  </div>
-</div>
-
-<!-- POST AD -->
-<div class="overlay hidden" id="modal-post-ad">
-  <div class="modal">
-    <h3 style="color:#1A2744;font-weight:900;font-size:1.15rem;margin-bottom:4px">📢 نشر إعلان لمرة واحدة</h3>
-    <p style="color:#6B7280;font-size:0.84rem;margin-bottom:16px">إعلان واحد يظهر في المنصة — 5,000 ج.س</p>
-    <div class="field"><label class="lbl">اسمك</label><input class="inp" id="ad-name" placeholder="اسمك الكامل"></div>
-    <div class="field"><label class="lbl">رقم هاتفك</label><input class="inp" id="ad-phone" placeholder="0912345678"></div>
-    <div class="field"><label class="lbl">عنوان الإعلان</label><input class="inp" id="ad-title" placeholder="مثال: عرض خاص على الأثاث المنزلي"></div>
-    <div class="field"><label class="lbl">تفاصيل الإعلان</label><textarea class="inp" id="ad-desc" placeholder="اكتب تفاصيل عرضك أو خدمتك..."></textarea></div>
-    <div class="field">
-      <label class="lbl">صورة الإعلان (اختياري)</label>
-      <div class="img-upload-box">
-        <input type="file" accept="image/*" id="ad-img-input" onchange="handleAdImgUpload(this)">
-        <div id="ad-img-placeholder"><div style="font-size:1.8rem;margin-bottom:4px">🖼️</div><div style="color:#6B7280;font-size:0.82rem">اضغط لرفع صورة الإعلان</div></div>
-        <img id="ad-img-preview" style="display:none;width:100%;border-radius:9px">
-      </div>
-    </div>
-    <div style="background:#F4F6FA;border-radius:12px;padding:16px;margin-bottom:16px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <span style="color:#6B7280;font-size:0.82rem">المبلغ المطلوب</span>
-        <span style="color:#C9933A;font-weight:900;font-size:1.1rem">5,000 ج.س</span>
-      </div>
-      <div style="border-top:1px dashed #E5E0D8;padding-top:10px">
-        <div style="color:#6B7280;font-size:0.78rem;margin-bottom:2px">رقم الحساب (المركزي بحري)</div>
-        <div style="color:#1A2744;font-weight:900;font-size:1.05rem;margin-bottom:8px">1978584</div>
-        <div style="color:#6B7280;font-size:0.78rem;margin-bottom:2px">اسم صاحب الحساب</div>
-        <div style="color:#1A2744;font-weight:700;font-size:0.92rem">عبد الرؤوف خالد محمد</div>
-      </div>
-    </div>
-    <div class="field">
-      <label class="lbl">صورة إشعار الدفع</label>
-      <div class="img-upload-box">
-        <input type="file" accept="image/*" id="ad-receipt-input" onchange="handleAdReceiptUpload(this)">
-        <div id="ad-receipt-placeholder"><div style="font-size:1.8rem;margin-bottom:4px">🧾</div><div style="color:#6B7280;font-size:0.82rem">اضغط لرفع صورة إشعار الدفع</div></div>
-        <img id="ad-receipt-preview" style="display:none;width:100%;border-radius:9px">
-      </div>
-    </div>
-    <div id="ad-err" class="err-box hidden"></div>
-    <button class="btn-gold" style="width:100%;padding:12px;margin-top:4px" onclick="submitAdRequest()">📤 إرسال طلب الإعلان</button>
-    <button style="width:100%;margin-top:8px;padding:9px;border-radius:9px;border:1.5px solid #E5E0D8;background:transparent;font-weight:700;color:#6B7280;cursor:pointer;font-family:Tajawal,sans-serif" onclick="closeModal('modal-post-ad')">إلغاء</button>
-  </div>
-</div>
-
-<!-- REGISTER -->
 <div class="overlay hidden" id="modal-register">
   <div class="modal">
-    <div class="steps-bar"><div class="step-seg done" id="seg1"></div><div class="step-seg" id="seg2"></div><div class="step-seg" id="seg3"></div><div class="step-seg hidden" id="seg4"></div></div>
+    <div class="steps-bar"><div class="step-seg done" id="seg1"></div><div class="step-seg" id="seg2"></div><div class="step-seg" id="seg3"></div></div>
     <div class="step-label" id="step-label">الخطوة 1 من 3</div>
     <div id="step1">
       <h3 style="color:#1A2744;font-weight:900;font-size:1.15rem;margin-bottom:4px">أهلاً بك في الريان 👋</h3>
@@ -460,7 +363,6 @@ textarea.inp{height:64px;resize:none}
       <h3 style="color:#1A2744;font-weight:900;font-size:1.15rem;margin-bottom:4px">بيانات المتجر 🏪</h3>
       <p style="color:#6B7280;font-size:0.84rem;margin-bottom:16px">ما الذي ستبيعه؟</p>
       <div class="field"><label class="lbl">اسم المتجر</label><input class="inp" id="r-store" placeholder="متجر الخرطوم"></div>
-      <div class="field"><label class="lbl">المدينة</label><input class="inp" id="r-city" placeholder="مثال: الخرطوم، بحري، أم درمان"></div>
       <div class="field">
         <label class="lbl">صورة المتجر (اختياري)</label>
         <div class="img-upload-box">
@@ -477,30 +379,6 @@ textarea.inp{height:64px;resize:none}
       <p style="color:#6B7280;font-size:0.84rem;margin-bottom:14px">الأسعار بالجنيه السوداني</p>
       <div id="plans-list"></div>
       <div class="hidden" id="reg-summary" style="background:#F4F6FA;border-radius:9px;padding:11px 13px;margin-top:11px;font-size:0.83rem;color:#6B7280"><div id="sum-store">—</div><div id="sum-owner" style="margin-top:2px">—</div></div>
-    </div>
-    <div id="step4" class="hidden">
-      <h3 style="color:#1A2744;font-weight:900;font-size:1.15rem;margin-bottom:4px">💳 إتمام الدفع</h3>
-      <p style="color:#6B7280;font-size:0.84rem;margin-bottom:14px">حوّل قيمة باقتك، وارفع صورة إشعار التحويل — سيتم تفعيل متجرك بعد المراجعة</p>
-      <div style="background:#F4F6FA;border-radius:12px;padding:16px;margin-bottom:16px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-          <span style="color:#6B7280;font-size:0.82rem">المبلغ المطلوب</span>
-          <span style="color:#C9933A;font-weight:900;font-size:1.15rem" id="pay-amount">—</span>
-        </div>
-        <div style="border-top:1px dashed #E5E0D8;padding-top:10px">
-          <div style="color:#6B7280;font-size:0.78rem;margin-bottom:2px">رقم الحساب (المركزي بحري)</div>
-          <div style="color:#1A2744;font-weight:900;font-size:1.05rem;margin-bottom:8px">1978584</div>
-          <div style="color:#6B7280;font-size:0.78rem;margin-bottom:2px">اسم صاحب الحساب</div>
-          <div style="color:#1A2744;font-weight:700;font-size:0.92rem">عبد الرؤوف خالد محمد</div>
-        </div>
-      </div>
-      <div class="field">
-        <label class="lbl">صورة إشعار الدفع</label>
-        <div class="img-upload-box">
-          <input type="file" accept="image/*" id="reg-receipt-input" onchange="handleReceiptUpload(this)">
-          <div id="reg-receipt-placeholder"><div style="font-size:1.8rem;margin-bottom:4px">🧾</div><div style="color:#6B7280;font-size:0.82rem">اضغط لرفع صورة إشعار الدفع</div></div>
-          <img id="reg-receipt-preview" style="display:none;width:100%;border-radius:9px">
-        </div>
-      </div>
     </div>
     <div id="reg-err" class="err-box hidden"></div>
     <div class="modal-btns">
@@ -616,15 +494,6 @@ textarea.inp{height:64px;resize:none}
 </div>
 
 <!-- WELCOME TRADER -->
-<div class="overlay hidden" id="modal-request-submitted">
-  <div class="modal modal-sm" style="text-align:center">
-    <div style="font-size:2.8rem;margin-bottom:8px">📨</div>
-    <h3 style="color:#1A2744;font-weight:900;font-size:1.2rem;margin-bottom:4px">تم استلام طلبك!</h3>
-    <p style="color:#6B7280;font-size:0.85rem;margin-bottom:18px" id="rs-message">سيتم مراجعة طلبك والرد عليك قريباً.</p>
-    <button class="btn-gold" style="width:100%;padding:11px" onclick="closeModal('modal-request-submitted')">تمام</button>
-  </div>
-</div>
-
 <div class="overlay hidden" id="modal-welcome-trader">
   <div class="modal modal-sm" style="text-align:center">
     <div style="font-size:2.8rem;margin-bottom:8px">🎉</div>
@@ -740,54 +609,12 @@ textarea.inp{height:64px;resize:none}
   </div>
 </div>
 
-<!-- UPGRADE PLAN -->
-<div class="overlay hidden" id="modal-upgrade-plan">
-  <div class="modal">
-    <h3 style="color:#1A2744;font-weight:900;font-size:1.15rem;margin-bottom:4px">🚀 رقّي باقتك</h3>
-    <p style="color:#6B7280;font-size:0.84rem;margin-bottom:16px">اختار الباقة اللي تناسب طموح متجرك</p>
-    <div id="upgrade-plans-list"></div>
-    <button style="width:100%;margin-top:6px;padding:9px;border-radius:9px;border:1.5px solid #E5E0D8;background:transparent;font-weight:700;color:#6B7280;cursor:pointer;font-family:Tajawal,sans-serif" onclick="closeModal('modal-upgrade-plan')">إغلاق</button>
-  </div>
-</div>
-
-<!-- UPGRADE PAYMENT -->
-<div class="overlay hidden" id="modal-upgrade-payment">
-  <div class="modal modal-sm">
-    <h3 style="color:#1A2744;font-weight:900;font-size:1.05rem;margin-bottom:4px">💳 إتمام دفع الترقية</h3>
-    <p style="color:#6B7280;font-size:0.84rem;margin-bottom:14px">حوّل قيمة الباقة، وارفع صورة إشعار التحويل</p>
-    <div style="background:#F4F6FA;border-radius:12px;padding:16px;margin-bottom:16px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <span style="color:#6B7280;font-size:0.82rem">الباقة المطلوبة</span>
-        <span style="color:#C9933A;font-weight:900;font-size:1.05rem" id="upg-pay-plan">—</span>
-      </div>
-      <div style="border-top:1px dashed #E5E0D8;padding-top:10px">
-        <div style="color:#6B7280;font-size:0.78rem;margin-bottom:2px">رقم الحساب (المركزي بحري)</div>
-        <div style="color:#1A2744;font-weight:900;font-size:1.05rem;margin-bottom:8px">1978584</div>
-        <div style="color:#6B7280;font-size:0.78rem;margin-bottom:2px">اسم صاحب الحساب</div>
-        <div style="color:#1A2744;font-weight:700;font-size:0.92rem">عبد الرؤوف خالد محمد</div>
-      </div>
-    </div>
-    <div class="field">
-      <label class="lbl">صورة إشعار الدفع</label>
-      <div class="img-upload-box">
-        <input type="file" accept="image/*" id="upg-receipt-input" onchange="handleUpgradeReceiptUpload(this)">
-        <div id="upg-receipt-placeholder"><div style="font-size:1.8rem;margin-bottom:4px">🧾</div><div style="color:#6B7280;font-size:0.82rem">اضغط لرفع صورة إشعار الدفع</div></div>
-        <img id="upg-receipt-preview" style="display:none;width:100%;border-radius:9px">
-      </div>
-    </div>
-    <div id="upg-pay-err" class="err-box hidden"></div>
-    <button class="btn-gold" style="width:100%;margin-top:6px;padding:11px" onclick="submitUpgradeRequest()">🚀 إرسال طلب الترقية</button>
-    <button style="width:100%;margin-top:8px;padding:9px;border-radius:9px;border:1.5px solid #E5E0D8;background:transparent;font-weight:700;color:#6B7280;cursor:pointer;font-family:Tajawal,sans-serif" onclick="closeModal('modal-upgrade-payment')">إلغاء</button>
-  </div>
-</div>
-
 <!-- ADMIN EDIT SELLER -->
 <div class="overlay hidden" id="modal-edit-seller">
   <div class="modal modal-sm">
     <h3 style="color:#1A2744;font-weight:900;font-size:1.05rem;margin-bottom:14px">✏️ تعديل بيانات التاجر</h3>
     <input type="hidden" id="es-id">
     <div class="field"><label class="lbl">اسم المتجر</label><input class="inp" id="es-store"></div>
-    <div class="field"><label class="lbl">المدينة</label><input class="inp" id="es-city"></div>
     <div class="field">
       <label class="lbl">صورة المتجر</label>
       <div class="img-upload-box">
@@ -800,7 +627,6 @@ textarea.inp{height:64px;resize:none}
     <div class="field"><label class="lbl">رقم الهاتف</label><input class="inp" id="es-phone"></div>
     <div class="field"><label class="lbl">التصنيف</label><select class="inp" id="es-cat"></select></div>
     <div class="field"><label class="lbl">وصف المتجر</label><textarea class="inp" id="es-desc"></textarea></div>
-    <div class="field"><label class="lbl">الباقة</label><select class="inp" id="es-plan"></select></div>
     <div id="es-err" class="err-box hidden"></div>
     <div class="modal-btns">
       <button class="btn-back" onclick="closeModal('modal-edit-seller')">إلغاء</button>
@@ -835,29 +661,14 @@ window._fbImports={collection,query,orderBy,onSnapshot,doc,setDoc,getDoc,getDocs
 const CATS=["أغذية ومشروبات","عطور وبخور","أعشاب وصحة","هدايا وحرف","إلكترونيات","ملابس وأزياء","مواد بناء","سيارات","عقارات","أنشطة متعددة","أخرى"];
 const EMOJIS={"أغذية ومشروبات":"☕","عطور وبخور":"🕌","أعشاب وصحة":"🌿","هدايا وحرف":"🎁","إلكترونيات":"📱","ملابس وأزياء":"👗","مواد بناء":"🧱","سيارات":"🚗","عقارات":"🏠","أنشطة متعددة":"🎯","أخرى":"📦"};
 const BG={"أغذية ومشروبات":"#FFF0E8","عطور وبخور":"#FFF8EE","أعشاب وصحة":"#EEF8EE","هدايا وحرف":"#EEF0FF","إلكترونيات":"#F0F8FF","ملابس وأزياء":"#FFF0F8","مواد بناء":"#F0EEE8","سيارات":"#E8F0FF","عقارات":"#FFF0EC","أنشطة متعددة":"#F5F0FF","أخرى":"#F5F5F5"};
-const PLANS=[
-  {id:"starter",name:"ابتدائية",price:25000,maxProducts:5,commission:0,type:"flat",whatsapp:false,facebook:false,boost:false,verified:false,fbPage:false,contentPlan:false,desc:"تسجيل المتجر + 5 منتجات"},
-  {id:"basic",name:"أساسية",price:50000,maxProducts:10,commission:0,type:"flat",whatsapp:true,facebook:false,boost:false,verified:false,fbPage:false,contentPlan:false,desc:"تسجيل المتجر + 10 منتجات + تسويق عبر واتساب (حالات وقروبات)"},
-  {id:"pro",name:"احترافية",price:100000,maxProducts:20,commission:0,type:"flat",whatsapp:true,facebook:true,boost:false,verified:false,fbPage:false,contentPlan:false,desc:"تسجيل المتجر + 20 منتج + تسويق عبر واتساب وفيسبوك"},
-  {id:"gold",name:"ذهبية",price:200000,maxProducts:Infinity,commission:0,type:"flat",whatsapp:true,facebook:true,boost:true,verified:false,fbPage:false,contentPlan:false,desc:"نشر مفتوح للمنتجات + ظهور أعلى للمتجر والمنتجات + تسويق عبر فيسبوك وواتساب"},
-  {id:"diamond",name:"ماسية",price:400000,maxProducts:Infinity,commission:0,type:"flat",whatsapp:true,facebook:true,boost:true,verified:true,fbPage:true,contentPlan:true,desc:"كل مزايا الباقة الذهبية + علامة موثّق + صفحة فيسبوك مخصصة + خطة محتوى كاملة (محتوى، هوية بصرية، مبيعات)"}
-];
-// baaqa for sellers who joined before the 5-tier system existed — keeps their
-// old unrestricted setup until manually moved to a real plan, so they're
-// never silently blocked from adding products by the new limits.
-const LEGACY_PLAN={id:"legacy",name:"سابقة",price:0,maxProducts:Infinity,commission:0,type:"flat",whatsapp:false,facebook:false,boost:false,verified:false,fbPage:false,contentPlan:false,desc:"باقة سابقة (قبل تحديث نظام الباقات) — بدون حد للمنتجات"};
-function getSellerPlan(seller){
-  if(!seller)return PLANS[0];
-  return PLANS.find(p=>p.id===seller.plan)||LEGACY_PLAN;
-}
+const PLANS=[{id:"commission",name:"عمولة",price:0,commission:3,maxProducts:999,type:"commission",desc:"3% عمولة من كل طلبية — بدون رسوم شهرية"},{id:"rent",name:"إيجار",price:50000,commission:0,maxProducts:999,type:"rent",desc:"إيجار ثابت 50,000 ج.س/شهر — بدون أي عمولة"}];
 const ADMIN_PASS="alrayan2026";
-const AD_PRICE=5000;
 const SDG=n=>Number(n).toLocaleString("ar")+" ج.س";
 const TODAY=()=>new Date().toLocaleDateString("ar",{year:"numeric",month:"long",day:"numeric"});
 const validSD=p=>/^(09|01)\d{8}$/.test(p.replace(/\s/g,""));
 
 // ══════════ STATE ══════════
-let sellers=[], products=[], orders=[], chats=[], sellerRequests=[], adRequests=[], ads=[];
+let sellers=[], products=[], orders=[], chats=[];
 let currentChatId="", chatViewerRole="";
 let chatPrefillText="";
 let customerPhone="";
@@ -867,7 +678,7 @@ let cart={};
 let currentSeller=null;
 let isAdmin=false;
 let regStep=1;
-let selectedPlan="starter";
+let selectedPlan="commission";
 let currentImgBase64="";
 let currentProductImages=[];
 let directGalleryImages=[], directGalleryIndex=0;
@@ -889,12 +700,13 @@ function listenAll(){
   onSnapshot(collection(db,"sellers"), snap=>{
     sellers = snap.docs.map(d=>d.data());
     renderProducts(document.querySelector(".filter-btn.active")?.textContent||"الكل");
-    if(!document.getElementById("view-stores").classList.contains("hidden")) renderStoresDirectory();
+    document.getElementById("hero-counts").textContent=`🟢 ${sellers.length} تاجر · ${products.length} منتج`;
   });
   // products
   onSnapshot(collection(db,"products"), snap=>{
     products = snap.docs.map(d=>d.data());
     renderProducts(document.querySelector(".filter-btn.active")?.textContent||"الكل");
+    document.getElementById("hero-counts").textContent=`🟢 ${sellers.length} تاجر · ${products.length} منتج`;
     if(currentSeller||isAdmin) renderDashboard();
   });
   // orders
@@ -914,29 +726,18 @@ function listenAll(){
   onSnapshot(doc(db,"meta","visits"), snap=>{
     if(snap.exists()) visits=snap.data();
   });
-  // seller registration requests
-  onSnapshot(collection(db,"sellerRequests"), snap=>{
-    sellerRequests = snap.docs.map(d=>d.data());
-    if(isAdmin) renderDashboard();
-  });
-  // one-time ad requests
-  onSnapshot(collection(db,"adRequests"), snap=>{
-    adRequests = snap.docs.map(d=>d.data());
-    if(isAdmin) renderDashboard();
-  });
-  // published ads
-  onSnapshot(collection(db,"ads"), snap=>{
-    ads = snap.docs.map(d=>d.data());
-    renderAdsStrip();
-  });
 }
 
-// track visit
+// track visit (unique per device per day)
 async function trackVisit(){
   try{
+    const today=new Date().toDateString();
+    const lastVisit=localStorage.getItem('lastVisitDate');
+    if(lastVisit===today) return;
+    localStorage.setItem('lastVisitDate',today);
+
     const ref=doc(db,"meta","visits");
     const snap=await getDoc(ref);
-    const today=new Date().toDateString();
     let v=snap.exists()?snap.data():{total:0,today:0,lastDate:""};
     if(v.lastDate!==today){v.today=0;v.lastDate=today;}
     v.total++;v.today++;
@@ -956,8 +757,8 @@ window.onload=async function(){
     const isFirst=i===0;
     pl.innerHTML+=`<div class="plan-card ${isFirst?"selected":""}" id="plan-${p.id}" onclick="selectPlan('${p.id}')">
       <div class="plan-row">
-        <div class="plan-name">الباقة ${p.name}${isFirst?"<span class=\"plan-tag\">الأنسب للبداية</span>":""}</div>
-        <div class="plan-price ${isFirst?"sel":""}" id="plan-price-${p.id}">${SDG(p.price)}</div>
+        <div class="plan-name">الباقة ${i===0?"الأولى":"الثانية"} — ${p.name}${isFirst?"<span class=\"plan-tag\">الأشهر</span>":""}</div>
+        <div class="plan-price ${isFirst?"sel":""}" id="plan-price-${p.id}">${p.price===0?"بدون رسوم شهرية":SDG(p.price)+"/شهر"}</div>
       </div>
       <div class="plan-meta">${p.desc}</div>
     </div>`;
@@ -1134,84 +935,10 @@ function getProductPopularity(p){
     const matched = items.filter(i=>i.productId===p.id);
     return sum + matched.reduce((s,i)=>s+(i.qty||0),0);
   },0);
-  const seller = sellers.find(s=>s.id===p.sellerId);
-  const plan = getSellerPlan(seller);
-  const boost = plan.boost ? 1000 : 0; // gold/diamond plans surface above everyone else
-  return boost + views + orderedQty*5; // orders weigh more than plain views
+  return views + orderedQty*5; // orders weigh more than plain views
 }
 function sortByPopularity(list){
   return list.slice().sort((a,b)=>getProductPopularity(b)-getProductPopularity(a));
-}
-
-// ══════════ STORES DIRECTORY ══════════
-function getSellerSalesQty(sellerId){
-  return orders.reduce((sum,o)=>{
-    const items=(o.items||[]).filter(i=>i.sellerId===sellerId);
-    return sum+items.reduce((s,i)=>s+(i.qty||0),0);
-  },0);
-}
-function getTopSellerIds(n){
-  return sellers
-    .map(s=>({id:s.id,qty:getSellerSalesQty(s.id)}))
-    .filter(x=>x.qty>0)
-    .sort((a,b)=>b.qty-a.qty)
-    .slice(0,n)
-    .map(x=>x.id);
-}
-function showStoresPage(){
-  showView("stores");
-  renderStoresDirectory();
-  window.scrollTo(0,0);
-}
-function closeStoresPage(){
-  showView("market");
-}
-function renderStoresDirectory(){
-  const grid=document.getElementById("stores-directory-grid");
-  const countLabel=document.getElementById("stores-count-label");
-  if(sellers.length===0){
-    countLabel.textContent="لا توجد متاجر بعد";
-    grid.innerHTML=`<div class="store-empty"><div style="font-size:2.5rem;margin-bottom:12px">🏪</div><div style="font-weight:700;color:#6B7280">لا توجد متاجر بعد</div></div>`;
-    return;
-  }
-  countLabel.textContent=`📋 ${sellers.length} متجر متاح`;
-  const topSellerIds=getTopSellerIds(3);
-  const sortedSellers=sellers.slice().sort((a,b)=>{
-    const rank=s=>{const pl=getSellerPlan(s);return (pl.boost?5000:0)+(s.featured?1000:0)+(s.verified?100:0)+(topSellerIds.includes(s.id)?10:0);};
-    const rankDiff=rank(b)-rank(a);
-    if(rankDiff!==0)return rankDiff;
-    const avgA=a.ratingCount?a.ratingSum/a.ratingCount:0;
-    const avgB=b.ratingCount?b.ratingSum/b.ratingCount:0;
-    return avgB-avgA;
-  });
-  grid.innerHTML=`<div class="products-grid"></div>`;
-  const wrap=grid.querySelector(".products-grid");
-  sortedSellers.forEach(s=>{
-    const prodCount=products.filter(p=>p.sellerId===s.id).length;
-    const avg=s.ratingCount?Math.round((s.ratingSum/s.ratingCount)*10)/10:0;
-    const cnt=s.ratingCount||0;
-    const isBestSeller=topSellerIds.includes(s.id);
-    const badges=[];
-    const sellerPlan=getSellerPlan(s);
-    if(s.verified||sellerPlan.verified)badges.push('<span style="background:#EEF8EE;color:#2E7D5E;font-size:0.66rem;font-weight:700;padding:2px 7px;border-radius:100px">⭐ متجر موثّق</span>');
-    if(s.featured)badges.push('<span style="background:#FFF8EE;color:#C9933A;font-size:0.66rem;font-weight:700;padding:2px 7px;border-radius:100px">🏆 بائع مميز</span>');
-    if(isBestSeller)badges.push('<span style="background:#FFF0EC;color:#C0392B;font-size:0.66rem;font-weight:700;padding:2px 7px;border-radius:100px">🔥 الأكثر مبيعاً</span>');
-    const avatarHtml=s.storeImage?`<img src="${s.storeImage}" style="width:100%;height:100%;object-fit:cover">`:`<span style="font-size:2rem">${EMOJIS[s.category]||"🏪"}</span>`;
-    const div=document.createElement("div");
-    div.className="product-card";
-    div.style.cursor="pointer";
-    div.onclick=()=>{ closeStoresPage(); openStore(s.id); };
-    div.innerHTML=`
-      <div style="height:110px;display:flex;align-items:center;justify-content:center;background:${BG[s.category]||"#F5F5F5"};overflow:hidden">${avatarHtml}</div>
-      <div class="product-body">
-        <div class="product-name">${s.storeName}</div>
-        ${s.city?'<div style="color:#9CA3AF;font-size:0.72rem;margin-bottom:5px">📍 '+s.city+'</div>':''}
-        ${cnt>0?`<div class="seller-rating"><span style="color:#F59E0B;font-size:0.85rem">${"★".repeat(Math.round(avg))}${"☆".repeat(5-Math.round(avg))}</span><span class="rating-num">${avg}</span><span class="rating-count">(${cnt})</span></div>`:'<div style="color:#9CA3AF;font-size:0.72rem;margin-bottom:5px">لا توجد تقييمات بعد</div>'}
-        <div style="color:#6B7280;font-size:0.76rem;margin:5px 0">📦 ${prodCount} منتج</div>
-        ${badges.length?'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">'+badges.join("")+'</div>':''}
-      </div>`;
-    wrap.appendChild(div);
-  });
 }
 
 function renderFilters(){
@@ -1228,6 +955,7 @@ function renderFilters(){
 function renderProducts(filter){
   const wrap=document.getElementById("products-container");
   const list=sortByPopularity(filter==="الكل"?products:products.filter(p=>p.category===filter));
+  document.getElementById("hero-counts").textContent=`🟢 ${sellers.length} تاجر · ${products.length} منتج`;
   if(list.length===0){
     wrap.innerHTML=`<div style="text-align:center;padding:60px 20px;color:#9CA3AF"><div style="font-size:2.6rem;margin-bottom:12px">🏪</div><div style="font-weight:800;color:#6B7280;margin-bottom:7px">لا توجد منتجات بعد</div><div style="font-size:0.83rem;margin-bottom:16px">كن أول تاجر ينشر منتجات هنا!</div><button class="btn-gold" onclick="openRegister()">افتح متجرك الآن</button></div>`;
     return;
@@ -1238,11 +966,8 @@ function renderProducts(filter){
     const div=document.createElement("div");div.className="product-card";
     const imgHtml=p.image?`<img src="${p.image}" style="width:100%;height:100%;object-fit:cover">`:`<span style="font-size:52px">${EMOJIS[p.category]||"📦"}</span>`;
     const mediaBadge=((p.images&&p.images.length>1)||p.videoUrl)?`<div style="position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,0.6);color:#fff;font-size:0.65rem;padding:2px 7px;border-radius:100px;display:flex;align-items:center;gap:3px">${p.videoUrl?"🎥":""}${(p.images&&p.images.length>1)?" "+p.images.length+" صور":""}</div>`:"";
-    const pSeller=sellers.find(x=>x.id===p.sellerId);
-    const pSellerPlan=getSellerPlan(pSeller);
-    const verifiedBadge=(pSeller&&(pSeller.verified||pSellerPlan.verified))?`<div style="position:absolute;top:6px;right:6px;background:rgba(46,125,94,0.9);color:#fff;font-size:0.62rem;padding:2px 7px;border-radius:100px;font-weight:700">✓ موثّق</div>`:"";
     div.innerHTML=`
-      <div class="product-img" style="background:${BG[p.category]||"#F5F5F5"}">${imgHtml}${mediaBadge}${verifiedBadge}</div>
+      <div class="product-img" style="background:${BG[p.category]||"#F5F5F5"}">${imgHtml}${mediaBadge}</div>
       <div class="product-body">
         <div class="seller-row" onclick="openStore('${p.sellerId}')" style="cursor:pointer"><div class="seller-dot"></div><span class="seller-nm" style="text-decoration:underline;text-decoration-style:dotted">${p.sellerName}</span><span style="color:#C9933A;font-size:0.65rem;margin-right:3px">↗</span></div>
         ${(()=>{const s=sellers.find(x=>x.id===p.sellerId);const avg=s&&s.ratingCount?Math.round((s.ratingSum/s.ratingCount)*10)/10:0;const cnt=s&&s.ratingCount?s.ratingCount:0;if(!cnt)return "";const stars="★".repeat(Math.round(avg))+"☆".repeat(5-Math.round(avg));return '<div class="seller-rating"><span style="color:#F59E0B;font-size:0.9rem">'+stars+'</span><span class="rating-num">'+avg+'</span><span class="rating-count">('+cnt+')</span></div>';})()}
@@ -1367,210 +1092,32 @@ function showView(v){
   document.getElementById("view-market").classList.toggle("hidden",v!=="market");
   document.getElementById("view-dashboard").classList.toggle("hidden",v!=="dashboard");
   document.getElementById("view-store").classList.toggle("hidden",v!=="store");
-  document.getElementById("view-stores").classList.toggle("hidden",v!=="stores");
 }
 function closeModal(id){document.getElementById(id).classList.add("hidden");}
 
 // ══════════ REGISTER ══════════
-function openJoinChoice(){
-  document.getElementById("modal-join-choice").classList.remove("hidden");
-}
-function renderAdsStrip(){
-  const strip=document.getElementById("ads-strip");
-  if(!strip)return;
-  const active=ads.filter(a=>a.active).sort((a,b)=>(b.id>a.id?1:-1));
-  if(active.length===0){ strip.classList.add("hidden"); strip.innerHTML=""; return; }
-  strip.classList.remove("hidden");
-  strip.innerHTML=`<div style="font-weight:900;color:#1A2744;font-size:0.9rem;margin-bottom:8px">📢 إعلانات</div>
-    <div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:4px">`+
-    active.map(a=>`<div style="flex-shrink:0;width:230px;background:#fff;border:1.5px solid #FFE8CC;border-radius:12px;overflow:hidden">
-      ${a.image?`<img src="${a.image}" style="width:100%;height:110px;object-fit:cover">`:`<div style="width:100%;height:110px;background:linear-gradient(135deg,#FFF0E8,#FFE0CC);display:flex;align-items:center;justify-content:center;font-size:2rem">📢</div>`}
-      <div style="padding:10px">
-        <div style="font-weight:800;color:#1A2744;font-size:0.86rem;margin-bottom:3px">${a.title}</div>
-        ${a.description?`<div style="color:#6B7280;font-size:0.76rem;line-height:1.4;margin-bottom:7px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${a.description}</div>`:""}
-        <a href="https://wa.me/249${a.phone.replace(/^0/,"")}" target="_blank" style="display:block;text-align:center;background:#25D366;color:#fff;border-radius:7px;padding:6px;font-weight:700;font-size:0.78rem;text-decoration:none">💬 تواصل</a>
-      </div>
-    </div>`).join("")+`</div>`;
-}
-let adImage="", adReceiptImage="";
-function openPostAd(){
-  adImage="";adReceiptImage="";
-  ["ad-name","ad-phone","ad-title","ad-desc"].forEach(id=>document.getElementById(id).value="");
-  document.getElementById("ad-img-input").value="";
-  document.getElementById("ad-img-preview").style.display="none";
-  document.getElementById("ad-img-placeholder").style.display="block";
-  document.getElementById("ad-receipt-input").value="";
-  document.getElementById("ad-receipt-preview").style.display="none";
-  document.getElementById("ad-receipt-placeholder").style.display="block";
-  hideErr("ad-err");
-  document.getElementById("modal-post-ad").classList.remove("hidden");
-}
-async function uploadToImgbb(file){
-  const formData=new FormData();
-  formData.append("image",file);
-  const res=await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`,{method:"POST",body:formData});
-  const data=await res.json();
-  if(!data.success)throw new Error("upload failed");
-  return data.data.url;
-}
-async function handleAdImgUpload(input){
-  const file=input.files[0];if(!file)return;
-  showToast("جاري رفع الصورة...");
-  try{
-    adImage=await uploadToImgbb(file);
-    document.getElementById("ad-img-preview").src=adImage;
-    document.getElementById("ad-img-preview").style.display="block";
-    document.getElementById("ad-img-placeholder").style.display="none";
-    showToast("تم رفع الصورة ✓");
-  }catch(e){ showToast("فشل رفع الصورة"); }
-}
-async function handleAdReceiptUpload(input){
-  const file=input.files[0];if(!file)return;
-  showToast("جاري رفع صورة الإشعار...");
-  try{
-    adReceiptImage=await uploadToImgbb(file);
-    document.getElementById("ad-receipt-preview").src=adReceiptImage;
-    document.getElementById("ad-receipt-preview").style.display="block";
-    document.getElementById("ad-receipt-placeholder").style.display="none";
-    showToast("تم رفع صورة الإشعار ✓");
-  }catch(e){ showToast("فشل رفع الصورة"); }
-}
-async function submitAdRequest(){
-  const name=document.getElementById("ad-name").value.trim();
-  const phone=document.getElementById("ad-phone").value.trim();
-  const title=document.getElementById("ad-title").value.trim();
-  const desc=document.getElementById("ad-desc").value.trim();
-  if(!name)return showErr("ad-err","يرجى إدخال اسمك");
-  if(!validSD(phone))return showErr("ad-err","رقم الهاتف يبدأ بـ 09 أو 01 ويكون 10 أرقام");
-  if(!title)return showErr("ad-err","يرجى إدخال عنوان الإعلان");
-  if(!adReceiptImage)return showErr("ad-err","يرجى رفع صورة إشعار الدفع أولاً");
-  const request={id:Date.now().toString(),type:"ad",advertiserName:name,phone,title,description:desc,image:adImage,paymentReceipt:adReceiptImage,status:"pending",requestedAt:Date.now()};
-  await dbSave("adRequests",request.id,request);
-  notifyAdmin(`📢 طلب نشر إعلان جديد!\n━━━━━━━━━━\nالعنوان: ${title}\nصاحب الإعلان: ${name}\nالهاتف: ${phone}\nالمبلغ: ${SDG(AD_PRICE)}\n━━━━━━━━━━\nصورة إشعار الدفع:\n${adReceiptImage}`);
-  closeModal("modal-post-ad");
-  document.getElementById("rs-message").textContent=`تم استلام طلب إعلانك "${title}" وسيتم مراجعته ونشره قريباً بعد تأكيد الدفع.`;
-  document.getElementById("modal-request-submitted").classList.remove("hidden");
-  adImage="";adReceiptImage="";
-}
 function openRegister(){
-  regStep=1;selectedPlan="starter";currentStoreImage="";regReceiptImage="";
+  regStep=1;selectedPlan="commission";currentStoreImage="";
   ["r-name","r-phone","r-store","r-desc"].forEach(id=>document.getElementById(id).value="");
   document.getElementById("r-img-input").value="";
   document.getElementById("r-img-preview").style.display="none";
   document.getElementById("r-img-placeholder").style.display="block";
-  document.getElementById("reg-receipt-input").value="";
-  document.getElementById("reg-receipt-preview").style.display="none";
-  document.getElementById("reg-receipt-placeholder").style.display="block";
   document.getElementById("r-img-placeholder").innerHTML=`<div style="font-size:1.8rem;margin-bottom:4px">🏪</div><div style="color:#6B7280;font-size:0.82rem">اضغط لرفع صورة المتجر</div>`;
   hideErr("reg-err");updateRegUI();
   document.getElementById("modal-register").classList.remove("hidden");
 }
-function totalRegSteps(){ return 4; }
 function updateRegUI(){
-  const total=totalRegSteps();
-  ["step1","step2","step3","step4"].forEach((s,i)=>document.getElementById(s).classList.toggle("hidden",i+1!==regStep));
-  ["seg1","seg2","seg3","seg4"].forEach((s,i)=>{
-    const seg=document.getElementById(s);
-    seg.classList.toggle("hidden", i+1>total);
-    seg.classList.toggle("done", i+1<=regStep);
-  });
-  document.getElementById("step-label").textContent=`الخطوة ${regStep} من ${total}`;
+  ["step1","step2","step3"].forEach((s,i)=>document.getElementById(s).classList.toggle("hidden",i+1!==regStep));
+  ["seg1","seg2","seg3"].forEach((s,i)=>document.getElementById(s).classList.toggle("done",i+1<=regStep));
+  document.getElementById("step-label").textContent=`الخطوة ${regStep} من 3`;
   document.getElementById("btn-back").classList.toggle("hidden",regStep===1);
-  document.getElementById("btn-next").classList.toggle("hidden",regStep===total);
-  document.getElementById("btn-submit").classList.toggle("hidden",regStep!==total);
+  document.getElementById("btn-next").classList.toggle("hidden",regStep===3);
+  document.getElementById("btn-submit").classList.toggle("hidden",regStep!==3);
   if(regStep===3){
     document.getElementById("sum-store").textContent=document.getElementById("r-store").value+" · "+document.getElementById("r-cat").value;
     document.getElementById("sum-owner").textContent=document.getElementById("r-name").value+" · "+document.getElementById("r-phone").value;
     document.getElementById("reg-summary").classList.remove("hidden");
   }
-  if(regStep===4){
-    const plan=PLANS.find(p=>p.id===selectedPlan);
-    document.getElementById("pay-amount").textContent=plan?SDG(plan.price):"—";
-  }
-}
-function updateUpgradeBanner(){
-  const banner=document.getElementById("upgrade-banner");
-  if(!banner)return;
-  if(!currentSeller){banner.classList.add("hidden");return;}
-  banner.onclick=openUpgradePlan;
-  banner.style.cursor="pointer";
-  const plan=getSellerPlan(currentSeller);
-  const idx=PLANS.findIndex(p=>p.id===plan.id);
-  if(idx===PLANS.length-1){ // already on the top (diamond) plan
-    banner.classList.add("hidden");
-    return;
-  }
-  banner.classList.remove("hidden");
-  const nextPlan=idx>=0?PLANS[idx+1]:PLANS[0];
-  document.getElementById("upgrade-banner-sub").textContent=`رقّي لباقة ${nextPlan.name} — ${nextPlan.desc}`;
-}
-function openUpgradePlan(){
-  const list=document.getElementById("upgrade-plans-list");
-  const currentPlanId=currentSeller?getSellerPlan(currentSeller).id:"";
-  list.innerHTML=PLANS.map(p=>{
-    const isCurrent=p.id===currentPlanId;
-    const perks=[
-      p.maxProducts===Infinity?"نشر مفتوح للمنتجات":"حتى "+p.maxProducts+" منتج",
-      p.whatsapp?"تسويق عبر واتساب (حالات وقروبات)":null,
-      p.facebook?"تسويق عبر فيسبوك":null,
-      p.boost?"ظهور أعلى للمتجر والمنتجات":null,
-      p.verified?"علامة \"موثّق\" تلقائية":null,
-      p.fbPage?"صفحة فيسبوك مخصصة":null,
-      p.contentPlan?"خطة محتوى كاملة (محتوى + هوية بصرية + مبيعات)":null,
-    ].filter(Boolean);
-    return `<div class="plan-card ${isCurrent?"selected":""}" style="${isCurrent?"":"cursor:pointer"}" ${isCurrent?"":`onclick="requestPlanUpgrade('${p.id}')"`}>
-      <div class="plan-row">
-        <div class="plan-name">${p.name}${isCurrent?'<span class="plan-tag" style="background:#6B7280">باقتك الحالية</span>':""}</div>
-        <div class="plan-price ${isCurrent?"sel":""}">${SDG(p.price)}</div>
-      </div>
-      <div class="plan-meta" style="margin-top:6px">${perks.map(x=>"✓ "+x).join("<br>")}</div>
-      ${isCurrent?"":'<button class="btn-gold" style="width:100%;margin-top:10px;padding:9px" onclick="event.stopPropagation();requestPlanUpgrade(\''+p.id+'\')">🚀 اطلب الترقية لهذه الباقة</button>'}
-    </div>`;
-  }).join("");
-  document.getElementById("modal-upgrade-plan").classList.remove("hidden");
-}
-let pendingUpgradePlanId="";
-let upgradeReceiptImage="";
-function requestPlanUpgrade(planId){
-  if(!currentSeller)return;
-  const plan=PLANS.find(p=>p.id===planId);if(!plan)return;
-  pendingUpgradePlanId=planId;
-  upgradeReceiptImage="";
-  document.getElementById("upg-pay-plan").textContent=`${plan.name} — ${SDG(plan.price)}`;
-  document.getElementById("upg-receipt-input").value="";
-  document.getElementById("upg-receipt-preview").style.display="none";
-  document.getElementById("upg-receipt-placeholder").style.display="block";
-  hideErr("upg-pay-err");
-  closeModal("modal-upgrade-plan");
-  document.getElementById("modal-upgrade-payment").classList.remove("hidden");
-}
-async function handleUpgradeReceiptUpload(input){
-  const file=input.files[0];if(!file)return;
-  showToast("جاري رفع صورة الإشعار...");
-  try{
-    const formData=new FormData();
-    formData.append("image",file);
-    const res=await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`,{method:"POST",body:formData});
-    const data=await res.json();
-    if(!data.success)throw new Error("upload failed");
-    upgradeReceiptImage=data.data.url;
-    document.getElementById("upg-receipt-preview").src=upgradeReceiptImage;
-    document.getElementById("upg-receipt-preview").style.display="block";
-    document.getElementById("upg-receipt-placeholder").style.display="none";
-    showToast("تم رفع صورة الإشعار ✓");
-  }catch(e){
-    showToast("فشل رفع الصورة، حاول مجدداً");
-  }
-}
-function submitUpgradeRequest(){
-  if(!currentSeller || !pendingUpgradePlanId)return;
-  if(!upgradeReceiptImage)return showErr("upg-pay-err","يرجى رفع صورة إشعار الدفع أولاً");
-  const plan=PLANS.find(p=>p.id===pendingUpgradePlanId);if(!plan)return;
-  notifyAdmin(`🚀 طلب ترقية باقة — بانتظار تأكيد الدفع\n━━━━━━━━━━\nالمتجر: ${currentSeller.storeName}\nصاحب المتجر: ${currentSeller.ownerName}\nالهاتف: ${currentSeller.phone}\n━━━━━━━━━━\nالباقة المطلوبة: ${plan.name} (${SDG(plan.price)})\n━━━━━━━━━━\nصورة إشعار الدفع:\n${upgradeReceiptImage}`);
-  closeModal("modal-upgrade-payment");
-  showToast("تم إرسال طلب الترقية، هيتواصل معاك فريق المنصة قريباً ✓");
-  pendingUpgradePlanId="";
-  upgradeReceiptImage="";
 }
 function selectPlan(id){
   selectedPlan=id;
@@ -1593,49 +1140,16 @@ function regNext(){
   regStep++;updateRegUI();
 }
 function regBack(){regStep--;updateRegUI();}
-let regReceiptImage="";
-async function handleReceiptUpload(input){
-  const file=input.files[0];if(!file)return;
-  showToast("جاري رفع صورة الإشعار...");
-  try{
-    const formData=new FormData();
-    formData.append("image",file);
-    const res=await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`,{method:"POST",body:formData});
-    const data=await res.json();
-    if(!data.success)throw new Error("upload failed");
-    regReceiptImage=data.data.url;
-    document.getElementById("reg-receipt-preview").src=regReceiptImage;
-    document.getElementById("reg-receipt-preview").style.display="block";
-    document.getElementById("reg-receipt-placeholder").style.display="none";
-    showToast("تم رفع صورة الإشعار ✓");
-  }catch(e){
-    showToast("فشل رفع الصورة، حاول مجدداً");
-  }
-}
 async function regSubmit(){
-  if(!regReceiptImage)return showErr("reg-err","يرجى رفع صورة إشعار الدفع أولاً");
-  const plan=PLANS.find(p=>p.id===selectedPlan);
-  const request={
-    id:Date.now().toString(),
-    type:"store",
-    ownerName:document.getElementById("r-name").value.trim(),
-    phone:document.getElementById("r-phone").value.trim(),
-    storeName:document.getElementById("r-store").value.trim(),
-    city:document.getElementById("r-city").value.trim(),
-    category:document.getElementById("r-cat").value,
-    description:document.getElementById("r-desc").value.trim(),
-    storeImage:currentStoreImage,
-    plan:selectedPlan,
-    paymentReceipt:regReceiptImage,
-    status:"pending",
-    requestedAt:Date.now()
-  };
-  await dbSave("sellerRequests",request.id,request);
-  notifyAdmin(`🆕 طلب تسجيل تاجر جديد!\n━━━━━━━━━━\nالمتجر: ${request.storeName}\nالمالك: ${request.ownerName}\nالهاتف: ${request.phone}\nالتصنيف: ${request.category}\nالمدينة: ${request.city}\nالباقة: ${plan.name} (${SDG(plan.price)})\n━━━━━━━━━━\nصورة إشعار الدفع:\n${regReceiptImage}`);
-  closeModal("modal-register");
-  document.getElementById("rs-message").textContent=`سيتم مراجعة طلب متجر "${request.storeName}" والرد عليك قريباً. بعد الموافقة، تقدر تسجّل دخولك بنفس رقم هاتفك (${request.phone}).`;
-  document.getElementById("modal-request-submitted").classList.remove("hidden");
-  regReceiptImage="";
+  const seller={id:Date.now().toString(),ownerName:document.getElementById("r-name").value.trim(),phone:document.getElementById("r-phone").value.trim(),storeName:document.getElementById("r-store").value.trim(),category:document.getElementById("r-cat").value,plan:selectedPlan,description:document.getElementById("r-desc").value.trim(),storeImage:currentStoreImage,joinedAt:TODAY()};
+  await dbSave("sellers",seller.id,seller);
+  notifyAdmin(`🆕 تاجر جديد سجّل في منصة الريان!\n━━━━━━━━━━\nالمتجر: ${seller.storeName}\nالمالك: ${seller.ownerName}\nالهاتف: ${seller.phone}\nالتصنيف: ${seller.category}\nالباقة: ${PLANS.find(p=>p.id===seller.plan)?.name||seller.plan}`);
+  currentSeller=seller;isAdmin=false;
+  enableSellerPushNotifications(seller.id);
+  closeModal("modal-register");showView("dashboard");renderDashboard();
+  document.getElementById("wt-name").textContent=`أهلاً بك يا ${seller.ownerName}! 👋`;
+  document.getElementById("wt-store").textContent=`متجر "${seller.storeName}" جاهز الآن على منصة الريان 🛒`;
+  document.getElementById("modal-welcome-trader").classList.remove("hidden");
 }
 function closeWelcomeAndAddProduct(){
   closeModal("modal-welcome-trader");
@@ -1644,14 +1158,6 @@ function closeWelcomeAndAddProduct(){
 
 // ══════════ ADD / EDIT PRODUCT ══════════
 function openAddProduct(){
-  if(currentSeller){
-    const plan=getSellerPlan(currentSeller);
-    const myProdCount=products.filter(p=>p.sellerId===currentSeller.id).length;
-    if(myProdCount>=plan.maxProducts){
-      showToast(`وصلت للحد الأقصى (${plan.maxProducts} منتج) في باقة ${plan.name} — تواصل معنا للترقية لباقة أعلى`);
-      return;
-    }
-  }
   currentProductImages=[];document.getElementById("p-edit-id").value="";
   document.getElementById("product-modal-title").textContent="➕ إضافة منتج جديد";
   document.getElementById("p-submit-btn").textContent="✓ نشر المنتج";
@@ -1746,15 +1252,15 @@ function switchTab(tab){
   activeTab=tab;
   document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
   event.target.classList.add("active");
-  ["tab-products","tab-orders","tab-admin","tab-messages","tab-manage","tab-requests"].forEach(id=>document.getElementById(id).classList.add("hidden"));
+  ["tab-products","tab-orders","tab-admin","tab-messages"].forEach(id=>document.getElementById(id).classList.add("hidden"));
   document.getElementById("tab-"+tab).classList.remove("hidden");
 }
 
 function renderDashboard(){
   if(isAdmin){renderAdminDashboard();return;}
   if(!currentSeller)return;
-  const plan=getSellerPlan(currentSeller);
-  const planLabel=`باقة ${plan.name} · ${SDG(plan.price)}${plan.maxProducts===Infinity?" · نشر مفتوح":" · حتى "+plan.maxProducts+" منتج"}`;
+  const plan=PLANS.find(p=>p.id===currentSeller.plan)||PLANS[0];
+  const planLabel=plan.type==="rent"?`باقة ${plan.name} · ${SDG(plan.price)}/شهر`:`باقة ${plan.name} · عمولة ${plan.commission}%`;
   document.getElementById("dash-view-label").textContent="· التاجر";
   document.getElementById("dash-sub").textContent="مرحباً،";
   document.getElementById("dash-store-name").textContent=currentSeller.storeName;
@@ -1763,14 +1269,13 @@ function renderDashboard(){
   document.getElementById("dash-main-btn").textContent="➕ أضف منتجاً";
   document.getElementById("dash-main-btn").onclick=openAddProduct;
   document.getElementById("dash-share-strip").classList.remove("hidden");
-  updateUpgradeBanner();
   const myProds=products.filter(p=>p.sellerId===currentSeller.id);
   const myOrders=orders.filter(o=>o.items.some(i=>i.sellerId===currentSeller.id));
   const myChats=chats.filter(c=>c.sellerId===currentSeller.id);
   const unreadChats=myChats.filter(c=>!c.sellerRead).length;
   const myRevenue=myOrders.filter(o=>o.status==="done").reduce((s,o)=>{
     const t=o.items.filter(i=>i.sellerId===currentSeller.id).reduce((x,i)=>x+(i.price*i.qty),0);
-    return s+t;
+    return s+(plan.type==="rent"?t:Math.round(t*(1-plan.commission/100)));
   },0);
   document.getElementById("dash-tabs").innerHTML=`
     <button class="tab-btn ${activeTab==="products"?"active":""}" onclick="switchTab('products')">📦 منتجاتي (${myProds.length})</button>
@@ -1792,7 +1297,7 @@ function renderDashboard(){
     const thumb=p.image?`<img class="prod-thumb" src="${p.image}">`:`<div class="prod-emoji-box" style="background:${BG[p.category]||"#F5F5F5"}">${EMOJIS[p.category]||"📦"}</div>`;
     return `<div class="prod-row"><div class="prod-row-left">${thumb}<div><div class="prod-title">${p.name}</div><div class="prod-meta">${p.category} · ${p.addedAt}</div></div></div>
       <div style="display:flex;align-items:center;gap:7px;flex-shrink:0">
-        <div class="prod-price-col"><div class="prod-price-val">${p.priceOnRequest?"عند الطلب":SDG(p.price)}</div><div class="prod-net">${p.priceOnRequest?"🔒 يتفاوض التاجر":"صافيك: "+SDG(p.price)}</div></div>
+        <div class="prod-price-col"><div class="prod-price-val">${p.priceOnRequest?"عند الطلب":SDG(p.price)}</div><div class="prod-net">${p.priceOnRequest?"🔒 يتفاوض التاجر":(plan.type==="rent"?"صافيك: "+SDG(p.price):"صافيك: "+SDG(Math.round(p.price*(1-plan.commission/100))))}</div></div>
         <button onclick="shareProduct('${p.id}')" class="btn-edit" style="background:#EEF8EE;color:#2E7D5E">🔗</button>
         <button class="btn-edit" onclick="openEditProduct('${p.id}')">✏️</button>
         <button class="btn-red" onclick="deleteProduct('${p.id}')">🗑</button>
@@ -1849,8 +1354,6 @@ function renderDashboard(){
 }
 
 function renderAdminDashboard(){
-  const pendingCount=sellerRequests.filter(r=>r.status==="pending").length+adRequests.filter(r=>r.status==="pending").length;
-  document.getElementById("upgrade-banner").classList.add("hidden");
   document.getElementById("dash-view-label").textContent="· لوحة المالك";
   document.getElementById("dash-sub").textContent="مرحباً، مالك المنصة";
   document.getElementById("dash-store-name").textContent="منصة الريان";
@@ -1867,7 +1370,6 @@ function renderAdminDashboard(){
     <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-val">${orders.length}</div><div class="stat-lbl">الطلبات</div></div>
     <div class="stat-card"><div class="stat-icon">👁</div><div class="stat-val">${visits.total||0}</div><div class="stat-lbl">الزيارات</div></div>`;
   document.getElementById("dash-tabs").innerHTML=`
-    <button class="tab-btn ${activeTab==="requests"?"active":""}" onclick="switchTab('requests')">📨 الطلبات الجديدة${pendingCount?' <span style="color:#C9933A">('+pendingCount+')</span>':""}</button>
     <button class="tab-btn ${activeTab==="admin"?"active":""}" onclick="switchTab('admin')">📊 الإحصائيات</button>
     <button class="tab-btn ${activeTab==="orders"?"active":""}" onclick="switchTab('orders')">📋 الطلبات</button>
     <button class="tab-btn ${activeTab==="messages"?"active":""}" onclick="switchTab('messages')">💬 المحادثات (${chats.length})</button>
@@ -1884,7 +1386,7 @@ function renderAdminDashboard(){
     </div>
     <div class="panel"><div class="panel-head"><span class="panel-title">التجار</span></div>
     ${sellers.length===0?"<div class=\"no-items\"><div>لا يوجد تجار</div></div>":
-    sellers.map(s=>{const sp=products.filter(p=>p.sellerId===s.id).length;const so=orders.filter(o=>o.items.some(i=>i.sellerId===s.id)).length;const plan=getSellerPlan(s);
+    sellers.map(s=>{const sp=products.filter(p=>p.sellerId===s.id).length;const so=orders.filter(o=>o.items.some(i=>i.sellerId===s.id)).length;const plan=PLANS.find(p=>p.id===s.plan)||PLANS[0];
     return `<div class="prod-row"><div class="prod-row-left">${s.storeImage?`<img class="prod-thumb" src="${s.storeImage}">`:`<div class="prod-emoji-box" style="background:#EEF0FF">🏪</div>`}<div><div class="prod-title">${s.storeName}</div><div class="prod-meta">${s.ownerName} · ${s.phone} · باقة ${plan.name}</div></div></div>
     <div style="text-align:left;flex-shrink:0"><div style="font-size:0.76rem;color:#6B7280">${sp} منتج · ${so} طلب</div></div></div>`;}).join("")}
     </div>`;
@@ -1908,7 +1410,7 @@ function renderAdminDashboard(){
     mTab.innerHTML=`<div class="panel"><div class="panel-head"><span class="panel-title">إدارة التجار والمنتجات</span></div>`+
     sellers.map(s=>{
       const sp=products.filter(p=>p.sellerId===s.id);
-      const plan=getSellerPlan(s);
+      const plan=PLANS.find(p=>p.id===s.plan)||PLANS[0];
       const avg=s.ratingCount?Math.round((s.ratingSum/s.ratingCount)*10)/10:0;
       return `<div style="background:#F4F6FA;border-radius:10px;padding:13px;margin-bottom:10px">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px">
@@ -1920,8 +1422,6 @@ function renderAdminDashboard(){
           <div style="display:flex;gap:5px;flex-wrap:wrap">
             <button onclick="adminEditSeller('${s.id}')" class="btn-edit" style="font-size:0.72rem">✏️ تعديل التاجر</button>
             <button onclick="adminAddProductForSeller('${s.id}')" class="btn-add-sm" style="font-size:0.72rem">➕ أضف منتج</button>
-            <button onclick="toggleSellerBadge('${s.id}','verified')" class="btn-edit" style="font-size:0.72rem;${s.verified?"background:#EEF8EE;color:#2E7D5E":""}">⭐ ${s.verified?"إلغاء التوثيق":"توثيق"}</button>
-            <button onclick="toggleSellerBadge('${s.id}','featured')" class="btn-edit" style="font-size:0.72rem;${s.featured?"background:#FFF8EE;color:#C9933A":""}">🏆 ${s.featured?"إلغاء التمييز":"تمييز"}</button>
             <button onclick="adminDeleteSeller('${s.id}')" class="btn-red" style="font-size:0.72rem">🗑 حذف التاجر</button>
           </div>
         </div>
@@ -1960,99 +1460,15 @@ function renderAdminDashboard(){
         </div>`;
       }).join("")+"</div>";
   }
-  renderRequestsTab();
-}
-function renderRequestsTab(){
-  const rTab=document.getElementById("tab-requests");
-  if(!rTab)return;
-  rTab.classList.toggle("hidden",activeTab!=="requests");
-  const pendingStores=sellerRequests.filter(r=>r.status==="pending").sort((a,b)=>b.requestedAt-a.requestedAt);
-  const pendingAds=adRequests.filter(r=>r.status==="pending").sort((a,b)=>b.requestedAt-a.requestedAt);
-  let html=`<div class="panel"><div class="panel-head"><span class="panel-title">طلبات إنشاء متجر (${pendingStores.length})</span></div>`;
-  if(pendingStores.length===0){
-    html+=`<div class="no-items"><div class="icon">📭</div><div>لا توجد طلبات متاجر جديدة</div></div>`;
-  } else {
-    html+=pendingStores.map(r=>{
-      const plan=PLANS.find(p=>p.id===r.plan)||{name:r.plan,price:0};
-      return `<div style="background:#F4F6FA;border-radius:11px;padding:14px;margin-bottom:12px;border:1.5px solid #C9933A">
-        <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px">
-          ${r.storeImage?`<img src="${r.storeImage}" style="width:52px;height:52px;border-radius:10px;object-fit:cover;flex-shrink:0">`:`<div style="width:52px;height:52px;border-radius:10px;background:#EEF0FF;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.5rem">🏪</div>`}
-          <div style="flex:1;min-width:0">
-            <div style="font-weight:900;color:#1A2744">${r.storeName}</div>
-            <div style="font-size:0.76rem;color:#6B7280">${r.ownerName} · ${r.phone}</div>
-            <div style="font-size:0.76rem;color:#6B7280">${r.category}${r.city?" · 📍 "+r.city:""}</div>
-            <div style="font-size:0.78rem;color:#C9933A;font-weight:800;margin-top:3px">باقة ${plan.name} · ${SDG(plan.price)}</div>
-          </div>
-        </div>
-        ${r.description?`<div style="font-size:0.8rem;color:#4B5563;background:#fff;border-radius:8px;padding:8px 10px;margin-bottom:10px">${r.description}</div>`:""}
-        <a href="${r.paymentReceipt}" target="_blank" style="display:block;text-align:center;background:#fff;border:1px solid #E5E0D8;border-radius:8px;padding:8px;color:#1A2744;font-weight:700;font-size:0.82rem;margin-bottom:10px;text-decoration:none">🧾 عرض صورة إشعار الدفع</a>
-        <div style="display:flex;gap:8px">
-          <button onclick="approveStoreRequest('${r.id}')" style="flex:1;background:#2E7D5E;color:#fff;border:none;border-radius:9px;padding:10px;font-weight:800;font-size:0.85rem;cursor:pointer;font-family:Tajawal,sans-serif">✅ قبول وتفعيل</button>
-          <button onclick="rejectStoreRequest('${r.id}')" style="flex:1;background:#FDECEC;color:#C62828;border:none;border-radius:9px;padding:10px;font-weight:800;font-size:0.85rem;cursor:pointer;font-family:Tajawal,sans-serif">✕ رفض</button>
-        </div>
-      </div>`;
-    }).join("");
-  }
-  html+=`</div><div class="panel"><div class="panel-head"><span class="panel-title">طلبات نشر إعلان (${pendingAds.length})</span></div>`;
-  if(pendingAds.length===0){
-    html+=`<div class="no-items"><div class="icon">📭</div><div>لا توجد طلبات إعلانات جديدة</div></div>`;
-  } else {
-    html+=pendingAds.map(r=>{
-      return `<div style="background:#F4F6FA;border-radius:11px;padding:14px;margin-bottom:12px;border:1.5px solid #C9933A">
-        <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px">
-          ${r.image?`<img src="${r.image}" style="width:52px;height:52px;border-radius:10px;object-fit:cover;flex-shrink:0">`:`<div style="width:52px;height:52px;border-radius:10px;background:#FFF0E8;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.5rem">📢</div>`}
-          <div style="flex:1;min-width:0">
-            <div style="font-weight:900;color:#1A2744">${r.title}</div>
-            <div style="font-size:0.76rem;color:#6B7280">${r.advertiserName} · ${r.phone}</div>
-            <div style="font-size:0.78rem;color:#C9933A;font-weight:800;margin-top:3px">إعلان لمرة واحدة · ${SDG(AD_PRICE)}</div>
-          </div>
-        </div>
-        ${r.description?`<div style="font-size:0.8rem;color:#4B5563;background:#fff;border-radius:8px;padding:8px 10px;margin-bottom:10px">${r.description}</div>`:""}
-        <a href="${r.paymentReceipt}" target="_blank" style="display:block;text-align:center;background:#fff;border:1px solid #E5E0D8;border-radius:8px;padding:8px;color:#1A2744;font-weight:700;font-size:0.82rem;margin-bottom:10px;text-decoration:none">🧾 عرض صورة إشعار الدفع</a>
-        <div style="display:flex;gap:8px">
-          <button onclick="approveAdRequest('${r.id}')" style="flex:1;background:#2E7D5E;color:#fff;border:none;border-radius:9px;padding:10px;font-weight:800;font-size:0.85rem;cursor:pointer;font-family:Tajawal,sans-serif">✅ نشر الإعلان</button>
-          <button onclick="rejectAdRequest('${r.id}')" style="flex:1;background:#FDECEC;color:#C62828;border:none;border-radius:9px;padding:10px;font-weight:800;font-size:0.85rem;cursor:pointer;font-family:Tajawal,sans-serif">✕ رفض</button>
-        </div>
-      </div>`;
-    }).join("");
-  }
-  html+=`</div>`;
-  rTab.innerHTML=html;
-}
-async function approveStoreRequest(reqId){
-  const r=sellerRequests.find(x=>x.id===reqId);if(!r)return;
-  const seller={id:Date.now().toString(),ownerName:r.ownerName,phone:r.phone,storeName:r.storeName,city:r.city,category:r.category,description:r.description,storeImage:r.storeImage||"",plan:r.plan,verified:false,featured:false,joinedAt:TODAY()};
-  await dbSave("sellers",seller.id,seller);
-  await dbUpdate("sellerRequests",reqId,{status:"approved"});
-  showToast(`تم قبول وتفعيل متجر ${r.storeName} ✓`);
-}
-async function rejectStoreRequest(reqId){
-  const r=sellerRequests.find(x=>x.id===reqId);if(!r)return;
-  if(!confirm(`رفض طلب متجر "${r.storeName}"؟`))return;
-  await dbUpdate("sellerRequests",reqId,{status:"rejected"});
-  showToast("تم رفض الطلب");
-}
-async function approveAdRequest(reqId){
-  const r=adRequests.find(x=>x.id===reqId);if(!r)return;
-  const ad={id:"ad_"+Date.now().toString(),title:r.title,description:r.description,image:r.image||"",advertiserName:r.advertiserName,phone:r.phone,postedAt:TODAY(),active:true};
-  await dbSave("ads",ad.id,ad);
-  await dbUpdate("adRequests",reqId,{status:"approved"});
-  showToast("تم نشر الإعلان ✓");
-}
-async function rejectAdRequest(reqId){
-  const r=adRequests.find(x=>x.id===reqId);if(!r)return;
-  if(!confirm(`رفض طلب إعلان "${r.title}"؟`))return;
-  await dbUpdate("adRequests",reqId,{status:"rejected"});
-  showToast("تم رفض الطلب");
 }
 
 // ══════════ LOGIN ══════════
 function openLogin(){document.getElementById("l-phone").value="";hideErr("login-err");document.getElementById("modal-login").classList.remove("hidden");}
 function doLogin(){
   const val=document.getElementById("l-phone").value.trim();
-  if(val===ADMIN_PASS){isAdmin=true;currentSeller=null;activeTab="requests";closeModal("modal-login");showView("dashboard");renderDashboard();return;}
+  if(val===ADMIN_PASS){isAdmin=true;currentSeller=null;activeTab="admin";closeModal("modal-login");showView("dashboard");renderDashboard();return;}
   const found=sellers.find(s=>s.phone===val);
-  if(!found)return showErr("login-err","رقم الهاتف غير مسجل، أو أن طلبك لا يزال قيد المراجعة");
+  if(!found)return showErr("login-err","رقم الهاتف غير مسجل");
   currentSeller=found;isAdmin=false;activeTab="products";
   enableSellerPushNotifications(found.id);
   closeModal("modal-login");showView("dashboard");renderDashboard();
@@ -2114,11 +1530,6 @@ function checkUrlProduct(){
     };
     setTimeout(tryOpen,1000);
   }
-  // direct "join as merchant" link
-  const join=params.get("join");
-  if(join==="1"||join==="store"){ setTimeout(()=>openRegister(),600); }
-  else if(join==="ad"){ setTimeout(()=>openPostAd(),600); }
-  else if(join==="choice"){ setTimeout(()=>openJoinChoice(),600); }
 }
 
 
@@ -2142,17 +1553,7 @@ async function openStore(sellerId){
   document.getElementById("store-avatar").innerHTML = seller.storeImage ? `<img src="${seller.storeImage}" style="width:100%;height:100%;object-fit:cover;border-radius:15px">` : (EMOJIS[seller.category]||"🏪");
   document.getElementById("store-name").textContent = seller.storeName;
   document.getElementById("store-cat").textContent = seller.category;
-  document.getElementById("store-city").innerHTML = seller.city ? "📍 "+seller.city : "";
   document.getElementById("store-desc").textContent = seller.description||"";
-
-  // badges
-  const isTopSeller = getTopSellerIds(3).includes(seller.id);
-  const sellerPlanObj = getSellerPlan(seller);
-  const badgesHtml=[];
-  if(seller.verified||sellerPlanObj.verified)badgesHtml.push('<span style="background:rgba(46,125,94,0.25);color:#7FE8B8;font-size:0.7rem;font-weight:700;padding:3px 9px;border-radius:100px;border:1px solid rgba(127,232,184,0.4)">⭐ متجر موثّق</span>');
-  if(seller.featured)badgesHtml.push('<span style="background:rgba(201,147,58,0.25);color:#E8B660;font-size:0.7rem;font-weight:700;padding:3px 9px;border-radius:100px;border:1px solid rgba(232,182,96,0.4)">🏆 بائع مميز</span>');
-  if(isTopSeller)badgesHtml.push('<span style="background:rgba(192,57,43,0.25);color:#FF8A75;font-size:0.7rem;font-weight:700;padding:3px 9px;border-radius:100px;border:1px solid rgba(255,138,117,0.4)">🔥 الأكثر مبيعاً</span>');
-  document.getElementById("store-badges").innerHTML = badgesHtml.join("");
 
   // rating
   const ratingBar = document.getElementById("store-rating-bar");
@@ -2161,17 +1562,14 @@ async function openStore(sellerId){
     : `<span class="store-rating-txt">لا توجد تقييمات بعد</span>`;
 
   // meta
-  const salesQty=getSellerSalesQty(seller.id);
   document.getElementById("store-meta").innerHTML = `
     <div class="store-meta-item"><div class="store-meta-num">${storeProds.length}</div><div class="store-meta-lbl">منتج</div></div>
-    <div class="store-meta-item"><div class="store-meta-num">${salesQty.toLocaleString("ar")}</div><div class="store-meta-lbl">مبيعات</div></div>
     <div class="store-meta-item"><div class="store-meta-num">${(seller.storeViews||0).toLocaleString("ar")}</div><div class="store-meta-lbl">مشاهدة</div></div>
-    <div class="store-meta-item"><div class="store-meta-num" style="font-size:0.8rem">${seller.joinedAt}</div><div class="store-meta-lbl">عضو منذ</div></div>`;
+    <div class="store-meta-item"><div class="store-meta-num">${seller.joinedAt}</div><div class="store-meta-lbl">انضم</div></div>`;
 
   // whatsapp
   const waNum = "249"+seller.phone.replace(/^0/,"");
   document.getElementById("store-wa-btn").href = `https://wa.me/${waNum}?text=${encodeURIComponent("مرحباً، زرت متجرك على منصة الريان 🛒")}`;
-  document.getElementById("store-closed-banner").classList.add("hidden");
 
   // products
   document.getElementById("store-products-title").textContent = `منتجات المتجر (${storeProds.length})`;
@@ -2186,10 +1584,8 @@ async function openStore(sellerId){
       div.className = "product-card";
       const imgHtml = p.image ? `<img src="${p.image}" style="width:100%;height:100%;object-fit:cover">` : `<span style="font-size:52px">${EMOJIS[p.category]||"📦"}</span>`;
       const mediaBadge=((p.images&&p.images.length>1)||p.videoUrl)?`<div style="position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,0.6);color:#fff;font-size:0.65rem;padding:2px 7px;border-radius:100px;display:flex;align-items:center;gap:3px">${p.videoUrl?"🎥":""}${(p.images&&p.images.length>1)?" "+p.images.length+" صور":""}</div>`:"";
-      const pSellerPlanStore=getSellerPlan(seller);
-      const verifiedBadge=(seller.verified||pSellerPlanStore.verified)?`<div style="position:absolute;top:6px;right:6px;background:rgba(46,125,94,0.9);color:#fff;font-size:0.62rem;padding:2px 7px;border-radius:100px;font-weight:700">✓ موثّق</div>`:"";
       div.innerHTML = `
-        <div class="product-img" style="background:${BG[p.category]||"#F5F5F5"}">${imgHtml}${mediaBadge}${verifiedBadge}</div>
+        <div class="product-img" style="background:${BG[p.category]||"#F5F5F5"}">${imgHtml}${mediaBadge}</div>
         <div class="product-body">
           <div class="product-name">${p.name}</div>
           ${p.location?'<div style="color:#9CA3AF;font-size:0.72rem;margin-bottom:3px">📍 '+p.location+'</div>':''}
@@ -2248,13 +1644,9 @@ function checkUrlStore(){
   const params = new URLSearchParams(window.location.search);
   const sid = params.get("store");
   if(sid){
-    let tries=0;
     const tryOpen = ()=>{
-      tries++;
       const s = sellers.find(x=>x.id===sid);
-      const hasProducts = products.some(p=>p.sellerId===sid);
-      // wait until the seller AND their products have loaded (or give up after ~12s)
-      if(s && (hasProducts || tries>20)){ openStore(sid); }
+      if(s){ openStore(sid); }
       else { setTimeout(tryOpen, 600); }
     };
     setTimeout(tryOpen, 1000);
@@ -2622,14 +2014,10 @@ function adminEditSeller(sellerId){
   const s=sellers.find(x=>x.id===sellerId);if(!s)return;
   document.getElementById("es-id").value=s.id;
   document.getElementById("es-store").value=s.storeName||"";
-  document.getElementById("es-city").value=s.city||"";
   document.getElementById("es-owner").value=s.ownerName||"";
   document.getElementById("es-phone").value=s.phone||"";
   document.getElementById("es-cat").value=s.category||CATS[0];
   document.getElementById("es-desc").value=s.description||"";
-  const planSel=document.getElementById("es-plan");
-  planSel.innerHTML=PLANS.map(p=>`<option value="${p.id}">${p.name} — ${SDG(p.price)}</option>`).join("");
-  planSel.value=s.plan||PLANS[0].id;
   editStoreImage=s.storeImage||"";
   document.getElementById("es-img-input").value="";
   if(s.storeImage){
@@ -2647,17 +2035,15 @@ function adminEditSeller(sellerId){
 async function submitEditSeller(){
   const id=document.getElementById("es-id").value;
   const storeName=document.getElementById("es-store").value.trim();
-  const city=document.getElementById("es-city").value.trim();
   const ownerName=document.getElementById("es-owner").value.trim();
   const phone=document.getElementById("es-phone").value.trim();
   const category=document.getElementById("es-cat").value;
   const description=document.getElementById("es-desc").value.trim();
-  const plan=document.getElementById("es-plan").value;
   if(!storeName)return showErr("es-err","اسم المتجر مطلوب");
   if(!phone)return showErr("es-err","رقم الهاتف مطلوب");
   if(!validSD(phone))return showErr("es-err","رقم الهاتف يبدأ بـ 09 أو 01 ويكون 10 أرقام");
   const existing=sellers.find(x=>x.id===id)||{};
-  await dbSave("sellers",id,{...existing,storeName,city,ownerName,phone,category,description,plan,storeImage:editStoreImage});
+  await dbSave("sellers",id,{...existing,storeName,ownerName,phone,category,description,storeImage:editStoreImage});
   // keep product sellerName in sync with any renamed store
   const sellerProducts=products.filter(p=>p.sellerId===id);
   for(const p of sellerProducts){
@@ -2666,12 +2052,6 @@ async function submitEditSeller(){
   closeModal("modal-edit-seller");
   showToast("تم تحديث بيانات التاجر ✓");
 }
-async function toggleSellerBadge(sellerId,field){
-  const s=sellers.find(x=>x.id===sellerId);if(!s)return;
-  await dbUpdate("sellers",sellerId,{[field]:!s[field]});
-  showToast(field==="verified"?"تم تحديث حالة التوثيق ✓":"تم تحديث حالة التمييز ✓");
-}
-
 function adminAddProductForSeller(sellerId){
   const s=sellers.find(x=>x.id===sellerId);if(!s)return;
   currentSeller=s;
@@ -2700,12 +2080,6 @@ window.openDirectOrder=openDirectOrder;window.submitDirectOrder=submitDirectOrde
 window.updateOrderStatus=updateOrderStatus;window.switchTab=switchTab;
 window.openShare=openShare;window.shareProduct=shareProduct;window.copyProductLink=copyProductLink;window.shareProductOther=shareProductOther;window.openStore=openStore;window.closeStore=closeStore;window.shareCurrentStore=shareCurrentStore;window.openRating=openRating;window.setRating=setRating;window.submitRating=submitRating;window.adminEditProduct=adminEditProduct;window.adminDeleteProduct=adminDeleteProduct;window.adminDeleteSeller=adminDeleteSeller;window.adminEditSeller=adminEditSeller;window.submitEditSeller=submitEditSeller;window.adminAddProductForSeller=adminAddProductForSeller;window.copyLink=copyLink;window.shareOther=shareOther;
 window.handleImgUpload=handleImgUpload;window.handleStoreImgUpload=handleStoreImgUpload;window.closeModal=closeModal;
-window.showStoresPage=showStoresPage;window.closeStoresPage=closeStoresPage;window.toggleSellerBadge=toggleSellerBadge;
-window.openUpgradePlan=openUpgradePlan;window.requestPlanUpgrade=requestPlanUpgrade;
-window.handleReceiptUpload=handleReceiptUpload;window.handleUpgradeReceiptUpload=handleUpgradeReceiptUpload;
-window.submitUpgradeRequest=submitUpgradeRequest;
-window.openJoinChoice=openJoinChoice;window.openPostAd=openPostAd;window.handleAdImgUpload=handleAdImgUpload;window.handleAdReceiptUpload=handleAdReceiptUpload;window.submitAdRequest=submitAdRequest;
-window.approveStoreRequest=approveStoreRequest;window.rejectStoreRequest=rejectStoreRequest;window.approveAdRequest=approveAdRequest;window.rejectAdRequest=rejectAdRequest;
 window.togglePriceOnRequest=togglePriceOnRequest;window.inquirePrice=inquirePrice;window.inquireAboutProduct=inquireAboutProduct;window.focusOrderForm=focusOrderForm;
 window.removeProductImage=removeProductImage;window.shiftDirectGallery=shiftDirectGallery;
 window.closeWelcomeAndAddProduct=closeWelcomeAndAddProduct;
