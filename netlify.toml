@@ -1,12 +1,12 @@
 [[edge_functions]]
-  path = "/p/*"
-  function = "product-share"
+path = "/p/*"
+function = "product-share"
 
 [[edge_functions]]
-  path = "/s/*"
-  function = "product-share"
+path = "/"
+function = "og-meta"
 
 [[redirects]]
-  from = "/"
-  to = "/index-23.html"
-  status = 200
+from = "/"
+to = "/index-23.html"
+status = 200
