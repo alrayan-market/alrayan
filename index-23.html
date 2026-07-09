@@ -331,7 +331,10 @@ textarea.inp{height:64px;resize:none}
       <div class="stats-grid" id="dash-stats"></div>
       <div class="share-strip" id="dash-share-strip">
         <div><div style="font-weight:800;color:#1A2744;margin-bottom:2px;font-size:0.93rem">🔗 رابط متجرك</div><div style="color:#6B7280;font-size:0.78rem">شاركه للتسويق</div></div>
-        <button class="btn-navy" onclick="openShare()">📣 مشاركة</button>
+        <div style="display:flex;gap:8px;flex-shrink:0">
+          <button class="btn-navy" onclick="editMyStore()" style="background:#EEF8EE;color:#2E7D5E">✏️ تعديل المتجر</button>
+          <button class="btn-navy" onclick="openShare()">📣 مشاركة</button>
+        </div>
       </div>
       <div class="tabs" id="dash-tabs">
         <button class="tab-btn active" onclick="switchTab('products')">📦 منتجاتي</button>
@@ -1488,6 +1491,10 @@ function openShare(){
 }
 function copyLink(){navigator.clipboard.writeText(document.getElementById("share-link-text").textContent).catch(()=>{});document.getElementById("copy-btn").textContent="✓ تم";setTimeout(()=>document.getElementById("copy-btn").textContent="نسخ",2000);}
 function shareOther(){const link=document.getElementById("share-link-text").textContent;const text=`🛒 ${currentSeller.storeName} على منصة الريان\n${link}`;if(navigator.share)navigator.share({title:currentSeller.storeName,text,url:link});else navigator.clipboard.writeText(text).catch(()=>{});}
+function editMyStore(){
+  if(!currentSeller)return;
+  adminEditSeller(currentSeller.id);
+}
 
 
 // ══════════ SHARE PRODUCT ══════════
@@ -2049,6 +2056,11 @@ async function submitEditSeller(){
   for(const p of sellerProducts){
     if(p.sellerName!==storeName) await dbUpdate("products",p.id,{sellerName:storeName});
   }
+  // if the logged-in seller edited their own store, refresh their session + dashboard
+  if(currentSeller && currentSeller.id===id){
+    currentSeller={...currentSeller,storeName,ownerName,phone,category,description,storeImage:editStoreImage};
+    if(typeof renderDashboard==="function") renderDashboard();
+  }
   closeModal("modal-edit-seller");
   showToast("تم تحديث بيانات التاجر ✓");
 }
@@ -2078,7 +2090,7 @@ window.regNext=regNext;window.regBack=regBack;window.regSubmit=regSubmit;window.
 window.openAddProduct=openAddProduct;window.openEditProduct=openEditProduct;window.submitProduct=submitProduct;window.deleteProduct=deleteProduct;
 window.openDirectOrder=openDirectOrder;window.submitDirectOrder=submitDirectOrder;
 window.updateOrderStatus=updateOrderStatus;window.switchTab=switchTab;
-window.openShare=openShare;window.shareProduct=shareProduct;window.copyProductLink=copyProductLink;window.shareProductOther=shareProductOther;window.openStore=openStore;window.closeStore=closeStore;window.shareCurrentStore=shareCurrentStore;window.openRating=openRating;window.setRating=setRating;window.submitRating=submitRating;window.adminEditProduct=adminEditProduct;window.adminDeleteProduct=adminDeleteProduct;window.adminDeleteSeller=adminDeleteSeller;window.adminEditSeller=adminEditSeller;window.submitEditSeller=submitEditSeller;window.adminAddProductForSeller=adminAddProductForSeller;window.copyLink=copyLink;window.shareOther=shareOther;
+window.openShare=openShare;window.shareProduct=shareProduct;window.copyProductLink=copyProductLink;window.shareProductOther=shareProductOther;window.openStore=openStore;window.closeStore=closeStore;window.shareCurrentStore=shareCurrentStore;window.openRating=openRating;window.setRating=setRating;window.submitRating=submitRating;window.adminEditProduct=adminEditProduct;window.adminDeleteProduct=adminDeleteProduct;window.adminDeleteSeller=adminDeleteSeller;window.adminEditSeller=adminEditSeller;window.submitEditSeller=submitEditSeller;window.adminAddProductForSeller=adminAddProductForSeller;window.copyLink=copyLink;window.shareOther=shareOther;window.editMyStore=editMyStore;
 window.handleImgUpload=handleImgUpload;window.handleStoreImgUpload=handleStoreImgUpload;window.closeModal=closeModal;
 window.togglePriceOnRequest=togglePriceOnRequest;window.inquirePrice=inquirePrice;window.inquireAboutProduct=inquireAboutProduct;window.focusOrderForm=focusOrderForm;
 window.removeProductImage=removeProductImage;window.shiftDirectGallery=shiftDirectGallery;
