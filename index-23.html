@@ -1070,7 +1070,7 @@ async function submitDirectOrder(){
   const deliveryText=p.deliveryPrice!=null?(p.deliveryPrice===0?"\nالتوصيل: مجاني":"\nالتوصيل: "+SDG(deliveryFee)):"";
   const totalText=p.priceOnRequest?"يُحدد عند التواصل":SDG(total);
   const orderId="ORD-"+Date.now().toString().slice(-6);
-  const order={id:orderId,buyerName:name,buyerPhone:phone,buyerAddress:address,notes,items:[{productId:p.id,name:p.name,price:p.price,qty,sellerId:p.sellerId,sellerName:p.sellerName}],deliveryFee,total,priceOnRequest:!!p.priceOnRequest,date:TODAY(),status:"new"};
+  const order={id:orderId,createdAt:Date.now(),buyerName:name,buyerPhone:phone,buyerAddress:address,notes,items:[{productId:p.id,name:p.name,price:p.price,qty,sellerId:p.sellerId,sellerName:p.sellerName}],deliveryFee,total,priceOnRequest:!!p.priceOnRequest,date:TODAY(),status:"new"};
   await dbSave("orders",orderId,order);
   notifyAdmin(`🛒 طلب جديد على منصة الريان!\n━━━━━━━━━━\nرقم الطلب: ${orderId}\nالمنتج: ${p.name} × ${qty}${deliveryText}\nالإجمالي: ${totalText}\nالمتجر: ${p.sellerName}\n━━━━━━━━━━\nالزبون: ${name}\nالهاتف: ${phone}\nالعنوان: ${address}`);
   const seller=sellers.find(s=>s.id===p.sellerId);
@@ -1311,7 +1311,7 @@ function renderDashboard(){
   oTab.classList.toggle("hidden",activeTab!=="orders");
   if(myOrders.length===0){oTab.innerHTML=`<div class="panel"><div class="no-items"><div class="icon">📋</div><div style="font-weight:700;margin-bottom:3px">لا توجد طلبات بعد</div></div></div>`;}
   else{oTab.innerHTML=`<div class="panel"><div class="panel-head"><span class="panel-title">الطلبات (${myOrders.length})</span></div>`+
-    myOrders.slice().reverse().map(o=>{
+    myOrders.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).map(o=>{
       const myItems=o.items.filter(i=>i.sellerId===currentSeller.id);
       const myTotal=myItems.reduce((s,i)=>s+(i.price*i.qty),0);
       const waNum="249"+o.buyerPhone.replace(/^0/,"");
@@ -1398,7 +1398,7 @@ function renderAdminDashboard(){
   oTab.classList.toggle("hidden",activeTab!=="orders");
   if(orders.length===0){oTab.innerHTML=`<div class="panel"><div class="no-items"><div class="icon">📋</div><div>لا توجد طلبات</div></div></div>`;}
   else{oTab.innerHTML=`<div class="panel"><div class="panel-head"><span class="panel-title">كل الطلبات (${orders.length})</span></div>`+
-    orders.slice().reverse().map(o=>`<div class="order-row"><div class="order-info">
+    orders.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).map(o=>`<div class="order-row"><div class="order-info">
       <div class="order-id">${o.id} · ${o.date}</div>
       <div class="order-buyer">${o.buyerName}</div>
       <div class="order-detail">📱 ${o.buyerPhone} · 🏠 ${o.buyerAddress}</div>
