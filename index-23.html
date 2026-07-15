@@ -360,7 +360,8 @@ textarea.inp{height:64px;resize:none}
       <h3 style="color:#1A2744;font-weight:900;font-size:1.15rem;margin-bottom:4px">أهلاً بك في الريان 👋</h3>
       <p style="color:#6B7280;font-size:0.84rem;margin-bottom:16px">بيانات صاحب المتجر</p>
       <div class="field"><label class="lbl">الاسم الكامل</label><input class="inp" id="r-name" placeholder="محمد أحمد"></div>
-      <div class="field"><label class="lbl">رقم الهاتف السوداني</label><input class="inp" id="r-phone" placeholder="0912345678"><div class="inp-hint">يبدأ بـ 09 أو 01 — 10 أرقام</div></div>
+      <div class="field"><label class="lbl">الدولة</label><select class="inp" id="r-country"><option value="+249" selected>🇸🇩 السودان (+249)</option><option value="+966">🇸🇦 السعودية (+966)</option><option value="+20">🇪🇬 مصر (+20)</option><option value="+971">🇦🇪 الإمارات (+971)</option><option value="+974">🇶🇦 قطر (+974)</option><option value="+965">🇰🇼 الكويت (+965)</option><option value="+973">🇧🇭 البحرين (+973)</option><option value="+968">🇴🇲 عُمان (+968)</option><option value="+962">🇯🇴 الأردن (+962)</option><option value="+961">🇱🇧 لبنان (+961)</option><option value="+963">🇸🇾 سوريا (+963)</option><option value="+964">🇮🇶 العراق (+964)</option><option value="+970">🇵🇸 فلسطين (+970)</option><option value="+967">🇾🇪 اليمن (+967)</option><option value="+218">🇱🇾 ليبيا (+218)</option><option value="+216">🇹🇳 تونس (+216)</option><option value="+213">🇩🇿 الجزائر (+213)</option><option value="+212">🇲🇦 المغرب (+212)</option><option value="+222">🇲🇷 موريتانيا (+222)</option><option value="+252">🇸🇴 الصومال (+252)</option><option value="+253">🇩🇯 جيبوتي (+253)</option><option value="+211">🇸🇸 جنوب السودان (+211)</option><option value="+235">🇹🇩 تشاد (+235)</option><option value="+251">🇪🇹 إثيوبيا (+251)</option><option value="+291">🇪🇷 إريتريا (+291)</option><option value="+254">🇰🇪 كينيا (+254)</option><option value="+256">🇺🇬 أوغندا (+256)</option><option value="+90">🇹🇷 تركيا (+90)</option><option value="+1">🇺🇸 الولايات المتحدة (+1)</option><option value="+44">🇬🇧 المملكة المتحدة (+44)</option><option value="+33">🇫🇷 فرنسا (+33)</option><option value="+49">🇩🇪 ألمانيا (+49)</option><option value="+39">🇮🇹 إيطاليا (+39)</option><option value="+34">🇪🇸 إسبانيا (+34)</option><option value="+31">🇳🇱 هولندا (+31)</option><option value="+46">🇸🇪 السويد (+46)</option><option value="+47">🇳🇴 النرويج (+47)</option><option value="+41">🇨🇭 سويسرا (+41)</option><option value="+7">🇷🇺 روسيا (+7)</option><option value="+86">🇨🇳 الصين (+86)</option><option value="+91">🇮🇳 الهند (+91)</option><option value="+92">🇵🇰 باكستان (+92)</option><option value="+62">🇮🇩 إندونيسيا (+62)</option><option value="+60">🇲🇾 ماليزيا (+60)</option><option value="+81">🇯🇵 اليابان (+81)</option><option value="+82">🇰🇷 كوريا الجنوبية (+82)</option><option value="+61">🇦🇺 أستراليا (+61)</option><option value="+234">🇳🇬 نيجيريا (+234)</option><option value="+27">🇿🇦 جنوب أفريقيا (+27)</option><option value="+55">🇧🇷 البرازيل (+55)</option></select></div>
+      <div class="field"><label class="lbl">رقم الهاتف</label><input class="inp" id="r-phone" placeholder="912345678"><div class="inp-hint">اكتب رقمك بدون مفتاح الدولة</div></div>
     </div>
     <div id="step2" class="hidden">
       <h3 style="color:#1A2744;font-weight:900;font-size:1.15rem;margin-bottom:4px">بيانات المتجر 🏪</h3>
@@ -470,7 +471,8 @@ textarea.inp{height:64px;resize:none}
       <button type="button" onclick="focusOrderForm()" style="flex:1;padding:11px;border-radius:9px;border:none;background:linear-gradient(135deg,#C9933A,#E8B660);color:#1A2744;font-weight:800;font-size:0.85rem;cursor:pointer;font-family:Tajawal,sans-serif">🛒 اطلب الآن</button>
     </div>
     <div class="field"><label class="lbl">اسمك الكامل</label><input class="inp" id="co-name" placeholder="أحمد محمد"></div>
-    <div class="field"><label class="lbl">رقم الهاتف</label><input class="inp" id="co-phone" placeholder="0912345678"></div>
+    <div class="field"><label class="lbl">الدولة</label><select class="inp" id="co-country"><option value="+249" selected>🇸🇩 السودان (+249)</option><option value="+966">🇸🇦 السعودية (+966)</option><option value="+20">🇪🇬 مصر (+20)</option><option value="+971">🇦🇪 الإمارات (+971)</option><option value="+974">🇶🇦 قطر (+974)</option><option value="+965">🇰🇼 الكويت (+965)</option><option value="+973">🇧🇭 البحرين (+973)</option><option value="+968">🇴🇲 عُمان (+968)</option><option value="+962">🇯🇴 الأردن (+962)</option><option value="+961">🇱🇧 لبنان (+961)</option><option value="+963">🇸🇾 سوريا (+963)</option><option value="+964">🇮🇶 العراق (+964)</option><option value="+970">🇵🇸 فلسطين (+970)</option><option value="+967">🇾🇪 اليمن (+967)</option><option value="+218">🇱🇾 ليبيا (+218)</option><option value="+216">🇹🇳 تونس (+216)</option><option value="+213">🇩🇿 الجزائر (+213)</option><option value="+212">🇲🇦 المغرب (+212)</option><option value="+222">🇲🇷 موريتانيا (+222)</option><option value="+252">🇸🇴 الصومال (+252)</option><option value="+253">🇩🇯 جيبوتي (+253)</option><option value="+211">🇸🇸 جنوب السودان (+211)</option><option value="+235">🇹🇩 تشاد (+235)</option><option value="+251">🇪🇹 إثيوبيا (+251)</option><option value="+291">🇪🇷 إريتريا (+291)</option><option value="+254">🇰🇪 كينيا (+254)</option><option value="+256">🇺🇬 أوغندا (+256)</option><option value="+90">🇹🇷 تركيا (+90)</option><option value="+1">🇺🇸 الولايات المتحدة (+1)</option><option value="+44">🇬🇧 المملكة المتحدة (+44)</option><option value="+33">🇫🇷 فرنسا (+33)</option><option value="+49">🇩🇪 ألمانيا (+49)</option><option value="+39">🇮🇹 إيطاليا (+39)</option><option value="+34">🇪🇸 إسبانيا (+34)</option><option value="+31">🇳🇱 هولندا (+31)</option><option value="+46">🇸🇪 السويد (+46)</option><option value="+47">🇳🇴 النرويج (+47)</option><option value="+41">🇨🇭 سويسرا (+41)</option><option value="+7">🇷🇺 روسيا (+7)</option><option value="+86">🇨🇳 الصين (+86)</option><option value="+91">🇮🇳 الهند (+91)</option><option value="+92">🇵🇰 باكستان (+92)</option><option value="+62">🇮🇩 إندونيسيا (+62)</option><option value="+60">🇲🇾 ماليزيا (+60)</option><option value="+81">🇯🇵 اليابان (+81)</option><option value="+82">🇰🇷 كوريا الجنوبية (+82)</option><option value="+61">🇦🇺 أستراليا (+61)</option><option value="+234">🇳🇬 نيجيريا (+234)</option><option value="+27">🇿🇦 جنوب أفريقيا (+27)</option><option value="+55">🇧🇷 البرازيل (+55)</option></select></div>
+    <div class="field"><label class="lbl">رقم الهاتف</label><input class="inp" id="co-phone" placeholder="912345678"></div>
     <div class="field"><label class="lbl">العنوان / المدينة</label><input class="inp" id="co-address" placeholder="الخرطوم، حي الرياض"></div>
     <div class="field"><label class="lbl">الكمية</label><input class="inp" type="number" id="co-qty" value="1" min="1"></div>
     <div class="field"><label class="lbl">ملاحظات (اختياري)</label><textarea class="inp" id="co-notes" placeholder="أي تفاصيل..."></textarea></div>
@@ -520,7 +522,8 @@ textarea.inp{height:64px;resize:none}
     <p style="color:#6B7280;font-size:0.82rem;margin-bottom:16px">للاستفسار قبل الطلب — مش لتأكيد الشراء</p>
     <input type="hidden" id="sc-seller-id">
     <div class="field"><label class="lbl">اسمك</label><input class="inp" id="sc-name" placeholder="أحمد محمد"></div>
-    <div class="field"><label class="lbl">رقم هاتفك</label><input class="inp" id="sc-phone" placeholder="0912345678"></div>
+    <div class="field"><label class="lbl">الدولة</label><select class="inp" id="sc-country"><option value="+249" selected>🇸🇩 السودان (+249)</option><option value="+966">🇸🇦 السعودية (+966)</option><option value="+20">🇪🇬 مصر (+20)</option><option value="+971">🇦🇪 الإمارات (+971)</option><option value="+974">🇶🇦 قطر (+974)</option><option value="+965">🇰🇼 الكويت (+965)</option><option value="+973">🇧🇭 البحرين (+973)</option><option value="+968">🇴🇲 عُمان (+968)</option><option value="+962">🇯🇴 الأردن (+962)</option><option value="+961">🇱🇧 لبنان (+961)</option><option value="+963">🇸🇾 سوريا (+963)</option><option value="+964">🇮🇶 العراق (+964)</option><option value="+970">🇵🇸 فلسطين (+970)</option><option value="+967">🇾🇪 اليمن (+967)</option><option value="+218">🇱🇾 ليبيا (+218)</option><option value="+216">🇹🇳 تونس (+216)</option><option value="+213">🇩🇿 الجزائر (+213)</option><option value="+212">🇲🇦 المغرب (+212)</option><option value="+222">🇲🇷 موريتانيا (+222)</option><option value="+252">🇸🇴 الصومال (+252)</option><option value="+253">🇩🇯 جيبوتي (+253)</option><option value="+211">🇸🇸 جنوب السودان (+211)</option><option value="+235">🇹🇩 تشاد (+235)</option><option value="+251">🇪🇹 إثيوبيا (+251)</option><option value="+291">🇪🇷 إريتريا (+291)</option><option value="+254">🇰🇪 كينيا (+254)</option><option value="+256">🇺🇬 أوغندا (+256)</option><option value="+90">🇹🇷 تركيا (+90)</option><option value="+1">🇺🇸 الولايات المتحدة (+1)</option><option value="+44">🇬🇧 المملكة المتحدة (+44)</option><option value="+33">🇫🇷 فرنسا (+33)</option><option value="+49">🇩🇪 ألمانيا (+49)</option><option value="+39">🇮🇹 إيطاليا (+39)</option><option value="+34">🇪🇸 إسبانيا (+34)</option><option value="+31">🇳🇱 هولندا (+31)</option><option value="+46">🇸🇪 السويد (+46)</option><option value="+47">🇳🇴 النرويج (+47)</option><option value="+41">🇨🇭 سويسرا (+41)</option><option value="+7">🇷🇺 روسيا (+7)</option><option value="+86">🇨🇳 الصين (+86)</option><option value="+91">🇮🇳 الهند (+91)</option><option value="+92">🇵🇰 باكستان (+92)</option><option value="+62">🇮🇩 إندونيسيا (+62)</option><option value="+60">🇲🇾 ماليزيا (+60)</option><option value="+81">🇯🇵 اليابان (+81)</option><option value="+82">🇰🇷 كوريا الجنوبية (+82)</option><option value="+61">🇦🇺 أستراليا (+61)</option><option value="+234">🇳🇬 نيجيريا (+234)</option><option value="+27">🇿🇦 جنوب أفريقيا (+27)</option><option value="+55">🇧🇷 البرازيل (+55)</option></select></div>
+    <div class="field"><label class="lbl">رقم هاتفك</label><input class="inp" id="sc-phone" placeholder="912345678"></div>
     <div id="sc-err" class="err-box hidden"></div>
     <div class="modal-btns">
       <button class="btn-back" onclick="closeModal('modal-start-chat')">إلغاء</button>
@@ -627,6 +630,7 @@ textarea.inp{height:64px;resize:none}
       </div>
     </div>
     <div class="field"><label class="lbl">اسم صاحب المتجر</label><input class="inp" id="es-owner"></div>
+    <div class="field"><label class="lbl">الدولة</label><select class="inp" id="es-country"><option value="+249" selected>🇸🇩 السودان (+249)</option><option value="+966">🇸🇦 السعودية (+966)</option><option value="+20">🇪🇬 مصر (+20)</option><option value="+971">🇦🇪 الإمارات (+971)</option><option value="+974">🇶🇦 قطر (+974)</option><option value="+965">🇰🇼 الكويت (+965)</option><option value="+973">🇧🇭 البحرين (+973)</option><option value="+968">🇴🇲 عُمان (+968)</option><option value="+962">🇯🇴 الأردن (+962)</option><option value="+961">🇱🇧 لبنان (+961)</option><option value="+963">🇸🇾 سوريا (+963)</option><option value="+964">🇮🇶 العراق (+964)</option><option value="+970">🇵🇸 فلسطين (+970)</option><option value="+967">🇾🇪 اليمن (+967)</option><option value="+218">🇱🇾 ليبيا (+218)</option><option value="+216">🇹🇳 تونس (+216)</option><option value="+213">🇩🇿 الجزائر (+213)</option><option value="+212">🇲🇦 المغرب (+212)</option><option value="+222">🇲🇷 موريتانيا (+222)</option><option value="+252">🇸🇴 الصومال (+252)</option><option value="+253">🇩🇯 جيبوتي (+253)</option><option value="+211">🇸🇸 جنوب السودان (+211)</option><option value="+235">🇹🇩 تشاد (+235)</option><option value="+251">🇪🇹 إثيوبيا (+251)</option><option value="+291">🇪🇷 إريتريا (+291)</option><option value="+254">🇰🇪 كينيا (+254)</option><option value="+256">🇺🇬 أوغندا (+256)</option><option value="+90">🇹🇷 تركيا (+90)</option><option value="+1">🇺🇸 الولايات المتحدة (+1)</option><option value="+44">🇬🇧 المملكة المتحدة (+44)</option><option value="+33">🇫🇷 فرنسا (+33)</option><option value="+49">🇩🇪 ألمانيا (+49)</option><option value="+39">🇮🇹 إيطاليا (+39)</option><option value="+34">🇪🇸 إسبانيا (+34)</option><option value="+31">🇳🇱 هولندا (+31)</option><option value="+46">🇸🇪 السويد (+46)</option><option value="+47">🇳🇴 النرويج (+47)</option><option value="+41">🇨🇭 سويسرا (+41)</option><option value="+7">🇷🇺 روسيا (+7)</option><option value="+86">🇨🇳 الصين (+86)</option><option value="+91">🇮🇳 الهند (+91)</option><option value="+92">🇵🇰 باكستان (+92)</option><option value="+62">🇮🇩 إندونيسيا (+62)</option><option value="+60">🇲🇾 ماليزيا (+60)</option><option value="+81">🇯🇵 اليابان (+81)</option><option value="+82">🇰🇷 كوريا الجنوبية (+82)</option><option value="+61">🇦🇺 أستراليا (+61)</option><option value="+234">🇳🇬 نيجيريا (+234)</option><option value="+27">🇿🇦 جنوب أفريقيا (+27)</option><option value="+55">🇧🇷 البرازيل (+55)</option></select></div>
     <div class="field"><label class="lbl">رقم الهاتف</label><input class="inp" id="es-phone"></div>
     <div class="field"><label class="lbl">التصنيف</label><select class="inp" id="es-cat"></select></div>
     <div class="field"><label class="lbl">وصف المتجر</label><textarea class="inp" id="es-desc"></textarea></div>
@@ -668,7 +672,68 @@ const PLANS=[{id:"commission",name:"عمولة",price:0,commission:3,maxProducts
 const ADMIN_PASS="alrayan2026";
 const SDG=n=>Number(n).toLocaleString("ar")+" ج.س";
 const TODAY=()=>new Date().toLocaleDateString("ar",{year:"numeric",month:"long",day:"numeric"});
-const validSD=p=>/^(09|01)\d{8}$/.test(p.replace(/\s/g,""));
+// قائمة دول العالم مع المفاتيح (السودان افتراضي)
+const COUNTRIES=[
+{n:"السودان",c:"SD",d:"+249",f:"🇸🇩"},
+{n:"السعودية",c:"SA",d:"+966",f:"🇸🇦"},
+{n:"مصر",c:"EG",d:"+20",f:"🇪🇬"},
+{n:"الإمارات",c:"AE",d:"+971",f:"🇦🇪"},
+{n:"قطر",c:"QA",d:"+974",f:"🇶🇦"},
+{n:"الكويت",c:"KW",d:"+965",f:"🇰🇼"},
+{n:"البحرين",c:"BH",d:"+973",f:"🇧🇭"},
+{n:"عُمان",c:"OM",d:"+968",f:"🇴🇲"},
+{n:"الأردن",c:"JO",d:"+962",f:"🇯🇴"},
+{n:"لبنان",c:"LB",d:"+961",f:"🇱🇧"},
+{n:"سوريا",c:"SY",d:"+963",f:"🇸🇾"},
+{n:"العراق",c:"IQ",d:"+964",f:"🇮🇶"},
+{n:"فلسطين",c:"PS",d:"+970",f:"🇵🇸"},
+{n:"اليمن",c:"YE",d:"+967",f:"🇾🇪"},
+{n:"ليبيا",c:"LY",d:"+218",f:"🇱🇾"},
+{n:"تونس",c:"TN",d:"+216",f:"🇹🇳"},
+{n:"الجزائر",c:"DZ",d:"+213",f:"🇩🇿"},
+{n:"المغرب",c:"MA",d:"+212",f:"🇲🇦"},
+{n:"موريتانيا",c:"MR",d:"+222",f:"🇲🇷"},
+{n:"الصومال",c:"SO",d:"+252",f:"🇸🇴"},
+{n:"جيبوتي",c:"DJ",d:"+253",f:"🇩🇯"},
+{n:"جنوب السودان",c:"SS",d:"+211",f:"🇸🇸"},
+{n:"تشاد",c:"TD",d:"+235",f:"🇹🇩"},
+{n:"إثيوبيا",c:"ET",d:"+251",f:"🇪🇹"},
+{n:"إريتريا",c:"ER",d:"+291",f:"🇪🇷"},
+{n:"كينيا",c:"KE",d:"+254",f:"🇰🇪"},
+{n:"أوغندا",c:"UG",d:"+256",f:"🇺🇬"},
+{n:"تركيا",c:"TR",d:"+90",f:"🇹🇷"},
+{n:"الولايات المتحدة",c:"US",d:"+1",f:"🇺🇸"},
+{n:"كندا",c:"CA",d:"+1",f:"🇨🇦"},
+{n:"المملكة المتحدة",c:"GB",d:"+44",f:"🇬🇧"},
+{n:"فرنسا",c:"FR",d:"+33",f:"🇫🇷"},
+{n:"ألمانيا",c:"DE",d:"+49",f:"🇩🇪"},
+{n:"إيطاليا",c:"IT",d:"+39",f:"🇮🇹"},
+{n:"إسبانيا",c:"ES",d:"+34",f:"🇪🇸"},
+{n:"هولندا",c:"NL",d:"+31",f:"🇳🇱"},
+{n:"السويد",c:"SE",d:"+46",f:"🇸🇪"},
+{n:"النرويج",c:"NO",d:"+47",f:"🇳🇴"},
+{n:"الدنمارك",c:"DK",d:"+45",f:"🇩🇰"},
+{n:"سويسرا",c:"CH",d:"+41",f:"🇨🇭"},
+{n:"روسيا",c:"RU",d:"+7",f:"🇷🇺"},
+{n:"الصين",c:"CN",d:"+86",f:"🇨🇳"},
+{n:"الهند",c:"IN",d:"+91",f:"🇮🇳"},
+{n:"باكستان",c:"PK",d:"+92",f:"🇵🇰"},
+{n:"بنغلاديش",c:"BD",d:"+880",f:"🇧🇩"},
+{n:"إندونيسيا",c:"ID",d:"+62",f:"🇮🇩"},
+{n:"ماليزيا",c:"MY",d:"+60",f:"🇲🇾"},
+{n:"اليابان",c:"JP",d:"+81",f:"🇯🇵"},
+{n:"كوريا الجنوبية",c:"KR",d:"+82",f:"🇰🇷"},
+{n:"أستراليا",c:"AU",d:"+61",f:"🇦🇺"},
+{n:"نيجيريا",c:"NG",d:"+234",f:"🇳🇬"},
+{n:"غانا",c:"GH",d:"+233",f:"🇬🇭"},
+{n:"جنوب أفريقيا",c:"ZA",d:"+27",f:"🇿🇦"},
+{n:"البرازيل",c:"BR",d:"+55",f:"🇧🇷"},
+{n:"الأرجنتين",c:"AR",d:"+54",f:"🇦🇷"},
+{n:"المكسيك",c:"MX",d:"+52",f:"🇲🇽"}
+];
+function countryOptions(sel){return COUNTRIES.map(x=>`<option value="${x.d}" ${x.d===(sel||"+249")&&x.c==="SD"?"selected":""}>${x.f} ${x.n} (${x.d})</option>`).join("");}
+// تحقق عام: أي رقم من 6 إلى 15 خانة
+const validSD=p=>/^\d{6,15}$/.test(p.replace(/\D/g,""));
 
 // ══════════ STATE ══════════
 let sellers=[], products=[], orders=[], chats=[];
@@ -1057,7 +1122,7 @@ function buildVideoEmbed(url){
 
 async function submitDirectOrder(){
   const name=document.getElementById("co-name").value.trim();
-  const phone=document.getElementById("co-phone").value.trim();
+  const phone=(document.getElementById("co-country").value+document.getElementById("co-phone").value.trim().replace(/^0+/,""));
   const address=document.getElementById("co-address").value.trim();
   const qty=parseInt(document.getElementById("co-qty").value)||1;
   const notes=document.getElementById("co-notes").value.trim();
@@ -1138,14 +1203,14 @@ function regNext(){
     if(!document.getElementById("r-name").value.trim())return showErr("reg-err","يرجى إدخال اسمك");
     const ph=document.getElementById("r-phone").value.trim();
     if(!ph)return showErr("reg-err","يرجى إدخال رقم الهاتف");
-    if(!validSD(ph))return showErr("reg-err","رقم الهاتف يبدأ بـ 09 أو 01 ويكون 10 أرقام");
+    if(!validSD(ph))return showErr("reg-err","يرجى إدخال رقم هاتف صحيح");
   }
   if(regStep===2&&!document.getElementById("r-store").value.trim())return showErr("reg-err","يرجى إدخال اسم المتجر");
   regStep++;updateRegUI();
 }
 function regBack(){regStep--;updateRegUI();}
 async function regSubmit(){
-  const seller={id:Date.now().toString(),ownerName:document.getElementById("r-name").value.trim(),phone:document.getElementById("r-phone").value.trim(),storeName:document.getElementById("r-store").value.trim(),category:document.getElementById("r-cat").value,plan:selectedPlan,description:document.getElementById("r-desc").value.trim(),storeImage:currentStoreImage,joinedAt:TODAY()};
+  const seller={id:Date.now().toString(),ownerName:document.getElementById("r-name").value.trim(),phone:(document.getElementById("r-country").value+document.getElementById("r-phone").value.trim().replace(/^0+/,"")),storeName:document.getElementById("r-store").value.trim(),category:document.getElementById("r-cat").value,plan:selectedPlan,description:document.getElementById("r-desc").value.trim(),storeImage:currentStoreImage,joinedAt:TODAY()};
   await dbSave("sellers",seller.id,seller);
   notifyAdmin(`🆕 تاجر جديد سجّل في منصة الريان!\n━━━━━━━━━━\nالمتجر: ${seller.storeName}\nالمالك: ${seller.ownerName}\nالهاتف: ${seller.phone}\nالتصنيف: ${seller.category}\nالباقة: ${PLANS.find(p=>p.id===seller.plan)?.name||seller.plan}`);
   currentSeller=seller;isAdmin=false;
@@ -1726,10 +1791,10 @@ function showStartChatForm(sellerId){
 async function submitStartChat(){
   const sellerId=document.getElementById("sc-seller-id").value;
   const name=document.getElementById("sc-name").value.trim();
-  const phone=document.getElementById("sc-phone").value.trim();
+  const phone=(document.getElementById("sc-country").value+document.getElementById("sc-phone").value.trim().replace(/^0+/,""));
   if(!name)return showErr("sc-err","يرجى إدخال اسمك");
   if(!phone)return showErr("sc-err","يرجى إدخال رقم الهاتف");
-  if(!validSD(phone))return showErr("sc-err","رقم الهاتف يبدأ بـ 09 أو 01 ويكون 10 أرقام");
+  if(!validSD(phone))return showErr("sc-err","يرجى إدخال رقم هاتف صحيح");
   const s=sellers.find(x=>x.id===sellerId);if(!s)return;
   const chatId="chat_"+Date.now().toString()+Math.random().toString(36).slice(2,6);
   const chat={id:chatId,sellerId,sellerName:s.storeName,sellerImage:s.storeImage||"",customerName:name,customerPhone:phone,messages:[],lastMessageAt:Date.now(),lastSender:"",sellerRead:true,customerRead:true};
@@ -1928,7 +1993,8 @@ function renderMyChats(){
   if(!customerPhone){
     wrap.innerHTML=`
       <p style="color:#6B7280;font-size:0.82rem;margin-bottom:14px">أدخل رقم هاتفك لعرض كل محادثاتك مع التجار</p>
-      <div class="field"><label class="lbl">رقم هاتفك</label><input class="inp" id="mc-phone-input" placeholder="0912345678"></div>
+      <div class="field"><label class="lbl">الدولة</label><select class="inp" id="mc-country"><option value="+249" selected>🇸🇩 السودان (+249)</option><option value="+966">🇸🇦 السعودية (+966)</option><option value="+20">🇪🇬 مصر (+20)</option><option value="+971">🇦🇪 الإمارات (+971)</option><option value="+974">🇶🇦 قطر (+974)</option><option value="+965">🇰🇼 الكويت (+965)</option><option value="+973">🇧🇭 البحرين (+973)</option><option value="+968">🇴🇲 عُمان (+968)</option><option value="+962">🇯🇴 الأردن (+962)</option><option value="+961">🇱🇧 لبنان (+961)</option><option value="+963">🇸🇾 سوريا (+963)</option><option value="+964">🇮🇶 العراق (+964)</option><option value="+970">🇵🇸 فلسطين (+970)</option><option value="+967">🇾🇪 اليمن (+967)</option><option value="+218">🇱🇾 ليبيا (+218)</option><option value="+216">🇹🇳 تونس (+216)</option><option value="+213">🇩🇿 الجزائر (+213)</option><option value="+212">🇲🇦 المغرب (+212)</option><option value="+222">🇲🇷 موريتانيا (+222)</option><option value="+252">🇸🇴 الصومال (+252)</option><option value="+253">🇩🇯 جيبوتي (+253)</option><option value="+211">🇸🇸 جنوب السودان (+211)</option><option value="+235">🇹🇩 تشاد (+235)</option><option value="+251">🇪🇹 إثيوبيا (+251)</option><option value="+291">🇪🇷 إريتريا (+291)</option><option value="+254">🇰🇪 كينيا (+254)</option><option value="+256">🇺🇬 أوغندا (+256)</option><option value="+90">🇹🇷 تركيا (+90)</option><option value="+1">🇺🇸 الولايات المتحدة (+1)</option><option value="+44">🇬🇧 المملكة المتحدة (+44)</option><option value="+33">🇫🇷 فرنسا (+33)</option><option value="+49">🇩🇪 ألمانيا (+49)</option><option value="+39">🇮🇹 إيطاليا (+39)</option><option value="+34">🇪🇸 إسبانيا (+34)</option><option value="+31">🇳🇱 هولندا (+31)</option><option value="+46">🇸🇪 السويد (+46)</option><option value="+47">🇳🇴 النرويج (+47)</option><option value="+41">🇨🇭 سويسرا (+41)</option><option value="+7">🇷🇺 روسيا (+7)</option><option value="+86">🇨🇳 الصين (+86)</option><option value="+91">🇮🇳 الهند (+91)</option><option value="+92">🇵🇰 باكستان (+92)</option><option value="+62">🇮🇩 إندونيسيا (+62)</option><option value="+60">🇲🇾 ماليزيا (+60)</option><option value="+81">🇯🇵 اليابان (+81)</option><option value="+82">🇰🇷 كوريا الجنوبية (+82)</option><option value="+61">🇦🇺 أستراليا (+61)</option><option value="+234">🇳🇬 نيجيريا (+234)</option><option value="+27">🇿🇦 جنوب أفريقيا (+27)</option><option value="+55">🇧🇷 البرازيل (+55)</option></select></div>
+      <div class="field"><label class="lbl">رقم هاتفك</label><input class="inp" id="mc-phone-input" placeholder="912345678"></div>
       <div id="mc-err" class="err-box hidden"></div>
       <button class="btn-next" style="width:100%" onclick="loginMyChats()">عرض محادثاتي</button>`;
     return;
@@ -1954,8 +2020,8 @@ function renderMyChats(){
   wrap.innerHTML=`<div style="margin-bottom:10px;color:#6B7280;font-size:0.76rem">مسجل برقم ${customerPhone} · <span style="color:#C62828;cursor:pointer;text-decoration:underline" onclick="logoutMyChats()">تغيير الرقم</span></div>`+listHtml;
 }
 function loginMyChats(){
-  const phone=document.getElementById("mc-phone-input").value.trim();
-  if(!validSD(phone))return showErr("mc-err","رقم الهاتف يبدأ بـ 09 أو 01 ويكون 10 أرقام");
+  const phone=(document.getElementById("mc-country").value+document.getElementById("mc-phone-input").value.trim().replace(/^0+/,""));
+  if(!validSD(phone))return showErr("mc-err","يرجى إدخال رقم هاتف صحيح");
   customerPhone=phone;
   try{ localStorage.setItem("rayan_customer_phone",phone); }catch(e){}
   updateMyChatsBadge();
@@ -2039,7 +2105,18 @@ function adminEditSeller(sellerId){
   document.getElementById("es-id").value=s.id;
   document.getElementById("es-store").value=s.storeName||"";
   document.getElementById("es-owner").value=s.ownerName||"";
-  document.getElementById("es-phone").value=s.phone||"";
+  // فصل مفتاح الدولة عن الرقم للعرض
+  (function(){
+    const full=(s.phone||"").trim();
+    let match=COUNTRIES.slice().sort((a,b)=>b.d.length-a.d.length).find(x=>full.startsWith(x.d));
+    if(match){
+      document.getElementById("es-country").value=match.d;
+      document.getElementById("es-phone").value=full.slice(match.d.length);
+    }else{
+      document.getElementById("es-country").value="+249";
+      document.getElementById("es-phone").value=full;
+    }
+  })();
   document.getElementById("es-cat").value=s.category||CATS[0];
   document.getElementById("es-desc").value=s.description||"";
   editStoreImage=s.storeImage||"";
@@ -2060,12 +2137,12 @@ async function submitEditSeller(){
   const id=document.getElementById("es-id").value;
   const storeName=document.getElementById("es-store").value.trim();
   const ownerName=document.getElementById("es-owner").value.trim();
-  const phone=document.getElementById("es-phone").value.trim();
+  const phone=(document.getElementById("es-country").value+document.getElementById("es-phone").value.trim().replace(/^0+/,""));
   const category=document.getElementById("es-cat").value;
   const description=document.getElementById("es-desc").value.trim();
   if(!storeName)return showErr("es-err","اسم المتجر مطلوب");
   if(!phone)return showErr("es-err","رقم الهاتف مطلوب");
-  if(!validSD(phone))return showErr("es-err","رقم الهاتف يبدأ بـ 09 أو 01 ويكون 10 أرقام");
+  if(!validSD(phone))return showErr("es-err","يرجى إدخال رقم هاتف صحيح");
   const existing=sellers.find(x=>x.id===id)||{};
   await dbSave("sellers",id,{...existing,storeName,ownerName,phone,category,description,storeImage:editStoreImage});
   // keep product sellerName in sync with any renamed store
