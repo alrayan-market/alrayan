@@ -259,6 +259,7 @@ textarea.inp{height:64px;resize:none}
     </div>
     <div style="display:flex;gap:7px;align-items:center">
       <div class="cart-badge hidden" id="cart-count-badge" onclick="openCart()">🛒 0</div>
+      <button class="chats-nav-btn" id="ent-nav-btn" onclick="openEntertainment()">📺</button>
       <button class="chats-nav-btn" id="my-chats-btn" onclick="openMyChats()">💬</button>
       <button class="btn-gold" onclick="openRegister()">انضم كتاجر</button>
     </div>
@@ -344,6 +345,7 @@ textarea.inp{height:64px;resize:none}
       <div id="tab-orders" class="hidden"></div>
       <div id="tab-messages" class="hidden"></div>
       <div id="tab-admin" class="hidden"></div>
+      <div id="tab-channel" class="hidden"></div>
       <div id="tab-manage" class="hidden"></div>
     </div>
   </div>
@@ -566,6 +568,36 @@ textarea.inp{height:64px;resize:none}
 </div>
 
 <!-- MY CHATS -->
+<div class="overlay hidden" id="modal-entertainment">
+  <div class="modal modal-sm" style="max-height:88vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3 style="color:#1A2744;font-weight:900;font-size:1.1rem">📺 قناة الريان</h3>
+      <button onclick="closeModal('modal-entertainment')" style="background:none;border:none;font-size:1.4rem;color:#9CA3AF;cursor:pointer">✕</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <button class="ent-tab-btn active" id="ent-tab-videos" onclick="switchEntTab('videos')" style="flex:1;padding:9px;border-radius:9px;border:none;background:#1A2744;color:#fff;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif">🎥 الفيديوهات</button>
+      <button class="ent-tab-btn" id="ent-tab-quiz" onclick="switchEntTab('quiz')" style="flex:1;padding:9px;border-radius:9px;border:none;background:#EEF1F6;color:#1A2744;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif">🔮 التوقعات</button>
+    </div>
+    <div id="ent-videos-body"></div>
+    <div id="ent-quiz-body" class="hidden"></div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="modal-predict">
+  <div class="modal modal-sm">
+    <h3 style="color:#1A2744;font-weight:900;font-size:1.05rem;margin-bottom:6px" id="predict-title"></h3>
+    <p style="color:#6B7280;font-size:0.82rem;margin-bottom:14px" id="predict-sub"></p>
+    <div id="predict-options" style="display:grid;gap:9px;margin-bottom:14px"></div>
+    <div class="field"><label class="lbl">توقع النتيجة بالضبط (اختياري)</label><input class="inp" id="predict-score" placeholder="مثال: 2-1"></div>
+    <div class="field"><label class="lbl">اسمك</label><input class="inp" id="predict-name"></div>
+    <div class="field"><label class="lbl">الدولة</label><select class="inp" id="predict-country"><option value="+249" selected>🇸🇩 السودان (+249)</option><option value="+966">🇸🇦 السعودية (+966)</option><option value="+20">🇪🇬 مصر (+20)</option><option value="+971">🇦🇪 الإمارات (+971)</option><option value="+974">🇶🇦 قطر (+974)</option><option value="+965">🇰🇼 الكويت (+965)</option><option value="+973">🇧🇭 البحرين (+973)</option><option value="+968">🇴🇲 عُمان (+968)</option><option value="+962">🇯🇴 الأردن (+962)</option><option value="+961">🇱🇧 لبنان (+961)</option><option value="+964">🇮🇶 العراق (+964)</option><option value="+970">🇵🇸 فلسطين (+970)</option><option value="+967">🇾🇪 اليمن (+967)</option><option value="+218">🇱🇾 ليبيا (+218)</option><option value="+216">🇹🇳 تونس (+216)</option><option value="+213">🇩🇿 الجزائر (+213)</option><option value="+212">🇲🇦 المغرب (+212)</option><option value="+90">🇹🇷 تركيا (+90)</option><option value="+1">🇺🇸 أمريكا (+1)</option><option value="+44">🇬🇧 بريطانيا (+44)</option></select></div>
+    <div class="field"><label class="lbl">رقم هاتفك</label><input class="inp" id="predict-phone" placeholder="912345678"></div>
+    <div id="predict-err" style="color:#D9534F;font-size:0.8rem;margin-bottom:8px"></div>
+    <button class="btn-navy" style="width:100%" onclick="submitPrediction()">أرسل توقعي 🔮</button>
+    <button style="width:100%;margin-top:8px;padding:9px;border-radius:9px;border:1.5px solid #E5E0D8;background:transparent;font-weight:700;color:#6B7280;cursor:pointer;font-family:Tajawal,sans-serif" onclick="closeModal('modal-predict')">إلغاء</button>
+  </div>
+</div>
+
 <div class="overlay hidden" id="modal-my-chats">
   <div class="modal modal-sm">
     <h3 style="color:#1A2744;font-weight:900;font-size:1.05rem;margin-bottom:14px">💬 محادثاتي</h3>
@@ -742,6 +774,7 @@ let chatPrefillText="";
 let customerPhone="";
 try{ customerPhone = localStorage.getItem("rayan_customer_phone")||""; }catch(e){}
 let visits={total:0,today:0,lastDate:""};
+let entVideos=[], entPredicts=[], entEntries=[], currentPredictId=null;
 let cart={};
 let currentSeller=null;
 let isAdmin=false;
@@ -793,6 +826,23 @@ function listenAll(){
   // visits
   onSnapshot(doc(db,"meta","visits"), snap=>{
     if(snap.exists()) visits=snap.data();
+  });
+  // entertainment videos
+  onSnapshot(collection(db,"entVideos"), snap=>{
+    entVideos = snap.docs.map(d=>d.data());
+    if(!document.getElementById("modal-entertainment").classList.contains("hidden")) renderEntVideos();
+    if(isAdmin && activeTab==="channel") renderDashboard();
+  });
+  // entertainment predictions
+  onSnapshot(collection(db,"entPredicts"), snap=>{
+    entPredicts = snap.docs.map(d=>d.data());
+    if(!document.getElementById("modal-entertainment").classList.contains("hidden")) renderEntQuiz();
+    if(isAdmin && activeTab==="channel") renderDashboard();
+  });
+  // predictions entries
+  onSnapshot(collection(db,"entEntries"), snap=>{
+    entEntries = snap.docs.map(d=>d.data());
+    if(isAdmin && activeTab==="channel") renderDashboard();
   });
 }
 
@@ -1321,8 +1371,9 @@ function switchTab(tab){
   activeTab=tab;
   document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
   event.target.classList.add("active");
-  ["tab-products","tab-orders","tab-admin","tab-messages"].forEach(id=>document.getElementById(id).classList.add("hidden"));
-  document.getElementById("tab-"+tab).classList.remove("hidden");
+  ["tab-products","tab-orders","tab-admin","tab-messages","tab-manage","tab-channel"].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.add("hidden");});
+  const cur=document.getElementById("tab-"+tab); if(cur)cur.classList.remove("hidden");
+  if(tab==="channel") renderChannelAdmin();
 }
 
 function renderDashboard(){
@@ -1442,7 +1493,8 @@ function renderAdminDashboard(){
     <button class="tab-btn ${activeTab==="admin"?"active":""}" onclick="switchTab('admin')">📊 الإحصائيات</button>
     <button class="tab-btn ${activeTab==="orders"?"active":""}" onclick="switchTab('orders')">📋 الطلبات</button>
     <button class="tab-btn ${activeTab==="messages"?"active":""}" onclick="switchTab('messages')">💬 المحادثات (${chats.length})</button>
-    <button class="tab-btn ${activeTab==="manage"?"active":""}" onclick="switchTab('manage')">🏪 التجار</button>`;
+    <button class="tab-btn ${activeTab==="manage"?"active":""}" onclick="switchTab('manage')">🏪 التجار</button>
+    <button class="tab-btn ${activeTab==="channel"?"active":""}" onclick="switchTab('channel')">📺 القناة</button>`;
   const aTab=document.getElementById("tab-admin");
   aTab.classList.toggle("hidden",activeTab!=="admin");
   aTab.innerHTML=`<div class="admin-grid">
@@ -1984,6 +2036,168 @@ async function sendChatImage(input){
 }
 
 // ══════════ MY CHATS (customer inbox) ══════════
+// ══════════ قناة الريان الترفيهية ══════════
+let entActiveTab="videos";
+function openEntertainment(){
+  document.getElementById("modal-entertainment").classList.remove("hidden");
+  switchEntTab("videos");
+}
+function switchEntTab(t){
+  entActiveTab=t;
+  document.getElementById("ent-videos-body").classList.toggle("hidden",t!=="videos");
+  document.getElementById("ent-quiz-body").classList.toggle("hidden",t!=="quiz");
+  const vb=document.getElementById("ent-tab-videos"), qb=document.getElementById("ent-tab-quiz");
+  vb.style.background=t==="videos"?"#1A2744":"#EEF1F6"; vb.style.color=t==="videos"?"#fff":"#1A2744";
+  qb.style.background=t==="quiz"?"#1A2744":"#EEF1F6"; qb.style.color=t==="quiz"?"#fff":"#1A2744";
+  if(t==="videos") renderEntVideos(); else renderEntQuiz();
+}
+function ytId(url){
+  const m=(url||"").match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([A-Za-z0-9_-]{11})/);
+  return m?m[1]:"";
+}
+function renderEntVideos(){
+  const body=document.getElementById("ent-videos-body");
+  const list=entVideos.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  if(list.length===0){body.innerHTML=`<div style="text-align:center;color:#9CA3AF;padding:30px 0">لا توجد فيديوهات بعد 🎬</div>`;return;}
+  body.innerHTML=list.map(v=>{
+    const id=ytId(v.url);
+    return `<div style="margin-bottom:16px"><div style="font-weight:800;color:#1A2744;margin-bottom:6px;font-size:0.92rem">${v.title||""}</div>
+    ${id?`<div style="position:relative;padding-bottom:56.25%;height:0;border-radius:12px;overflow:hidden"><iframe src="https://www.youtube.com/embed/${id}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" allowfullscreen></iframe></div>`:`<div style="color:#D9534F;font-size:0.8rem">رابط غير صالح</div>`}</div>`;
+  }).join("");
+}
+function renderEntQuiz(){
+  const body=document.getElementById("ent-quiz-body");
+  const list=entPredicts.slice().filter(p=>p.active!==false).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  if(list.length===0){body.innerHTML=`<div style="text-align:center;color:#9CA3AF;padding:30px 0">لا توجد توقعات نشطة 🔮</div>`;return;}
+  body.innerHTML=list.map(p=>{
+    const done=p.result!=null&&p.result!=="";
+    return `<div style="background:#F4F6FA;border-radius:12px;padding:14px;margin-bottom:12px">
+      <div style="font-weight:800;color:#1A2744;margin-bottom:4px">${p.title}</div>
+      ${p.sub?`<div style="color:#6B7280;font-size:0.8rem;margin-bottom:8px">${p.sub}</div>`:""}
+      ${done?`<div style="color:#2E7D5E;font-weight:800;font-size:0.85rem">✅ النتيجة: ${p.result}</div>`:
+      `<button class="btn-navy" style="width:100%;margin-top:6px" onclick="openPredict('${p.id}')">شارك بتوقعك 🔮</button>`}
+    </div>`;
+  }).join("");
+}
+function openPredict(id){
+  const p=entPredicts.find(x=>x.id===id); if(!p)return;
+  currentPredictId=id;
+  document.getElementById("predict-title").textContent=p.title;
+  document.getElementById("predict-sub").textContent=p.sub||"";
+  document.getElementById("predict-options").innerHTML=(p.options||[]).map((o,i)=>
+    `<label style="display:flex;align-items:center;gap:9px;background:#F4F6FA;border-radius:9px;padding:11px;cursor:pointer;font-weight:700;color:#1A2744">
+      <input type="radio" name="predict-opt" value="${o}"> ${o}</label>`).join("");
+  document.getElementById("predict-score").value="";
+  document.getElementById("predict-name").value="";
+  document.getElementById("predict-phone").value="";
+  document.getElementById("predict-err").textContent="";
+  document.getElementById("modal-predict").classList.remove("hidden");
+}
+async function submitPrediction(){
+  const opt=document.querySelector('input[name="predict-opt"]:checked');
+  const score=document.getElementById("predict-score").value.trim();
+  const name=document.getElementById("predict-name").value.trim();
+  const phone=(document.getElementById("predict-country").value+document.getElementById("predict-phone").value.trim().replace(/^0+/,""));
+  const err=document.getElementById("predict-err");
+  if(!opt){err.textContent="يرجى اختيار توقعك";return;}
+  if(!name){err.textContent="يرجى إدخال اسمك";return;}
+  if(!/^\d{6,15}$/.test(phone.replace(/\D/g,""))){err.textContent="يرجى إدخال رقم صحيح";return;}
+  const entryId="EN-"+Date.now();
+  await dbSave("entEntries",entryId,{id:entryId,predictId:currentPredictId,choice:opt.value,score,name,phone,createdAt:Date.now()});
+  closeModal("modal-predict");
+  showToast("تم استلام توقعك بنجاح 🎉");
+}
+window.openEntertainment=openEntertainment;
+window.switchEntTab=switchEntTab;
+window.openPredict=openPredict;
+window.submitPrediction=submitPrediction;
+
+// ══════════ إدارة القناة (أدمن) ══════════
+function renderChannelAdmin(){
+  const t=document.getElementById("tab-channel"); if(!t)return;
+  const vids=entVideos.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  const preds=entPredicts.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  t.innerHTML=`
+  <div class="panel"><div class="panel-head"><span class="panel-title">🎥 إضافة فيديو</span></div>
+    <div class="field"><label class="lbl">عنوان الفيديو</label><input class="inp" id="av-title"></div>
+    <div class="field"><label class="lbl">رابط يوتيوب</label><input class="inp" id="av-url" placeholder="https://youtu.be/..."></div>
+    <button class="btn-navy" style="width:100%" onclick="addVideo()">إضافة الفيديو</button>
+  </div>
+  <div class="panel"><div class="panel-head"><span class="panel-title">الفيديوهات (${vids.length})</span></div>
+    ${vids.length===0?'<div class="no-items"><div>لا توجد فيديوهات</div></div>':vids.map(v=>`
+      <div class="prod-row"><div class="prod-row-left"><div class="prod-emoji-box" style="background:#FFECEC">🎬</div>
+        <div><div class="prod-title">${v.title||""}</div><div class="prod-meta">${v.url||""}</div></div></div>
+        <button onclick="delVideo('${v.id}')" style="background:#FEE;color:#D9534F;border:none;border-radius:8px;padding:6px 12px;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">حذف</button>
+      </div>`).join("")}
+  </div>
+  <div class="panel"><div class="panel-head"><span class="panel-title">🔮 إنشاء توقع جديد</span></div>
+    <div class="field"><label class="lbl">عنوان التوقع</label><input class="inp" id="ap-title" placeholder="توقع الفائز: الأرجنتين × إسبانيا"></div>
+    <div class="field"><label class="lbl">وصف (اختياري)</label><input class="inp" id="ap-sub" placeholder="نهائي كأس العالم"></div>
+    <div class="field"><label class="lbl">الخيارات (افصل بينها بفاصلة)</label><input class="inp" id="ap-opts" placeholder="الأرجنتين, إسبانيا, تعادل"></div>
+    <button class="btn-navy" style="width:100%" onclick="addPredict()">إنشاء التوقع</button>
+  </div>
+  <div class="panel"><div class="panel-head"><span class="panel-title">التوقعات (${preds.length})</span></div>
+    ${preds.length===0?'<div class="no-items"><div>لا توجد توقعات</div></div>':preds.map(p=>{
+      const entries=entEntries.filter(e=>e.predictId===p.id);
+      const winners=p.result?entries.filter(e=>e.choice===p.result):[];
+      return `<div style="background:#F4F6FA;border-radius:10px;padding:13px;margin-bottom:10px">
+        <div style="font-weight:800;color:#1A2744;margin-bottom:4px">${p.title}</div>
+        <div style="font-size:0.76rem;color:#6B7280;margin-bottom:8px">${entries.length} مشارك · ${p.result?`النتيجة: ${p.result}`:"لم تُعلن النتيجة"}</div>
+        ${!p.result?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+          ${(p.options||[]).map(o=>`<button onclick="setResult('${p.id}','${o}')" style="background:#1A2744;color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">النتيجة: ${o}</button>`).join("")}
+        </div>`:`<div style="color:#2E7D5E;font-weight:800;font-size:0.82rem;margin-bottom:8px">🏆 ${winners.length} متوقّع صح</div>`}
+        <button onclick="showEntries('${p.id}')" style="background:#EEF1F6;color:#1A2744;border:none;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.8rem">عرض المشاركين (${entries.length})</button>
+        <button onclick="delPredict('${p.id}')" style="background:#FEE;color:#D9534F;border:none;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.8rem;margin-right:6px">حذف</button>
+        <div id="entries-${p.id}" class="hidden" style="margin-top:10px"></div>
+      </div>`;
+    }).join("")}
+  </div>`;
+}
+async function addVideo(){
+  const title=document.getElementById("av-title").value.trim();
+  const url=document.getElementById("av-url").value.trim();
+  if(!title||!url){showToast("أدخل العنوان والرابط");return;}
+  if(!ytId(url)){showToast("رابط يوتيوب غير صالح");return;}
+  const id="VID-"+Date.now();
+  await dbSave("entVideos",id,{id,title,url,createdAt:Date.now()});
+  document.getElementById("av-title").value="";document.getElementById("av-url").value="";
+  showToast("تم إضافة الفيديو ✓");
+}
+async function delVideo(id){ if(confirm("حذف الفيديو؟")){await dbDelete("entVideos",id);showToast("تم الحذف");} }
+async function addPredict(){
+  const title=document.getElementById("ap-title").value.trim();
+  const sub=document.getElementById("ap-sub").value.trim();
+  const opts=document.getElementById("ap-opts").value.split(",").map(x=>x.trim()).filter(Boolean);
+  if(!title||opts.length<2){showToast("أدخل العنوان وخيارين على الأقل");return;}
+  const id="PR-"+Date.now();
+  await dbSave("entPredicts",id,{id,title,sub,options:opts,result:"",active:true,createdAt:Date.now()});
+  document.getElementById("ap-title").value="";document.getElementById("ap-sub").value="";document.getElementById("ap-opts").value="";
+  showToast("تم إنشاء التوقع ✓");
+}
+async function setResult(id,result){
+  if(confirm(`تأكيد النتيجة: ${result}؟`)){await dbUpdate("entPredicts",id,{result});showToast("تم إعلان النتيجة ✓");}
+}
+async function delPredict(id){ if(confirm("حذف التوقع؟")){await dbDelete("entPredicts",id);showToast("تم الحذف");} }
+function showEntries(pid){
+  const box=document.getElementById("entries-"+pid);
+  if(!box)return;
+  if(!box.classList.contains("hidden")){box.classList.add("hidden");return;}
+  const p=entPredicts.find(x=>x.id===pid);
+  const entries=entEntries.filter(e=>e.predictId===pid).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  if(entries.length===0){box.innerHTML='<div style="color:#9CA3AF;font-size:0.8rem">لا مشاركين بعد</div>';}
+  else{box.innerHTML=entries.map(e=>{
+    const win=p&&p.result&&e.choice===p.result;
+    return `<div style="display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid #E5E7EB;font-size:0.8rem;${win?'background:#EEF9F0':''}">
+      <div><b>${e.name}</b> ${win?'🏆':''}<br><span style="color:#6B7280">توقع: ${e.choice}${e.score?` (${e.score})`:''}</span></div>
+      <a href="https://wa.me/${e.phone.replace(/\D/g,"")}" target="_blank" style="color:#2E7D5E;font-weight:700;text-decoration:none">${e.phone} 📱</a>
+    </div>`;
+  }).join("");}
+  box.classList.remove("hidden");
+}
+window.addVideo=addVideo;window.delVideo=delVideo;window.addPredict=addPredict;
+window.setResult=setResult;window.delPredict=delPredict;window.showEntries=showEntries;
+window.renderChannelAdmin=renderChannelAdmin;
+
 function openMyChats(){
   renderMyChats();
   document.getElementById("modal-my-chats").classList.remove("hidden");
