@@ -245,6 +245,13 @@ textarea.inp{height:64px;resize:none}
 .store-rating-txt{color:rgba(255,255,255,0.55);font-size:0.76rem}
 @media(max-width:640px){.stats-grid{grid-template-columns:repeat(2,1fr)}.admin-grid{grid-template-columns:repeat(2,1fr)}.products-grid{grid-template-columns:1fr 1fr}.modal{padding:18px}}
 @media(max-width:380px){.products-grid{grid-template-columns:1fr}}
+
+.home-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px 16px}
+.home-card{background:linear-gradient(160deg,#1A2744,#2A3C63);border-radius:16px;padding:18px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;box-shadow:0 6px 18px rgba(26,39,68,.18);transition:transform .15s}
+.home-card:active{transform:scale(.97)}
+.home-card-ico{font-size:2rem;flex-shrink:0}
+.home-card-title{color:#fff;font-weight:900;font-size:1rem}
+.home-card-sub{color:#C6CFDF;font-size:0.72rem;margin-top:2px}
 </style>
 </head>
 <body>
@@ -259,7 +266,7 @@ textarea.inp{height:64px;resize:none}
     </div>
     <div style="display:flex;gap:7px;align-items:center">
       <div class="cart-badge hidden" id="cart-count-badge" onclick="openCart()">🛒 0</div>
-      <button class="chats-nav-btn" id="ent-nav-btn" onclick="openEntertainment()">📺</button>
+      <button class="chats-nav-btn" id="contact-nav-btn" onclick="openContactPlatform()">📨</button>
       <button class="chats-nav-btn" id="my-chats-btn" onclick="openMyChats()">💬</button>
       <button class="btn-gold" onclick="openRegister()">انضم كتاجر</button>
     </div>
@@ -270,7 +277,17 @@ textarea.inp{height:64px;resize:none}
     <p>منتجات حقيقية من تجار سودانيين</p>
     <button type="button" id="install-app-btn" onclick="triggerAppInstall()" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#C9933A,#E8B660);color:#1A2744;border:none;border-radius:10px;padding:10px 22px;font-weight:800;font-size:0.9rem;cursor:pointer;margin-top:16px;font-family:Tajawal,sans-serif">📲 ثبّت تطبيق الريان</button>
   </div>
-  <div class="filters-wrap"><div class="filters" id="filters-bar"></div></div>
+  <div class="home-cards">
+    <div class="home-card" onclick="openAllStores()">
+      <div class="home-card-ico">🏬</div>
+      <div class="home-card-txt"><div class="home-card-title">المتاجر</div><div class="home-card-sub">تصفّح كل المتاجر</div></div>
+    </div>
+    <div class="home-card" onclick="openEntertainment()">
+      <div class="home-card-ico">📺</div>
+      <div class="home-card-txt"><div class="home-card-title">القناة</div><div class="home-card-sub">فيديوهات واستطلاعات</div></div>
+    </div>
+  </div>
+  <div class="filters-wrap" style="display:none"><div class="filters" id="filters-bar"></div></div>
   <div id="products-container"></div>
   <button class="float-btn" onclick="openLogin()">🏪 دخول التجار</button>
 </div>
@@ -346,6 +363,8 @@ textarea.inp{height:64px;resize:none}
       <div id="tab-messages" class="hidden"></div>
       <div id="tab-admin" class="hidden"></div>
       <div id="tab-channel" class="hidden"></div>
+      <div id="tab-messages2" class="hidden"></div>
+    </div>
       <div id="tab-manage" class="hidden"></div>
     </div>
   </div>
@@ -354,6 +373,30 @@ textarea.inp{height:64px;resize:none}
 <!-- ═══ MODALS ═══ -->
 
 <!-- REGISTER -->
+<div class="overlay hidden" id="modal-all-stores">
+  <div class="modal modal-sm" style="max-height:85vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3 style="color:#1A2744;font-weight:900;font-size:1.1rem">🏬 كل المتاجر</h3>
+      <button onclick="closeModal('modal-all-stores')" style="background:none;border:none;font-size:1.4rem;color:#9CA3AF;cursor:pointer">✕</button>
+    </div>
+    <div id="all-stores-body"></div>
+  </div>
+</div>
+<div class="overlay hidden" id="modal-contact-platform">
+  <div class="modal modal-sm">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <h3 style="color:#1A2744;font-weight:900;font-size:1.05rem">📨 تواصل مع المنصة</h3>
+      <button onclick="closeModal('modal-contact-platform')" style="background:none;border:none;font-size:1.4rem;color:#9CA3AF;cursor:pointer">✕</button>
+    </div>
+    <p style="color:#6B7280;font-size:0.82rem;margin-bottom:14px">اكتب لنا استفسارك أو اقتراحك وسنتواصل معك</p>
+    <div class="field"><label class="lbl">الاسم</label><input class="inp" id="cp-name"></div>
+    <div class="field"><label class="lbl">الدولة</label><select class="inp" id="cp-country"><option value="+249" selected>🇸🇩 السودان (+249)</option><option value="+966">🇸🇦 السعودية (+966)</option><option value="+20">🇪🇬 مصر (+20)</option><option value="+971">🇦🇪 الإمارات (+971)</option><option value="+974">🇶🇦 قطر (+974)</option><option value="+965">🇰🇼 الكويت (+965)</option><option value="+973">🇧🇭 البحرين (+973)</option><option value="+968">🇴🇲 عُمان (+968)</option><option value="+962">🇯🇴 الأردن (+962)</option><option value="+90">🇹🇷 تركيا (+90)</option><option value="+1">🇺🇸 أمريكا (+1)</option><option value="+44">🇬🇧 بريطانيا (+44)</option></select></div>
+    <div class="field"><label class="lbl">رقم الهاتف</label><input class="inp" id="cp-phone" placeholder="912345678"></div>
+    <div class="field"><label class="lbl">رسالتك</label><textarea class="inp" id="cp-msg" rows="4" style="resize:vertical"></textarea></div>
+    <div id="cp-err" style="color:#D9534F;font-size:0.8rem;margin-bottom:8px"></div>
+    <button class="btn-navy" style="width:100%" onclick="submitContactPlatform()">إرسال 📨</button>
+  </div>
+</div>
 <div class="overlay hidden" id="modal-register">
   <div class="modal">
     <div class="steps-bar"><div class="step-seg done" id="seg1"></div><div class="step-seg" id="seg2"></div><div class="step-seg" id="seg3"></div></div>
@@ -776,7 +819,7 @@ let chatPrefillText="";
 let customerPhone="";
 try{ customerPhone = localStorage.getItem("rayan_customer_phone")||""; }catch(e){}
 let visits={total:0,today:0,lastDate:""};
-let entVideos=[], entPredicts=[], entEntries=[], currentPredictId=null;
+let entVideos=[], entPredicts=[], entEntries=[], platformMessages=[], currentPredictId=null;
 let cart={};
 let currentSeller=null;
 let isAdmin=false;
@@ -845,6 +888,10 @@ function listenAll(){
   onSnapshot(collection(db,"entEntries"), snap=>{
     entEntries = snap.docs.map(d=>d.data());
     if(isAdmin && activeTab==="channel") renderDashboard();
+  });
+  onSnapshot(collection(db,"platformMessages"), snap=>{
+    platformMessages=snap.docs.map(d=>d.data());
+    if(isAdmin && activeTab==="messages2") renderPlatformMessages();
   });
 }
 
@@ -1374,9 +1421,10 @@ function switchTab(tab){
   activeTab=tab;
   document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
   event.target.classList.add("active");
-  ["tab-products","tab-orders","tab-admin","tab-messages","tab-manage","tab-channel"].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.add("hidden");});
+  ["tab-products","tab-orders","tab-admin","tab-messages","tab-manage","tab-channel","tab-messages2"].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.add("hidden");});
   const cur=document.getElementById("tab-"+tab); if(cur)cur.classList.remove("hidden");
   if(tab==="channel") renderChannelAdmin();
+  if(tab==="messages2") renderPlatformMessages();
 }
 
 function renderDashboard(){
@@ -1497,7 +1545,7 @@ function renderAdminDashboard(){
     <button class="tab-btn ${activeTab==="orders"?"active":""}" onclick="switchTab('orders')">📋 الطلبات</button>
     <button class="tab-btn ${activeTab==="messages"?"active":""}" onclick="switchTab('messages')">💬 المحادثات (${chats.length})</button>
     <button class="tab-btn ${activeTab==="manage"?"active":""}" onclick="switchTab('manage')">🏪 التجار</button>
-    <button class="tab-btn ${activeTab==="channel"?"active":""}" onclick="switchTab('channel')">📺 القناة</button>`;
+    <button class="tab-btn ${activeTab==="channel"?"active":""}" onclick="switchTab('channel')">📺 القناة</button><button class="tab-btn ${activeTab==="messages2"?"active":""}" onclick="switchTab('messages2')">📨 رسائل المنصة</button>`;
   const aTab=document.getElementById("tab-admin");
   aTab.classList.toggle("hidden",activeTab!=="admin");
   aTab.innerHTML=`<div class="admin-grid">
@@ -2148,6 +2196,75 @@ async function submitPrediction(){
   showToast("تم تسجيل رأيك بنجاح 🎉");
   renderEntQuiz();
 }
+
+// ═══ عرض كل المتاجر ═══
+function openAllStores(){
+  const body=document.getElementById("all-stores-body");
+  const list=sellers.slice().sort((a,b)=>(a.storeName||"").localeCompare(b.storeName||""));
+  if(list.length===0){body.innerHTML='<div style="text-align:center;color:#9CA3AF;padding:30px 0">لا توجد متاجر بعد</div>';}
+  else{body.innerHTML=list.map(sr=>`
+    <div onclick="closeModal('modal-all-stores');openStore('${sr.id}')" style="display:flex;align-items:center;gap:12px;background:#F4F6FA;border-radius:12px;padding:11px;margin-bottom:9px;cursor:pointer">
+      ${sr.storeImage?`<img src="${sr.storeImage}" style="width:48px;height:48px;border-radius:10px;object-fit:cover;flex-shrink:0">`:`<div style="width:48px;height:48px;border-radius:10px;background:#1A2744;display:grid;place-items:center;font-size:1.3rem;flex-shrink:0">🏪</div>`}
+      <div style="flex:1;min-width:0"><div style="font-weight:800;color:#1A2744">${sr.storeName||"متجر"}</div><div style="color:#6B7280;font-size:0.76rem">${sr.category||""}</div></div>
+      <div style="color:#9CA3AF">›</div>
+    </div>`).join("");}
+  document.getElementById("modal-all-stores").classList.remove("hidden");
+}
+// ═══ تواصل مع المنصة ═══
+function openContactPlatform(){
+  document.getElementById("cp-name").value="";
+  document.getElementById("cp-phone").value="";
+  document.getElementById("cp-msg").value="";
+  document.getElementById("cp-err").textContent="";
+  document.getElementById("modal-contact-platform").classList.remove("hidden");
+}
+async function submitContactPlatform(){
+  const name=document.getElementById("cp-name").value.trim();
+  const phone=(document.getElementById("cp-country").value+document.getElementById("cp-phone").value.trim().replace(/^0+/,""));
+  const msg=document.getElementById("cp-msg").value.trim();
+  const err=document.getElementById("cp-err");
+  if(!name){err.textContent="يرجى إدخال الاسم";return;}
+  if(!/^\d{6,15}$/.test(phone.replace(/\D/g,""))){err.textContent="يرجى إدخال رقم صحيح";return;}
+  if(!msg){err.textContent="يرجى كتابة رسالتك";return;}
+  const id="MSG-"+Date.now();
+  await dbSave("platformMessages",id,{id,name,phone,msg,createdAt:Date.now(),read:false});
+  try{ notifyAdmin(`📨 رسالة جديدة للمنصة\n━━━━━━━━━━\nالاسم: ${name}\nالهاتف: ${phone}\nالرسالة: ${msg}`); }catch(e){}
+  closeModal("modal-contact-platform");
+  showToast("تم إرسال رسالتك بنجاح ✓");
+}
+
+function renderPlatformMessages(){
+  const t=document.getElementById("tab-messages2"); if(!t)return;
+  const list=platformMessages.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  t.innerHTML=`<div class="panel"><div class="panel-head"><span class="panel-title">📨 رسائل المنصة (${list.length})</span></div>`+
+    (list.length===0?'<div class="no-items"><div>لا توجد رسائل</div></div>':list.map(m=>{
+      const d=new Date(m.createdAt||0);
+      return `<div style="background:${m.read?'#F4F6FA':'#FFF9E9'};border-radius:11px;padding:13px;margin-bottom:9px;border-right:3px solid ${m.read?'#E5E7EB':'#D9A840'}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+          <div style="font-weight:800;color:#1A2744">${m.name||""} ${m.read?'':'🔴'}</div>
+          <a href="https://wa.me/${(m.phone||'').replace(/\D/g,'')}" target="_blank" style="color:#2E7D5E;font-weight:700;text-decoration:none;font-size:0.8rem">${m.phone||''} 📱</a>
+        </div>
+        <div style="color:#374151;font-size:0.86rem;margin-bottom:6px">${m.msg||""}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="color:#9CA3AF;font-size:0.72rem">${d.toLocaleDateString('ar')} ${d.toLocaleTimeString('ar',{hour:'2-digit',minute:'2-digit'})}</span>
+          <div>
+            ${m.read?'':`<button onclick="markMsgRead('${m.id}')" style="background:#EEF1F6;color:#1A2744;border:none;border-radius:7px;padding:5px 11px;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.75rem">تحديد كمقروء</button>`}
+            <button onclick="delPlatformMsg('${m.id}')" style="background:#FEE;color:#D9534F;border:none;border-radius:7px;padding:5px 11px;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.75rem">حذف</button>
+          </div>
+        </div>
+      </div>`;
+    }).join(""))+`</div>`;
+}
+async function markMsgRead(id){ await dbUpdate("platformMessages",id,{read:true}); }
+async function delPlatformMsg(id){ if(confirm("حذف الرسالة؟")){ await dbDelete("platformMessages",id); showToast("تم الحذف"); } }
+window.renderPlatformMessages=renderPlatformMessages;
+window.markMsgRead=markMsgRead;
+window.delPlatformMsg=delPlatformMsg;
+
+window.openAllStores=openAllStores;
+window.openContactPlatform=openContactPlatform;
+window.submitContactPlatform=submitContactPlatform;
+
 window.openEntertainment=openEntertainment;
 // مشاركة القناة والفيديوهات والاستطلاعات
 function baseUrl(){ return window.location.href.split("?")[0].replace(/index-23\.html$/,"").replace(/index\.html$/,"").replace(/\/$/,""); }
