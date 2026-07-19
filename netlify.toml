@@ -2,6 +2,10 @@
 path = "/p/*"
 function = "product-share"
 
+[[edge_functions]]
+path = "/"
+function = "og-meta"
+
 [[redirects]]
 from = "/"
 to = "/index-23.html"
