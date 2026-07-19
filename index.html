@@ -137,7 +137,6 @@ textarea.inp{height:64px;resize:none}
 .chats-nav-dot{position:absolute;top:1px;left:1px;width:9px;height:9px;background:#C9933A;border-radius:50%;border:1.5px solid #1A2744}
 .chat-img-btn{background:#F5F5F5;border:1.5px solid #E5E0D8;border-radius:50%;width:38px;height:38px;font-size:1rem;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
 @keyframes cwPulse{0%{opacity:1}50%{opacity:0.25}100%{opacity:1}}
-@keyframes upgradeShine{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 
 /* DASHBOARD */
 #dashboard{min-height:100vh;background:#F4F6FA}
@@ -260,19 +259,18 @@ textarea.inp{height:64px;resize:none}
     </div>
     <div style="display:flex;gap:7px;align-items:center">
       <div class="cart-badge hidden" id="cart-count-badge" onclick="openCart()">🛒 0</div>
-      <button class="chats-nav-btn" onclick="showStoresPage()">🏪</button>
+      <button class="chats-nav-btn" id="ent-nav-btn" onclick="openEntertainment()">📺</button>
       <button class="chats-nav-btn" id="my-chats-btn" onclick="openMyChats()">💬</button>
-      <button class="btn-gold" onclick="openJoinChoice()">انضم كتاجر</button>
+      <button class="btn-gold" onclick="openRegister()">انضم كتاجر</button>
     </div>
   </nav>
   <div class="hero">
-    <div class="hero-badge" id="hero-counts">🟢 سوق نشط يومياً</div>
+    <div class="hero-badge" id="hero-counts">🟢 0 تاجر · 0 منتج</div>
     <h1><span style="font-size:1.3em">🛒</span> سوق <span>الريان</span> <span style="font-size:1.3em">🛒</span><br>السوق السوداني الموثوق</h1>
     <p>منتجات حقيقية من تجار سودانيين</p>
     <button type="button" id="install-app-btn" onclick="triggerAppInstall()" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#C9933A,#E8B660);color:#1A2744;border:none;border-radius:10px;padding:10px 22px;font-weight:800;font-size:0.9rem;cursor:pointer;margin-top:16px;font-family:Tajawal,sans-serif">📲 ثبّت تطبيق الريان</button>
   </div>
   <div class="filters-wrap"><div class="filters" id="filters-bar"></div></div>
-  <div id="ads-strip" class="hidden" style="padding:0 4% 4px"></div>
   <div id="products-container"></div>
   <button class="float-btn" onclick="openLogin()">🏪 دخول التجار</button>
 </div>
@@ -287,10 +285,7 @@ textarea.inp{height:64px;resize:none}
         <div class="store-avatar" id="store-avatar">🏪</div>
         <div class="store-info">
           <div class="store-name" id="store-name">—</div>
-          <div id="store-badges" style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px"></div>
-          <div id="store-closed-banner" class="hidden" style="background:rgba(198,40,40,0.2);border:1px solid rgba(198,40,40,0.4);color:#FF8A75;font-size:0.82rem;font-weight:700;padding:9px 14px;border-radius:9px;margin-bottom:10px">🔒 هذا المتجر مغلق مؤقتاً — انتهت فترة تجربة التاجر المجانية</div>
           <div class="store-cat" id="store-cat">—</div>
-          <div id="store-city" style="color:rgba(255,255,255,0.55);font-size:0.8rem;margin-bottom:4px"></div>
           <div class="store-desc" id="store-desc"></div>
           <div class="store-rating-bar" id="store-rating-bar"></div>
           <div class="store-meta" id="store-meta"></div>
@@ -307,22 +302,6 @@ textarea.inp{height:64px;resize:none}
     <div class="store-products-title" id="store-products-title">منتجات المتجر</div>
     <div id="store-products-grid"></div>
   </div>
-</div>
-
-<!-- ═══ STORES DIRECTORY ═══ -->
-<div id="view-stores" class="hidden">
-  <div class="store-hero" style="padding:32px 5% 26px;text-align:center">
-    <div style="max-width:900px;margin:0 auto">
-      <button class="store-back-btn" onclick="closeStoresPage()" style="margin-bottom:16px">← رجوع للسوق</button>
-      <div class="hero-badge" style="margin-bottom:10px">🏪 دليل المتاجر</div>
-      <div style="color:#fff;font-weight:900;font-size:1.6rem;margin-bottom:6px">كل متاجر منصة الريان في مكان واحد</div>
-      <div style="color:rgba(255,255,255,0.6);font-size:0.88rem">تصفّح، قارن، واختر التاجر المناسب لك</div>
-    </div>
-  </div>
-  <div style="background:#F4F6FA;padding:16px 4% 6px;max-width:1000px;margin:0 auto">
-    <div style="font-weight:900;color:#1A2744;font-size:0.95rem" id="stores-count-label">جاري التحميل...</div>
-  </div>
-  <div style="background:#F4F6FA;padding:6px 4% 24px;max-width:1000px;margin:0 auto" id="stores-directory-grid"></div>
 </div>
 
 <!-- ═══ DASHBOARD ═══ -->
@@ -351,16 +330,12 @@ textarea.inp{height:64px;resize:none}
         <button class="btn-gold" id="dash-main-btn" onclick="openAddProduct()">➕ أضف منتجاً</button>
       </div>
       <div class="stats-grid" id="dash-stats"></div>
-      <div id="upgrade-banner" class="hidden" onclick="openUpgradePlan()" style="cursor:pointer;background:linear-gradient(120deg,#1A2744,#2A1F0E,#1A2744);background-size:200% 200%;animation:upgradeShine 4s ease infinite;border-radius:13px;padding:16px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1.5px solid #C9933A">
-        <div>
-          <div style="color:#E8B660;font-weight:900;font-size:1rem;margin-bottom:2px">🚀 رقّي متجرك لباقة أعلى</div>
-          <div style="color:rgba(255,255,255,0.7);font-size:0.78rem" id="upgrade-banner-sub">اظهر أعلى، بيع أكتر، ووثّق متجرك</div>
-        </div>
-        <div style="background:linear-gradient(135deg,#C9933A,#E8B660);color:#1A2744;border-radius:8px;padding:8px 16px;font-weight:900;font-size:0.85rem;white-space:nowrap">رقّي الآن</div>
-      </div>
       <div class="share-strip" id="dash-share-strip">
         <div><div style="font-weight:800;color:#1A2744;margin-bottom:2px;font-size:0.93rem">🔗 رابط متجرك</div><div style="color:#6B7280;font-size:0.78rem">شاركه للتسويق</div></div>
-        <button class="btn-navy" onclick="openShare()">📣 مشاركة</button>
+        <div style="display:flex;gap:8px;flex-shrink:0">
+          <button class="btn-navy" onclick="editMyStore()" style="background:#EEF8EE;color:#2E7D5E">✏️ تعديل المتجر</button>
+          <button class="btn-navy" onclick="openShare()">📣 مشاركة</button>
+        </div>
       </div>
       <div class="tabs" id="dash-tabs">
         <button class="tab-btn active" onclick="switchTab('products')">📦 منتجاتي</button>
@@ -370,8 +345,8 @@ textarea.inp{height:64px;resize:none}
       <div id="tab-orders" class="hidden"></div>
       <div id="tab-messages" class="hidden"></div>
       <div id="tab-admin" class="hidden"></div>
+      <div id="tab-channel" class="hidden"></div>
       <div id="tab-manage" class="hidden"></div>
-      <div id="tab-requests" class="hidden"></div>
     </div>
   </div>
 </div>
@@ -379,88 +354,21 @@ textarea.inp{height:64px;resize:none}
 <!-- ═══ MODALS ═══ -->
 
 <!-- REGISTER -->
-<!-- JOIN CHOICE -->
-<div class="overlay hidden" id="modal-join-choice">
-  <div class="modal modal-sm">
-    <h3 style="color:#1A2744;font-weight:900;font-size:1.15rem;margin-bottom:4px">انضم إلى منصة الريان</h3>
-    <p style="color:#6B7280;font-size:0.84rem;margin-bottom:18px">اختر الطريقة المناسبة لك</p>
-    <div onclick="closeModal('modal-join-choice');openRegister()" style="cursor:pointer;border:1.5px solid #E5E0D8;border-radius:13px;padding:16px;margin-bottom:12px;display:flex;align-items:center;gap:13px;transition:all 0.2s" onmouseover="this.style.borderColor='#C9933A'" onmouseout="this.style.borderColor='#E5E0D8'">
-      <div style="font-size:2rem;flex-shrink:0">🏪</div>
-      <div>
-        <div style="font-weight:900;color:#1A2744;font-size:0.98rem">أنشئ متجرك</div>
-        <div style="color:#6B7280;font-size:0.8rem;line-height:1.5">متجر دائم بمنتجات متعددة، طلبات، ومحادثات — عبر باقات شهرية</div>
-      </div>
-    </div>
-    <div onclick="closeModal('modal-join-choice');openPostAd()" style="cursor:pointer;border:1.5px solid #E5E0D8;border-radius:13px;padding:16px;display:flex;align-items:center;gap:13px;transition:all 0.2s" onmouseover="this.style.borderColor='#C9933A'" onmouseout="this.style.borderColor='#E5E0D8'">
-      <div style="font-size:2rem;flex-shrink:0">📢</div>
-      <div>
-        <div style="font-weight:900;color:#1A2744;font-size:0.98rem">انشر إعلاناً لمرة واحدة <span style="color:#C9933A">· 5,000 ج.س</span></div>
-        <div style="color:#6B7280;font-size:0.8rem;line-height:1.5">إعلان واحد سريع بدون إنشاء متجر — مناسب للعروض المؤقتة</div>
-      </div>
-    </div>
-    <button style="width:100%;margin-top:14px;padding:9px;border-radius:9px;border:1.5px solid #E5E0D8;background:transparent;font-weight:700;color:#6B7280;cursor:pointer;font-family:Tajawal,sans-serif" onclick="closeModal('modal-join-choice')">إلغاء</button>
-  </div>
-</div>
-
-<!-- POST AD -->
-<div class="overlay hidden" id="modal-post-ad">
-  <div class="modal">
-    <h3 style="color:#1A2744;font-weight:900;font-size:1.15rem;margin-bottom:4px">📢 نشر إعلان لمرة واحدة</h3>
-    <p style="color:#6B7280;font-size:0.84rem;margin-bottom:16px">إعلان واحد يظهر في المنصة — 5,000 ج.س</p>
-    <div class="field"><label class="lbl">اسمك</label><input class="inp" id="ad-name" placeholder="اسمك الكامل"></div>
-    <div class="field"><label class="lbl">رقم هاتفك</label><input class="inp" id="ad-phone" placeholder="0912345678"></div>
-    <div class="field"><label class="lbl">عنوان الإعلان</label><input class="inp" id="ad-title" placeholder="مثال: عرض خاص على الأثاث المنزلي"></div>
-    <div class="field"><label class="lbl">تفاصيل الإعلان</label><textarea class="inp" id="ad-desc" placeholder="اكتب تفاصيل عرضك أو خدمتك..."></textarea></div>
-    <div class="field">
-      <label class="lbl">صورة الإعلان (اختياري)</label>
-      <div class="img-upload-box">
-        <input type="file" accept="image/*" id="ad-img-input" onchange="handleAdImgUpload(this)">
-        <div id="ad-img-placeholder"><div style="font-size:1.8rem;margin-bottom:4px">🖼️</div><div style="color:#6B7280;font-size:0.82rem">اضغط لرفع صورة الإعلان</div></div>
-        <img id="ad-img-preview" style="display:none;width:100%;border-radius:9px">
-      </div>
-    </div>
-    <div style="background:#F4F6FA;border-radius:12px;padding:16px;margin-bottom:16px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <span style="color:#6B7280;font-size:0.82rem">المبلغ المطلوب</span>
-        <span style="color:#C9933A;font-weight:900;font-size:1.1rem">5,000 ج.س</span>
-      </div>
-      <div style="border-top:1px dashed #E5E0D8;padding-top:10px">
-        <div style="color:#6B7280;font-size:0.78rem;margin-bottom:2px">رقم الحساب (المركزي بحري)</div>
-        <div style="color:#1A2744;font-weight:900;font-size:1.05rem;margin-bottom:8px">1978584</div>
-        <div style="color:#6B7280;font-size:0.78rem;margin-bottom:2px">اسم صاحب الحساب</div>
-        <div style="color:#1A2744;font-weight:700;font-size:0.92rem">عبد الرؤوف خالد محمد</div>
-      </div>
-    </div>
-    <div class="field">
-      <label class="lbl">صورة إشعار الدفع</label>
-      <div class="img-upload-box">
-        <input type="file" accept="image/*" id="ad-receipt-input" onchange="handleAdReceiptUpload(this)">
-        <div id="ad-receipt-placeholder"><div style="font-size:1.8rem;margin-bottom:4px">🧾</div><div style="color:#6B7280;font-size:0.82rem">اضغط لرفع صورة إشعار الدفع</div></div>
-        <img id="ad-receipt-preview" style="display:none;width:100%;border-radius:9px">
-      </div>
-    </div>
-    <div id="ad-err" class="err-box hidden"></div>
-    <button class="btn-gold" style="width:100%;padding:12px;margin-top:4px" onclick="submitAdRequest()">📤 إرسال طلب الإعلان</button>
-    <button style="width:100%;margin-top:8px;padding:9px;border-radius:9px;border:1.5px solid #E5E0D8;background:transparent;font-weight:700;color:#6B7280;cursor:pointer;font-family:Tajawal,sans-serif" onclick="closeModal('modal-post-ad')">إلغاء</button>
-  </div>
-</div>
-
-<!-- REGISTER -->
 <div class="overlay hidden" id="modal-register">
   <div class="modal">
-    <div class="steps-bar"><div class="step-seg done" id="seg1"></div><div class="step-seg" id="seg2"></div><div class="step-seg" id="seg3"></div><div class="step-seg hidden" id="seg4"></div></div>
+    <div class="steps-bar"><div class="step-seg done" id="seg1"></div><div class="step-seg" id="seg2"></div><div class="step-seg" id="seg3"></div></div>
     <div class="step-label" id="step-label">الخطوة 1 من 3</div>
     <div id="step1">
       <h3 style="color:#1A2744;font-weight:900;font-size:1.15rem;margin-bottom:4px">أهلاً بك في الريان 👋</h3>
       <p style="color:#6B7280;font-size:0.84rem;margin-bottom:16px">بيانات صاحب المتجر</p>
       <div class="field"><label class="lbl">الاسم الكامل</label><input class="inp" id="r-name" placeholder="محمد أحمد"></div>
-      <div class="field"><label class="lbl">رقم الهاتف السوداني</label><input class="inp" id="r-phone" placeholder="0912345678"><div class="inp-hint">يبدأ بـ 09 أو 01 — 10 أرقام</div></div>
+      <div class="field"><label class="lbl">الدولة</label><select class="inp" id="r-country"><option value="+249" selected>🇸🇩 السودان (+249)</option><option value="+966">🇸🇦 السعودية (+966)</option><option value="+20">🇪🇬 مصر (+20)</option><option value="+971">🇦🇪 الإمارات (+971)</option><option value="+974">🇶🇦 قطر (+974)</option><option value="+965">🇰🇼 الكويت (+965)</option><option value="+973">🇧🇭 البحرين (+973)</option><option value="+968">🇴🇲 عُمان (+968)</option><option value="+962">🇯🇴 الأردن (+962)</option><option value="+961">🇱🇧 لبنان (+961)</option><option value="+963">🇸🇾 سوريا (+963)</option><option value="+964">🇮🇶 العراق (+964)</option><option value="+970">🇵🇸 فلسطين (+970)</option><option value="+967">🇾🇪 اليمن (+967)</option><option value="+218">🇱🇾 ليبيا (+218)</option><option value="+216">🇹🇳 تونس (+216)</option><option value="+213">🇩🇿 الجزائر (+213)</option><option value="+212">🇲🇦 المغرب (+212)</option><option value="+222">🇲🇷 موريتانيا (+222)</option><option value="+252">🇸🇴 الصومال (+252)</option><option value="+253">🇩🇯 جيبوتي (+253)</option><option value="+211">🇸🇸 جنوب السودان (+211)</option><option value="+235">🇹🇩 تشاد (+235)</option><option value="+251">🇪🇹 إثيوبيا (+251)</option><option value="+291">🇪🇷 إريتريا (+291)</option><option value="+254">🇰🇪 كينيا (+254)</option><option value="+256">🇺🇬 أوغندا (+256)</option><option value="+90">🇹🇷 تركيا (+90)</option><option value="+1">🇺🇸 الولايات المتحدة (+1)</option><option value="+44">🇬🇧 المملكة المتحدة (+44)</option><option value="+33">🇫🇷 فرنسا (+33)</option><option value="+49">🇩🇪 ألمانيا (+49)</option><option value="+39">🇮🇹 إيطاليا (+39)</option><option value="+34">🇪🇸 إسبانيا (+34)</option><option value="+31">🇳🇱 هولندا (+31)</option><option value="+46">🇸🇪 السويد (+46)</option><option value="+47">🇳🇴 النرويج (+47)</option><option value="+41">🇨🇭 سويسرا (+41)</option><option value="+7">🇷🇺 روسيا (+7)</option><option value="+86">🇨🇳 الصين (+86)</option><option value="+91">🇮🇳 الهند (+91)</option><option value="+92">🇵🇰 باكستان (+92)</option><option value="+62">🇮🇩 إندونيسيا (+62)</option><option value="+60">🇲🇾 ماليزيا (+60)</option><option value="+81">🇯🇵 اليابان (+81)</option><option value="+82">🇰🇷 كوريا الجنوبية (+82)</option><option value="+61">🇦🇺 أستراليا (+61)</option><option value="+234">🇳🇬 نيجيريا (+234)</option><option value="+27">🇿🇦 جنوب أفريقيا (+27)</option><option value="+55">🇧🇷 البرازيل (+55)</option></select></div>
+      <div class="field"><label class="lbl">رقم الهاتف</label><input class="inp" id="r-phone" placeholder="912345678"><div class="inp-hint">اكتب رقمك بدون مفتاح الدولة</div></div>
     </div>
     <div id="step2" class="hidden">
       <h3 style="color:#1A2744;font-weight:900;font-size:1.15rem;margin-bottom:4px">بيانات المتجر 🏪</h3>
       <p style="color:#6B7280;font-size:0.84rem;margin-bottom:16px">ما الذي ستبيعه؟</p>
       <div class="field"><label class="lbl">اسم المتجر</label><input class="inp" id="r-store" placeholder="متجر الخرطوم"></div>
-      <div class="field"><label class="lbl">المدينة</label><input class="inp" id="r-city" placeholder="مثال: الخرطوم، بحري، أم درمان"></div>
       <div class="field">
         <label class="lbl">صورة المتجر (اختياري)</label>
         <div class="img-upload-box">
@@ -477,30 +385,6 @@ textarea.inp{height:64px;resize:none}
       <p style="color:#6B7280;font-size:0.84rem;margin-bottom:14px">الأسعار بالجنيه السوداني</p>
       <div id="plans-list"></div>
       <div class="hidden" id="reg-summary" style="background:#F4F6FA;border-radius:9px;padding:11px 13px;margin-top:11px;font-size:0.83rem;color:#6B7280"><div id="sum-store">—</div><div id="sum-owner" style="margin-top:2px">—</div></div>
-    </div>
-    <div id="step4" class="hidden">
-      <h3 style="color:#1A2744;font-weight:900;font-size:1.15rem;margin-bottom:4px">💳 إتمام الدفع</h3>
-      <p style="color:#6B7280;font-size:0.84rem;margin-bottom:14px">حوّل قيمة باقتك، وارفع صورة إشعار التحويل — سيتم تفعيل متجرك بعد المراجعة</p>
-      <div style="background:#F4F6FA;border-radius:12px;padding:16px;margin-bottom:16px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-          <span style="color:#6B7280;font-size:0.82rem">المبلغ المطلوب</span>
-          <span style="color:#C9933A;font-weight:900;font-size:1.15rem" id="pay-amount">—</span>
-        </div>
-        <div style="border-top:1px dashed #E5E0D8;padding-top:10px">
-          <div style="color:#6B7280;font-size:0.78rem;margin-bottom:2px">رقم الحساب (المركزي بحري)</div>
-          <div style="color:#1A2744;font-weight:900;font-size:1.05rem;margin-bottom:8px">1978584</div>
-          <div style="color:#6B7280;font-size:0.78rem;margin-bottom:2px">اسم صاحب الحساب</div>
-          <div style="color:#1A2744;font-weight:700;font-size:0.92rem">عبد الرؤوف خالد محمد</div>
-        </div>
-      </div>
-      <div class="field">
-        <label class="lbl">صورة إشعار الدفع</label>
-        <div class="img-upload-box">
-          <input type="file" accept="image/*" id="reg-receipt-input" onchange="handleReceiptUpload(this)">
-          <div id="reg-receipt-placeholder"><div style="font-size:1.8rem;margin-bottom:4px">🧾</div><div style="color:#6B7280;font-size:0.82rem">اضغط لرفع صورة إشعار الدفع</div></div>
-          <img id="reg-receipt-preview" style="display:none;width:100%;border-radius:9px">
-        </div>
-      </div>
     </div>
     <div id="reg-err" class="err-box hidden"></div>
     <div class="modal-btns">
@@ -586,10 +470,11 @@ textarea.inp{height:64px;resize:none}
     <div id="direct-prod-meta" style="color:#6B7280;font-size:0.78rem;margin-bottom:14px;display:flex;flex-wrap:wrap;gap:10px"></div>
     <div style="display:flex;gap:8px;margin-bottom:18px">
       <button type="button" onclick="startChatFromDirectOrder()" style="flex:1;padding:11px;border-radius:9px;border:1.5px solid #E5E0D8;background:#FAFAF7;color:#1A2744;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:Tajawal,sans-serif">💬 استفسر</button>
-      <button type="button" onclick="focusOrderForm()" style="flex:1;padding:11px;border-radius:9px;border:none;background:linear-gradient(135deg,#C9933A,#E8B660);color:#1A2744;font-weight:800;font-size:0.85rem;cursor:pointer;font-family:Tajawal,sans-serif">🛒 اطلب الآن</button>
+      <button type="button" onclick="focusOrderForm()" style="flex:1;padding:11px;border-radius:9px;border:none;background:linear-gradient(135deg,#C9933A,#E8B660);color:#1A2744;font-weight:800;font-size:0.85rem;cursor:pointer;font-family:Tajawal,sans-serif">🛒 تواصل واطلب</button>
     </div>
     <div class="field"><label class="lbl">اسمك الكامل</label><input class="inp" id="co-name" placeholder="أحمد محمد"></div>
-    <div class="field"><label class="lbl">رقم الهاتف</label><input class="inp" id="co-phone" placeholder="0912345678"></div>
+    <div class="field"><label class="lbl">الدولة</label><select class="inp" id="co-country"><option value="+249" selected>🇸🇩 السودان (+249)</option><option value="+966">🇸🇦 السعودية (+966)</option><option value="+20">🇪🇬 مصر (+20)</option><option value="+971">🇦🇪 الإمارات (+971)</option><option value="+974">🇶🇦 قطر (+974)</option><option value="+965">🇰🇼 الكويت (+965)</option><option value="+973">🇧🇭 البحرين (+973)</option><option value="+968">🇴🇲 عُمان (+968)</option><option value="+962">🇯🇴 الأردن (+962)</option><option value="+961">🇱🇧 لبنان (+961)</option><option value="+963">🇸🇾 سوريا (+963)</option><option value="+964">🇮🇶 العراق (+964)</option><option value="+970">🇵🇸 فلسطين (+970)</option><option value="+967">🇾🇪 اليمن (+967)</option><option value="+218">🇱🇾 ليبيا (+218)</option><option value="+216">🇹🇳 تونس (+216)</option><option value="+213">🇩🇿 الجزائر (+213)</option><option value="+212">🇲🇦 المغرب (+212)</option><option value="+222">🇲🇷 موريتانيا (+222)</option><option value="+252">🇸🇴 الصومال (+252)</option><option value="+253">🇩🇯 جيبوتي (+253)</option><option value="+211">🇸🇸 جنوب السودان (+211)</option><option value="+235">🇹🇩 تشاد (+235)</option><option value="+251">🇪🇹 إثيوبيا (+251)</option><option value="+291">🇪🇷 إريتريا (+291)</option><option value="+254">🇰🇪 كينيا (+254)</option><option value="+256">🇺🇬 أوغندا (+256)</option><option value="+90">🇹🇷 تركيا (+90)</option><option value="+1">🇺🇸 الولايات المتحدة (+1)</option><option value="+44">🇬🇧 المملكة المتحدة (+44)</option><option value="+33">🇫🇷 فرنسا (+33)</option><option value="+49">🇩🇪 ألمانيا (+49)</option><option value="+39">🇮🇹 إيطاليا (+39)</option><option value="+34">🇪🇸 إسبانيا (+34)</option><option value="+31">🇳🇱 هولندا (+31)</option><option value="+46">🇸🇪 السويد (+46)</option><option value="+47">🇳🇴 النرويج (+47)</option><option value="+41">🇨🇭 سويسرا (+41)</option><option value="+7">🇷🇺 روسيا (+7)</option><option value="+86">🇨🇳 الصين (+86)</option><option value="+91">🇮🇳 الهند (+91)</option><option value="+92">🇵🇰 باكستان (+92)</option><option value="+62">🇮🇩 إندونيسيا (+62)</option><option value="+60">🇲🇾 ماليزيا (+60)</option><option value="+81">🇯🇵 اليابان (+81)</option><option value="+82">🇰🇷 كوريا الجنوبية (+82)</option><option value="+61">🇦🇺 أستراليا (+61)</option><option value="+234">🇳🇬 نيجيريا (+234)</option><option value="+27">🇿🇦 جنوب أفريقيا (+27)</option><option value="+55">🇧🇷 البرازيل (+55)</option></select></div>
+    <div class="field"><label class="lbl">رقم الهاتف</label><input class="inp" id="co-phone" placeholder="912345678"></div>
     <div class="field"><label class="lbl">العنوان / المدينة</label><input class="inp" id="co-address" placeholder="الخرطوم، حي الرياض"></div>
     <div class="field"><label class="lbl">الكمية</label><input class="inp" type="number" id="co-qty" value="1" min="1"></div>
     <div class="field"><label class="lbl">ملاحظات (اختياري)</label><textarea class="inp" id="co-notes" placeholder="أي تفاصيل..."></textarea></div>
@@ -616,15 +501,6 @@ textarea.inp{height:64px;resize:none}
 </div>
 
 <!-- WELCOME TRADER -->
-<div class="overlay hidden" id="modal-request-submitted">
-  <div class="modal modal-sm" style="text-align:center">
-    <div style="font-size:2.8rem;margin-bottom:8px">📨</div>
-    <h3 style="color:#1A2744;font-weight:900;font-size:1.2rem;margin-bottom:4px">تم استلام طلبك!</h3>
-    <p style="color:#6B7280;font-size:0.85rem;margin-bottom:18px" id="rs-message">سيتم مراجعة طلبك والرد عليك قريباً.</p>
-    <button class="btn-gold" style="width:100%;padding:11px" onclick="closeModal('modal-request-submitted')">تمام</button>
-  </div>
-</div>
-
 <div class="overlay hidden" id="modal-welcome-trader">
   <div class="modal modal-sm" style="text-align:center">
     <div style="font-size:2.8rem;margin-bottom:8px">🎉</div>
@@ -648,7 +524,8 @@ textarea.inp{height:64px;resize:none}
     <p style="color:#6B7280;font-size:0.82rem;margin-bottom:16px">للاستفسار قبل الطلب — مش لتأكيد الشراء</p>
     <input type="hidden" id="sc-seller-id">
     <div class="field"><label class="lbl">اسمك</label><input class="inp" id="sc-name" placeholder="أحمد محمد"></div>
-    <div class="field"><label class="lbl">رقم هاتفك</label><input class="inp" id="sc-phone" placeholder="0912345678"></div>
+    <div class="field"><label class="lbl">الدولة</label><select class="inp" id="sc-country"><option value="+249" selected>🇸🇩 السودان (+249)</option><option value="+966">🇸🇦 السعودية (+966)</option><option value="+20">🇪🇬 مصر (+20)</option><option value="+971">🇦🇪 الإمارات (+971)</option><option value="+974">🇶🇦 قطر (+974)</option><option value="+965">🇰🇼 الكويت (+965)</option><option value="+973">🇧🇭 البحرين (+973)</option><option value="+968">🇴🇲 عُمان (+968)</option><option value="+962">🇯🇴 الأردن (+962)</option><option value="+961">🇱🇧 لبنان (+961)</option><option value="+963">🇸🇾 سوريا (+963)</option><option value="+964">🇮🇶 العراق (+964)</option><option value="+970">🇵🇸 فلسطين (+970)</option><option value="+967">🇾🇪 اليمن (+967)</option><option value="+218">🇱🇾 ليبيا (+218)</option><option value="+216">🇹🇳 تونس (+216)</option><option value="+213">🇩🇿 الجزائر (+213)</option><option value="+212">🇲🇦 المغرب (+212)</option><option value="+222">🇲🇷 موريتانيا (+222)</option><option value="+252">🇸🇴 الصومال (+252)</option><option value="+253">🇩🇯 جيبوتي (+253)</option><option value="+211">🇸🇸 جنوب السودان (+211)</option><option value="+235">🇹🇩 تشاد (+235)</option><option value="+251">🇪🇹 إثيوبيا (+251)</option><option value="+291">🇪🇷 إريتريا (+291)</option><option value="+254">🇰🇪 كينيا (+254)</option><option value="+256">🇺🇬 أوغندا (+256)</option><option value="+90">🇹🇷 تركيا (+90)</option><option value="+1">🇺🇸 الولايات المتحدة (+1)</option><option value="+44">🇬🇧 المملكة المتحدة (+44)</option><option value="+33">🇫🇷 فرنسا (+33)</option><option value="+49">🇩🇪 ألمانيا (+49)</option><option value="+39">🇮🇹 إيطاليا (+39)</option><option value="+34">🇪🇸 إسبانيا (+34)</option><option value="+31">🇳🇱 هولندا (+31)</option><option value="+46">🇸🇪 السويد (+46)</option><option value="+47">🇳🇴 النرويج (+47)</option><option value="+41">🇨🇭 سويسرا (+41)</option><option value="+7">🇷🇺 روسيا (+7)</option><option value="+86">🇨🇳 الصين (+86)</option><option value="+91">🇮🇳 الهند (+91)</option><option value="+92">🇵🇰 باكستان (+92)</option><option value="+62">🇮🇩 إندونيسيا (+62)</option><option value="+60">🇲🇾 ماليزيا (+60)</option><option value="+81">🇯🇵 اليابان (+81)</option><option value="+82">🇰🇷 كوريا الجنوبية (+82)</option><option value="+61">🇦🇺 أستراليا (+61)</option><option value="+234">🇳🇬 نيجيريا (+234)</option><option value="+27">🇿🇦 جنوب أفريقيا (+27)</option><option value="+55">🇧🇷 البرازيل (+55)</option></select></div>
+    <div class="field"><label class="lbl">رقم هاتفك</label><input class="inp" id="sc-phone" placeholder="912345678"></div>
     <div id="sc-err" class="err-box hidden"></div>
     <div class="modal-btns">
       <button class="btn-back" onclick="closeModal('modal-start-chat')">إلغاء</button>
@@ -691,6 +568,36 @@ textarea.inp{height:64px;resize:none}
 </div>
 
 <!-- MY CHATS -->
+<div class="overlay hidden" id="modal-entertainment">
+  <div class="modal modal-sm" style="max-height:88vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3 style="color:#1A2744;font-weight:900;font-size:1.1rem">📺 قناة الريان</h3>
+      <button onclick="closeModal('modal-entertainment')" style="background:none;border:none;font-size:1.4rem;color:#9CA3AF;cursor:pointer">✕</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <button class="ent-tab-btn active" id="ent-tab-videos" onclick="switchEntTab('videos')" style="flex:1;padding:9px;border-radius:9px;border:none;background:#1A2744;color:#fff;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif">🎥 الفيديوهات</button>
+      <button class="ent-tab-btn" id="ent-tab-quiz" onclick="switchEntTab('quiz')" style="flex:1;padding:9px;border-radius:9px;border:none;background:#EEF1F6;color:#1A2744;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif">🔮 التوقعات</button>
+    </div>
+    <div id="ent-videos-body"></div>
+    <div id="ent-quiz-body" class="hidden"></div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="modal-predict">
+  <div class="modal modal-sm">
+    <h3 style="color:#1A2744;font-weight:900;font-size:1.05rem;margin-bottom:6px" id="predict-title"></h3>
+    <p style="color:#6B7280;font-size:0.82rem;margin-bottom:14px" id="predict-sub"></p>
+    <div id="predict-options" style="display:grid;gap:9px;margin-bottom:14px"></div>
+    <div class="field"><label class="lbl">توقع النتيجة بالضبط (اختياري)</label><input class="inp" id="predict-score" placeholder="مثال: 2-1"></div>
+    <div class="field"><label class="lbl">اسمك</label><input class="inp" id="predict-name"></div>
+    <div class="field"><label class="lbl">الدولة</label><select class="inp" id="predict-country"><option value="+249" selected>🇸🇩 السودان (+249)</option><option value="+966">🇸🇦 السعودية (+966)</option><option value="+20">🇪🇬 مصر (+20)</option><option value="+971">🇦🇪 الإمارات (+971)</option><option value="+974">🇶🇦 قطر (+974)</option><option value="+965">🇰🇼 الكويت (+965)</option><option value="+973">🇧🇭 البحرين (+973)</option><option value="+968">🇴🇲 عُمان (+968)</option><option value="+962">🇯🇴 الأردن (+962)</option><option value="+961">🇱🇧 لبنان (+961)</option><option value="+964">🇮🇶 العراق (+964)</option><option value="+970">🇵🇸 فلسطين (+970)</option><option value="+967">🇾🇪 اليمن (+967)</option><option value="+218">🇱🇾 ليبيا (+218)</option><option value="+216">🇹🇳 تونس (+216)</option><option value="+213">🇩🇿 الجزائر (+213)</option><option value="+212">🇲🇦 المغرب (+212)</option><option value="+90">🇹🇷 تركيا (+90)</option><option value="+1">🇺🇸 أمريكا (+1)</option><option value="+44">🇬🇧 بريطانيا (+44)</option></select></div>
+    <div class="field"><label class="lbl">رقم هاتفك</label><input class="inp" id="predict-phone" placeholder="912345678"></div>
+    <div id="predict-err" style="color:#D9534F;font-size:0.8rem;margin-bottom:8px"></div>
+    <button class="btn-navy" style="width:100%" onclick="submitPrediction()">أرسل توقعي 🔮</button>
+    <button style="width:100%;margin-top:8px;padding:9px;border-radius:9px;border:1.5px solid #E5E0D8;background:transparent;font-weight:700;color:#6B7280;cursor:pointer;font-family:Tajawal,sans-serif" onclick="closeModal('modal-predict')">إلغاء</button>
+  </div>
+</div>
+
 <div class="overlay hidden" id="modal-my-chats">
   <div class="modal modal-sm">
     <h3 style="color:#1A2744;font-weight:900;font-size:1.05rem;margin-bottom:14px">💬 محادثاتي</h3>
@@ -740,54 +647,12 @@ textarea.inp{height:64px;resize:none}
   </div>
 </div>
 
-<!-- UPGRADE PLAN -->
-<div class="overlay hidden" id="modal-upgrade-plan">
-  <div class="modal">
-    <h3 style="color:#1A2744;font-weight:900;font-size:1.15rem;margin-bottom:4px">🚀 رقّي باقتك</h3>
-    <p style="color:#6B7280;font-size:0.84rem;margin-bottom:16px">اختار الباقة اللي تناسب طموح متجرك</p>
-    <div id="upgrade-plans-list"></div>
-    <button style="width:100%;margin-top:6px;padding:9px;border-radius:9px;border:1.5px solid #E5E0D8;background:transparent;font-weight:700;color:#6B7280;cursor:pointer;font-family:Tajawal,sans-serif" onclick="closeModal('modal-upgrade-plan')">إغلاق</button>
-  </div>
-</div>
-
-<!-- UPGRADE PAYMENT -->
-<div class="overlay hidden" id="modal-upgrade-payment">
-  <div class="modal modal-sm">
-    <h3 style="color:#1A2744;font-weight:900;font-size:1.05rem;margin-bottom:4px">💳 إتمام دفع الترقية</h3>
-    <p style="color:#6B7280;font-size:0.84rem;margin-bottom:14px">حوّل قيمة الباقة، وارفع صورة إشعار التحويل</p>
-    <div style="background:#F4F6FA;border-radius:12px;padding:16px;margin-bottom:16px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <span style="color:#6B7280;font-size:0.82rem">الباقة المطلوبة</span>
-        <span style="color:#C9933A;font-weight:900;font-size:1.05rem" id="upg-pay-plan">—</span>
-      </div>
-      <div style="border-top:1px dashed #E5E0D8;padding-top:10px">
-        <div style="color:#6B7280;font-size:0.78rem;margin-bottom:2px">رقم الحساب (المركزي بحري)</div>
-        <div style="color:#1A2744;font-weight:900;font-size:1.05rem;margin-bottom:8px">1978584</div>
-        <div style="color:#6B7280;font-size:0.78rem;margin-bottom:2px">اسم صاحب الحساب</div>
-        <div style="color:#1A2744;font-weight:700;font-size:0.92rem">عبد الرؤوف خالد محمد</div>
-      </div>
-    </div>
-    <div class="field">
-      <label class="lbl">صورة إشعار الدفع</label>
-      <div class="img-upload-box">
-        <input type="file" accept="image/*" id="upg-receipt-input" onchange="handleUpgradeReceiptUpload(this)">
-        <div id="upg-receipt-placeholder"><div style="font-size:1.8rem;margin-bottom:4px">🧾</div><div style="color:#6B7280;font-size:0.82rem">اضغط لرفع صورة إشعار الدفع</div></div>
-        <img id="upg-receipt-preview" style="display:none;width:100%;border-radius:9px">
-      </div>
-    </div>
-    <div id="upg-pay-err" class="err-box hidden"></div>
-    <button class="btn-gold" style="width:100%;margin-top:6px;padding:11px" onclick="submitUpgradeRequest()">🚀 إرسال طلب الترقية</button>
-    <button style="width:100%;margin-top:8px;padding:9px;border-radius:9px;border:1.5px solid #E5E0D8;background:transparent;font-weight:700;color:#6B7280;cursor:pointer;font-family:Tajawal,sans-serif" onclick="closeModal('modal-upgrade-payment')">إلغاء</button>
-  </div>
-</div>
-
 <!-- ADMIN EDIT SELLER -->
 <div class="overlay hidden" id="modal-edit-seller">
   <div class="modal modal-sm">
     <h3 style="color:#1A2744;font-weight:900;font-size:1.05rem;margin-bottom:14px">✏️ تعديل بيانات التاجر</h3>
     <input type="hidden" id="es-id">
     <div class="field"><label class="lbl">اسم المتجر</label><input class="inp" id="es-store"></div>
-    <div class="field"><label class="lbl">المدينة</label><input class="inp" id="es-city"></div>
     <div class="field">
       <label class="lbl">صورة المتجر</label>
       <div class="img-upload-box">
@@ -797,10 +662,10 @@ textarea.inp{height:64px;resize:none}
       </div>
     </div>
     <div class="field"><label class="lbl">اسم صاحب المتجر</label><input class="inp" id="es-owner"></div>
+    <div class="field"><label class="lbl">الدولة</label><select class="inp" id="es-country"><option value="+249" selected>🇸🇩 السودان (+249)</option><option value="+966">🇸🇦 السعودية (+966)</option><option value="+20">🇪🇬 مصر (+20)</option><option value="+971">🇦🇪 الإمارات (+971)</option><option value="+974">🇶🇦 قطر (+974)</option><option value="+965">🇰🇼 الكويت (+965)</option><option value="+973">🇧🇭 البحرين (+973)</option><option value="+968">🇴🇲 عُمان (+968)</option><option value="+962">🇯🇴 الأردن (+962)</option><option value="+961">🇱🇧 لبنان (+961)</option><option value="+963">🇸🇾 سوريا (+963)</option><option value="+964">🇮🇶 العراق (+964)</option><option value="+970">🇵🇸 فلسطين (+970)</option><option value="+967">🇾🇪 اليمن (+967)</option><option value="+218">🇱🇾 ليبيا (+218)</option><option value="+216">🇹🇳 تونس (+216)</option><option value="+213">🇩🇿 الجزائر (+213)</option><option value="+212">🇲🇦 المغرب (+212)</option><option value="+222">🇲🇷 موريتانيا (+222)</option><option value="+252">🇸🇴 الصومال (+252)</option><option value="+253">🇩🇯 جيبوتي (+253)</option><option value="+211">🇸🇸 جنوب السودان (+211)</option><option value="+235">🇹🇩 تشاد (+235)</option><option value="+251">🇪🇹 إثيوبيا (+251)</option><option value="+291">🇪🇷 إريتريا (+291)</option><option value="+254">🇰🇪 كينيا (+254)</option><option value="+256">🇺🇬 أوغندا (+256)</option><option value="+90">🇹🇷 تركيا (+90)</option><option value="+1">🇺🇸 الولايات المتحدة (+1)</option><option value="+44">🇬🇧 المملكة المتحدة (+44)</option><option value="+33">🇫🇷 فرنسا (+33)</option><option value="+49">🇩🇪 ألمانيا (+49)</option><option value="+39">🇮🇹 إيطاليا (+39)</option><option value="+34">🇪🇸 إسبانيا (+34)</option><option value="+31">🇳🇱 هولندا (+31)</option><option value="+46">🇸🇪 السويد (+46)</option><option value="+47">🇳🇴 النرويج (+47)</option><option value="+41">🇨🇭 سويسرا (+41)</option><option value="+7">🇷🇺 روسيا (+7)</option><option value="+86">🇨🇳 الصين (+86)</option><option value="+91">🇮🇳 الهند (+91)</option><option value="+92">🇵🇰 باكستان (+92)</option><option value="+62">🇮🇩 إندونيسيا (+62)</option><option value="+60">🇲🇾 ماليزيا (+60)</option><option value="+81">🇯🇵 اليابان (+81)</option><option value="+82">🇰🇷 كوريا الجنوبية (+82)</option><option value="+61">🇦🇺 أستراليا (+61)</option><option value="+234">🇳🇬 نيجيريا (+234)</option><option value="+27">🇿🇦 جنوب أفريقيا (+27)</option><option value="+55">🇧🇷 البرازيل (+55)</option></select></div>
     <div class="field"><label class="lbl">رقم الهاتف</label><input class="inp" id="es-phone"></div>
     <div class="field"><label class="lbl">التصنيف</label><select class="inp" id="es-cat"></select></div>
     <div class="field"><label class="lbl">وصف المتجر</label><textarea class="inp" id="es-desc"></textarea></div>
-    <div class="field"><label class="lbl">الباقة</label><select class="inp" id="es-plan"></select></div>
     <div id="es-err" class="err-box hidden"></div>
     <div class="modal-btns">
       <button class="btn-back" onclick="closeModal('modal-edit-seller')">إلغاء</button>
@@ -835,39 +700,86 @@ window._fbImports={collection,query,orderBy,onSnapshot,doc,setDoc,getDoc,getDocs
 const CATS=["أغذية ومشروبات","عطور وبخور","أعشاب وصحة","هدايا وحرف","إلكترونيات","ملابس وأزياء","مواد بناء","سيارات","عقارات","أنشطة متعددة","أخرى"];
 const EMOJIS={"أغذية ومشروبات":"☕","عطور وبخور":"🕌","أعشاب وصحة":"🌿","هدايا وحرف":"🎁","إلكترونيات":"📱","ملابس وأزياء":"👗","مواد بناء":"🧱","سيارات":"🚗","عقارات":"🏠","أنشطة متعددة":"🎯","أخرى":"📦"};
 const BG={"أغذية ومشروبات":"#FFF0E8","عطور وبخور":"#FFF8EE","أعشاب وصحة":"#EEF8EE","هدايا وحرف":"#EEF0FF","إلكترونيات":"#F0F8FF","ملابس وأزياء":"#FFF0F8","مواد بناء":"#F0EEE8","سيارات":"#E8F0FF","عقارات":"#FFF0EC","أنشطة متعددة":"#F5F0FF","أخرى":"#F5F5F5"};
-const PLANS=[
-  {id:"starter",name:"ابتدائية",price:25000,maxProducts:5,commission:0,type:"flat",whatsapp:false,facebook:false,boost:false,verified:false,fbPage:false,contentPlan:false,desc:"تسجيل المتجر + 5 منتجات"},
-  {id:"basic",name:"أساسية",price:50000,maxProducts:10,commission:0,type:"flat",whatsapp:true,facebook:false,boost:false,verified:false,fbPage:false,contentPlan:false,desc:"تسجيل المتجر + 10 منتجات + تسويق عبر واتساب (حالات وقروبات)"},
-  {id:"pro",name:"احترافية",price:100000,maxProducts:20,commission:0,type:"flat",whatsapp:true,facebook:true,boost:false,verified:false,fbPage:false,contentPlan:false,desc:"تسجيل المتجر + 20 منتج + تسويق عبر واتساب وفيسبوك"},
-  {id:"gold",name:"ذهبية",price:200000,maxProducts:Infinity,commission:0,type:"flat",whatsapp:true,facebook:true,boost:true,verified:false,fbPage:false,contentPlan:false,desc:"نشر مفتوح للمنتجات + ظهور أعلى للمتجر والمنتجات + تسويق عبر فيسبوك وواتساب"},
-  {id:"diamond",name:"ماسية",price:400000,maxProducts:Infinity,commission:0,type:"flat",whatsapp:true,facebook:true,boost:true,verified:true,fbPage:true,contentPlan:true,desc:"كل مزايا الباقة الذهبية + علامة موثّق + صفحة فيسبوك مخصصة + خطة محتوى كاملة (محتوى، هوية بصرية، مبيعات)"}
-];
-// baaqa for sellers who joined before the 5-tier system existed — keeps their
-// old unrestricted setup until manually moved to a real plan, so they're
-// never silently blocked from adding products by the new limits.
-const LEGACY_PLAN={id:"legacy",name:"سابقة",price:0,maxProducts:Infinity,commission:0,type:"flat",whatsapp:false,facebook:false,boost:false,verified:false,fbPage:false,contentPlan:false,desc:"باقة سابقة (قبل تحديث نظام الباقات) — بدون حد للمنتجات"};
-function getSellerPlan(seller){
-  if(!seller)return PLANS[0];
-  return PLANS.find(p=>p.id===seller.plan)||LEGACY_PLAN;
-}
+const PLANS=[{id:"commission",name:"عمولة",price:0,commission:3,maxProducts:999,type:"commission",desc:"3% عمولة من كل طلبية — بدون رسوم شهرية"},{id:"rent",name:"إيجار",price:50000,commission:0,maxProducts:999,type:"rent",desc:"إيجار ثابت 50,000 ج.س/شهر — بدون أي عمولة"}];
 const ADMIN_PASS="alrayan2026";
-const AD_PRICE=5000;
 const SDG=n=>Number(n).toLocaleString("ar")+" ج.س";
 const TODAY=()=>new Date().toLocaleDateString("ar",{year:"numeric",month:"long",day:"numeric"});
-const validSD=p=>/^(09|01)\d{8}$/.test(p.replace(/\s/g,""));
+// قائمة دول العالم مع المفاتيح (السودان افتراضي)
+const COUNTRIES=[
+{n:"السودان",c:"SD",d:"+249",f:"🇸🇩"},
+{n:"السعودية",c:"SA",d:"+966",f:"🇸🇦"},
+{n:"مصر",c:"EG",d:"+20",f:"🇪🇬"},
+{n:"الإمارات",c:"AE",d:"+971",f:"🇦🇪"},
+{n:"قطر",c:"QA",d:"+974",f:"🇶🇦"},
+{n:"الكويت",c:"KW",d:"+965",f:"🇰🇼"},
+{n:"البحرين",c:"BH",d:"+973",f:"🇧🇭"},
+{n:"عُمان",c:"OM",d:"+968",f:"🇴🇲"},
+{n:"الأردن",c:"JO",d:"+962",f:"🇯🇴"},
+{n:"لبنان",c:"LB",d:"+961",f:"🇱🇧"},
+{n:"سوريا",c:"SY",d:"+963",f:"🇸🇾"},
+{n:"العراق",c:"IQ",d:"+964",f:"🇮🇶"},
+{n:"فلسطين",c:"PS",d:"+970",f:"🇵🇸"},
+{n:"اليمن",c:"YE",d:"+967",f:"🇾🇪"},
+{n:"ليبيا",c:"LY",d:"+218",f:"🇱🇾"},
+{n:"تونس",c:"TN",d:"+216",f:"🇹🇳"},
+{n:"الجزائر",c:"DZ",d:"+213",f:"🇩🇿"},
+{n:"المغرب",c:"MA",d:"+212",f:"🇲🇦"},
+{n:"موريتانيا",c:"MR",d:"+222",f:"🇲🇷"},
+{n:"الصومال",c:"SO",d:"+252",f:"🇸🇴"},
+{n:"جيبوتي",c:"DJ",d:"+253",f:"🇩🇯"},
+{n:"جنوب السودان",c:"SS",d:"+211",f:"🇸🇸"},
+{n:"تشاد",c:"TD",d:"+235",f:"🇹🇩"},
+{n:"إثيوبيا",c:"ET",d:"+251",f:"🇪🇹"},
+{n:"إريتريا",c:"ER",d:"+291",f:"🇪🇷"},
+{n:"كينيا",c:"KE",d:"+254",f:"🇰🇪"},
+{n:"أوغندا",c:"UG",d:"+256",f:"🇺🇬"},
+{n:"تركيا",c:"TR",d:"+90",f:"🇹🇷"},
+{n:"الولايات المتحدة",c:"US",d:"+1",f:"🇺🇸"},
+{n:"كندا",c:"CA",d:"+1",f:"🇨🇦"},
+{n:"المملكة المتحدة",c:"GB",d:"+44",f:"🇬🇧"},
+{n:"فرنسا",c:"FR",d:"+33",f:"🇫🇷"},
+{n:"ألمانيا",c:"DE",d:"+49",f:"🇩🇪"},
+{n:"إيطاليا",c:"IT",d:"+39",f:"🇮🇹"},
+{n:"إسبانيا",c:"ES",d:"+34",f:"🇪🇸"},
+{n:"هولندا",c:"NL",d:"+31",f:"🇳🇱"},
+{n:"السويد",c:"SE",d:"+46",f:"🇸🇪"},
+{n:"النرويج",c:"NO",d:"+47",f:"🇳🇴"},
+{n:"الدنمارك",c:"DK",d:"+45",f:"🇩🇰"},
+{n:"سويسرا",c:"CH",d:"+41",f:"🇨🇭"},
+{n:"روسيا",c:"RU",d:"+7",f:"🇷🇺"},
+{n:"الصين",c:"CN",d:"+86",f:"🇨🇳"},
+{n:"الهند",c:"IN",d:"+91",f:"🇮🇳"},
+{n:"باكستان",c:"PK",d:"+92",f:"🇵🇰"},
+{n:"بنغلاديش",c:"BD",d:"+880",f:"🇧🇩"},
+{n:"إندونيسيا",c:"ID",d:"+62",f:"🇮🇩"},
+{n:"ماليزيا",c:"MY",d:"+60",f:"🇲🇾"},
+{n:"اليابان",c:"JP",d:"+81",f:"🇯🇵"},
+{n:"كوريا الجنوبية",c:"KR",d:"+82",f:"🇰🇷"},
+{n:"أستراليا",c:"AU",d:"+61",f:"🇦🇺"},
+{n:"نيجيريا",c:"NG",d:"+234",f:"🇳🇬"},
+{n:"غانا",c:"GH",d:"+233",f:"🇬🇭"},
+{n:"جنوب أفريقيا",c:"ZA",d:"+27",f:"🇿🇦"},
+{n:"البرازيل",c:"BR",d:"+55",f:"🇧🇷"},
+{n:"الأرجنتين",c:"AR",d:"+54",f:"🇦🇷"},
+{n:"المكسيك",c:"MX",d:"+52",f:"🇲🇽"}
+];
+function countryOptions(sel){return COUNTRIES.map(x=>`<option value="${x.d}" ${x.d===(sel||"+249")&&x.c==="SD"?"selected":""}>${x.f} ${x.n} (${x.d})</option>`).join("");}
+// تحقق عام: أي رقم من 6 إلى 15 خانة
+const validSD=p=>/^\d{6,15}$/.test(p.replace(/\D/g,""));
 
 // ══════════ STATE ══════════
-let sellers=[], products=[], orders=[], chats=[], sellerRequests=[], adRequests=[], ads=[];
+let sellers=[], products=[], orders=[], chats=[];
 let currentChatId="", chatViewerRole="";
 let chatPrefillText="";
 let customerPhone="";
 try{ customerPhone = localStorage.getItem("rayan_customer_phone")||""; }catch(e){}
 let visits={total:0,today:0,lastDate:""};
+let entVideos=[], entPredicts=[], entEntries=[], currentPredictId=null;
 let cart={};
 let currentSeller=null;
 let isAdmin=false;
 let regStep=1;
-let selectedPlan="starter";
+let selectedPlan="commission";
 let currentImgBase64="";
 let currentProductImages=[];
 let directGalleryImages=[], directGalleryIndex=0;
@@ -889,12 +801,13 @@ function listenAll(){
   onSnapshot(collection(db,"sellers"), snap=>{
     sellers = snap.docs.map(d=>d.data());
     renderProducts(document.querySelector(".filter-btn.active")?.textContent||"الكل");
-    if(!document.getElementById("view-stores").classList.contains("hidden")) renderStoresDirectory();
+    document.getElementById("hero-counts").textContent=`🟢 ${sellers.length} تاجر · ${products.length} منتج`;
   });
   // products
   onSnapshot(collection(db,"products"), snap=>{
     products = snap.docs.map(d=>d.data());
     renderProducts(document.querySelector(".filter-btn.active")?.textContent||"الكل");
+    document.getElementById("hero-counts").textContent=`🟢 ${sellers.length} تاجر · ${products.length} منتج`;
     if(currentSeller||isAdmin) renderDashboard();
   });
   // orders
@@ -914,29 +827,35 @@ function listenAll(){
   onSnapshot(doc(db,"meta","visits"), snap=>{
     if(snap.exists()) visits=snap.data();
   });
-  // seller registration requests
-  onSnapshot(collection(db,"sellerRequests"), snap=>{
-    sellerRequests = snap.docs.map(d=>d.data());
-    if(isAdmin) renderDashboard();
+  // entertainment videos
+  onSnapshot(collection(db,"entVideos"), snap=>{
+    entVideos = snap.docs.map(d=>d.data());
+    if(!document.getElementById("modal-entertainment").classList.contains("hidden")) renderEntVideos();
+    if(isAdmin && activeTab==="channel") renderDashboard();
   });
-  // one-time ad requests
-  onSnapshot(collection(db,"adRequests"), snap=>{
-    adRequests = snap.docs.map(d=>d.data());
-    if(isAdmin) renderDashboard();
+  // entertainment predictions
+  onSnapshot(collection(db,"entPredicts"), snap=>{
+    entPredicts = snap.docs.map(d=>d.data());
+    if(!document.getElementById("modal-entertainment").classList.contains("hidden")) renderEntQuiz();
+    if(isAdmin && activeTab==="channel") renderDashboard();
   });
-  // published ads
-  onSnapshot(collection(db,"ads"), snap=>{
-    ads = snap.docs.map(d=>d.data());
-    renderAdsStrip();
+  // predictions entries
+  onSnapshot(collection(db,"entEntries"), snap=>{
+    entEntries = snap.docs.map(d=>d.data());
+    if(isAdmin && activeTab==="channel") renderDashboard();
   });
 }
 
-// track visit
+// track visit (unique per device per day)
 async function trackVisit(){
   try{
+    const today=new Date().toDateString();
+    const lastVisit=localStorage.getItem('lastVisitDate');
+    if(lastVisit===today) return;
+    localStorage.setItem('lastVisitDate',today);
+
     const ref=doc(db,"meta","visits");
     const snap=await getDoc(ref);
-    const today=new Date().toDateString();
     let v=snap.exists()?snap.data():{total:0,today:0,lastDate:""};
     if(v.lastDate!==today){v.today=0;v.lastDate=today;}
     v.total++;v.today++;
@@ -956,8 +875,8 @@ window.onload=async function(){
     const isFirst=i===0;
     pl.innerHTML+=`<div class="plan-card ${isFirst?"selected":""}" id="plan-${p.id}" onclick="selectPlan('${p.id}')">
       <div class="plan-row">
-        <div class="plan-name">الباقة ${p.name}${isFirst?"<span class=\"plan-tag\">الأنسب للبداية</span>":""}</div>
-        <div class="plan-price ${isFirst?"sel":""}" id="plan-price-${p.id}">${SDG(p.price)}</div>
+        <div class="plan-name">الباقة ${i===0?"الأولى":"الثانية"} — ${p.name}${isFirst?"<span class=\"plan-tag\">الأشهر</span>":""}</div>
+        <div class="plan-price ${isFirst?"sel":""}" id="plan-price-${p.id}">${p.price===0?"بدون رسوم شهرية":SDG(p.price)+"/شهر"}</div>
       </div>
       <div class="plan-meta">${p.desc}</div>
     </div>`;
@@ -972,13 +891,14 @@ window.onload=async function(){
   checkUrlProduct();
   checkUrlStore();
   checkUrlChat();
+  checkUrlRegister();
 };
 
 // ══════════ IMAGE UPLOAD (via ImgBB) ══════════
 const IMGBB_API_KEY = "16b4262b9ff85a10c0f3a4834a847184";
 
 // ══════════ PUSH NOTIFICATIONS (real, works even when app is closed) ══════════
-const VAPID_PUBLIC_KEY = "BDgZAf-eaLJm0AShq2UJXqP4eideizd2OUWM3e12vNFFvVRbG1wYuonGFnjQQlKA2s9khgzSkJtC1iVrd1sXuVU";
+const VAPID_PUBLIC_KEY = "BLvYw7ZvvzUJ8YxX9v4pvPPZlR1IAcqrPiHGxjFZB97dYtM39xADAs852gLHB88lEricd68nVAzCcJwShz72IQk";
 
 function urlBase64ToUint8Array(base64String){
   const padding="=".repeat((4-base64String.length%4)%4);
@@ -1134,84 +1054,10 @@ function getProductPopularity(p){
     const matched = items.filter(i=>i.productId===p.id);
     return sum + matched.reduce((s,i)=>s+(i.qty||0),0);
   },0);
-  const seller = sellers.find(s=>s.id===p.sellerId);
-  const plan = getSellerPlan(seller);
-  const boost = plan.boost ? 1000 : 0; // gold/diamond plans surface above everyone else
-  return boost + views + orderedQty*5; // orders weigh more than plain views
+  return views + orderedQty*5; // orders weigh more than plain views
 }
 function sortByPopularity(list){
   return list.slice().sort((a,b)=>getProductPopularity(b)-getProductPopularity(a));
-}
-
-// ══════════ STORES DIRECTORY ══════════
-function getSellerSalesQty(sellerId){
-  return orders.reduce((sum,o)=>{
-    const items=(o.items||[]).filter(i=>i.sellerId===sellerId);
-    return sum+items.reduce((s,i)=>s+(i.qty||0),0);
-  },0);
-}
-function getTopSellerIds(n){
-  return sellers
-    .map(s=>({id:s.id,qty:getSellerSalesQty(s.id)}))
-    .filter(x=>x.qty>0)
-    .sort((a,b)=>b.qty-a.qty)
-    .slice(0,n)
-    .map(x=>x.id);
-}
-function showStoresPage(){
-  showView("stores");
-  renderStoresDirectory();
-  window.scrollTo(0,0);
-}
-function closeStoresPage(){
-  showView("market");
-}
-function renderStoresDirectory(){
-  const grid=document.getElementById("stores-directory-grid");
-  const countLabel=document.getElementById("stores-count-label");
-  if(sellers.length===0){
-    countLabel.textContent="لا توجد متاجر بعد";
-    grid.innerHTML=`<div class="store-empty"><div style="font-size:2.5rem;margin-bottom:12px">🏪</div><div style="font-weight:700;color:#6B7280">لا توجد متاجر بعد</div></div>`;
-    return;
-  }
-  countLabel.textContent=`📋 ${sellers.length} متجر متاح`;
-  const topSellerIds=getTopSellerIds(3);
-  const sortedSellers=sellers.slice().sort((a,b)=>{
-    const rank=s=>{const pl=getSellerPlan(s);return (pl.boost?5000:0)+(s.featured?1000:0)+(s.verified?100:0)+(topSellerIds.includes(s.id)?10:0);};
-    const rankDiff=rank(b)-rank(a);
-    if(rankDiff!==0)return rankDiff;
-    const avgA=a.ratingCount?a.ratingSum/a.ratingCount:0;
-    const avgB=b.ratingCount?b.ratingSum/b.ratingCount:0;
-    return avgB-avgA;
-  });
-  grid.innerHTML=`<div class="products-grid"></div>`;
-  const wrap=grid.querySelector(".products-grid");
-  sortedSellers.forEach(s=>{
-    const prodCount=products.filter(p=>p.sellerId===s.id).length;
-    const avg=s.ratingCount?Math.round((s.ratingSum/s.ratingCount)*10)/10:0;
-    const cnt=s.ratingCount||0;
-    const isBestSeller=topSellerIds.includes(s.id);
-    const badges=[];
-    const sellerPlan=getSellerPlan(s);
-    if(s.verified||sellerPlan.verified)badges.push('<span style="background:#EEF8EE;color:#2E7D5E;font-size:0.66rem;font-weight:700;padding:2px 7px;border-radius:100px">⭐ متجر موثّق</span>');
-    if(s.featured)badges.push('<span style="background:#FFF8EE;color:#C9933A;font-size:0.66rem;font-weight:700;padding:2px 7px;border-radius:100px">🏆 بائع مميز</span>');
-    if(isBestSeller)badges.push('<span style="background:#FFF0EC;color:#C0392B;font-size:0.66rem;font-weight:700;padding:2px 7px;border-radius:100px">🔥 الأكثر مبيعاً</span>');
-    const avatarHtml=s.storeImage?`<img src="${s.storeImage}" style="width:100%;height:100%;object-fit:cover">`:`<span style="font-size:2rem">${EMOJIS[s.category]||"🏪"}</span>`;
-    const div=document.createElement("div");
-    div.className="product-card";
-    div.style.cursor="pointer";
-    div.onclick=()=>{ closeStoresPage(); openStore(s.id); };
-    div.innerHTML=`
-      <div style="height:110px;display:flex;align-items:center;justify-content:center;background:${BG[s.category]||"#F5F5F5"};overflow:hidden">${avatarHtml}</div>
-      <div class="product-body">
-        <div class="product-name">${s.storeName}</div>
-        ${s.city?'<div style="color:#9CA3AF;font-size:0.72rem;margin-bottom:5px">📍 '+s.city+'</div>':''}
-        ${cnt>0?`<div class="seller-rating"><span style="color:#F59E0B;font-size:0.85rem">${"★".repeat(Math.round(avg))}${"☆".repeat(5-Math.round(avg))}</span><span class="rating-num">${avg}</span><span class="rating-count">(${cnt})</span></div>`:'<div style="color:#9CA3AF;font-size:0.72rem;margin-bottom:5px">لا توجد تقييمات بعد</div>'}
-        <div style="color:#6B7280;font-size:0.76rem;margin:5px 0">📦 ${prodCount} منتج</div>
-        ${badges.length?'<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">'+badges.join("")+'</div>':''}
-      </div>`;
-    wrap.appendChild(div);
-  });
 }
 
 function renderFilters(){
@@ -1228,6 +1074,7 @@ function renderFilters(){
 function renderProducts(filter){
   const wrap=document.getElementById("products-container");
   const list=sortByPopularity(filter==="الكل"?products:products.filter(p=>p.category===filter));
+  document.getElementById("hero-counts").textContent=`🟢 ${sellers.length} تاجر · ${products.length} منتج`;
   if(list.length===0){
     wrap.innerHTML=`<div style="text-align:center;padding:60px 20px;color:#9CA3AF"><div style="font-size:2.6rem;margin-bottom:12px">🏪</div><div style="font-weight:800;color:#6B7280;margin-bottom:7px">لا توجد منتجات بعد</div><div style="font-size:0.83rem;margin-bottom:16px">كن أول تاجر ينشر منتجات هنا!</div><button class="btn-gold" onclick="openRegister()">افتح متجرك الآن</button></div>`;
     return;
@@ -1238,11 +1085,8 @@ function renderProducts(filter){
     const div=document.createElement("div");div.className="product-card";
     const imgHtml=p.image?`<img src="${p.image}" style="width:100%;height:100%;object-fit:cover">`:`<span style="font-size:52px">${EMOJIS[p.category]||"📦"}</span>`;
     const mediaBadge=((p.images&&p.images.length>1)||p.videoUrl)?`<div style="position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,0.6);color:#fff;font-size:0.65rem;padding:2px 7px;border-radius:100px;display:flex;align-items:center;gap:3px">${p.videoUrl?"🎥":""}${(p.images&&p.images.length>1)?" "+p.images.length+" صور":""}</div>`:"";
-    const pSeller=sellers.find(x=>x.id===p.sellerId);
-    const pSellerPlan=getSellerPlan(pSeller);
-    const verifiedBadge=(pSeller&&(pSeller.verified||pSellerPlan.verified))?`<div style="position:absolute;top:6px;right:6px;background:rgba(46,125,94,0.9);color:#fff;font-size:0.62rem;padding:2px 7px;border-radius:100px;font-weight:700">✓ موثّق</div>`:"";
     div.innerHTML=`
-      <div class="product-img" style="background:${BG[p.category]||"#F5F5F5"}">${imgHtml}${mediaBadge}${verifiedBadge}</div>
+      <div class="product-img" style="background:${BG[p.category]||"#F5F5F5"}">${imgHtml}${mediaBadge}</div>
       <div class="product-body">
         <div class="seller-row" onclick="openStore('${p.sellerId}')" style="cursor:pointer"><div class="seller-dot"></div><span class="seller-nm" style="text-decoration:underline;text-decoration-style:dotted">${p.sellerName}</span><span style="color:#C9933A;font-size:0.65rem;margin-right:3px">↗</span></div>
         ${(()=>{const s=sellers.find(x=>x.id===p.sellerId);const avg=s&&s.ratingCount?Math.round((s.ratingSum/s.ratingCount)*10)/10:0;const cnt=s&&s.ratingCount?s.ratingCount:0;if(!cnt)return "";const stars="★".repeat(Math.round(avg))+"☆".repeat(5-Math.round(avg));return '<div class="seller-rating"><span style="color:#F59E0B;font-size:0.9rem">'+stars+'</span><span class="rating-num">'+avg+'</span><span class="rating-count">('+cnt+')</span></div>';})()}
@@ -1251,7 +1095,7 @@ function renderProducts(filter){
         ${p.desc?'<div class="product-desc">'+p.desc+'</div>':''}
         <div class="product-footer">
           <span class="product-price" ${p.priceOnRequest?'style="font-size:0.82rem;color:#C9933A"':''}>${p.priceOnRequest?"السعر عند الطلب":SDG(p.price)}</span>
-          <button class="order-now-btn" onclick="openDirectOrder('${p.id}')">اطلب الآن</button>
+          <button class="order-now-btn" onclick="openDirectOrder('${p.id}')">تواصل واطلب</button>
         </div>
         <div style="display:flex;gap:6px;margin-top:8px">
           <button onclick="inquireAboutProduct('${p.id}')" style="flex:1;padding:7px;border-radius:8px;border:1.5px solid #E5E0D8;background:#fff;color:#6B7280;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">💬 استفسر</button>
@@ -1328,7 +1172,7 @@ function buildVideoEmbed(url){
 
 async function submitDirectOrder(){
   const name=document.getElementById("co-name").value.trim();
-  const phone=document.getElementById("co-phone").value.trim();
+  const phone=(document.getElementById("co-country").value+document.getElementById("co-phone").value.trim().replace(/^0+/,""));
   const address=document.getElementById("co-address").value.trim();
   const qty=parseInt(document.getElementById("co-qty").value)||1;
   const notes=document.getElementById("co-notes").value.trim();
@@ -1341,7 +1185,7 @@ async function submitDirectOrder(){
   const deliveryText=p.deliveryPrice!=null?(p.deliveryPrice===0?"\nالتوصيل: مجاني":"\nالتوصيل: "+SDG(deliveryFee)):"";
   const totalText=p.priceOnRequest?"يُحدد عند التواصل":SDG(total);
   const orderId="ORD-"+Date.now().toString().slice(-6);
-  const order={id:orderId,buyerName:name,buyerPhone:phone,buyerAddress:address,notes,items:[{productId:p.id,name:p.name,price:p.price,qty,sellerId:p.sellerId,sellerName:p.sellerName}],deliveryFee,total,priceOnRequest:!!p.priceOnRequest,date:TODAY(),status:"new"};
+  const order={id:orderId,createdAt:Date.now(),buyerName:name,buyerPhone:phone,buyerAddress:address,notes,items:[{productId:p.id,name:p.name,price:p.price,qty,sellerId:p.sellerId,sellerName:p.sellerName}],deliveryFee,total,priceOnRequest:!!p.priceOnRequest,date:TODAY(),status:"new"};
   await dbSave("orders",orderId,order);
   notifyAdmin(`🛒 طلب جديد على منصة الريان!\n━━━━━━━━━━\nرقم الطلب: ${orderId}\nالمنتج: ${p.name} × ${qty}${deliveryText}\nالإجمالي: ${totalText}\nالمتجر: ${p.sellerName}\n━━━━━━━━━━\nالزبون: ${name}\nالهاتف: ${phone}\nالعنوان: ${address}`);
   const seller=sellers.find(s=>s.id===p.sellerId);
@@ -1367,210 +1211,32 @@ function showView(v){
   document.getElementById("view-market").classList.toggle("hidden",v!=="market");
   document.getElementById("view-dashboard").classList.toggle("hidden",v!=="dashboard");
   document.getElementById("view-store").classList.toggle("hidden",v!=="store");
-  document.getElementById("view-stores").classList.toggle("hidden",v!=="stores");
 }
 function closeModal(id){document.getElementById(id).classList.add("hidden");}
 
 // ══════════ REGISTER ══════════
-function openJoinChoice(){
-  document.getElementById("modal-join-choice").classList.remove("hidden");
-}
-function renderAdsStrip(){
-  const strip=document.getElementById("ads-strip");
-  if(!strip)return;
-  const active=ads.filter(a=>a.active).sort((a,b)=>(b.id>a.id?1:-1));
-  if(active.length===0){ strip.classList.add("hidden"); strip.innerHTML=""; return; }
-  strip.classList.remove("hidden");
-  strip.innerHTML=`<div style="font-weight:900;color:#1A2744;font-size:0.9rem;margin-bottom:8px">📢 إعلانات</div>
-    <div style="display:flex;gap:10px;overflow-x:auto;padding-bottom:4px">`+
-    active.map(a=>`<div style="flex-shrink:0;width:230px;background:#fff;border:1.5px solid #FFE8CC;border-radius:12px;overflow:hidden">
-      ${a.image?`<img src="${a.image}" style="width:100%;height:110px;object-fit:cover">`:`<div style="width:100%;height:110px;background:linear-gradient(135deg,#FFF0E8,#FFE0CC);display:flex;align-items:center;justify-content:center;font-size:2rem">📢</div>`}
-      <div style="padding:10px">
-        <div style="font-weight:800;color:#1A2744;font-size:0.86rem;margin-bottom:3px">${a.title}</div>
-        ${a.description?`<div style="color:#6B7280;font-size:0.76rem;line-height:1.4;margin-bottom:7px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${a.description}</div>`:""}
-        <a href="https://wa.me/249${a.phone.replace(/^0/,"")}" target="_blank" style="display:block;text-align:center;background:#25D366;color:#fff;border-radius:7px;padding:6px;font-weight:700;font-size:0.78rem;text-decoration:none">💬 تواصل</a>
-      </div>
-    </div>`).join("")+`</div>`;
-}
-let adImage="", adReceiptImage="";
-function openPostAd(){
-  adImage="";adReceiptImage="";
-  ["ad-name","ad-phone","ad-title","ad-desc"].forEach(id=>document.getElementById(id).value="");
-  document.getElementById("ad-img-input").value="";
-  document.getElementById("ad-img-preview").style.display="none";
-  document.getElementById("ad-img-placeholder").style.display="block";
-  document.getElementById("ad-receipt-input").value="";
-  document.getElementById("ad-receipt-preview").style.display="none";
-  document.getElementById("ad-receipt-placeholder").style.display="block";
-  hideErr("ad-err");
-  document.getElementById("modal-post-ad").classList.remove("hidden");
-}
-async function uploadToImgbb(file){
-  const formData=new FormData();
-  formData.append("image",file);
-  const res=await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`,{method:"POST",body:formData});
-  const data=await res.json();
-  if(!data.success)throw new Error("upload failed");
-  return data.data.url;
-}
-async function handleAdImgUpload(input){
-  const file=input.files[0];if(!file)return;
-  showToast("جاري رفع الصورة...");
-  try{
-    adImage=await uploadToImgbb(file);
-    document.getElementById("ad-img-preview").src=adImage;
-    document.getElementById("ad-img-preview").style.display="block";
-    document.getElementById("ad-img-placeholder").style.display="none";
-    showToast("تم رفع الصورة ✓");
-  }catch(e){ showToast("فشل رفع الصورة"); }
-}
-async function handleAdReceiptUpload(input){
-  const file=input.files[0];if(!file)return;
-  showToast("جاري رفع صورة الإشعار...");
-  try{
-    adReceiptImage=await uploadToImgbb(file);
-    document.getElementById("ad-receipt-preview").src=adReceiptImage;
-    document.getElementById("ad-receipt-preview").style.display="block";
-    document.getElementById("ad-receipt-placeholder").style.display="none";
-    showToast("تم رفع صورة الإشعار ✓");
-  }catch(e){ showToast("فشل رفع الصورة"); }
-}
-async function submitAdRequest(){
-  const name=document.getElementById("ad-name").value.trim();
-  const phone=document.getElementById("ad-phone").value.trim();
-  const title=document.getElementById("ad-title").value.trim();
-  const desc=document.getElementById("ad-desc").value.trim();
-  if(!name)return showErr("ad-err","يرجى إدخال اسمك");
-  if(!validSD(phone))return showErr("ad-err","رقم الهاتف يبدأ بـ 09 أو 01 ويكون 10 أرقام");
-  if(!title)return showErr("ad-err","يرجى إدخال عنوان الإعلان");
-  if(!adReceiptImage)return showErr("ad-err","يرجى رفع صورة إشعار الدفع أولاً");
-  const request={id:Date.now().toString(),type:"ad",advertiserName:name,phone,title,description:desc,image:adImage,paymentReceipt:adReceiptImage,status:"pending",requestedAt:Date.now()};
-  await dbSave("adRequests",request.id,request);
-  notifyAdmin(`📢 طلب نشر إعلان جديد!\n━━━━━━━━━━\nالعنوان: ${title}\nصاحب الإعلان: ${name}\nالهاتف: ${phone}\nالمبلغ: ${SDG(AD_PRICE)}\n━━━━━━━━━━\nصورة إشعار الدفع:\n${adReceiptImage}`);
-  closeModal("modal-post-ad");
-  document.getElementById("rs-message").textContent=`تم استلام طلب إعلانك "${title}" وسيتم مراجعته ونشره قريباً بعد تأكيد الدفع.`;
-  document.getElementById("modal-request-submitted").classList.remove("hidden");
-  adImage="";adReceiptImage="";
-}
 function openRegister(){
-  regStep=1;selectedPlan="starter";currentStoreImage="";regReceiptImage="";
+  regStep=1;selectedPlan="commission";currentStoreImage="";
   ["r-name","r-phone","r-store","r-desc"].forEach(id=>document.getElementById(id).value="");
   document.getElementById("r-img-input").value="";
   document.getElementById("r-img-preview").style.display="none";
   document.getElementById("r-img-placeholder").style.display="block";
-  document.getElementById("reg-receipt-input").value="";
-  document.getElementById("reg-receipt-preview").style.display="none";
-  document.getElementById("reg-receipt-placeholder").style.display="block";
   document.getElementById("r-img-placeholder").innerHTML=`<div style="font-size:1.8rem;margin-bottom:4px">🏪</div><div style="color:#6B7280;font-size:0.82rem">اضغط لرفع صورة المتجر</div>`;
   hideErr("reg-err");updateRegUI();
   document.getElementById("modal-register").classList.remove("hidden");
 }
-function totalRegSteps(){ return 4; }
 function updateRegUI(){
-  const total=totalRegSteps();
-  ["step1","step2","step3","step4"].forEach((s,i)=>document.getElementById(s).classList.toggle("hidden",i+1!==regStep));
-  ["seg1","seg2","seg3","seg4"].forEach((s,i)=>{
-    const seg=document.getElementById(s);
-    seg.classList.toggle("hidden", i+1>total);
-    seg.classList.toggle("done", i+1<=regStep);
-  });
-  document.getElementById("step-label").textContent=`الخطوة ${regStep} من ${total}`;
+  ["step1","step2","step3"].forEach((s,i)=>document.getElementById(s).classList.toggle("hidden",i+1!==regStep));
+  ["seg1","seg2","seg3"].forEach((s,i)=>document.getElementById(s).classList.toggle("done",i+1<=regStep));
+  document.getElementById("step-label").textContent=`الخطوة ${regStep} من 3`;
   document.getElementById("btn-back").classList.toggle("hidden",regStep===1);
-  document.getElementById("btn-next").classList.toggle("hidden",regStep===total);
-  document.getElementById("btn-submit").classList.toggle("hidden",regStep!==total);
+  document.getElementById("btn-next").classList.toggle("hidden",regStep===3);
+  document.getElementById("btn-submit").classList.toggle("hidden",regStep!==3);
   if(regStep===3){
     document.getElementById("sum-store").textContent=document.getElementById("r-store").value+" · "+document.getElementById("r-cat").value;
     document.getElementById("sum-owner").textContent=document.getElementById("r-name").value+" · "+document.getElementById("r-phone").value;
     document.getElementById("reg-summary").classList.remove("hidden");
   }
-  if(regStep===4){
-    const plan=PLANS.find(p=>p.id===selectedPlan);
-    document.getElementById("pay-amount").textContent=plan?SDG(plan.price):"—";
-  }
-}
-function updateUpgradeBanner(){
-  const banner=document.getElementById("upgrade-banner");
-  if(!banner)return;
-  if(!currentSeller){banner.classList.add("hidden");return;}
-  banner.onclick=openUpgradePlan;
-  banner.style.cursor="pointer";
-  const plan=getSellerPlan(currentSeller);
-  const idx=PLANS.findIndex(p=>p.id===plan.id);
-  if(idx===PLANS.length-1){ // already on the top (diamond) plan
-    banner.classList.add("hidden");
-    return;
-  }
-  banner.classList.remove("hidden");
-  const nextPlan=idx>=0?PLANS[idx+1]:PLANS[0];
-  document.getElementById("upgrade-banner-sub").textContent=`رقّي لباقة ${nextPlan.name} — ${nextPlan.desc}`;
-}
-function openUpgradePlan(){
-  const list=document.getElementById("upgrade-plans-list");
-  const currentPlanId=currentSeller?getSellerPlan(currentSeller).id:"";
-  list.innerHTML=PLANS.map(p=>{
-    const isCurrent=p.id===currentPlanId;
-    const perks=[
-      p.maxProducts===Infinity?"نشر مفتوح للمنتجات":"حتى "+p.maxProducts+" منتج",
-      p.whatsapp?"تسويق عبر واتساب (حالات وقروبات)":null,
-      p.facebook?"تسويق عبر فيسبوك":null,
-      p.boost?"ظهور أعلى للمتجر والمنتجات":null,
-      p.verified?"علامة \"موثّق\" تلقائية":null,
-      p.fbPage?"صفحة فيسبوك مخصصة":null,
-      p.contentPlan?"خطة محتوى كاملة (محتوى + هوية بصرية + مبيعات)":null,
-    ].filter(Boolean);
-    return `<div class="plan-card ${isCurrent?"selected":""}" style="${isCurrent?"":"cursor:pointer"}" ${isCurrent?"":`onclick="requestPlanUpgrade('${p.id}')"`}>
-      <div class="plan-row">
-        <div class="plan-name">${p.name}${isCurrent?'<span class="plan-tag" style="background:#6B7280">باقتك الحالية</span>':""}</div>
-        <div class="plan-price ${isCurrent?"sel":""}">${SDG(p.price)}</div>
-      </div>
-      <div class="plan-meta" style="margin-top:6px">${perks.map(x=>"✓ "+x).join("<br>")}</div>
-      ${isCurrent?"":'<button class="btn-gold" style="width:100%;margin-top:10px;padding:9px" onclick="event.stopPropagation();requestPlanUpgrade(\''+p.id+'\')">🚀 اطلب الترقية لهذه الباقة</button>'}
-    </div>`;
-  }).join("");
-  document.getElementById("modal-upgrade-plan").classList.remove("hidden");
-}
-let pendingUpgradePlanId="";
-let upgradeReceiptImage="";
-function requestPlanUpgrade(planId){
-  if(!currentSeller)return;
-  const plan=PLANS.find(p=>p.id===planId);if(!plan)return;
-  pendingUpgradePlanId=planId;
-  upgradeReceiptImage="";
-  document.getElementById("upg-pay-plan").textContent=`${plan.name} — ${SDG(plan.price)}`;
-  document.getElementById("upg-receipt-input").value="";
-  document.getElementById("upg-receipt-preview").style.display="none";
-  document.getElementById("upg-receipt-placeholder").style.display="block";
-  hideErr("upg-pay-err");
-  closeModal("modal-upgrade-plan");
-  document.getElementById("modal-upgrade-payment").classList.remove("hidden");
-}
-async function handleUpgradeReceiptUpload(input){
-  const file=input.files[0];if(!file)return;
-  showToast("جاري رفع صورة الإشعار...");
-  try{
-    const formData=new FormData();
-    formData.append("image",file);
-    const res=await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`,{method:"POST",body:formData});
-    const data=await res.json();
-    if(!data.success)throw new Error("upload failed");
-    upgradeReceiptImage=data.data.url;
-    document.getElementById("upg-receipt-preview").src=upgradeReceiptImage;
-    document.getElementById("upg-receipt-preview").style.display="block";
-    document.getElementById("upg-receipt-placeholder").style.display="none";
-    showToast("تم رفع صورة الإشعار ✓");
-  }catch(e){
-    showToast("فشل رفع الصورة، حاول مجدداً");
-  }
-}
-function submitUpgradeRequest(){
-  if(!currentSeller || !pendingUpgradePlanId)return;
-  if(!upgradeReceiptImage)return showErr("upg-pay-err","يرجى رفع صورة إشعار الدفع أولاً");
-  const plan=PLANS.find(p=>p.id===pendingUpgradePlanId);if(!plan)return;
-  notifyAdmin(`🚀 طلب ترقية باقة — بانتظار تأكيد الدفع\n━━━━━━━━━━\nالمتجر: ${currentSeller.storeName}\nصاحب المتجر: ${currentSeller.ownerName}\nالهاتف: ${currentSeller.phone}\n━━━━━━━━━━\nالباقة المطلوبة: ${plan.name} (${SDG(plan.price)})\n━━━━━━━━━━\nصورة إشعار الدفع:\n${upgradeReceiptImage}`);
-  closeModal("modal-upgrade-payment");
-  showToast("تم إرسال طلب الترقية، هيتواصل معاك فريق المنصة قريباً ✓");
-  pendingUpgradePlanId="";
-  upgradeReceiptImage="";
 }
 function selectPlan(id){
   selectedPlan=id;
@@ -1587,55 +1253,22 @@ function regNext(){
     if(!document.getElementById("r-name").value.trim())return showErr("reg-err","يرجى إدخال اسمك");
     const ph=document.getElementById("r-phone").value.trim();
     if(!ph)return showErr("reg-err","يرجى إدخال رقم الهاتف");
-    if(!validSD(ph))return showErr("reg-err","رقم الهاتف يبدأ بـ 09 أو 01 ويكون 10 أرقام");
+    if(!validSD(ph))return showErr("reg-err","يرجى إدخال رقم هاتف صحيح");
   }
   if(regStep===2&&!document.getElementById("r-store").value.trim())return showErr("reg-err","يرجى إدخال اسم المتجر");
   regStep++;updateRegUI();
 }
 function regBack(){regStep--;updateRegUI();}
-let regReceiptImage="";
-async function handleReceiptUpload(input){
-  const file=input.files[0];if(!file)return;
-  showToast("جاري رفع صورة الإشعار...");
-  try{
-    const formData=new FormData();
-    formData.append("image",file);
-    const res=await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`,{method:"POST",body:formData});
-    const data=await res.json();
-    if(!data.success)throw new Error("upload failed");
-    regReceiptImage=data.data.url;
-    document.getElementById("reg-receipt-preview").src=regReceiptImage;
-    document.getElementById("reg-receipt-preview").style.display="block";
-    document.getElementById("reg-receipt-placeholder").style.display="none";
-    showToast("تم رفع صورة الإشعار ✓");
-  }catch(e){
-    showToast("فشل رفع الصورة، حاول مجدداً");
-  }
-}
 async function regSubmit(){
-  if(!regReceiptImage)return showErr("reg-err","يرجى رفع صورة إشعار الدفع أولاً");
-  const plan=PLANS.find(p=>p.id===selectedPlan);
-  const request={
-    id:Date.now().toString(),
-    type:"store",
-    ownerName:document.getElementById("r-name").value.trim(),
-    phone:document.getElementById("r-phone").value.trim(),
-    storeName:document.getElementById("r-store").value.trim(),
-    city:document.getElementById("r-city").value.trim(),
-    category:document.getElementById("r-cat").value,
-    description:document.getElementById("r-desc").value.trim(),
-    storeImage:currentStoreImage,
-    plan:selectedPlan,
-    paymentReceipt:regReceiptImage,
-    status:"pending",
-    requestedAt:Date.now()
-  };
-  await dbSave("sellerRequests",request.id,request);
-  notifyAdmin(`🆕 طلب تسجيل تاجر جديد!\n━━━━━━━━━━\nالمتجر: ${request.storeName}\nالمالك: ${request.ownerName}\nالهاتف: ${request.phone}\nالتصنيف: ${request.category}\nالمدينة: ${request.city}\nالباقة: ${plan.name} (${SDG(plan.price)})\n━━━━━━━━━━\nصورة إشعار الدفع:\n${regReceiptImage}`);
-  closeModal("modal-register");
-  document.getElementById("rs-message").textContent=`سيتم مراجعة طلب متجر "${request.storeName}" والرد عليك قريباً. بعد الموافقة، تقدر تسجّل دخولك بنفس رقم هاتفك (${request.phone}).`;
-  document.getElementById("modal-request-submitted").classList.remove("hidden");
-  regReceiptImage="";
+  const seller={id:Date.now().toString(),ownerName:document.getElementById("r-name").value.trim(),phone:(document.getElementById("r-country").value+document.getElementById("r-phone").value.trim().replace(/^0+/,"")),storeName:document.getElementById("r-store").value.trim(),category:document.getElementById("r-cat").value,plan:selectedPlan,description:document.getElementById("r-desc").value.trim(),storeImage:currentStoreImage,joinedAt:TODAY()};
+  await dbSave("sellers",seller.id,seller);
+  notifyAdmin(`🆕 تاجر جديد سجّل في منصة الريان!\n━━━━━━━━━━\nالمتجر: ${seller.storeName}\nالمالك: ${seller.ownerName}\nالهاتف: ${seller.phone}\nالتصنيف: ${seller.category}\nالباقة: ${PLANS.find(p=>p.id===seller.plan)?.name||seller.plan}`);
+  currentSeller=seller;isAdmin=false;
+  enableSellerPushNotifications(seller.id);
+  closeModal("modal-register");showView("dashboard");renderDashboard();
+  document.getElementById("wt-name").textContent=`أهلاً بك يا ${seller.ownerName}! 👋`;
+  document.getElementById("wt-store").textContent=`متجر "${seller.storeName}" جاهز الآن على منصة الريان 🛒`;
+  document.getElementById("modal-welcome-trader").classList.remove("hidden");
 }
 function closeWelcomeAndAddProduct(){
   closeModal("modal-welcome-trader");
@@ -1644,14 +1277,6 @@ function closeWelcomeAndAddProduct(){
 
 // ══════════ ADD / EDIT PRODUCT ══════════
 function openAddProduct(){
-  if(currentSeller){
-    const plan=getSellerPlan(currentSeller);
-    const myProdCount=products.filter(p=>p.sellerId===currentSeller.id).length;
-    if(myProdCount>=plan.maxProducts){
-      showToast(`وصلت للحد الأقصى (${plan.maxProducts} منتج) في باقة ${plan.name} — تواصل معنا للترقية لباقة أعلى`);
-      return;
-    }
-  }
   currentProductImages=[];document.getElementById("p-edit-id").value="";
   document.getElementById("product-modal-title").textContent="➕ إضافة منتج جديد";
   document.getElementById("p-submit-btn").textContent="✓ نشر المنتج";
@@ -1746,15 +1371,16 @@ function switchTab(tab){
   activeTab=tab;
   document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
   event.target.classList.add("active");
-  ["tab-products","tab-orders","tab-admin","tab-messages","tab-manage","tab-requests"].forEach(id=>document.getElementById(id).classList.add("hidden"));
-  document.getElementById("tab-"+tab).classList.remove("hidden");
+  ["tab-products","tab-orders","tab-admin","tab-messages","tab-manage","tab-channel"].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.add("hidden");});
+  const cur=document.getElementById("tab-"+tab); if(cur)cur.classList.remove("hidden");
+  if(tab==="channel") renderChannelAdmin();
 }
 
 function renderDashboard(){
   if(isAdmin){renderAdminDashboard();return;}
   if(!currentSeller)return;
-  const plan=getSellerPlan(currentSeller);
-  const planLabel=`باقة ${plan.name} · ${SDG(plan.price)}${plan.maxProducts===Infinity?" · نشر مفتوح":" · حتى "+plan.maxProducts+" منتج"}`;
+  const plan=PLANS.find(p=>p.id===currentSeller.plan)||PLANS[0];
+  const planLabel=plan.type==="rent"?`باقة ${plan.name} · ${SDG(plan.price)}/شهر`:`باقة ${plan.name} · عمولة ${plan.commission}%`;
   document.getElementById("dash-view-label").textContent="· التاجر";
   document.getElementById("dash-sub").textContent="مرحباً،";
   document.getElementById("dash-store-name").textContent=currentSeller.storeName;
@@ -1763,14 +1389,13 @@ function renderDashboard(){
   document.getElementById("dash-main-btn").textContent="➕ أضف منتجاً";
   document.getElementById("dash-main-btn").onclick=openAddProduct;
   document.getElementById("dash-share-strip").classList.remove("hidden");
-  updateUpgradeBanner();
   const myProds=products.filter(p=>p.sellerId===currentSeller.id);
   const myOrders=orders.filter(o=>o.items.some(i=>i.sellerId===currentSeller.id));
   const myChats=chats.filter(c=>c.sellerId===currentSeller.id);
   const unreadChats=myChats.filter(c=>!c.sellerRead).length;
   const myRevenue=myOrders.filter(o=>o.status==="done").reduce((s,o)=>{
     const t=o.items.filter(i=>i.sellerId===currentSeller.id).reduce((x,i)=>x+(i.price*i.qty),0);
-    return s+t;
+    return s+(plan.type==="rent"?t:Math.round(t*(1-plan.commission/100)));
   },0);
   document.getElementById("dash-tabs").innerHTML=`
     <button class="tab-btn ${activeTab==="products"?"active":""}" onclick="switchTab('products')">📦 منتجاتي (${myProds.length})</button>
@@ -1792,7 +1417,7 @@ function renderDashboard(){
     const thumb=p.image?`<img class="prod-thumb" src="${p.image}">`:`<div class="prod-emoji-box" style="background:${BG[p.category]||"#F5F5F5"}">${EMOJIS[p.category]||"📦"}</div>`;
     return `<div class="prod-row"><div class="prod-row-left">${thumb}<div><div class="prod-title">${p.name}</div><div class="prod-meta">${p.category} · ${p.addedAt}</div></div></div>
       <div style="display:flex;align-items:center;gap:7px;flex-shrink:0">
-        <div class="prod-price-col"><div class="prod-price-val">${p.priceOnRequest?"عند الطلب":SDG(p.price)}</div><div class="prod-net">${p.priceOnRequest?"🔒 يتفاوض التاجر":"صافيك: "+SDG(p.price)}</div></div>
+        <div class="prod-price-col"><div class="prod-price-val">${p.priceOnRequest?"عند الطلب":SDG(p.price)}</div><div class="prod-net">${p.priceOnRequest?"🔒 يتفاوض التاجر":(plan.type==="rent"?"صافيك: "+SDG(p.price):"صافيك: "+SDG(Math.round(p.price*(1-plan.commission/100))))}</div></div>
         <button onclick="shareProduct('${p.id}')" class="btn-edit" style="background:#EEF8EE;color:#2E7D5E">🔗</button>
         <button class="btn-edit" onclick="openEditProduct('${p.id}')">✏️</button>
         <button class="btn-red" onclick="deleteProduct('${p.id}')">🗑</button>
@@ -1802,7 +1427,7 @@ function renderDashboard(){
   oTab.classList.toggle("hidden",activeTab!=="orders");
   if(myOrders.length===0){oTab.innerHTML=`<div class="panel"><div class="no-items"><div class="icon">📋</div><div style="font-weight:700;margin-bottom:3px">لا توجد طلبات بعد</div></div></div>`;}
   else{oTab.innerHTML=`<div class="panel"><div class="panel-head"><span class="panel-title">الطلبات (${myOrders.length})</span></div>`+
-    myOrders.slice().reverse().map(o=>{
+    myOrders.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).map(o=>{
       const myItems=o.items.filter(i=>i.sellerId===currentSeller.id);
       const myTotal=myItems.reduce((s,i)=>s+(i.price*i.qty),0);
       const waNum="249"+o.buyerPhone.replace(/^0/,"");
@@ -1849,8 +1474,6 @@ function renderDashboard(){
 }
 
 function renderAdminDashboard(){
-  const pendingCount=sellerRequests.filter(r=>r.status==="pending").length+adRequests.filter(r=>r.status==="pending").length;
-  document.getElementById("upgrade-banner").classList.add("hidden");
   document.getElementById("dash-view-label").textContent="· لوحة المالك";
   document.getElementById("dash-sub").textContent="مرحباً، مالك المنصة";
   document.getElementById("dash-store-name").textContent="منصة الريان";
@@ -1867,11 +1490,11 @@ function renderAdminDashboard(){
     <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-val">${orders.length}</div><div class="stat-lbl">الطلبات</div></div>
     <div class="stat-card"><div class="stat-icon">👁</div><div class="stat-val">${visits.total||0}</div><div class="stat-lbl">الزيارات</div></div>`;
   document.getElementById("dash-tabs").innerHTML=`
-    <button class="tab-btn ${activeTab==="requests"?"active":""}" onclick="switchTab('requests')">📨 الطلبات الجديدة${pendingCount?' <span style="color:#C9933A">('+pendingCount+')</span>':""}</button>
     <button class="tab-btn ${activeTab==="admin"?"active":""}" onclick="switchTab('admin')">📊 الإحصائيات</button>
     <button class="tab-btn ${activeTab==="orders"?"active":""}" onclick="switchTab('orders')">📋 الطلبات</button>
     <button class="tab-btn ${activeTab==="messages"?"active":""}" onclick="switchTab('messages')">💬 المحادثات (${chats.length})</button>
-    <button class="tab-btn ${activeTab==="manage"?"active":""}" onclick="switchTab('manage')">🏪 التجار</button>`;
+    <button class="tab-btn ${activeTab==="manage"?"active":""}" onclick="switchTab('manage')">🏪 التجار</button>
+    <button class="tab-btn ${activeTab==="channel"?"active":""}" onclick="switchTab('channel')">📺 القناة</button>`;
   const aTab=document.getElementById("tab-admin");
   aTab.classList.toggle("hidden",activeTab!=="admin");
   aTab.innerHTML=`<div class="admin-grid">
@@ -1884,7 +1507,7 @@ function renderAdminDashboard(){
     </div>
     <div class="panel"><div class="panel-head"><span class="panel-title">التجار</span></div>
     ${sellers.length===0?"<div class=\"no-items\"><div>لا يوجد تجار</div></div>":
-    sellers.map(s=>{const sp=products.filter(p=>p.sellerId===s.id).length;const so=orders.filter(o=>o.items.some(i=>i.sellerId===s.id)).length;const plan=getSellerPlan(s);
+    sellers.map(s=>{const sp=products.filter(p=>p.sellerId===s.id).length;const so=orders.filter(o=>o.items.some(i=>i.sellerId===s.id)).length;const plan=PLANS.find(p=>p.id===s.plan)||PLANS[0];
     return `<div class="prod-row"><div class="prod-row-left">${s.storeImage?`<img class="prod-thumb" src="${s.storeImage}">`:`<div class="prod-emoji-box" style="background:#EEF0FF">🏪</div>`}<div><div class="prod-title">${s.storeName}</div><div class="prod-meta">${s.ownerName} · ${s.phone} · باقة ${plan.name}</div></div></div>
     <div style="text-align:left;flex-shrink:0"><div style="font-size:0.76rem;color:#6B7280">${sp} منتج · ${so} طلب</div></div></div>`;}).join("")}
     </div>`;
@@ -1892,7 +1515,7 @@ function renderAdminDashboard(){
   oTab.classList.toggle("hidden",activeTab!=="orders");
   if(orders.length===0){oTab.innerHTML=`<div class="panel"><div class="no-items"><div class="icon">📋</div><div>لا توجد طلبات</div></div></div>`;}
   else{oTab.innerHTML=`<div class="panel"><div class="panel-head"><span class="panel-title">كل الطلبات (${orders.length})</span></div>`+
-    orders.slice().reverse().map(o=>`<div class="order-row"><div class="order-info">
+    orders.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).map(o=>`<div class="order-row"><div class="order-info">
       <div class="order-id">${o.id} · ${o.date}</div>
       <div class="order-buyer">${o.buyerName}</div>
       <div class="order-detail">📱 ${o.buyerPhone} · 🏠 ${o.buyerAddress}</div>
@@ -1908,7 +1531,7 @@ function renderAdminDashboard(){
     mTab.innerHTML=`<div class="panel"><div class="panel-head"><span class="panel-title">إدارة التجار والمنتجات</span></div>`+
     sellers.map(s=>{
       const sp=products.filter(p=>p.sellerId===s.id);
-      const plan=getSellerPlan(s);
+      const plan=PLANS.find(p=>p.id===s.plan)||PLANS[0];
       const avg=s.ratingCount?Math.round((s.ratingSum/s.ratingCount)*10)/10:0;
       return `<div style="background:#F4F6FA;border-radius:10px;padding:13px;margin-bottom:10px">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px">
@@ -1920,8 +1543,6 @@ function renderAdminDashboard(){
           <div style="display:flex;gap:5px;flex-wrap:wrap">
             <button onclick="adminEditSeller('${s.id}')" class="btn-edit" style="font-size:0.72rem">✏️ تعديل التاجر</button>
             <button onclick="adminAddProductForSeller('${s.id}')" class="btn-add-sm" style="font-size:0.72rem">➕ أضف منتج</button>
-            <button onclick="toggleSellerBadge('${s.id}','verified')" class="btn-edit" style="font-size:0.72rem;${s.verified?"background:#EEF8EE;color:#2E7D5E":""}">⭐ ${s.verified?"إلغاء التوثيق":"توثيق"}</button>
-            <button onclick="toggleSellerBadge('${s.id}','featured')" class="btn-edit" style="font-size:0.72rem;${s.featured?"background:#FFF8EE;color:#C9933A":""}">🏆 ${s.featured?"إلغاء التمييز":"تمييز"}</button>
             <button onclick="adminDeleteSeller('${s.id}')" class="btn-red" style="font-size:0.72rem">🗑 حذف التاجر</button>
           </div>
         </div>
@@ -1960,99 +1581,15 @@ function renderAdminDashboard(){
         </div>`;
       }).join("")+"</div>";
   }
-  renderRequestsTab();
-}
-function renderRequestsTab(){
-  const rTab=document.getElementById("tab-requests");
-  if(!rTab)return;
-  rTab.classList.toggle("hidden",activeTab!=="requests");
-  const pendingStores=sellerRequests.filter(r=>r.status==="pending").sort((a,b)=>b.requestedAt-a.requestedAt);
-  const pendingAds=adRequests.filter(r=>r.status==="pending").sort((a,b)=>b.requestedAt-a.requestedAt);
-  let html=`<div class="panel"><div class="panel-head"><span class="panel-title">طلبات إنشاء متجر (${pendingStores.length})</span></div>`;
-  if(pendingStores.length===0){
-    html+=`<div class="no-items"><div class="icon">📭</div><div>لا توجد طلبات متاجر جديدة</div></div>`;
-  } else {
-    html+=pendingStores.map(r=>{
-      const plan=PLANS.find(p=>p.id===r.plan)||{name:r.plan,price:0};
-      return `<div style="background:#F4F6FA;border-radius:11px;padding:14px;margin-bottom:12px;border:1.5px solid #C9933A">
-        <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px">
-          ${r.storeImage?`<img src="${r.storeImage}" style="width:52px;height:52px;border-radius:10px;object-fit:cover;flex-shrink:0">`:`<div style="width:52px;height:52px;border-radius:10px;background:#EEF0FF;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.5rem">🏪</div>`}
-          <div style="flex:1;min-width:0">
-            <div style="font-weight:900;color:#1A2744">${r.storeName}</div>
-            <div style="font-size:0.76rem;color:#6B7280">${r.ownerName} · ${r.phone}</div>
-            <div style="font-size:0.76rem;color:#6B7280">${r.category}${r.city?" · 📍 "+r.city:""}</div>
-            <div style="font-size:0.78rem;color:#C9933A;font-weight:800;margin-top:3px">باقة ${plan.name} · ${SDG(plan.price)}</div>
-          </div>
-        </div>
-        ${r.description?`<div style="font-size:0.8rem;color:#4B5563;background:#fff;border-radius:8px;padding:8px 10px;margin-bottom:10px">${r.description}</div>`:""}
-        <a href="${r.paymentReceipt}" target="_blank" style="display:block;text-align:center;background:#fff;border:1px solid #E5E0D8;border-radius:8px;padding:8px;color:#1A2744;font-weight:700;font-size:0.82rem;margin-bottom:10px;text-decoration:none">🧾 عرض صورة إشعار الدفع</a>
-        <div style="display:flex;gap:8px">
-          <button onclick="approveStoreRequest('${r.id}')" style="flex:1;background:#2E7D5E;color:#fff;border:none;border-radius:9px;padding:10px;font-weight:800;font-size:0.85rem;cursor:pointer;font-family:Tajawal,sans-serif">✅ قبول وتفعيل</button>
-          <button onclick="rejectStoreRequest('${r.id}')" style="flex:1;background:#FDECEC;color:#C62828;border:none;border-radius:9px;padding:10px;font-weight:800;font-size:0.85rem;cursor:pointer;font-family:Tajawal,sans-serif">✕ رفض</button>
-        </div>
-      </div>`;
-    }).join("");
-  }
-  html+=`</div><div class="panel"><div class="panel-head"><span class="panel-title">طلبات نشر إعلان (${pendingAds.length})</span></div>`;
-  if(pendingAds.length===0){
-    html+=`<div class="no-items"><div class="icon">📭</div><div>لا توجد طلبات إعلانات جديدة</div></div>`;
-  } else {
-    html+=pendingAds.map(r=>{
-      return `<div style="background:#F4F6FA;border-radius:11px;padding:14px;margin-bottom:12px;border:1.5px solid #C9933A">
-        <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px">
-          ${r.image?`<img src="${r.image}" style="width:52px;height:52px;border-radius:10px;object-fit:cover;flex-shrink:0">`:`<div style="width:52px;height:52px;border-radius:10px;background:#FFF0E8;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.5rem">📢</div>`}
-          <div style="flex:1;min-width:0">
-            <div style="font-weight:900;color:#1A2744">${r.title}</div>
-            <div style="font-size:0.76rem;color:#6B7280">${r.advertiserName} · ${r.phone}</div>
-            <div style="font-size:0.78rem;color:#C9933A;font-weight:800;margin-top:3px">إعلان لمرة واحدة · ${SDG(AD_PRICE)}</div>
-          </div>
-        </div>
-        ${r.description?`<div style="font-size:0.8rem;color:#4B5563;background:#fff;border-radius:8px;padding:8px 10px;margin-bottom:10px">${r.description}</div>`:""}
-        <a href="${r.paymentReceipt}" target="_blank" style="display:block;text-align:center;background:#fff;border:1px solid #E5E0D8;border-radius:8px;padding:8px;color:#1A2744;font-weight:700;font-size:0.82rem;margin-bottom:10px;text-decoration:none">🧾 عرض صورة إشعار الدفع</a>
-        <div style="display:flex;gap:8px">
-          <button onclick="approveAdRequest('${r.id}')" style="flex:1;background:#2E7D5E;color:#fff;border:none;border-radius:9px;padding:10px;font-weight:800;font-size:0.85rem;cursor:pointer;font-family:Tajawal,sans-serif">✅ نشر الإعلان</button>
-          <button onclick="rejectAdRequest('${r.id}')" style="flex:1;background:#FDECEC;color:#C62828;border:none;border-radius:9px;padding:10px;font-weight:800;font-size:0.85rem;cursor:pointer;font-family:Tajawal,sans-serif">✕ رفض</button>
-        </div>
-      </div>`;
-    }).join("");
-  }
-  html+=`</div>`;
-  rTab.innerHTML=html;
-}
-async function approveStoreRequest(reqId){
-  const r=sellerRequests.find(x=>x.id===reqId);if(!r)return;
-  const seller={id:Date.now().toString(),ownerName:r.ownerName,phone:r.phone,storeName:r.storeName,city:r.city,category:r.category,description:r.description,storeImage:r.storeImage||"",plan:r.plan,verified:false,featured:false,joinedAt:TODAY()};
-  await dbSave("sellers",seller.id,seller);
-  await dbUpdate("sellerRequests",reqId,{status:"approved"});
-  showToast(`تم قبول وتفعيل متجر ${r.storeName} ✓`);
-}
-async function rejectStoreRequest(reqId){
-  const r=sellerRequests.find(x=>x.id===reqId);if(!r)return;
-  if(!confirm(`رفض طلب متجر "${r.storeName}"؟`))return;
-  await dbUpdate("sellerRequests",reqId,{status:"rejected"});
-  showToast("تم رفض الطلب");
-}
-async function approveAdRequest(reqId){
-  const r=adRequests.find(x=>x.id===reqId);if(!r)return;
-  const ad={id:"ad_"+Date.now().toString(),title:r.title,description:r.description,image:r.image||"",advertiserName:r.advertiserName,phone:r.phone,postedAt:TODAY(),active:true};
-  await dbSave("ads",ad.id,ad);
-  await dbUpdate("adRequests",reqId,{status:"approved"});
-  showToast("تم نشر الإعلان ✓");
-}
-async function rejectAdRequest(reqId){
-  const r=adRequests.find(x=>x.id===reqId);if(!r)return;
-  if(!confirm(`رفض طلب إعلان "${r.title}"؟`))return;
-  await dbUpdate("adRequests",reqId,{status:"rejected"});
-  showToast("تم رفض الطلب");
 }
 
 // ══════════ LOGIN ══════════
 function openLogin(){document.getElementById("l-phone").value="";hideErr("login-err");document.getElementById("modal-login").classList.remove("hidden");}
 function doLogin(){
   const val=document.getElementById("l-phone").value.trim();
-  if(val===ADMIN_PASS){isAdmin=true;currentSeller=null;activeTab="requests";closeModal("modal-login");showView("dashboard");renderDashboard();return;}
+  if(val===ADMIN_PASS){isAdmin=true;currentSeller=null;activeTab="admin";closeModal("modal-login");showView("dashboard");renderDashboard();return;}
   const found=sellers.find(s=>s.phone===val);
-  if(!found)return showErr("login-err","رقم الهاتف غير مسجل، أو أن طلبك لا يزال قيد المراجعة");
+  if(!found)return showErr("login-err","رقم الهاتف غير مسجل");
   currentSeller=found;isAdmin=false;activeTab="products";
   enableSellerPushNotifications(found.id);
   closeModal("modal-login");showView("dashboard");renderDashboard();
@@ -2072,6 +1609,10 @@ function openShare(){
 }
 function copyLink(){navigator.clipboard.writeText(document.getElementById("share-link-text").textContent).catch(()=>{});document.getElementById("copy-btn").textContent="✓ تم";setTimeout(()=>document.getElementById("copy-btn").textContent="نسخ",2000);}
 function shareOther(){const link=document.getElementById("share-link-text").textContent;const text=`🛒 ${currentSeller.storeName} على منصة الريان\n${link}`;if(navigator.share)navigator.share({title:currentSeller.storeName,text,url:link});else navigator.clipboard.writeText(text).catch(()=>{});}
+function editMyStore(){
+  if(!currentSeller)return;
+  adminEditSeller(currentSeller.id);
+}
 
 
 // ══════════ SHARE PRODUCT ══════════
@@ -2085,7 +1626,7 @@ function shareProduct(productId){
   document.getElementById("sp-link").textContent=link;
   const imgEl=document.getElementById("sp-img");
   imgEl.innerHTML=p.image?`<img src="${p.image}" style="width:100%;height:100%;object-fit:cover;border-radius:9px">`:(EMOJIS[p.category]||"📦");
-  document.getElementById("sp-wa").href=`https://wa.me/?text=${encodeURIComponent("🛒 "+p.name+"\n💰 "+priceText+"\n\nاطلب الآن من منصة الريان:\n"+link)}`;
+  document.getElementById("sp-wa").href=`https://wa.me/?text=${encodeURIComponent("🛒 "+p.name+"\n💰 "+priceText+"\n\nتواصل واطلب من منصة الريان:\n"+link)}`;
   document.getElementById("sp-copy-btn").textContent="نسخ";
   document.getElementById("modal-share-product").classList.remove("hidden");
 }
@@ -2114,11 +1655,6 @@ function checkUrlProduct(){
     };
     setTimeout(tryOpen,1000);
   }
-  // direct "join as merchant" link
-  const join=params.get("join");
-  if(join==="1"||join==="store"){ setTimeout(()=>openRegister(),600); }
-  else if(join==="ad"){ setTimeout(()=>openPostAd(),600); }
-  else if(join==="choice"){ setTimeout(()=>openJoinChoice(),600); }
 }
 
 
@@ -2142,17 +1678,7 @@ async function openStore(sellerId){
   document.getElementById("store-avatar").innerHTML = seller.storeImage ? `<img src="${seller.storeImage}" style="width:100%;height:100%;object-fit:cover;border-radius:15px">` : (EMOJIS[seller.category]||"🏪");
   document.getElementById("store-name").textContent = seller.storeName;
   document.getElementById("store-cat").textContent = seller.category;
-  document.getElementById("store-city").innerHTML = seller.city ? "📍 "+seller.city : "";
   document.getElementById("store-desc").textContent = seller.description||"";
-
-  // badges
-  const isTopSeller = getTopSellerIds(3).includes(seller.id);
-  const sellerPlanObj = getSellerPlan(seller);
-  const badgesHtml=[];
-  if(seller.verified||sellerPlanObj.verified)badgesHtml.push('<span style="background:rgba(46,125,94,0.25);color:#7FE8B8;font-size:0.7rem;font-weight:700;padding:3px 9px;border-radius:100px;border:1px solid rgba(127,232,184,0.4)">⭐ متجر موثّق</span>');
-  if(seller.featured)badgesHtml.push('<span style="background:rgba(201,147,58,0.25);color:#E8B660;font-size:0.7rem;font-weight:700;padding:3px 9px;border-radius:100px;border:1px solid rgba(232,182,96,0.4)">🏆 بائع مميز</span>');
-  if(isTopSeller)badgesHtml.push('<span style="background:rgba(192,57,43,0.25);color:#FF8A75;font-size:0.7rem;font-weight:700;padding:3px 9px;border-radius:100px;border:1px solid rgba(255,138,117,0.4)">🔥 الأكثر مبيعاً</span>');
-  document.getElementById("store-badges").innerHTML = badgesHtml.join("");
 
   // rating
   const ratingBar = document.getElementById("store-rating-bar");
@@ -2161,17 +1687,14 @@ async function openStore(sellerId){
     : `<span class="store-rating-txt">لا توجد تقييمات بعد</span>`;
 
   // meta
-  const salesQty=getSellerSalesQty(seller.id);
   document.getElementById("store-meta").innerHTML = `
     <div class="store-meta-item"><div class="store-meta-num">${storeProds.length}</div><div class="store-meta-lbl">منتج</div></div>
-    <div class="store-meta-item"><div class="store-meta-num">${salesQty.toLocaleString("ar")}</div><div class="store-meta-lbl">مبيعات</div></div>
     <div class="store-meta-item"><div class="store-meta-num">${(seller.storeViews||0).toLocaleString("ar")}</div><div class="store-meta-lbl">مشاهدة</div></div>
-    <div class="store-meta-item"><div class="store-meta-num" style="font-size:0.8rem">${seller.joinedAt}</div><div class="store-meta-lbl">عضو منذ</div></div>`;
+    <div class="store-meta-item"><div class="store-meta-num">${seller.joinedAt}</div><div class="store-meta-lbl">انضم</div></div>`;
 
   // whatsapp
   const waNum = "249"+seller.phone.replace(/^0/,"");
   document.getElementById("store-wa-btn").href = `https://wa.me/${waNum}?text=${encodeURIComponent("مرحباً، زرت متجرك على منصة الريان 🛒")}`;
-  document.getElementById("store-closed-banner").classList.add("hidden");
 
   // products
   document.getElementById("store-products-title").textContent = `منتجات المتجر (${storeProds.length})`;
@@ -2186,10 +1709,8 @@ async function openStore(sellerId){
       div.className = "product-card";
       const imgHtml = p.image ? `<img src="${p.image}" style="width:100%;height:100%;object-fit:cover">` : `<span style="font-size:52px">${EMOJIS[p.category]||"📦"}</span>`;
       const mediaBadge=((p.images&&p.images.length>1)||p.videoUrl)?`<div style="position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,0.6);color:#fff;font-size:0.65rem;padding:2px 7px;border-radius:100px;display:flex;align-items:center;gap:3px">${p.videoUrl?"🎥":""}${(p.images&&p.images.length>1)?" "+p.images.length+" صور":""}</div>`:"";
-      const pSellerPlanStore=getSellerPlan(seller);
-      const verifiedBadge=(seller.verified||pSellerPlanStore.verified)?`<div style="position:absolute;top:6px;right:6px;background:rgba(46,125,94,0.9);color:#fff;font-size:0.62rem;padding:2px 7px;border-radius:100px;font-weight:700">✓ موثّق</div>`:"";
       div.innerHTML = `
-        <div class="product-img" style="background:${BG[p.category]||"#F5F5F5"}">${imgHtml}${mediaBadge}${verifiedBadge}</div>
+        <div class="product-img" style="background:${BG[p.category]||"#F5F5F5"}">${imgHtml}${mediaBadge}</div>
         <div class="product-body">
           <div class="product-name">${p.name}</div>
           ${p.location?'<div style="color:#9CA3AF;font-size:0.72rem;margin-bottom:3px">📍 '+p.location+'</div>':''}
@@ -2197,7 +1718,7 @@ async function openStore(sellerId){
           ${p.desc?'<div class="product-desc">'+p.desc+'</div>':''}
           <div class="product-footer">
             <span class="product-price" ${p.priceOnRequest?'style="font-size:0.82rem;color:#C9933A"':''}>${p.priceOnRequest?"السعر عند الطلب":SDG(p.price)}</span>
-            <button class="order-now-btn" onclick="openDirectOrder('${p.id}')">اطلب الآن</button>
+            <button class="order-now-btn" onclick="openDirectOrder('${p.id}')">تواصل واطلب</button>
           </div>
           <div style="display:flex;gap:6px;margin-top:8px">
             <button onclick="inquireAboutProduct('${p.id}')" style="flex:1;padding:7px;border-radius:8px;border:1.5px solid #E5E0D8;background:#fff;color:#6B7280;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">💬 استفسر</button>
@@ -2248,16 +1769,28 @@ function checkUrlStore(){
   const params = new URLSearchParams(window.location.search);
   const sid = params.get("store");
   if(sid){
-    let tries=0;
     const tryOpen = ()=>{
-      tries++;
       const s = sellers.find(x=>x.id===sid);
-      const hasProducts = products.some(p=>p.sellerId===sid);
-      // wait until the seller AND their products have loaded (or give up after ~12s)
-      if(s && (hasProducts || tries>20)){ openStore(sid); }
+      if(s){ openStore(sid); }
       else { setTimeout(tryOpen, 600); }
     };
     setTimeout(tryOpen, 1000);
+  }
+}
+function checkUrlRegister(){
+  const params = new URLSearchParams(window.location.search);
+  if(params.get("register")==="1" || window.location.pathname==="/join"){
+    let tries=0;
+    const tryOpen=()=>{
+      tries++;
+      const modal=document.getElementById("modal-register");
+      if(typeof openRegister==="function" && modal){
+        openRegister();
+      } else if(tries<20){
+        setTimeout(tryOpen,300);
+      }
+    };
+    setTimeout(tryOpen,1500);
   }
 }
 
@@ -2310,10 +1843,10 @@ function showStartChatForm(sellerId){
 async function submitStartChat(){
   const sellerId=document.getElementById("sc-seller-id").value;
   const name=document.getElementById("sc-name").value.trim();
-  const phone=document.getElementById("sc-phone").value.trim();
+  const phone=(document.getElementById("sc-country").value+document.getElementById("sc-phone").value.trim().replace(/^0+/,""));
   if(!name)return showErr("sc-err","يرجى إدخال اسمك");
   if(!phone)return showErr("sc-err","يرجى إدخال رقم الهاتف");
-  if(!validSD(phone))return showErr("sc-err","رقم الهاتف يبدأ بـ 09 أو 01 ويكون 10 أرقام");
+  if(!validSD(phone))return showErr("sc-err","يرجى إدخال رقم هاتف صحيح");
   const s=sellers.find(x=>x.id===sellerId);if(!s)return;
   const chatId="chat_"+Date.now().toString()+Math.random().toString(36).slice(2,6);
   const chat={id:chatId,sellerId,sellerName:s.storeName,sellerImage:s.storeImage||"",customerName:name,customerPhone:phone,messages:[],lastMessageAt:Date.now(),lastSender:"",sellerRead:true,customerRead:true};
@@ -2503,6 +2036,168 @@ async function sendChatImage(input){
 }
 
 // ══════════ MY CHATS (customer inbox) ══════════
+// ══════════ قناة الريان الترفيهية ══════════
+let entActiveTab="videos";
+function openEntertainment(){
+  document.getElementById("modal-entertainment").classList.remove("hidden");
+  switchEntTab("videos");
+}
+function switchEntTab(t){
+  entActiveTab=t;
+  document.getElementById("ent-videos-body").classList.toggle("hidden",t!=="videos");
+  document.getElementById("ent-quiz-body").classList.toggle("hidden",t!=="quiz");
+  const vb=document.getElementById("ent-tab-videos"), qb=document.getElementById("ent-tab-quiz");
+  vb.style.background=t==="videos"?"#1A2744":"#EEF1F6"; vb.style.color=t==="videos"?"#fff":"#1A2744";
+  qb.style.background=t==="quiz"?"#1A2744":"#EEF1F6"; qb.style.color=t==="quiz"?"#fff":"#1A2744";
+  if(t==="videos") renderEntVideos(); else renderEntQuiz();
+}
+function ytId(url){
+  const m=(url||"").match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([A-Za-z0-9_-]{11})/);
+  return m?m[1]:"";
+}
+function renderEntVideos(){
+  const body=document.getElementById("ent-videos-body");
+  const list=entVideos.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  if(list.length===0){body.innerHTML=`<div style="text-align:center;color:#9CA3AF;padding:30px 0">لا توجد فيديوهات بعد 🎬</div>`;return;}
+  body.innerHTML=list.map(v=>{
+    const id=ytId(v.url);
+    return `<div style="margin-bottom:16px"><div style="font-weight:800;color:#1A2744;margin-bottom:6px;font-size:0.92rem">${v.title||""}</div>
+    ${id?`<div style="position:relative;padding-bottom:56.25%;height:0;border-radius:12px;overflow:hidden"><iframe src="https://www.youtube.com/embed/${id}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" allowfullscreen></iframe></div>`:`<div style="color:#D9534F;font-size:0.8rem">رابط غير صالح</div>`}</div>`;
+  }).join("");
+}
+function renderEntQuiz(){
+  const body=document.getElementById("ent-quiz-body");
+  const list=entPredicts.slice().filter(p=>p.active!==false).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  if(list.length===0){body.innerHTML=`<div style="text-align:center;color:#9CA3AF;padding:30px 0">لا توجد توقعات نشطة 🔮</div>`;return;}
+  body.innerHTML=list.map(p=>{
+    const done=p.result!=null&&p.result!=="";
+    return `<div style="background:#F4F6FA;border-radius:12px;padding:14px;margin-bottom:12px">
+      <div style="font-weight:800;color:#1A2744;margin-bottom:4px">${p.title}</div>
+      ${p.sub?`<div style="color:#6B7280;font-size:0.8rem;margin-bottom:8px">${p.sub}</div>`:""}
+      ${done?`<div style="color:#2E7D5E;font-weight:800;font-size:0.85rem">✅ النتيجة: ${p.result}</div>`:
+      `<button class="btn-navy" style="width:100%;margin-top:6px" onclick="openPredict('${p.id}')">شارك بتوقعك 🔮</button>`}
+    </div>`;
+  }).join("");
+}
+function openPredict(id){
+  const p=entPredicts.find(x=>x.id===id); if(!p)return;
+  currentPredictId=id;
+  document.getElementById("predict-title").textContent=p.title;
+  document.getElementById("predict-sub").textContent=p.sub||"";
+  document.getElementById("predict-options").innerHTML=(p.options||[]).map((o,i)=>
+    `<label style="display:flex;align-items:center;gap:9px;background:#F4F6FA;border-radius:9px;padding:11px;cursor:pointer;font-weight:700;color:#1A2744">
+      <input type="radio" name="predict-opt" value="${o}"> ${o}</label>`).join("");
+  document.getElementById("predict-score").value="";
+  document.getElementById("predict-name").value="";
+  document.getElementById("predict-phone").value="";
+  document.getElementById("predict-err").textContent="";
+  document.getElementById("modal-predict").classList.remove("hidden");
+}
+async function submitPrediction(){
+  const opt=document.querySelector('input[name="predict-opt"]:checked');
+  const score=document.getElementById("predict-score").value.trim();
+  const name=document.getElementById("predict-name").value.trim();
+  const phone=(document.getElementById("predict-country").value+document.getElementById("predict-phone").value.trim().replace(/^0+/,""));
+  const err=document.getElementById("predict-err");
+  if(!opt){err.textContent="يرجى اختيار توقعك";return;}
+  if(!name){err.textContent="يرجى إدخال اسمك";return;}
+  if(!/^\d{6,15}$/.test(phone.replace(/\D/g,""))){err.textContent="يرجى إدخال رقم صحيح";return;}
+  const entryId="EN-"+Date.now();
+  await dbSave("entEntries",entryId,{id:entryId,predictId:currentPredictId,choice:opt.value,score,name,phone,createdAt:Date.now()});
+  closeModal("modal-predict");
+  showToast("تم استلام توقعك بنجاح 🎉");
+}
+window.openEntertainment=openEntertainment;
+window.switchEntTab=switchEntTab;
+window.openPredict=openPredict;
+window.submitPrediction=submitPrediction;
+
+// ══════════ إدارة القناة (أدمن) ══════════
+function renderChannelAdmin(){
+  const t=document.getElementById("tab-channel"); if(!t)return;
+  const vids=entVideos.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  const preds=entPredicts.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  t.innerHTML=`
+  <div class="panel"><div class="panel-head"><span class="panel-title">🎥 إضافة فيديو</span></div>
+    <div class="field"><label class="lbl">عنوان الفيديو</label><input class="inp" id="av-title"></div>
+    <div class="field"><label class="lbl">رابط يوتيوب</label><input class="inp" id="av-url" placeholder="https://youtu.be/..."></div>
+    <button class="btn-navy" style="width:100%" onclick="addVideo()">إضافة الفيديو</button>
+  </div>
+  <div class="panel"><div class="panel-head"><span class="panel-title">الفيديوهات (${vids.length})</span></div>
+    ${vids.length===0?'<div class="no-items"><div>لا توجد فيديوهات</div></div>':vids.map(v=>`
+      <div class="prod-row"><div class="prod-row-left"><div class="prod-emoji-box" style="background:#FFECEC">🎬</div>
+        <div><div class="prod-title">${v.title||""}</div><div class="prod-meta">${v.url||""}</div></div></div>
+        <button onclick="delVideo('${v.id}')" style="background:#FEE;color:#D9534F;border:none;border-radius:8px;padding:6px 12px;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">حذف</button>
+      </div>`).join("")}
+  </div>
+  <div class="panel"><div class="panel-head"><span class="panel-title">🔮 إنشاء توقع جديد</span></div>
+    <div class="field"><label class="lbl">عنوان التوقع</label><input class="inp" id="ap-title" placeholder="توقع الفائز: الأرجنتين × إسبانيا"></div>
+    <div class="field"><label class="lbl">وصف (اختياري)</label><input class="inp" id="ap-sub" placeholder="نهائي كأس العالم"></div>
+    <div class="field"><label class="lbl">الخيارات (افصل بينها بفاصلة)</label><input class="inp" id="ap-opts" placeholder="الأرجنتين, إسبانيا, تعادل"></div>
+    <button class="btn-navy" style="width:100%" onclick="addPredict()">إنشاء التوقع</button>
+  </div>
+  <div class="panel"><div class="panel-head"><span class="panel-title">التوقعات (${preds.length})</span></div>
+    ${preds.length===0?'<div class="no-items"><div>لا توجد توقعات</div></div>':preds.map(p=>{
+      const entries=entEntries.filter(e=>e.predictId===p.id);
+      const winners=p.result?entries.filter(e=>e.choice===p.result):[];
+      return `<div style="background:#F4F6FA;border-radius:10px;padding:13px;margin-bottom:10px">
+        <div style="font-weight:800;color:#1A2744;margin-bottom:4px">${p.title}</div>
+        <div style="font-size:0.76rem;color:#6B7280;margin-bottom:8px">${entries.length} مشارك · ${p.result?`النتيجة: ${p.result}`:"لم تُعلن النتيجة"}</div>
+        ${!p.result?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+          ${(p.options||[]).map(o=>`<button onclick="setResult('${p.id}','${o}')" style="background:#1A2744;color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">النتيجة: ${o}</button>`).join("")}
+        </div>`:`<div style="color:#2E7D5E;font-weight:800;font-size:0.82rem;margin-bottom:8px">🏆 ${winners.length} متوقّع صح</div>`}
+        <button onclick="showEntries('${p.id}')" style="background:#EEF1F6;color:#1A2744;border:none;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.8rem">عرض المشاركين (${entries.length})</button>
+        <button onclick="delPredict('${p.id}')" style="background:#FEE;color:#D9534F;border:none;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.8rem;margin-right:6px">حذف</button>
+        <div id="entries-${p.id}" class="hidden" style="margin-top:10px"></div>
+      </div>`;
+    }).join("")}
+  </div>`;
+}
+async function addVideo(){
+  const title=document.getElementById("av-title").value.trim();
+  const url=document.getElementById("av-url").value.trim();
+  if(!title||!url){showToast("أدخل العنوان والرابط");return;}
+  if(!ytId(url)){showToast("رابط يوتيوب غير صالح");return;}
+  const id="VID-"+Date.now();
+  await dbSave("entVideos",id,{id,title,url,createdAt:Date.now()});
+  document.getElementById("av-title").value="";document.getElementById("av-url").value="";
+  showToast("تم إضافة الفيديو ✓");
+}
+async function delVideo(id){ if(confirm("حذف الفيديو؟")){await dbDelete("entVideos",id);showToast("تم الحذف");} }
+async function addPredict(){
+  const title=document.getElementById("ap-title").value.trim();
+  const sub=document.getElementById("ap-sub").value.trim();
+  const opts=document.getElementById("ap-opts").value.split(",").map(x=>x.trim()).filter(Boolean);
+  if(!title||opts.length<2){showToast("أدخل العنوان وخيارين على الأقل");return;}
+  const id="PR-"+Date.now();
+  await dbSave("entPredicts",id,{id,title,sub,options:opts,result:"",active:true,createdAt:Date.now()});
+  document.getElementById("ap-title").value="";document.getElementById("ap-sub").value="";document.getElementById("ap-opts").value="";
+  showToast("تم إنشاء التوقع ✓");
+}
+async function setResult(id,result){
+  if(confirm(`تأكيد النتيجة: ${result}؟`)){await dbUpdate("entPredicts",id,{result});showToast("تم إعلان النتيجة ✓");}
+}
+async function delPredict(id){ if(confirm("حذف التوقع؟")){await dbDelete("entPredicts",id);showToast("تم الحذف");} }
+function showEntries(pid){
+  const box=document.getElementById("entries-"+pid);
+  if(!box)return;
+  if(!box.classList.contains("hidden")){box.classList.add("hidden");return;}
+  const p=entPredicts.find(x=>x.id===pid);
+  const entries=entEntries.filter(e=>e.predictId===pid).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  if(entries.length===0){box.innerHTML='<div style="color:#9CA3AF;font-size:0.8rem">لا مشاركين بعد</div>';}
+  else{box.innerHTML=entries.map(e=>{
+    const win=p&&p.result&&e.choice===p.result;
+    return `<div style="display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid #E5E7EB;font-size:0.8rem;${win?'background:#EEF9F0':''}">
+      <div><b>${e.name}</b> ${win?'🏆':''}<br><span style="color:#6B7280">توقع: ${e.choice}${e.score?` (${e.score})`:''}</span></div>
+      <a href="https://wa.me/${e.phone.replace(/\D/g,"")}" target="_blank" style="color:#2E7D5E;font-weight:700;text-decoration:none">${e.phone} 📱</a>
+    </div>`;
+  }).join("");}
+  box.classList.remove("hidden");
+}
+window.addVideo=addVideo;window.delVideo=delVideo;window.addPredict=addPredict;
+window.setResult=setResult;window.delPredict=delPredict;window.showEntries=showEntries;
+window.renderChannelAdmin=renderChannelAdmin;
+
 function openMyChats(){
   renderMyChats();
   document.getElementById("modal-my-chats").classList.remove("hidden");
@@ -2512,7 +2207,8 @@ function renderMyChats(){
   if(!customerPhone){
     wrap.innerHTML=`
       <p style="color:#6B7280;font-size:0.82rem;margin-bottom:14px">أدخل رقم هاتفك لعرض كل محادثاتك مع التجار</p>
-      <div class="field"><label class="lbl">رقم هاتفك</label><input class="inp" id="mc-phone-input" placeholder="0912345678"></div>
+      <div class="field"><label class="lbl">الدولة</label><select class="inp" id="mc-country"><option value="+249" selected>🇸🇩 السودان (+249)</option><option value="+966">🇸🇦 السعودية (+966)</option><option value="+20">🇪🇬 مصر (+20)</option><option value="+971">🇦🇪 الإمارات (+971)</option><option value="+974">🇶🇦 قطر (+974)</option><option value="+965">🇰🇼 الكويت (+965)</option><option value="+973">🇧🇭 البحرين (+973)</option><option value="+968">🇴🇲 عُمان (+968)</option><option value="+962">🇯🇴 الأردن (+962)</option><option value="+961">🇱🇧 لبنان (+961)</option><option value="+963">🇸🇾 سوريا (+963)</option><option value="+964">🇮🇶 العراق (+964)</option><option value="+970">🇵🇸 فلسطين (+970)</option><option value="+967">🇾🇪 اليمن (+967)</option><option value="+218">🇱🇾 ليبيا (+218)</option><option value="+216">🇹🇳 تونس (+216)</option><option value="+213">🇩🇿 الجزائر (+213)</option><option value="+212">🇲🇦 المغرب (+212)</option><option value="+222">🇲🇷 موريتانيا (+222)</option><option value="+252">🇸🇴 الصومال (+252)</option><option value="+253">🇩🇯 جيبوتي (+253)</option><option value="+211">🇸🇸 جنوب السودان (+211)</option><option value="+235">🇹🇩 تشاد (+235)</option><option value="+251">🇪🇹 إثيوبيا (+251)</option><option value="+291">🇪🇷 إريتريا (+291)</option><option value="+254">🇰🇪 كينيا (+254)</option><option value="+256">🇺🇬 أوغندا (+256)</option><option value="+90">🇹🇷 تركيا (+90)</option><option value="+1">🇺🇸 الولايات المتحدة (+1)</option><option value="+44">🇬🇧 المملكة المتحدة (+44)</option><option value="+33">🇫🇷 فرنسا (+33)</option><option value="+49">🇩🇪 ألمانيا (+49)</option><option value="+39">🇮🇹 إيطاليا (+39)</option><option value="+34">🇪🇸 إسبانيا (+34)</option><option value="+31">🇳🇱 هولندا (+31)</option><option value="+46">🇸🇪 السويد (+46)</option><option value="+47">🇳🇴 النرويج (+47)</option><option value="+41">🇨🇭 سويسرا (+41)</option><option value="+7">🇷🇺 روسيا (+7)</option><option value="+86">🇨🇳 الصين (+86)</option><option value="+91">🇮🇳 الهند (+91)</option><option value="+92">🇵🇰 باكستان (+92)</option><option value="+62">🇮🇩 إندونيسيا (+62)</option><option value="+60">🇲🇾 ماليزيا (+60)</option><option value="+81">🇯🇵 اليابان (+81)</option><option value="+82">🇰🇷 كوريا الجنوبية (+82)</option><option value="+61">🇦🇺 أستراليا (+61)</option><option value="+234">🇳🇬 نيجيريا (+234)</option><option value="+27">🇿🇦 جنوب أفريقيا (+27)</option><option value="+55">🇧🇷 البرازيل (+55)</option></select></div>
+      <div class="field"><label class="lbl">رقم هاتفك</label><input class="inp" id="mc-phone-input" placeholder="912345678"></div>
       <div id="mc-err" class="err-box hidden"></div>
       <button class="btn-next" style="width:100%" onclick="loginMyChats()">عرض محادثاتي</button>`;
     return;
@@ -2538,8 +2234,8 @@ function renderMyChats(){
   wrap.innerHTML=`<div style="margin-bottom:10px;color:#6B7280;font-size:0.76rem">مسجل برقم ${customerPhone} · <span style="color:#C62828;cursor:pointer;text-decoration:underline" onclick="logoutMyChats()">تغيير الرقم</span></div>`+listHtml;
 }
 function loginMyChats(){
-  const phone=document.getElementById("mc-phone-input").value.trim();
-  if(!validSD(phone))return showErr("mc-err","رقم الهاتف يبدأ بـ 09 أو 01 ويكون 10 أرقام");
+  const phone=(document.getElementById("mc-country").value+document.getElementById("mc-phone-input").value.trim().replace(/^0+/,""));
+  if(!validSD(phone))return showErr("mc-err","يرجى إدخال رقم هاتف صحيح");
   customerPhone=phone;
   try{ localStorage.setItem("rayan_customer_phone",phone); }catch(e){}
   updateMyChatsBadge();
@@ -2622,14 +2318,21 @@ function adminEditSeller(sellerId){
   const s=sellers.find(x=>x.id===sellerId);if(!s)return;
   document.getElementById("es-id").value=s.id;
   document.getElementById("es-store").value=s.storeName||"";
-  document.getElementById("es-city").value=s.city||"";
   document.getElementById("es-owner").value=s.ownerName||"";
-  document.getElementById("es-phone").value=s.phone||"";
+  // فصل مفتاح الدولة عن الرقم للعرض
+  (function(){
+    const full=(s.phone||"").trim();
+    let match=COUNTRIES.slice().sort((a,b)=>b.d.length-a.d.length).find(x=>full.startsWith(x.d));
+    if(match){
+      document.getElementById("es-country").value=match.d;
+      document.getElementById("es-phone").value=full.slice(match.d.length);
+    }else{
+      document.getElementById("es-country").value="+249";
+      document.getElementById("es-phone").value=full;
+    }
+  })();
   document.getElementById("es-cat").value=s.category||CATS[0];
   document.getElementById("es-desc").value=s.description||"";
-  const planSel=document.getElementById("es-plan");
-  planSel.innerHTML=PLANS.map(p=>`<option value="${p.id}">${p.name} — ${SDG(p.price)}</option>`).join("");
-  planSel.value=s.plan||PLANS[0].id;
   editStoreImage=s.storeImage||"";
   document.getElementById("es-img-input").value="";
   if(s.storeImage){
@@ -2647,31 +2350,28 @@ function adminEditSeller(sellerId){
 async function submitEditSeller(){
   const id=document.getElementById("es-id").value;
   const storeName=document.getElementById("es-store").value.trim();
-  const city=document.getElementById("es-city").value.trim();
   const ownerName=document.getElementById("es-owner").value.trim();
-  const phone=document.getElementById("es-phone").value.trim();
+  const phone=(document.getElementById("es-country").value+document.getElementById("es-phone").value.trim().replace(/^0+/,""));
   const category=document.getElementById("es-cat").value;
   const description=document.getElementById("es-desc").value.trim();
-  const plan=document.getElementById("es-plan").value;
   if(!storeName)return showErr("es-err","اسم المتجر مطلوب");
   if(!phone)return showErr("es-err","رقم الهاتف مطلوب");
-  if(!validSD(phone))return showErr("es-err","رقم الهاتف يبدأ بـ 09 أو 01 ويكون 10 أرقام");
+  if(!validSD(phone))return showErr("es-err","يرجى إدخال رقم هاتف صحيح");
   const existing=sellers.find(x=>x.id===id)||{};
-  await dbSave("sellers",id,{...existing,storeName,city,ownerName,phone,category,description,plan,storeImage:editStoreImage});
+  await dbSave("sellers",id,{...existing,storeName,ownerName,phone,category,description,storeImage:editStoreImage});
   // keep product sellerName in sync with any renamed store
   const sellerProducts=products.filter(p=>p.sellerId===id);
   for(const p of sellerProducts){
     if(p.sellerName!==storeName) await dbUpdate("products",p.id,{sellerName:storeName});
   }
+  // if the logged-in seller edited their own store, refresh their session + dashboard
+  if(currentSeller && currentSeller.id===id){
+    currentSeller={...currentSeller,storeName,ownerName,phone,category,description,storeImage:editStoreImage};
+    if(typeof renderDashboard==="function") renderDashboard();
+  }
   closeModal("modal-edit-seller");
   showToast("تم تحديث بيانات التاجر ✓");
 }
-async function toggleSellerBadge(sellerId,field){
-  const s=sellers.find(x=>x.id===sellerId);if(!s)return;
-  await dbUpdate("sellers",sellerId,{[field]:!s[field]});
-  showToast(field==="verified"?"تم تحديث حالة التوثيق ✓":"تم تحديث حالة التمييز ✓");
-}
-
 function adminAddProductForSeller(sellerId){
   const s=sellers.find(x=>x.id===sellerId);if(!s)return;
   currentSeller=s;
@@ -2698,14 +2398,8 @@ window.regNext=regNext;window.regBack=regBack;window.regSubmit=regSubmit;window.
 window.openAddProduct=openAddProduct;window.openEditProduct=openEditProduct;window.submitProduct=submitProduct;window.deleteProduct=deleteProduct;
 window.openDirectOrder=openDirectOrder;window.submitDirectOrder=submitDirectOrder;
 window.updateOrderStatus=updateOrderStatus;window.switchTab=switchTab;
-window.openShare=openShare;window.shareProduct=shareProduct;window.copyProductLink=copyProductLink;window.shareProductOther=shareProductOther;window.openStore=openStore;window.closeStore=closeStore;window.shareCurrentStore=shareCurrentStore;window.openRating=openRating;window.setRating=setRating;window.submitRating=submitRating;window.adminEditProduct=adminEditProduct;window.adminDeleteProduct=adminDeleteProduct;window.adminDeleteSeller=adminDeleteSeller;window.adminEditSeller=adminEditSeller;window.submitEditSeller=submitEditSeller;window.adminAddProductForSeller=adminAddProductForSeller;window.copyLink=copyLink;window.shareOther=shareOther;
+window.openShare=openShare;window.shareProduct=shareProduct;window.copyProductLink=copyProductLink;window.shareProductOther=shareProductOther;window.openStore=openStore;window.closeStore=closeStore;window.shareCurrentStore=shareCurrentStore;window.openRating=openRating;window.setRating=setRating;window.submitRating=submitRating;window.adminEditProduct=adminEditProduct;window.adminDeleteProduct=adminDeleteProduct;window.adminDeleteSeller=adminDeleteSeller;window.adminEditSeller=adminEditSeller;window.submitEditSeller=submitEditSeller;window.adminAddProductForSeller=adminAddProductForSeller;window.copyLink=copyLink;window.shareOther=shareOther;window.editMyStore=editMyStore;
 window.handleImgUpload=handleImgUpload;window.handleStoreImgUpload=handleStoreImgUpload;window.closeModal=closeModal;
-window.showStoresPage=showStoresPage;window.closeStoresPage=closeStoresPage;window.toggleSellerBadge=toggleSellerBadge;
-window.openUpgradePlan=openUpgradePlan;window.requestPlanUpgrade=requestPlanUpgrade;
-window.handleReceiptUpload=handleReceiptUpload;window.handleUpgradeReceiptUpload=handleUpgradeReceiptUpload;
-window.submitUpgradeRequest=submitUpgradeRequest;
-window.openJoinChoice=openJoinChoice;window.openPostAd=openPostAd;window.handleAdImgUpload=handleAdImgUpload;window.handleAdReceiptUpload=handleAdReceiptUpload;window.submitAdRequest=submitAdRequest;
-window.approveStoreRequest=approveStoreRequest;window.rejectStoreRequest=rejectStoreRequest;window.approveAdRequest=approveAdRequest;window.rejectAdRequest=rejectAdRequest;
 window.togglePriceOnRequest=togglePriceOnRequest;window.inquirePrice=inquirePrice;window.inquireAboutProduct=inquireAboutProduct;window.focusOrderForm=focusOrderForm;
 window.removeProductImage=removeProductImage;window.shiftDirectGallery=shiftDirectGallery;
 window.closeWelcomeAndAddProduct=closeWelcomeAndAddProduct;
