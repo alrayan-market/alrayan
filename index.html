@@ -572,7 +572,10 @@ textarea.inp{height:64px;resize:none}
   <div class="modal modal-sm" style="max-height:88vh;overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
       <h3 style="color:#1A2744;font-weight:900;font-size:1.1rem">📺 قناة الريان</h3>
-      <button onclick="closeModal('modal-entertainment')" style="background:none;border:none;font-size:1.4rem;color:#9CA3AF;cursor:pointer">✕</button>
+      <div style="display:flex;gap:6px;align-items:center">
+        <button onclick="shareChannel()" style="background:#EEF8EE;border:none;border-radius:9px;padding:6px 12px;font-weight:800;color:#2E7D5E;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.85rem">📤 مشاركة</button>
+        <button onclick="closeModal('modal-entertainment')" style="background:none;border:none;font-size:1.4rem;color:#9CA3AF;cursor:pointer">✕</button>
+      </div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:16px">
       <button class="ent-tab-btn active" id="ent-tab-videos" onclick="switchEntTab('videos')" style="flex:1;padding:9px;border-radius:9px;border:none;background:#1A2744;color:#fff;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif">🎥 الفيديوهات</button>
@@ -891,6 +894,7 @@ window.onload=async function(){
   checkUrlStore();
   checkUrlChat();
   checkUrlRegister();
+  checkUrlChannel();
 };
 
 // ══════════ IMAGE UPLOAD (via ImgBB) ══════════
@@ -1792,6 +1796,23 @@ function checkUrlRegister(){
     setTimeout(tryOpen,1500);
   }
 }
+function checkUrlChannel(){
+  const params=new URLSearchParams(window.location.search);
+  const wantsChannel=params.get("channel")==="1";
+  const vid=params.get("video");
+  const poll=params.get("poll");
+  if(!wantsChannel && !vid && !poll) return;
+  let tries=0;
+  const tryOpen=()=>{
+    tries++;
+    if(typeof openEntertainment==="function" && document.getElementById("modal-entertainment")){
+      openEntertainment();
+      if(poll){ switchEntTab("quiz"); }
+      else if(vid){ switchEntTab("videos"); }
+    } else if(tries<20){ setTimeout(tryOpen,300); }
+  };
+  setTimeout(tryOpen,1500);
+}
 
 // ══════════ CHAT (INQUIRIES) ══════════
 function startChatFromDirectOrder(){
@@ -2060,7 +2081,7 @@ function renderEntVideos(){
   if(list.length===0){body.innerHTML=`<div style="text-align:center;color:#9CA3AF;padding:30px 0">لا توجد فيديوهات بعد 🎬</div>`;return;}
   body.innerHTML=list.map(v=>{
     const id=ytId(v.url);
-    return `<div style="margin-bottom:16px"><div style="font-weight:800;color:#1A2744;margin-bottom:6px;font-size:0.92rem">${v.title||""}</div>
+    return `<div style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><div style="font-weight:800;color:#1A2744;font-size:0.92rem">${v.title||""}</div><button onclick="shareVideo('${v.id}')" style="background:#EEF8EE;border:none;border-radius:8px;padding:5px 10px;font-weight:800;color:#2E7D5E;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.78rem;flex-shrink:0">📤 مشاركة</button></div>
     ${id?`<div style="position:relative;padding-bottom:56.25%;height:0;border-radius:12px;overflow:hidden"><iframe src="https://www.youtube.com/embed/${id}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" allowfullscreen></iframe></div>`:`<div style="color:#D9534F;font-size:0.8rem">رابط غير صالح</div>`}</div>`;
   }).join("");
 }
@@ -2090,7 +2111,7 @@ function renderEntQuiz(){
       inner=`<button class="btn-navy" style="width:100%;margin-top:6px" onclick="openPredict('${p.id}')">شارك برأيك 📊</button>`;
     }
     return `<div style="background:#F4F6FA;border-radius:12px;padding:14px;margin-bottom:12px">
-      <div style="font-weight:800;color:#1A2744;margin-bottom:4px">${p.title}</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:4px"><div style="font-weight:800;color:#1A2744">${p.title}</div><button onclick="sharePoll('${p.id}')" style="background:#EEF8EE;border:none;border-radius:8px;padding:5px 10px;font-weight:800;color:#2E7D5E;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.78rem;flex-shrink:0">📤</button></div>
       ${p.sub?`<div style="color:#6B7280;font-size:0.8rem;margin-bottom:10px">${p.sub}</div>`:'<div style="margin-bottom:8px"></div>'}
       ${inner}
     </div>`;
@@ -2128,6 +2149,28 @@ async function submitPrediction(){
   renderEntQuiz();
 }
 window.openEntertainment=openEntertainment;
+// مشاركة القناة والفيديوهات والاستطلاعات
+function baseUrl(){ return window.location.href.split("?")[0].replace(/index-23\.html$/,"").replace(/index\.html$/,"").replace(/\/$/,""); }
+function doShare(text,url){
+  const full=text+"\n"+url;
+  if(navigator.share){ navigator.share({text,url}).catch(()=>{}); }
+  else { navigator.clipboard.writeText(full).catch(()=>{}); showToast("تم نسخ الرابط ✓"); }
+}
+function shareChannel(){
+  doShare("📺 تابع قناة الريان — فيديوهات واستطلاعات ممتعة!", baseUrl()+"/?channel=1");
+}
+function shareVideo(id){
+  const v=entVideos.find(x=>x.id===id); if(!v)return;
+  doShare("🎥 شاهد: "+(v.title||"فيديو على قناة الريان"), baseUrl()+"/?video="+id);
+}
+function sharePoll(id){
+  const p=entPredicts.find(x=>x.id===id); if(!p)return;
+  doShare("📊 شارك برأيك: "+(p.title||"استطلاع على قناة الريان"), baseUrl()+"/?poll="+id);
+}
+window.shareChannel=shareChannel;
+window.shareVideo=shareVideo;
+window.sharePoll=sharePoll;
+
 window.switchEntTab=switchEntTab;
 window.openPredict=openPredict;
 window.submitPrediction=submitPrediction;
@@ -2153,7 +2196,7 @@ function renderChannelAdmin(){
   <div class="panel"><div class="panel-head"><span class="panel-title">📊 إنشاء استطلاع جديد</span></div>
     <div class="field"><label class="lbl">عنوان الاستطلاع</label><input class="inp" id="ap-title" placeholder="سؤال الاستطلاع"></div>
     <div class="field"><label class="lbl">وصف (اختياري)</label><input class="inp" id="ap-sub" placeholder="نهائي كأس العالم"></div>
-    <div class="field"><label class="lbl">الخيارات (افصل بينها بفاصلة)</label><input class="inp" id="ap-opts" placeholder="الأرجنتين, إسبانيا, تعادل"></div>
+    <div class="field"><label class="lbl">الخيارات (افصل بينها بفاصلة أو شرطة)</label><input class="inp" id="ap-opts" placeholder="الأرجنتين, إسبانيا, تعادل"></div>
     <button class="btn-navy" style="width:100%" onclick="addPredict()">إنشاء الاستطلاع</button>
   </div>
   <div class="panel"><div class="panel-head"><span class="panel-title">الاستطلاعات (${preds.length})</span></div>
@@ -2194,7 +2237,7 @@ async function delVideo(id){ if(confirm("حذف الفيديو؟")){await dbDele
 async function addPredict(){
   const title=document.getElementById("ap-title").value.trim();
   const sub=document.getElementById("ap-sub").value.trim();
-  const opts=document.getElementById("ap-opts").value.split(",").map(x=>x.trim()).filter(Boolean);
+  const opts=document.getElementById("ap-opts").value.split(/[,،/\n]+/).map(x=>x.trim()).filter(Boolean);
   if(!title||opts.length<2){showToast("أدخل العنوان وخيارين على الأقل");return;}
   const id="PR-"+Date.now();
   await dbSave("entPredicts",id,{id,title,sub,options:opts,showResults:false,active:true,createdAt:Date.now()});
