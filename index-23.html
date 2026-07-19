@@ -378,6 +378,40 @@ textarea.inp{height:64px;resize:none}
 <!-- ═══ MODALS ═══ -->
 
 <!-- REGISTER -->
+<div class="overlay hidden" id="modal-upgrade">
+  <div class="modal modal-sm">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><h3 style="color:#1A2744;font-weight:900;font-size:1.05rem">⭐ ترقية المتجر</h3><button onclick="closeModal('modal-upgrade')" style="background:none;border:none;font-size:1.4rem;color:#9CA3AF;cursor:pointer">✕</button></div>
+    <p style="color:#6B7280;font-size:0.82rem;margin-bottom:14px">اختر الباقة للترقية إليها</p>
+    <div id="upgrade-plans" style="display:grid;gap:9px;margin-bottom:14px"></div>
+    <div class="field"><label class="lbl">اسمك</label><input class="inp" id="up-name"></div>
+    <div class="field"><label class="lbl">رقم هاتفك</label><input class="inp" id="up-phone" placeholder="912345678"></div>
+    <div id="up-err" style="color:#D9534F;font-size:0.8rem;margin-bottom:8px"></div>
+    <button class="btn-navy" style="width:100%" onclick="submitUpgrade()">متابعة للدفع ⭐</button>
+  </div>
+</div>
+<div class="overlay hidden" id="modal-payment">
+  <div class="modal modal-sm" style="max-height:88vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <h3 style="color:#1A2744;font-weight:900;font-size:1.05rem">💳 إتمام الدفع</h3>
+      <button onclick="closeModal('modal-payment')" style="background:none;border:none;font-size:1.4rem;color:#9CA3AF;cursor:pointer">✕</button>
+    </div>
+    <div style="background:#EEF8EE;border-radius:12px;padding:12px;margin-bottom:14px;text-align:center">
+      <div style="color:#6B7280;font-size:0.8rem">المبلغ المطلوب</div>
+      <div id="pay-amount" style="color:#2E7D5E;font-weight:900;font-size:1.4rem"></div>
+    </div>
+    <div style="background:#F4F6FA;border-radius:12px;padding:14px;margin-bottom:14px;line-height:2">
+      <div style="font-weight:800;color:#1A2744;margin-bottom:6px">حوّل المبلغ إلى الحساب التالي:</div>
+      <div style="font-size:0.88rem;color:#374151">🏦 البنك: <b>المركزي — بحري</b><br>👤 الاسم: <b>عبد الرؤوف خالد محمد</b><br>🔢 رقم الحساب: <b style="font-size:1.05rem;letter-spacing:1px">1978584</b></div>
+      <button onclick="copyAccount()" style="margin-top:8px;background:#1A2744;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.8rem">📋 نسخ رقم الحساب</button>
+    </div>
+    <p style="color:#6B7280;font-size:0.82rem;margin-bottom:8px">بعد التحويل، ارفع صورة إشعار الدفع:</p>
+    <div id="pay-img-placeholder" onclick="document.getElementById('pay-img-input').click()" style="background:#F4F6FA;border:2px dashed #D8D3C6;border-radius:12px;padding:24px;text-align:center;cursor:pointer;margin-bottom:8px"><div style="font-size:1.8rem;margin-bottom:4px">📸</div><div style="color:#6B7280;font-size:0.82rem">اضغط لرفع صورة الإشعار</div></div>
+    <img id="pay-img-preview" style="display:none;width:100%;border-radius:12px;margin-bottom:8px">
+    <input type="file" id="pay-img-input" accept="image/*" style="display:none" onchange="handlePayImg(this)">
+    <div id="pay-err" style="color:#D9534F;font-size:0.8rem;margin-bottom:8px"></div>
+    <button class="btn-navy" style="width:100%" onclick="submitPayment()">إرسال الطلب مع الإشعار ✓</button>
+  </div>
+</div>
 <div class="overlay hidden" id="modal-all-stores">
   <div class="modal modal-sm" style="max-height:85vh;overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
@@ -1349,13 +1383,9 @@ function regNext(){
 function regBack(){regStep--;updateRegUI();}
 async function regSubmit(){
   const seller={id:Date.now().toString(),ownerName:document.getElementById("r-name").value.trim(),phone:(document.getElementById("r-country").value+document.getElementById("r-phone").value.trim().replace(/^0+/,"")),storeName:document.getElementById("r-store").value.trim(),category:document.getElementById("r-cat").value,plan:selectedPlan,description:document.getElementById("r-desc").value.trim(),storeImage:currentStoreImage,joinedAt:TODAY(),status:"pending"};
-  await dbSave("sellers",seller.id,seller);
-  notifyAdmin(`🆕 تاجر جديد سجّل في منصة الريان!\n━━━━━━━━━━\nالمتجر: ${seller.storeName}\nالمالك: ${seller.ownerName}\nالهاتف: ${seller.phone}\nالتصنيف: ${seller.category}\nالباقة: ${PLANS.find(p=>p.id===seller.plan)?.name||seller.plan}`);
+  const plan=PLANS.find(p=>p.id===seller.plan);
   closeModal("modal-register");
-  showToast("تم إرسال طلبك ✓ بانتظار موافقة الإدارة");
-  alert("تم استلام طلبك بنجاح!\n\nسيتم مراجعته من قبل الإدارة، وسنتواصل معك عبر رقمك عند القبول.");
-  document.getElementById("wt-store").textContent=`متجر "${seller.storeName}" جاهز الآن على منصة الريان 🛒`;
-  document.getElementById("modal-welcome-trader").classList.remove("hidden");
+  openPayment({kind: (plan&&plan.type==="ad")?"ad":"store", data:seller, amount: plan?plan.price:0});
 }
 function closeWelcomeAndAddProduct(){
   closeModal("modal-welcome-trader");
@@ -2339,6 +2369,40 @@ async function rejectSeller(id){
 window.renderPendingRequests=renderPendingRequests;
 window.approveSeller=approveSeller;
 window.rejectSeller=rejectSeller;
+
+
+let payContext=null,payNotifImage="";
+function copyAccount(){navigator.clipboard.writeText("1978584").catch(()=>{});showToast("تم نسخ رقم الحساب ✓");}
+function openPayment(ctx){payContext=ctx;payNotifImage="";document.getElementById("pay-amount").textContent=SDG(ctx.amount);document.getElementById("pay-img-preview").style.display="none";document.getElementById("pay-img-placeholder").style.display="block";document.getElementById("pay-err").textContent="";document.getElementById("pay-img-input").value="";document.getElementById("modal-payment").classList.remove("hidden");}
+function handlePayImg(input){const file=input.files[0];if(!file)return;if(file.size>5*1024*1024){document.getElementById("pay-err").textContent="حجم الصورة كبير (الحد 5MB)";return;}const ph=document.getElementById("pay-img-placeholder");ph.innerHTML='<div style="font-size:1.8rem">⏳</div><div style="color:#6B7280;font-size:0.82rem">جاري الرفع...</div>';const fd=new FormData();fd.append("image",file);fetch("https://api.imgbb.com/1/upload?key=16b4262b9ff85a10c0f3a4834a847184",{method:"POST",body:fd}).then(r=>r.json()).then(d=>{if(d&&d.data&&d.data.url){payNotifImage=d.data.url;const pv=document.getElementById("pay-img-preview");pv.src=d.data.url;pv.style.display="block";ph.style.display="none";}else{document.getElementById("pay-err").textContent="فشل الرفع، حاول ثانية";}ph.innerHTML='<div style="font-size:1.8rem;margin-bottom:4px">📸</div><div style="color:#6B7280;font-size:0.82rem">اضغط لرفع صورة الإشعار</div>';}).catch(()=>{document.getElementById("pay-err").textContent="فشل الرفع";});}
+async function submitPayment(){if(!payNotifImage){document.getElementById("pay-err").textContent="يرجى رفع صورة إشعار الدفع";return;}const c=payContext;if(!c)return;if(c.kind==="store"||c.kind==="ad"){const rec={...c.data,paymentImage:payNotifImage,status:"pending",createdAt:Date.now()};await dbSave("sellers",rec.id,rec);const plan=PLANS.find(p=>p.id===rec.plan);notifyAdmin(`🆕 طلب ${c.kind==="ad"?"إعلان":"متجر"} + إشعار دفع\n━━━━━━━━━━\n${rec.storeName}\nالمالك: ${rec.ownerName}\nالهاتف: ${rec.phone}\nالباقة: ${plan?plan.name:rec.plan} (${SDG(c.amount)})\nالإشعار: ${payNotifImage}`);}else if(c.kind==="upgrade"){await dbSave("upgradeRequests",c.data.id,{...c.data,paymentImage:payNotifImage,status:"pending",createdAt:Date.now()});notifyAdmin(`⭐ طلب ترقية + إشعار دفع\n━━━━━━━━━━\nالمتجر: ${c.data.storeName}\nالباقة: ${c.data.planName} (${SDG(c.amount)})\nالهاتف: ${c.data.phone}\nالإشعار: ${payNotifImage}`);}closeModal("modal-payment");showToast("تم إرسال طلبك مع الإشعار ✓");alert("تم استلام طلبك وإشعار الدفع!\nسيراجع من الإدارة ونتواصل معك عند القبول.");}
+
+let upgradeChoice=null;
+function openUpgrade(){
+  const storePlans=PLANS.filter(p=>p.type==="store");
+  const box=document.getElementById("upgrade-plans");
+  if(!box)return;
+  box.innerHTML=storePlans.map(p=>`<label style="display:flex;justify-content:space-between;align-items:center;background:#F4F6FA;border-radius:10px;padding:12px;cursor:pointer;font-weight:700;color:#1A2744"><span><input type="radio" name="up-plan" value="${p.id}" style="margin-left:8px">${p.name}</span><span style="color:#2E7D5E">${SDG(p.price)}/شهر</span></label>`).join("");
+  document.getElementById("up-name").value="";document.getElementById("up-phone").value="";document.getElementById("up-err").textContent="";
+  document.getElementById("modal-upgrade").classList.remove("hidden");
+}
+async function submitUpgrade(){
+  const opt=document.querySelector('input[name="up-plan"]:checked');
+  const name=document.getElementById("up-name").value.trim();
+  const phone=document.getElementById("up-phone").value.trim();
+  const err=document.getElementById("up-err");
+  if(!opt){err.textContent="يرجى اختيار الباقة";return;}
+  if(!name){err.textContent="يرجى إدخال اسمك";return;}
+  if(!/^\d{6,15}$/.test(phone.replace(/\D/g,""))){err.textContent="يرجى إدخال رقم صحيح";return;}
+  const plan=PLANS.find(p=>p.id===opt.value);
+  const store=sellers.find(x=>x.id===currentStoreId);
+  const data={id:"UPG-"+Date.now(),storeId:currentStoreId,storeName:store?store.storeName:"",newPlan:opt.value,planName:plan?plan.name:"",name,phone};
+  closeModal("modal-upgrade");
+  openPayment({kind:"upgrade",data:data,amount:plan?plan.price:0});
+}
+window.openUpgrade=openUpgrade;window.submitUpgrade=submitUpgrade;
+
+window.copyAccount=copyAccount;window.openPayment=openPayment;window.handlePayImg=handlePayImg;window.submitPayment=submitPayment;
 
 window.openAllStores=openAllStores;
 window.openContactPlatform=openContactPlatform;
