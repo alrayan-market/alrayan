@@ -268,7 +268,7 @@ textarea.inp{height:64px;resize:none}
       <div class="cart-badge hidden" id="cart-count-badge" onclick="openCart()">🛒 0</div>
       <button class="chats-nav-btn" id="contact-nav-btn" onclick="openContactPlatform()">📨</button>
       <button class="chats-nav-btn" id="my-chats-btn" onclick="openMyChats()">💬</button>
-      <button class="btn-gold" onclick="openJoinChoice()">انضم كتاجر</button>
+      
     </div>
   </nav>
   <div class="hero">
@@ -278,13 +278,17 @@ textarea.inp{height:64px;resize:none}
     <button type="button" id="install-app-btn" onclick="triggerAppInstall()" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#C9933A,#E8B660);color:#1A2744;border:none;border-radius:10px;padding:10px 22px;font-weight:800;font-size:0.9rem;cursor:pointer;margin-top:16px;font-family:Tajawal,sans-serif">📲 ثبّت تطبيق الريان</button>
   </div>
   <div class="home-cards">
+    <div class="home-card" onclick="startJoin('store')" style="background:linear-gradient(160deg,#1A2744,#2A3C63)">
+      <div class="home-card-ico">🏪</div><div class="home-card-txt"><div class="home-card-title">إنشاء متجر</div><div class="home-card-sub">باقات شهرية</div></div>
+    </div>
+    <div class="home-card" onclick="startJoin('ad')" style="background:linear-gradient(160deg,#D9A840,#B8862B)">
+      <div class="home-card-ico">📢</div><div class="home-card-txt"><div class="home-card-title">أنشئ إعلان</div><div class="home-card-sub">10,000 ج.س</div></div>
+    </div>
     <div class="home-card" onclick="openAllStores()">
-      <div class="home-card-ico">🏬</div>
-      <div class="home-card-txt"><div class="home-card-title">المتاجر</div><div class="home-card-sub">تصفّح كل المتاجر</div></div>
+      <div class="home-card-ico">🏬</div><div class="home-card-txt"><div class="home-card-title">المتاجر</div><div class="home-card-sub">تصفّح كل المتاجر</div></div>
     </div>
     <div class="home-card" onclick="openEntertainment()">
-      <div class="home-card-ico">📺</div>
-      <div class="home-card-txt"><div class="home-card-title">القناة</div><div class="home-card-sub">فيديوهات واستطلاعات</div></div>
+      <div class="home-card-ico">📺</div><div class="home-card-txt"><div class="home-card-title">القناة</div><div class="home-card-sub">فيديوهات واستطلاعات</div></div>
     </div>
   </div>
   <div class="filters-wrap" style="display:none"><div class="filters" id="filters-bar"></div></div>
@@ -310,6 +314,7 @@ textarea.inp{height:64px;resize:none}
             <a class="store-wa-btn" id="store-wa-btn" href="#" target="_blank">📱 تواصل عبر واتساب</a>
             <button class="store-chat-btn" onclick="openStartChat(currentStoreId)">💬 راسل التاجر</button>
             <button class="store-share-btn" onclick="shareCurrentStore()">🔗 شارك المتجر</button>
+            <button class="store-share-btn" onclick="openUpgrade()" style="background:#EEF8EE;color:#2E7D5E">⭐ ترقية المتجر</button>
           </div>
         </div>
       </div>
@@ -1143,7 +1148,7 @@ function renderFilters(){
 
 function renderProducts(filter){
   const wrap=document.getElementById("products-container");
-  const list=sortByPopularity(filter==="الكل"?products:products.filter(p=>p.category===filter));
+  const okSellers=new Set(sellers.filter(x=>x.status!=="pending"&&x.status!=="rejected").map(x=>x.id));const visP=products.filter(p=>okSellers.has(p.sellerId));const list=sortByPopularity(filter==="الكل"?visP:visP.filter(p=>p.category===filter));
   document.getElementById("hero-counts").textContent=`🟢 ${sellers.length} تاجر · ${products.length} منتج`;
   if(list.length===0){
     wrap.innerHTML=`<div style="text-align:center;padding:60px 20px;color:#9CA3AF"><div style="font-size:2.6rem;margin-bottom:12px">🏪</div><div style="font-weight:800;color:#6B7280;margin-bottom:7px">لا توجد منتجات بعد</div><div style="font-size:0.83rem;margin-bottom:16px">كن أول تاجر ينشر منتجات هنا!</div><button class="btn-gold" onclick="openRegister()">افتح متجرك الآن</button></div>`;
@@ -1343,13 +1348,12 @@ function regNext(){
 }
 function regBack(){regStep--;updateRegUI();}
 async function regSubmit(){
-  const seller={id:Date.now().toString(),ownerName:document.getElementById("r-name").value.trim(),phone:(document.getElementById("r-country").value+document.getElementById("r-phone").value.trim().replace(/^0+/,"")),storeName:document.getElementById("r-store").value.trim(),category:document.getElementById("r-cat").value,plan:selectedPlan,description:document.getElementById("r-desc").value.trim(),storeImage:currentStoreImage,joinedAt:TODAY()};
+  const seller={id:Date.now().toString(),ownerName:document.getElementById("r-name").value.trim(),phone:(document.getElementById("r-country").value+document.getElementById("r-phone").value.trim().replace(/^0+/,"")),storeName:document.getElementById("r-store").value.trim(),category:document.getElementById("r-cat").value,plan:selectedPlan,description:document.getElementById("r-desc").value.trim(),storeImage:currentStoreImage,joinedAt:TODAY(),status:"pending"};
   await dbSave("sellers",seller.id,seller);
   notifyAdmin(`🆕 تاجر جديد سجّل في منصة الريان!\n━━━━━━━━━━\nالمتجر: ${seller.storeName}\nالمالك: ${seller.ownerName}\nالهاتف: ${seller.phone}\nالتصنيف: ${seller.category}\nالباقة: ${PLANS.find(p=>p.id===seller.plan)?.name||seller.plan}`);
-  currentSeller=seller;isAdmin=false;
-  enableSellerPushNotifications(seller.id);
-  closeModal("modal-register");showView("dashboard");renderDashboard();
-  document.getElementById("wt-name").textContent=`أهلاً بك يا ${seller.ownerName}! 👋`;
+  closeModal("modal-register");
+  showToast("تم إرسال طلبك ✓ بانتظار موافقة الإدارة");
+  alert("تم استلام طلبك بنجاح!\n\nسيتم مراجعته من قبل الإدارة، وسنتواصل معك عبر رقمك عند القبول.");
   document.getElementById("wt-store").textContent=`متجر "${seller.storeName}" جاهز الآن على منصة الريان 🛒`;
   document.getElementById("modal-welcome-trader").classList.remove("hidden");
 }
@@ -1612,7 +1616,8 @@ function renderAdminDashboard(){
   const mTab=document.getElementById("tab-manage");
   if(mTab){
     mTab.classList.toggle("hidden",activeTab!=="manage");
-    mTab.innerHTML=`<div class="panel"><div class="panel-head"><span class="panel-title">إدارة التجار والمنتجات</span></div>`+
+    setTimeout(()=>{if(typeof renderPendingRequests==="function")renderPendingRequests();},50);
+    mTab.innerHTML=`<div class="panel"><div class="panel-head"><span class="panel-title">⏳ طلبات معلّقة</span></div><div id="pending-requests-box"></div></div><div class="panel"><div class="panel-head"><span class="panel-title">إدارة التجار والمنتجات</span></div>`+
     sellers.map(s=>{
       const sp=products.filter(p=>p.sellerId===s.id);
       const plan=PLANS.find(p=>p.id===s.plan)||PLANS[0];
@@ -2233,7 +2238,7 @@ async function submitPrediction(){
 // ═══ عرض كل المتاجر ═══
 function openAllStores(){
   const body=document.getElementById("all-stores-body");
-  const list=sellers.slice().sort((a,b)=>(a.storeName||"").localeCompare(b.storeName||""));
+  const list=sellers.filter(x=>x.status!=="pending"&&x.status!=="rejected").slice().sort((a,b)=>(a.storeName||"").localeCompare(b.storeName||""));
   if(list.length===0){body.innerHTML='<div style="text-align:center;color:#9CA3AF;padding:30px 0">لا توجد متاجر بعد</div>';}
   else{body.innerHTML=list.map(sr=>`
     <div onclick="closeModal('modal-all-stores');openStore('${sr.id}')" style="display:flex;align-items:center;gap:12px;background:#F4F6FA;border-radius:12px;padding:11px;margin-bottom:9px;cursor:pointer">
@@ -2293,6 +2298,47 @@ async function delPlatformMsg(id){ if(confirm("حذف الرسالة؟")){ await
 window.renderPlatformMessages=renderPlatformMessages;
 window.markMsgRead=markMsgRead;
 window.delPlatformMsg=delPlatformMsg;
+
+
+// ═══ موافقات الطلبات ═══
+function renderPendingRequests(){
+  const box=document.getElementById("pending-requests-box");
+  if(!box)return;
+  const pend=sellers.filter(x=>x.status==="pending").sort((a,b)=>(b.id||0)-(a.id||0));
+  if(pend.length===0){box.innerHTML='<div style="color:#9CA3AF;font-size:0.82rem;padding:10px 0">لا توجد طلبات معلّقة</div>';return;}
+  box.innerHTML=pend.map(sr=>{
+    const plan=PLANS.find(p=>p.id===sr.plan);
+    const isAd=plan&&plan.type==="ad";
+    return `<div style="background:#FFF9E9;border:1px solid #F0D98A;border-radius:12px;padding:13px;margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="font-weight:800;color:#1A2744">${isAd?'📢':'🏪'} ${sr.storeName||sr.ownerName}</div>
+        <span style="background:#D9A840;color:#fff;font-size:0.7rem;font-weight:700;padding:3px 9px;border-radius:100px">${plan?plan.name:sr.plan}</span>
+      </div>
+      <div style="font-size:0.8rem;color:#374151;line-height:1.7">
+        المالك: ${sr.ownerName||''}<br>الهاتف: <a href="https://wa.me/${(sr.phone||'').replace(/\D/g,'')}" target="_blank" style="color:#2E7D5E;font-weight:700">${sr.phone||''} 📱</a><br>التصنيف: ${sr.category||''}
+        ${sr.description?'<br>الوصف: '+sr.description:''}
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button onclick="approveSeller('${sr.id}')" style="flex:1;background:#2E7D5E;color:#fff;border:none;border-radius:9px;padding:9px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif">✓ قبول</button>
+        <button onclick="rejectSeller('${sr.id}')" style="flex:1;background:#FEE;color:#D9534F;border:none;border-radius:9px;padding:9px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif">✕ رفض</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+async function approveSeller(id){
+  const sr=sellers.find(x=>x.id===id); if(!sr)return;
+  await dbUpdate("sellers",id,{status:"approved"});
+  try{ const num=(sr.phone||'').replace(/\D/g,''); const msg=encodeURIComponent(`مرحباً ${sr.ownerName}،\nتم قبول طلبك في منصة الريان ✓\nمتجرك الآن فعّال. مرحباً بك!`); if(confirm("تم القبول. إرسال إشعار واتساب للتاجر؟")) window.open(`https://wa.me/${num}?text=${msg}`,"_blank"); }catch(e){}
+  showToast("تم قبول الطلب ✓");
+}
+async function rejectSeller(id){
+  if(!confirm("رفض هذا الطلب؟")) return;
+  await dbUpdate("sellers",id,{status:"rejected"});
+  showToast("تم رفض الطلب");
+}
+window.renderPendingRequests=renderPendingRequests;
+window.approveSeller=approveSeller;
+window.rejectSeller=rejectSeller;
 
 window.openAllStores=openAllStores;
 window.openContactPlatform=openContactPlatform;
