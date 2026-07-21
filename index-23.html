@@ -632,54 +632,10 @@ textarea.inp{height:64px;resize:none}
 </div>
 
 <!-- START CHAT -->
-<div class="overlay hidden" id="modal-start-chat">
-  <div class="modal modal-sm">
-    <h3 style="color:#1A2744;font-weight:900;font-size:1.05rem;margin-bottom:4px">💬 راسل التاجر</h3>
-    <p style="color:#6B7280;font-size:0.82rem;margin-bottom:16px">للاستفسار قبل الطلب — مش لتأكيد الشراء</p>
-    <input type="hidden" id="sc-seller-id">
-    <div class="field"><label class="lbl">اسمك</label><input class="inp" id="sc-name" placeholder="أحمد محمد"></div>
-    <div class="field"><label class="lbl">الدولة</label><select class="inp" id="sc-country"><option value="+249" selected>🇸🇩 السودان (+249)</option><option value="+966">🇸🇦 السعودية (+966)</option><option value="+20">🇪🇬 مصر (+20)</option><option value="+971">🇦🇪 الإمارات (+971)</option><option value="+974">🇶🇦 قطر (+974)</option><option value="+965">🇰🇼 الكويت (+965)</option><option value="+973">🇧🇭 البحرين (+973)</option><option value="+968">🇴🇲 عُمان (+968)</option><option value="+962">🇯🇴 الأردن (+962)</option><option value="+961">🇱🇧 لبنان (+961)</option><option value="+963">🇸🇾 سوريا (+963)</option><option value="+964">🇮🇶 العراق (+964)</option><option value="+970">🇵🇸 فلسطين (+970)</option><option value="+967">🇾🇪 اليمن (+967)</option><option value="+218">🇱🇾 ليبيا (+218)</option><option value="+216">🇹🇳 تونس (+216)</option><option value="+213">🇩🇿 الجزائر (+213)</option><option value="+212">🇲🇦 المغرب (+212)</option><option value="+222">🇲🇷 موريتانيا (+222)</option><option value="+252">🇸🇴 الصومال (+252)</option><option value="+253">🇩🇯 جيبوتي (+253)</option><option value="+211">🇸🇸 جنوب السودان (+211)</option><option value="+235">🇹🇩 تشاد (+235)</option><option value="+251">🇪🇹 إثيوبيا (+251)</option><option value="+291">🇪🇷 إريتريا (+291)</option><option value="+254">🇰🇪 كينيا (+254)</option><option value="+256">🇺🇬 أوغندا (+256)</option><option value="+90">🇹🇷 تركيا (+90)</option><option value="+1">🇺🇸 الولايات المتحدة (+1)</option><option value="+44">🇬🇧 المملكة المتحدة (+44)</option><option value="+33">🇫🇷 فرنسا (+33)</option><option value="+49">🇩🇪 ألمانيا (+49)</option><option value="+39">🇮🇹 إيطاليا (+39)</option><option value="+34">🇪🇸 إسبانيا (+34)</option><option value="+31">🇳🇱 هولندا (+31)</option><option value="+46">🇸🇪 السويد (+46)</option><option value="+47">🇳🇴 النرويج (+47)</option><option value="+41">🇨🇭 سويسرا (+41)</option><option value="+7">🇷🇺 روسيا (+7)</option><option value="+86">🇨🇳 الصين (+86)</option><option value="+91">🇮🇳 الهند (+91)</option><option value="+92">🇵🇰 باكستان (+92)</option><option value="+62">🇮🇩 إندونيسيا (+62)</option><option value="+60">🇲🇾 ماليزيا (+60)</option><option value="+81">🇯🇵 اليابان (+81)</option><option value="+82">🇰🇷 كوريا الجنوبية (+82)</option><option value="+61">🇦🇺 أستراليا (+61)</option><option value="+234">🇳🇬 نيجيريا (+234)</option><option value="+27">🇿🇦 جنوب أفريقيا (+27)</option><option value="+55">🇧🇷 البرازيل (+55)</option></select></div>
-    <div class="field"><label class="lbl">رقم هاتفك</label><input class="inp" id="sc-phone" placeholder="912345678"></div>
-    <div id="sc-err" class="err-box hidden"></div>
-    <div class="modal-btns">
-      <button class="btn-back" onclick="closeModal('modal-start-chat')">إلغاء</button>
-      <button class="btn-next" onclick="submitStartChat()">✓ ابدأ المحادثة</button>
-    </div>
-  </div>
-</div>
+
 
 <!-- CHAT WINDOW -->
-<div class="overlay hidden" id="modal-chat-window">
-  <div class="modal modal-sm" style="display:flex;flex-direction:column">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <h3 style="color:#1A2744;font-weight:900;font-size:1rem" id="cw-title">—</h3>
-      <button onclick="closeModal('modal-chat-window')" style="background:none;border:none;font-size:1.3rem;color:#9CA3AF;cursor:pointer;line-height:1">×</button>
-    </div>
-    <div id="cw-link-box" class="hidden" style="background:#FFF8EE;border:1px solid #FFE8C2;border-radius:9px;padding:9px 12px;margin-bottom:10px">
-      <div style="font-size:0.74rem;color:#C9933A;font-weight:700;margin-bottom:5px">💾 احفظ هذا الرابط عشان ترجع للمحادثة لاحقاً:</div>
-      <div style="display:flex;align-items:center;gap:7px">
-        <span id="cw-link-text" style="flex:1;font-size:0.72rem;color:#1A2744;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:ltr;text-align:right"></span>
-        <button onclick="copyChatLink()" style="background:#1A2744;color:#fff;border:none;border-radius:6px;padding:4px 10px;font-family:Tajawal,sans-serif;font-weight:700;font-size:0.72rem;cursor:pointer;flex-shrink:0">نسخ</button>
-      </div>
-    </div>
-    <div class="chat-messages" id="cw-messages"></div>
-    <div id="cw-readonly-note" class="hidden" style="text-align:center;color:#9CA3AF;font-size:0.76rem;padding:6px">👁 عرض فقط — أنت تتابع كمالك المنصة</div>
-    <div class="chat-input-row" id="cw-input-row">
-      <input type="file" accept="image/*" id="cw-img-input" style="display:none" onchange="sendChatImage(this)">
-      <button type="button" class="chat-img-btn" onclick="document.getElementById('cw-img-input').click()">📷</button>
-      <button type="button" class="chat-img-btn" onclick="toggleVoiceRecording()">🎤</button>
-      <input class="chat-input" id="cw-input" placeholder="اكتب رسالتك..." onkeydown="if(event.key==='Enter'){event.preventDefault();sendChatMessage();}">
-      <button class="chat-send-btn" onclick="sendChatMessage()">➤</button>
-    </div>
-    <div id="cw-recording-ui" class="hidden" style="display:flex;align-items:center;gap:9px;background:#FFF0F0;border-radius:22px;padding:8px 14px">
-      <span style="width:10px;height:10px;background:#C62828;border-radius:50%;flex-shrink:0;animation:cwPulse 1s infinite"></span>
-      <span id="cw-recording-timer" style="font-weight:800;color:#1A2744;font-size:0.85rem;flex-shrink:0">00:00</span>
-      <span style="flex:1;color:#6B7280;font-size:0.76rem">جاري تسجيل رسالة صوتية...</span>
-      <button type="button" onclick="cancelVoiceRecording()" style="background:#E5E0D8;border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:0.85rem;flex-shrink:0">✕</button>
-      <button type="button" onclick="toggleVoiceRecording()" style="background:#1A2744;color:#fff;border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:0.85rem;flex-shrink:0">✓</button>
-    </div>
-  </div>
-</div>
+
 
 <!-- MY CHATS -->
 <div class="overlay hidden" id="modal-entertainment">
@@ -714,13 +670,7 @@ textarea.inp{height:64px;resize:none}
   </div>
 </div>
 
-<div class="overlay hidden" id="modal-my-chats">
-  <div class="modal modal-sm">
-    <h3 style="color:#1A2744;font-weight:900;font-size:1.05rem;margin-bottom:14px">💬 محادثاتي</h3>
-    <div id="mc-body"></div>
-    <button style="width:100%;margin-top:12px;padding:9px;border-radius:9px;border:1.5px solid #E5E0D8;background:transparent;font-weight:700;color:#6B7280;cursor:pointer;font-family:Tajawal,sans-serif" onclick="closeModal('modal-my-chats')">إغلاق</button>
-  </div>
-</div>
+
 
 <!-- SHARE PRODUCT MODAL -->
 <div class="overlay hidden" id="modal-share-product">
@@ -934,10 +884,10 @@ function listenAll(){
   // chats
   onSnapshot(collection(db,"chats"), snap=>{
     chats = snap.docs.map(d=>d.data());
-    if(currentChatId && !document.getElementById("modal-chat-window").classList.contains("hidden")) renderChatWindow();
+    var _cw=document.getElementById("modal-chat-window"); if(_cw && !_cw.classList.contains("hidden")) renderChatWindow();
     if(currentSeller && activeTab==="messages") renderDashboard();
     updateMyChatsBadge();
-    if(!document.getElementById("modal-my-chats").classList.contains("hidden")) renderMyChats();
+    var _mc=document.getElementById("modal-my-chats"); if(_mc && !_mc.classList.contains("hidden")) renderMyChats();
   });
   // visits
   onSnapshot(doc(db,"meta","visits"), snap=>{
@@ -1624,7 +1574,7 @@ function renderAdminDashboard(){
   document.getElementById("dash-tabs").innerHTML=`
     <button class="tab-btn ${activeTab==="admin"?"active":""}" onclick="switchTab('admin')">📊 الإحصائيات</button>
     <button class="tab-btn ${activeTab==="orders"?"active":""}" onclick="switchTab('orders')">📋 الطلبات</button>
-    <button class="tab-btn ${activeTab==="messages"?"active":""}" onclick="switchTab('messages')">💬 المحادثات (${chats.length})</button>
+    
     <button class="tab-btn ${activeTab==="manage"?"active":""}" onclick="switchTab('manage')">🏪 التجار</button>
     <button class="tab-btn ${activeTab==="channel"?"active":""}" onclick="switchTab('channel')">📺 القناة</button><button class="tab-btn ${activeTab==="messages2"?"active":""}" onclick="switchTab('messages2')">📨 رسائل المنصة</button>`;
   const aTab=document.getElementById("tab-admin");
@@ -2704,6 +2654,7 @@ function logoutMyChats(){
   renderMyChats();
 }
 function updateMyChatsBadge(){
+  if(!document.getElementById("my-chats-btn")) return;
   const btn=document.getElementById("my-chats-btn");
   if(!btn)return;
   const hasUnread = customerPhone && chats.some(c=>c.customerPhone===customerPhone && !c.customerRead);
