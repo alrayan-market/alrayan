@@ -356,6 +356,7 @@ textarea.inp{height:64px;resize:none}
         <div><div style="font-weight:800;color:#1A2744;margin-bottom:2px;font-size:0.93rem">🔗 رابط متجرك</div><div style="color:#6B7280;font-size:0.78rem">شاركه للتسويق</div></div>
         <div style="display:flex;gap:8px;flex-shrink:0">
           <button class="btn-navy" onclick="editMyStore()" style="background:#EEF8EE;color:#2E7D5E">✏️ تعديل المتجر</button>
+          <button class="btn-navy" onclick="upgradeMyStore()" style="background:#FFF4E0;color:#B8862B">⭐ ترقية الباقة</button>
           <button class="btn-navy" onclick="openShare()">📣 مشاركة</button>
         </div>
       </div>
@@ -389,6 +390,7 @@ textarea.inp{height:64px;resize:none}
     <button class="btn-navy" style="width:100%" onclick="submitUpgrade()">متابعة للدفع ⭐</button>
   </div>
 </div>
+<div class="overlay hidden" id="modal-ad"><div class="modal modal-sm" style="max-height:88vh;overflow-y:auto"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><h3 style="color:#1A2744;font-weight:900;font-size:1.05rem">📢 نشر إعلان</h3><button onclick="closeModal('modal-ad')" style="background:none;border:none;font-size:1.4rem;color:#9CA3AF;cursor:pointer">✕</button></div><p style="color:#6B7280;font-size:0.82rem;margin-bottom:14px">إعلان واحد يظهر أسبوع — 10,000 ج.س</p><div class="field"><label class="lbl">عنوان الإعلان</label><input class="inp" id="ad-title"></div><div class="field"><label class="lbl">الوصف</label><textarea class="inp" id="ad-desc" rows="3"></textarea></div><div class="field"><label class="lbl">صورة الإعلان</label><div id="ad-img-ph" onclick="document.getElementById('ad-img-input').click()" style="background:#F4F6FA;border:2px dashed #D8D3C6;border-radius:12px;padding:22px;text-align:center;cursor:pointer"><div style="font-size:1.6rem">📷</div><div style="color:#6B7280;font-size:0.8rem">اضغط لرفع صورة</div></div><img id="ad-img-preview" style="display:none;width:100%;border-radius:12px;margin-top:8px"><input type="file" id="ad-img-input" accept="image/*" style="display:none" onchange="handleAdImg(this)"></div><div class="field"><label class="lbl">اسمك</label><input class="inp" id="ad-name"></div><div class="field"><label class="lbl">الدولة</label><select class="inp" id="ad-country"><option value="+249" selected>🇸🇩 السودان (+249)</option><option value="+966">🇸🇦 السعودية (+966)</option><option value="+20">🇪🇬 مصر (+20)</option><option value="+90">🇹🇷 تركيا (+90)</option><option value="+1">🇺🇸 أمريكا (+1)</option></select></div><div class="field"><label class="lbl">رقم التواصل</label><input class="inp" id="ad-phone" placeholder="912345678"></div><div id="ad-err" style="color:#D9534F;font-size:0.8rem;margin-bottom:8px"></div><button class="btn-navy" style="width:100%" onclick="submitAd()">متابعة للدفع 📢</button></div></div>
 <div class="overlay hidden" id="modal-payment">
   <div class="modal modal-sm" style="max-height:88vh;overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
@@ -1329,11 +1331,8 @@ let joinType="store";
 function openJoinChoice(){
   document.getElementById("modal-join-choice").classList.remove("hidden");
 }
-function startJoin(type){
-  joinType=type;
-  closeModal("modal-join-choice");
-  openRegister();
-}
+function startJoin(type){joinType=type;closeModal("modal-join-choice");if(type==="ad"){openAdForm();}else{openRegister();}}
+function openAdForm(){["ad-title","ad-desc","ad-name","ad-phone"].forEach(function(id){var el=document.getElementById(id);if(el)el.value="";});adImage="";var pv=document.getElementById("ad-img-preview");if(pv)pv.style.display="none";var ph=document.getElementById("ad-img-ph");if(ph){ph.style.display="block";ph.innerHTML='<div style="font-size:1.6rem">📷</div><div style="color:#6B7280;font-size:0.8rem">اضغط لرفع صورة</div>';}var e=document.getElementById("ad-err");if(e)e.textContent="";document.getElementById("modal-ad").classList.remove("hidden");}
 window.openJoinChoice=openJoinChoice;
 window.startJoin=startJoin;
 
@@ -2402,6 +2401,14 @@ async function submitUpgrade(){
 }
 window.openUpgrade=openUpgrade;window.submitUpgrade=submitUpgrade;
 
+
+let adImage="";
+function handleAdImg(input){var f=input.files[0];if(!f)return;if(f.size>5*1024*1024){document.getElementById("ad-err").textContent="حجم كبير";return;}var ph=document.getElementById("ad-img-ph");ph.innerHTML='<div style="font-size:1.6rem">⏳</div>';var fd=new FormData();fd.append("image",f);fetch("https://api.imgbb.com/1/upload?key=16b4262b9ff85a10c0f3a4834a847184",{method:"POST",body:fd}).then(function(r){return r.json();}).then(function(d){if(d&&d.data&&d.data.url){adImage=d.data.url;var pv=document.getElementById("ad-img-preview");pv.src=d.data.url;pv.style.display="block";ph.style.display="none";}else{document.getElementById("ad-err").textContent="فشل الرفع";}ph.innerHTML='<div style="font-size:1.6rem">📷</div><div style="color:#6B7280;font-size:0.8rem">اضغط لرفع صورة</div>';}).catch(function(){document.getElementById("ad-err").textContent="فشل الرفع";});}
+function submitAd(){var t=document.getElementById("ad-title").value.trim();var de=document.getElementById("ad-desc").value.trim();var n=document.getElementById("ad-name").value.trim();var p=(document.getElementById("ad-country").value+document.getElementById("ad-phone").value.trim().replace(/^0+/,""));var e=document.getElementById("ad-err");if(!t){e.textContent="أدخل عنوان الإعلان";return;}if(!adImage){e.textContent="ارفع صورة الإعلان";return;}if(!n){e.textContent="أدخل اسمك";return;}if(!/^\d{6,15}$/.test(p.replace(/\D/g,""))){e.textContent="رقم غير صحيح";return;}var ad={id:"AD-"+Date.now(),type:"ad",adTitle:t,adDesc:de,adImage:adImage,storeImage:adImage,ownerName:n,storeName:t,phone:p,plan:"ad",expiresAt:Date.now()+7*24*60*60*1000};closeModal("modal-ad");openPayment({kind:"ad",data:ad,amount:10000});}
+window.handleAdImg=handleAdImg;window.submitAd=submitAd;window.openAdForm=openAdForm;
+
+function upgradeMyStore(){if(!currentSeller)return;currentStoreId=currentSeller.id;openUpgrade();}
+window.upgradeMyStore=upgradeMyStore;
 window.copyAccount=copyAccount;window.openPayment=openPayment;window.handlePayImg=handlePayImg;window.submitPayment=submitPayment;
 
 window.openAllStores=openAllStores;
