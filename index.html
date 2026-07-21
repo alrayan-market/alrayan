@@ -311,8 +311,8 @@ textarea.inp{height:64px;resize:none}
           <div class="store-rating-bar" id="store-rating-bar"></div>
           <div class="store-meta" id="store-meta"></div>
           <div class="store-actions">
-            <a class="store-wa-btn" id="store-wa-btn" href="#" target="_blank">📱 تواصل عبر واتساب</a>
-            <button class="store-share-btn" onclick="waStoreDirect()" style="background:#EEF8EE;color:#2E7D5E">💬 واتساب التاجر</button>
+            <a class="store-wa-btn" id="store-wa-btn" href="javascript:void(0)" onclick="openWaStoreInquire()">📱 تواصل عبر واتساب</a>
+            
             <button class="store-share-btn" onclick="shareCurrentStore()">🔗 شارك المتجر</button>
             <button class="store-share-btn" onclick="openUpgrade()" style="background:#EEF8EE;color:#2E7D5E">⭐ ترقية المتجر</button>
           </div>
@@ -1174,7 +1174,7 @@ function renderProducts(filter){
           <button class="order-now-btn" onclick="openDirectOrder('${p.id}')">تواصل واطلب</button>
         </div>
         <div style="display:flex;gap:6px;margin-top:8px">
-          <button onclick="inquireWhatsApp('${p.id}')" style="flex:1;padding:7px;border-radius:8px;border:1.5px solid #E5E0D8;background:#fff;color:#6B7280;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">💬 استفسر</button>
+          <button onclick="openWaInquire('${p.id}')" style="flex:1;padding:7px;border-radius:8px;border:1.5px solid #E5E0D8;background:#fff;color:#6B7280;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">💬 استفسر</button>
           <button onclick="shareProduct('${p.id}')" style="flex:1;padding:7px;border-radius:8px;border:1.5px solid #E5E0D8;background:#fff;color:#6B7280;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">🔗 شارك</button>
           <button onclick="openRating('${p.sellerId}','${p.sellerName}')" style="flex:1;padding:7px;border-radius:8px;border:1.5px solid #FFF0D8;background:#FFF8EE;color:#C9933A;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">⭐ قيّم</button>
         </div>
@@ -1777,7 +1777,7 @@ async function openStore(sellerId){
 
   // whatsapp
   const waNum = "249"+seller.phone.replace(/^0/,"");
-  document.getElementById("store-wa-btn").href = `https://wa.me/${waNum}?text=${encodeURIComponent("مرحباً، زرت متجرك على منصة الريان 🛒")}`;
+  document.getElementById("store-wa-btn").dataset.x="1";
 
   // products
   document.getElementById("store-products-title").textContent = `منتجات المتجر (${storeProds.length})`;
@@ -1804,7 +1804,7 @@ async function openStore(sellerId){
             <button class="order-now-btn" onclick="openDirectOrder('${p.id}')">تواصل واطلب</button>
           </div>
           <div style="display:flex;gap:6px;margin-top:8px">
-            <button onclick="inquireWhatsApp('${p.id}')" style="flex:1;padding:7px;border-radius:8px;border:1.5px solid #E5E0D8;background:#fff;color:#6B7280;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">💬 استفسر</button>
+            <button onclick="openWaInquire('${p.id}')" style="flex:1;padding:7px;border-radius:8px;border:1.5px solid #E5E0D8;background:#fff;color:#6B7280;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">💬 استفسر</button>
             <button onclick="shareProduct('${p.id}')" style="flex:1;padding:7px;border-radius:8px;border:1.5px solid #E5E0D8;background:#fff;color:#6B7280;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">🔗 شارك</button>
             <button onclick="openRating('${p.sellerId}','${p.sellerName}')" style="flex:1;padding:7px;border-radius:8px;border:1.5px solid #FFF0D8;background:#FFF8EE;color:#C9933A;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">⭐ قيّم</button>
           </div>
@@ -2405,18 +2405,11 @@ async function submitUpgrade(){
 window.openUpgrade=openUpgrade;window.submitUpgrade=submitUpgrade;
 
 
-function inquireWhatsApp(productId){
-  const p=products.find(x=>x.id===productId); if(!p)return;
-  const seller=sellers.find(x=>x.id===p.sellerId);
-  const phone=(seller&&seller.phone?seller.phone:"").replace(/\D/g,"");
-  if(!phone){showToast("رقم التاجر غير متوفر");return;}
-  const msg=encodeURIComponent(`مرحباً، عندي استفسار عن: ${p.name}\nمن منصة الريان 🛒`);
-  window.open(`https://wa.me/${phone}?text=${msg}`,"_blank");
-}
+function inquireWhatsApp(pid){ openWaInquire(pid); }
 function whatsAppFromDirectOrder(){
-  const p=products.find(x=>x.id===directOrderProductId); if(!p){closeModal("modal-direct-order");return;}
-  closeModal("modal-direct-order");
-  inquireWhatsApp(p.id);
+  closeModal("modal-checkout");
+  if(typeof checkoutProduct!=="undefined"&&checkoutProduct){openWaInquire(checkoutProduct.id);return;}
+  if(typeof currentProductId!=="undefined"&&currentProductId){openWaInquire(currentProductId);return;}
 }
 window.inquireWhatsApp=inquireWhatsApp;
 window.whatsAppFromDirectOrder=whatsAppFromDirectOrder;
@@ -2435,17 +2428,25 @@ async function goWhatsAppInquire(){
   var e=document.getElementById("wa-err");
   if(!n){e.textContent="أدخل اسمك";return;}
   if(!/^\d{6,15}$/.test(p.replace(/\D/g,""))){e.textContent="رقم غير صحيح";return;}
-  var prod=products.find(function(x){return x.id===waInquireProduct;});
-  if(!prod){e.textContent="المنتج غير موجود";return;}
-  var sel=sellers.find(function(x){return x.id===prod.sellerId;});
-  var selPhone=(sel&&sel.phone?sel.phone:"").replace(/\D/g,"");
+  var sel=null, prodName="", prodId="";
+  if(waInquireProduct){
+    var prod=products.find(function(x){return x.id===waInquireProduct;});
+    if(!prod){e.textContent="المنتج غير موجود";return;}
+    sel=sellers.find(function(x){return x.id===prod.sellerId;});
+    prodName=prod.name; prodId=prod.id;
+  }else if(waInquireStore){
+    sel=sellers.find(function(x){return x.id===waInquireStore;});
+    prodName="(تواصل عام مع المتجر)";
+  }
+  if(!sel){e.textContent="المتجر غير متاح";return;}
+  var selPhone=(sel.phone||"").replace(/\D/g,"");
   if(!selPhone){e.textContent="رقم التاجر غير متاح";return;}
-  // تسجيل الاستفسار ليعرف المالك والتاجر من استفسر
   var iid="INQ-"+Date.now();
-  try{ await dbSave("inquiries",iid,{id:iid,productId:prod.id,productName:prod.name,sellerId:prod.sellerId,sellerName:prod.sellerName||"",name:n,phone:p,createdAt:Date.now()}); }catch(err){}
+  try{ await dbSave("inquiries",iid,{id:iid,productId:prodId,productName:prodName,sellerId:sel.id,sellerName:sel.storeName||"",name:n,phone:p,createdAt:Date.now()}); }catch(err){}
   closeModal("modal-wa-inquire");
-  var msg=encodeURIComponent("مرحباً، أنا "+n+"\nعندي استفسار عن: "+prod.name+"\n(من منصة الريان)");
+  var msg=encodeURIComponent("مرحباً، أنا "+n+(prodId?"\nعندي استفسار عن: "+prodName:"")+"\n(من منصة الريان)");
   window.open("https://wa.me/"+selPhone+"?text="+msg,"_blank");
+  waInquireStore=null;
 }
 
 function waFromDirectOrder(){
@@ -2465,6 +2466,16 @@ function waStoreDirect(){
   window.open("https://wa.me/"+ph+"?text="+msg,"_blank");
 }
 window.waStoreDirect=waStoreDirect;
+
+
+let waInquireStore=null;
+function openWaStoreInquire(){
+  waInquireStore=currentStoreId; waInquireProduct=null;
+  ["wa-name","wa-phone"].forEach(function(id){var el=document.getElementById(id);if(el)el.value="";});
+  document.getElementById("wa-err").textContent="";
+  document.getElementById("modal-wa-inquire").classList.remove("hidden");
+}
+window.openWaStoreInquire=openWaStoreInquire;
 
 window.openWaInquire=openWaInquire;
 window.goWhatsAppInquire=goWhatsAppInquire;
