@@ -267,7 +267,7 @@ textarea.inp{height:64px;resize:none}
     <div style="display:flex;gap:7px;align-items:center">
       <div class="cart-badge hidden" id="cart-count-badge" onclick="openCart()">🛒 0</div>
       <button class="chats-nav-btn" id="contact-nav-btn" onclick="openContactPlatform()">📨</button>
-      <button class="chats-nav-btn" id="my-chats-btn" onclick="openMyChats()">💬</button>
+      
       
     </div>
   </nav>
@@ -312,7 +312,7 @@ textarea.inp{height:64px;resize:none}
           <div class="store-meta" id="store-meta"></div>
           <div class="store-actions">
             <a class="store-wa-btn" id="store-wa-btn" href="#" target="_blank">📱 تواصل عبر واتساب</a>
-            <button class="store-chat-btn" onclick="openStartChat(currentStoreId)">💬 راسل التاجر</button>
+            <button class="store-share-btn" onclick="waStoreDirect()" style="background:#EEF8EE;color:#2E7D5E">💬 واتساب التاجر</button>
             <button class="store-share-btn" onclick="shareCurrentStore()">🔗 شارك المتجر</button>
             <button class="store-share-btn" onclick="openUpgrade()" style="background:#EEF8EE;color:#2E7D5E">⭐ ترقية المتجر</button>
           </div>
@@ -888,7 +888,7 @@ let chatPrefillText="";
 let customerPhone="";
 try{ customerPhone = localStorage.getItem("rayan_customer_phone")||""; }catch(e){}
 let visits={total:0,today:0,lastDate:""};
-let entVideos=[], entPredicts=[], entEntries=[], platformMessages=[], currentPredictId=null;
+let entVideos=[], entPredicts=[], entEntries=[], platformMessages=[], inquiries=[], currentPredictId=null;
 let cart={};
 let currentSeller=null;
 let isAdmin=false;
@@ -960,6 +960,10 @@ function listenAll(){
   });
   onSnapshot(collection(db,"platformMessages"), snap=>{
     platformMessages=snap.docs.map(d=>d.data());
+    if(isAdmin && activeTab==="messages2") renderPlatformMessages();
+  });
+  onSnapshot(collection(db,"inquiries"), snap=>{
+    inquiries=snap.docs.map(d=>d.data());
     if(isAdmin && activeTab==="messages2") renderPlatformMessages();
   });
 }
@@ -2355,6 +2359,21 @@ function renderPlatformMessages(){
           </div>
         </div>
       </div>`;
+    }).join(""))+`</div>`+renderInquiriesPanel();
+}
+function renderInquiriesPanel(){
+  const list=inquiries.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  return `<div class="panel"><div class="panel-head"><span class="panel-title">💬 استفسارات الواتساب (${list.length})</span></div>`+
+    (list.length===0?'<div class="no-items"><div>لا توجد استفسارات</div></div>':list.map(q=>{
+      const d=new Date(q.createdAt||0);
+      return `<div style="background:#F4F6FA;border-radius:11px;padding:12px;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-weight:800;color:#1A2744">${q.name||""}</div>
+          <a href="https://wa.me/${(q.phone||'').replace(/\D/g,'')}" target="_blank" style="color:#2E7D5E;font-weight:700;text-decoration:none;font-size:0.8rem">${q.phone||''} 📱</a>
+        </div>
+        <div style="color:#374151;font-size:0.8rem;margin-top:4px">استفسر عن: <b>${q.productName||""}</b> · متجر: ${q.sellerName||""}</div>
+        <div style="color:#9CA3AF;font-size:0.7rem;margin-top:4px">${d.toLocaleDateString('ar')} ${d.toLocaleTimeString('ar',{hour:'2-digit',minute:'2-digit'})}</div>
+      </div>`;
     }).join(""))+`</div>`;
 }
 async function markMsgRead(id){ await dbUpdate("platformMessages",id,{read:true}); }
@@ -2486,6 +2505,17 @@ function waFromDirectOrder(){
   else if(typeof coProductId!=="undefined"&&coProductId){openWaInquire(coProductId);}
 }
 window.waFromDirectOrder=waFromDirectOrder;
+
+
+function waStoreDirect(){
+  var sel=sellers.find(function(x){return x.id===currentStoreId;});
+  if(!sel){showToast("المتجر غير متاح");return;}
+  var ph=(sel.phone||"").replace(/\D/g,"");
+  if(!ph){showToast("رقم التاجر غير متاح");return;}
+  var msg=encodeURIComponent("مرحباً، أتواصل معك من متجرك في منصة الريان 🛒");
+  window.open("https://wa.me/"+ph+"?text="+msg,"_blank");
+}
+window.waStoreDirect=waStoreDirect;
 
 window.openWaInquire=openWaInquire;
 window.goWhatsAppInquire=goWhatsAppInquire;
