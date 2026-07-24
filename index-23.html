@@ -1041,6 +1041,7 @@ const ADMIN_NOTIFY_PHONE = "249966009977";
 const ADMIN_NOTIFY_APIKEY = "7899312";
 function notifyAdmin(text){
   try{
+    if(text.length>250) text=text.slice(0,247)+"...";
     const url=`https://api.callmebot.com/whatsapp.php?phone=${ADMIN_NOTIFY_PHONE}&text=${encodeURIComponent(text)}&apikey=${ADMIN_NOTIFY_APIKEY}`;
     fetch(url,{mode:"no-cors"}).catch(()=>{});
   }catch(e){}
@@ -1263,7 +1264,7 @@ async function submitDirectOrder(){
   const orderId="ORD-"+Date.now().toString().slice(-6);
   const order={id:orderId,createdAt:Date.now(),buyerName:name,buyerPhone:phone,buyerAddress:address,notes,items:[{productId:p.id,name:p.name,price:p.price,qty,sellerId:p.sellerId,sellerName:p.sellerName}],deliveryFee,total,priceOnRequest:!!p.priceOnRequest,date:TODAY(),status:"new"};
   await dbSave("orders",orderId,order);
-  notifyAdmin(`🛒 طلب جديد على منصة الريان!\n━━━━━━━━━━\nرقم الطلب: ${orderId}\nالمنتج: ${p.name} × ${qty}${deliveryText}\nالإجمالي: ${totalText}\nالمتجر: ${p.sellerName}\n━━━━━━━━━━\nالزبون: ${name}\nالهاتف: ${phone}\nالعنوان: ${address}`);
+  notifyAdmin(`🛒 طلب ${orderId}\n${p.name} x${qty}\nالزبون: ${name}\n${phone}`);
   const seller=sellers.find(s=>s.id===p.sellerId);
   let waLink="";
   if(seller){
