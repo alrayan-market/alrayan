@@ -291,6 +291,18 @@ textarea.inp{height:64px;resize:none}
       <div class="home-card-ico">📺</div><div class="home-card-txt"><div class="home-card-title">القناة</div><div class="home-card-sub">فيديوهات واستطلاعات</div></div>
     </div>
   </div>
+  <div id="adspace-banner" onclick="openAdSpace()" style="margin:4px 16px 14px;background:linear-gradient(120deg,#1A2744 0%,#2A3C63 55%,#B8862B 130%);border-radius:18px;padding:18px 20px;cursor:pointer;position:relative;overflow:hidden;box-shadow:0 8px 24px rgba(26,39,68,.22)">
+    <div style="position:absolute;top:-20px;left:-20px;width:110px;height:110px;background:rgba(217,168,64,.18);border-radius:50%"></div>
+    <div style="display:flex;align-items:center;gap:14px;position:relative">
+      <div style="font-size:2.2rem">📣</div>
+      <div style="flex:1">
+        <div style="color:#F2CE73;font-weight:900;font-size:1.05rem;letter-spacing:.3px">مساحة إعلانية</div>
+        <div style="color:#C6CFDF;font-size:0.78rem;margin-top:3px">أعلن هنا ووصل لآلاف الزوار يومياً — باقات تبدأ من 20,000 ج.س</div>
+      </div>
+      <div style="background:linear-gradient(100deg,#F2CE73,#D9A840);color:#12203A;font-weight:900;font-size:0.78rem;padding:8px 14px;border-radius:100px;white-space:nowrap">أعلن الآن ←</div>
+    </div>
+  </div>
+
   <div class="filters-wrap" style="display:none"><div class="filters" id="filters-bar"></div></div>
   <div id="products-container"></div>
   <button class="float-btn" onclick="openLogin()">🏪 دخول التجار</button>
@@ -402,6 +414,24 @@ textarea.inp{height:64px;resize:none}
   </div>
 </div>
 <div class="overlay hidden" id="modal-ad"><div class="modal modal-sm" style="max-height:88vh;overflow-y:auto"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><h3 style="color:#1A2744;font-weight:900;font-size:1.05rem">📢 نشر إعلان</h3><button onclick="closeModal('modal-ad')" style="background:none;border:none;font-size:1.4rem;color:#9CA3AF;cursor:pointer">✕</button></div><p style="color:#6B7280;font-size:0.82rem;margin-bottom:14px">إعلان واحد يظهر أسبوع — 10,000 ج.س</p><div class="field"><label class="lbl">عنوان الإعلان</label><input class="inp" id="ad-title"></div><div class="field"><label class="lbl">الوصف</label><textarea class="inp" id="ad-desc" rows="3"></textarea></div><div class="field"><label class="lbl">صورة الإعلان</label><div id="ad-img-ph" onclick="document.getElementById('ad-img-input').click()" style="background:#F4F6FA;border:2px dashed #D8D3C6;border-radius:12px;padding:22px;text-align:center;cursor:pointer"><div style="font-size:1.6rem">📷</div><div style="color:#6B7280;font-size:0.8rem">اضغط لرفع صورة</div></div><img id="ad-img-preview" style="display:none;width:100%;border-radius:12px;margin-top:8px"><input type="file" id="ad-img-input" accept="image/*" style="display:none" onchange="handleAdImg(this)"></div><div class="field"><label class="lbl">اسمك</label><input class="inp" id="ad-name"></div><div class="field"><label class="lbl">الدولة</label><select class="inp" id="ad-country"><option value="+249" selected>🇸🇩 السودان (+249)</option><option value="+966">🇸🇦 السعودية (+966)</option><option value="+20">🇪🇬 مصر (+20)</option><option value="+90">🇹🇷 تركيا (+90)</option><option value="+1">🇺🇸 أمريكا (+1)</option></select></div><div class="field"><label class="lbl">رقم التواصل</label><input class="inp" id="ad-phone" placeholder="912345678"></div><div id="ad-err" style="color:#D9534F;font-size:0.8rem;margin-bottom:8px"></div><button class="btn-navy" style="width:100%" onclick="submitAd()">متابعة للدفع 📢</button></div></div>
+<div class="overlay hidden" id="modal-adspace">
+  <div class="modal modal-sm" style="max-height:88vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><h3 style="color:#1A2744;font-weight:900;font-size:1.05rem">📣 المساحة الإعلانية</h3><button onclick="closeModal('modal-adspace')" style="background:none;border:none;font-size:1.4rem;color:#9CA3AF;cursor:pointer">✕</button></div>
+    <p style="color:#6B7280;font-size:0.82rem;margin-bottom:14px">إعلانك في أبرز مكان بالمنصة — اختر مدة الظهور:</p>
+    <div id="adspace-plans" style="display:grid;gap:9px;margin-bottom:14px">
+      <label style="display:flex;justify-content:space-between;align-items:center;background:#F4F6FA;border-radius:11px;padding:13px;cursor:pointer;font-weight:800;color:#1A2744"><span><input type="radio" name="as-plan" value="day" style="margin-left:8px">📅 يوم واحد</span><span style="color:#2E7D5E">20,000 ج.س</span></label>
+      <label style="display:flex;justify-content:space-between;align-items:center;background:#FFF9E9;border:1.5px solid #F0D98A;border-radius:11px;padding:13px;cursor:pointer;font-weight:800;color:#1A2744"><span><input type="radio" name="as-plan" value="week" style="margin-left:8px">⭐ أسبوع كامل</span><span style="color:#B8862B">100,000 ج.س</span></label>
+      <label style="display:flex;justify-content:space-between;align-items:center;background:#F4F6FA;border-radius:11px;padding:13px;cursor:pointer;font-weight:800;color:#1A2744"><span><input type="radio" name="as-plan" value="month" style="margin-left:8px">🏆 شهر كامل</span><span style="color:#2E7D5E">300,000 ج.س</span></label>
+    </div>
+    <div class="field"><label class="lbl">عنوان إعلانك</label><input class="inp" id="as-title"></div>
+    <div class="field"><label class="lbl">صورة الإعلان</label><div id="as-img-ph" onclick="document.getElementById('as-img-input').click()" style="background:#F4F6FA;border:2px dashed #D8D3C6;border-radius:12px;padding:20px;text-align:center;cursor:pointer"><div style="font-size:1.5rem">📷</div><div style="color:#6B7280;font-size:0.78rem">اضغط لرفع صورة</div></div><img id="as-img-preview" style="display:none;width:100%;border-radius:12px;margin-top:8px"><input type="file" id="as-img-input" accept="image/*" style="display:none" onchange="handleAsImg(this)"></div>
+    <div class="field"><label class="lbl">اسمك</label><input class="inp" id="as-name"></div>
+    <div class="field"><label class="lbl">الدولة</label><select class="inp" id="as-country"><option value="+249" selected>🇸🇩 السودان (+249)</option><option value="+966">🇸🇦 السعودية (+966)</option><option value="+20">🇪🇬 مصر (+20)</option><option value="+971">🇦🇪 الإمارات (+971)</option><option value="+90">🇹🇷 تركيا (+90)</option><option value="+1">🇺🇸 أمريكا (+1)</option></select></div>
+    <div class="field"><label class="lbl">رقم التواصل</label><input class="inp" id="as-phone" placeholder="912345678"></div>
+    <div id="as-err" style="color:#D9534F;font-size:0.8rem;margin-bottom:8px"></div>
+    <button class="btn-navy" style="width:100%" onclick="submitAdSpace()">متابعة للدفع 📣</button>
+  </div>
+</div>
 <div class="overlay hidden" id="modal-payment">
   <div class="modal modal-sm" style="max-height:88vh;overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
@@ -840,7 +870,7 @@ let chatPrefillText="";
 let customerPhone="";
 try{ customerPhone = localStorage.getItem("rayan_customer_phone")||""; }catch(e){}
 let visits={total:0,today:0,lastDate:""};
-let entVideos=[], entPredicts=[], entEntries=[], platformMessages=[], inquiries=[], currentPredictId=null;
+let entVideos=[], entPredicts=[], entEntries=[], platformMessages=[], inquiries=[], adSpaceReqs=[], currentPredictId=null;
 let cart={};
 let currentSeller=null;
 let isAdmin=false;
@@ -917,6 +947,10 @@ function listenAll(){
   onSnapshot(collection(db,"inquiries"), snap=>{
     inquiries=snap.docs.map(d=>d.data());
     if(isAdmin && activeTab==="messages2") renderPlatformMessages();
+  });
+  onSnapshot(collection(db,"adSpaceRequests"), snap=>{
+    adSpaceReqs=snap.docs.map(d=>d.data());
+    if(isAdmin && activeTab==="manage") renderPendingRequests();
   });
 }
 
@@ -1039,6 +1073,14 @@ async function notifyChatRecipient(chat,senderRole,previewText){
 // ══════════ ADMIN WHATSAPP NOTIFICATIONS (via CallMeBot) ══════════
 const ADMIN_NOTIFY_PHONE = "249966009977";
 const ADMIN_NOTIFY_APIKEY = "7899312";
+
+function waNum(phone){
+  var d=String(phone||"").replace(/\D/g,"");
+  if(d.indexOf("0")===0) d="249"+d.slice(1);
+  return d;
+}
+window.waNum=waNum;
+
 function notifyAdmin(text){
   try{
     if(text.length>250) text=text.slice(0,247)+"...";
@@ -1268,9 +1310,9 @@ async function submitDirectOrder(){
   const seller=sellers.find(s=>s.id===p.sellerId);
   let waLink="";
   if(seller){
-    const waNum="249"+seller.phone.replace(/^0/,"");
+    const waNumV=waNum(seller.phone);
     const waMsg=encodeURIComponent(`🛒 طلب جديد من منصة الريان!\n━━━━━━━━━━\nرقم الطلب: ${orderId}\nالزبون: ${name}\nالهاتف: ${phone}\nالعنوان: ${address}\n${notes?"ملاحظات: "+notes+"\n":""}━━━━━━━━━━\n${p.name} × ${qty}${deliveryText}\nالإجمالي: ${totalText}`);
-    waLink=`https://wa.me/${waNum}?text=${waMsg}`;
+    waLink=`https://wa.me/${waNumV}?text=${waMsg}`;
     if(seller.pushSubscription){
       sendPushNotification(seller.pushSubscription,"🛒 طلب جديد!",`${p.name} × ${qty} — ${totalText}`,"/");
     }
@@ -1442,7 +1484,7 @@ async function updateOrderStatus(orderId,newStatus){
   if(!o)return;
   const statusMsg={"delivery":"طلبك قيد التوصيل 🚚","done":"تم توصيل طلبك بنجاح ✅","cancel":"عذراً، تم إلغاء طلبك ❌"};
   if(statusMsg[newStatus]){
-    const buyerNum="249"+o.buyerPhone.replace(/^0/,"");
+    const buyerNum=waNum(o.buyerPhone);
     const msg=encodeURIComponent(`مرحباً ${o.buyerName},\nبخصوص طلبك رقم ${o.id} من منصة الريان:\n${statusMsg[newStatus]}`);
     if(confirm("هل تريد إرسال إشعار للزبون؟"))window.open(`https://wa.me/${buyerNum}?text=${msg}`,"_blank");
   }
@@ -1513,7 +1555,7 @@ function renderDashboard(){
     myOrders.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).map(o=>{
       const myItems=o.items.filter(i=>i.sellerId===currentSeller.id);
       const myTotal=myItems.reduce((s,i)=>s+(i.price*i.qty),0);
-      const waNum="249"+o.buyerPhone.replace(/^0/,"");
+      const waNum=waNum(o.buyerPhone);
       const waMsg=encodeURIComponent(`مرحباً ${o.buyerName},\nطلبك رقم ${o.id} تم استلامه ✓`);
       return `<div class="order-row"><div class="order-info">
         <div class="order-id">${o.id} · ${o.date}</div>
@@ -1531,7 +1573,7 @@ function renderDashboard(){
           <option value="done" ${o.status==="done"?"selected":""}>مكتمل</option>
           <option value="cancel" ${o.status==="cancel"?"selected":""}>ملغي</option>
         </select>
-        <a class="order-wa-btn" href="https://wa.me/${waNum}?text=${waMsg}" target="_blank">📱 واتساب</a>
+        <a class="order-wa-btn" href="https://wa.me/${waNumV}?text=${waMsg}" target="_blank">📱 واتساب</a>
       </div></div>`;
     }).join("")+"</div>";}
   const mTab=document.getElementById("tab-messages");
@@ -1777,7 +1819,7 @@ async function openStore(sellerId){
     <div class="store-meta-item"><div class="store-meta-num">${seller.joinedAt}</div><div class="store-meta-lbl">انضم</div></div>`;
 
   // whatsapp
-  const waNum = "249"+seller.phone.replace(/^0/,"");
+  const waNum = waNum(seller.phone);
   document.getElementById("store-wa-btn").dataset.x="1";
 
   // products
@@ -2335,11 +2377,22 @@ window.delPlatformMsg=delPlatformMsg;
 
 // ═══ موافقات الطلبات ═══
 function renderPendingRequests(){
+  const asPend=adSpaceReqs.filter(x=>x.status==="pending").sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  const asHtml=asPend.map(r=>`<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:12px;padding:13px;margin-bottom:10px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><div style="font-weight:800;color:#1A2744">📣 ${r.title}</div><span style="background:#3B82F6;color:#fff;font-size:0.7rem;font-weight:700;padding:3px 9px;border-radius:100px">${r.planLabel}</span></div>
+    ${r.image?`<img src="${r.image}" style="width:100%;border-radius:9px;margin-bottom:8px">`:''}
+    <div style="font-size:0.8rem;color:#374151">${r.ownerName} · <a href="https://wa.me/${(r.phone||'').replace(/\D/g,'')}" target="_blank" style="color:#2E7D5E;font-weight:700">${r.phone} 📱</a></div>
+    ${r.paymentImage?`<a href="${r.paymentImage}" target="_blank" style="display:inline-block;margin-top:6px;color:#1A2744;font-weight:700;font-size:0.78rem">🧾 عرض إشعار الدفع</a>`:''}
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button onclick="approveAdSpace('${r.id}')" style="flex:1;background:#2E7D5E;color:#fff;border:none;border-radius:9px;padding:9px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif">✓ قبول</button>
+      <button onclick="rejectAdSpace('${r.id}')" style="flex:1;background:#FEE;color:#D9534F;border:none;border-radius:9px;padding:9px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif">✕ رفض</button>
+    </div></div>`).join("");
+
   const box=document.getElementById("pending-requests-box");
   if(!box)return;
   const pend=sellers.filter(x=>x.status==="pending").sort((a,b)=>(b.id||0)-(a.id||0));
-  if(pend.length===0){box.innerHTML='<div style="color:#9CA3AF;font-size:0.82rem;padding:10px 0">لا توجد طلبات معلّقة</div>';return;}
-  box.innerHTML=pend.map(sr=>{
+  if(pend.length===0&&asPend.length===0){box.innerHTML='<div style="color:#9CA3AF;font-size:0.82rem;padding:10px 0">لا توجد طلبات معلّقة</div>';return;}
+  box.innerHTML=asHtml+pend.map(sr=>{
     const plan=PLANS.find(p=>p.id===sr.plan);
     const isAd=plan&&plan.type==="ad";
     return `<div style="background:#FFF9E9;border:1px solid #F0D98A;border-radius:12px;padding:13px;margin-bottom:10px">
@@ -2370,6 +2423,17 @@ async function rejectSeller(id){
   showToast("تم رفض الطلب");
 }
 window.renderPendingRequests=renderPendingRequests;
+
+async function approveAdSpace(id){
+  const r=adSpaceReqs.find(x=>x.id===id); if(!r)return;
+  const exp=Date.now()+ (r.days||1)*24*60*60*1000;
+  await dbUpdate("adSpaceRequests",id,{status:"approved",approvedAt:Date.now(),expiresAt:exp});
+  try{ const num=(r.phone||'').replace(/\D/g,''); const msg=encodeURIComponent(`مرحباً ${r.ownerName}،\nتم قبول إعلانك "${r.title}" في المساحة الإعلانية (${r.planLabel}) ✓`); if(confirm("تم القبول. إرسال إشعار واتساب للمعلن؟")) window.open(`https://wa.me/${num}?text=${msg}`,"_blank"); }catch(e){}
+  showToast("تم قبول الإعلان ✓");
+}
+async function rejectAdSpace(id){ if(confirm("رفض هذا الإعلان؟")){await dbUpdate("adSpaceRequests",id,{status:"rejected"});showToast("تم الرفض");} }
+window.approveAdSpace=approveAdSpace;window.rejectAdSpace=rejectAdSpace;
+
 window.approveSeller=approveSeller;
 window.rejectSeller=rejectSeller;
 
@@ -2378,7 +2442,10 @@ let payContext=null,payNotifImage="";
 function copyAccount(){navigator.clipboard.writeText("1978584").catch(()=>{});showToast("تم نسخ رقم الحساب ✓");}
 function openPayment(ctx){payContext=ctx;payNotifImage="";document.getElementById("pay-amount").textContent=SDG(ctx.amount);document.getElementById("pay-img-preview").style.display="none";document.getElementById("pay-img-placeholder").style.display="block";document.getElementById("pay-err").textContent="";document.getElementById("pay-img-input").value="";document.getElementById("modal-payment").classList.remove("hidden");}
 function handlePayImg(input){const file=input.files[0];if(!file)return;if(file.size>5*1024*1024){document.getElementById("pay-err").textContent="حجم الصورة كبير (الحد 5MB)";return;}const ph=document.getElementById("pay-img-placeholder");ph.innerHTML='<div style="font-size:1.8rem">⏳</div><div style="color:#6B7280;font-size:0.82rem">جاري الرفع...</div>';const fd=new FormData();fd.append("image",file);fetch("https://api.imgbb.com/1/upload?key=16b4262b9ff85a10c0f3a4834a847184",{method:"POST",body:fd}).then(r=>r.json()).then(d=>{if(d&&d.data&&d.data.url){payNotifImage=d.data.url;const pv=document.getElementById("pay-img-preview");pv.src=d.data.url;pv.style.display="block";ph.style.display="none";}else{document.getElementById("pay-err").textContent="فشل الرفع، حاول ثانية";}ph.innerHTML='<div style="font-size:1.8rem;margin-bottom:4px">📸</div><div style="color:#6B7280;font-size:0.82rem">اضغط لرفع صورة الإشعار</div>';}).catch(()=>{document.getElementById("pay-err").textContent="فشل الرفع";});}
-async function submitPayment(){if(!payNotifImage){document.getElementById("pay-err").textContent="يرجى رفع صورة إشعار الدفع";return;}const c=payContext;if(!c)return;if(c.kind==="store"||c.kind==="ad"){const rec={...c.data,paymentImage:payNotifImage,status:"pending",createdAt:Date.now()};await dbSave("sellers",rec.id,rec);const plan=PLANS.find(p=>p.id===rec.plan);notifyAdmin(`🆕 طلب ${c.kind==="ad"?"إعلان":"متجر"} + إشعار دفع\n━━━━━━━━━━\n${rec.storeName}\nالمالك: ${rec.ownerName}\nالهاتف: ${rec.phone}\nالباقة: ${plan?plan.name:rec.plan} (${SDG(c.amount)})\nالإشعار: ${payNotifImage}`);}else if(c.kind==="upgrade"){await dbSave("upgradeRequests",c.data.id,{...c.data,paymentImage:payNotifImage,status:"pending",createdAt:Date.now()});notifyAdmin(`⭐ طلب ترقية + إشعار دفع\n━━━━━━━━━━\nالمتجر: ${c.data.storeName}\nالباقة: ${c.data.planName} (${SDG(c.amount)})\nالهاتف: ${c.data.phone}\nالإشعار: ${payNotifImage}`);}closeModal("modal-payment");showToast("تم إرسال طلبك مع الإشعار ✓");alert("تم استلام طلبك وإشعار الدفع!\nسيراجع من الإدارة ونتواصل معك عند القبول.");}
+async function submitPayment(){if(!payNotifImage){document.getElementById("pay-err").textContent="يرجى رفع صورة إشعار الدفع";return;}const c=payContext;if(!c)return;if(c.kind==="store"||c.kind==="ad"){const rec={...c.data,paymentImage:payNotifImage,status:"pending",createdAt:Date.now()};await dbSave("sellers",rec.id,rec);const plan=PLANS.find(p=>p.id===rec.plan);notifyAdmin(`🆕 طلب ${c.kind==="ad"?"إعلان":"متجر"} + إشعار دفع\n━━━━━━━━━━\n${rec.storeName}\nالمالك: ${rec.ownerName}\nالهاتف: ${rec.phone}\nالباقة: ${plan?plan.name:rec.plan} (${SDG(c.amount)})\nالإشعار: ${payNotifImage}`);}else if(c.kind==="adspace"){
+    await dbSave("adSpaceRequests",c.data.id,{...c.data,paymentImage:payNotifImage,status:"pending",createdAt:Date.now()});
+    notifyAdmin(`📣 طلب مساحة إعلانية + دفع\n${c.data.title}\n${c.data.planLabel} (${SDG(c.amount)})\n${c.data.ownerName} ${c.data.phone}`);
+  }else if(c.kind==="upgrade"){await dbSave("upgradeRequests",c.data.id,{...c.data,paymentImage:payNotifImage,status:"pending",createdAt:Date.now()});notifyAdmin(`⭐ طلب ترقية + إشعار دفع\n━━━━━━━━━━\nالمتجر: ${c.data.storeName}\nالباقة: ${c.data.planName} (${SDG(c.amount)})\nالهاتف: ${c.data.phone}\nالإشعار: ${payNotifImage}`);}closeModal("modal-payment");showToast("تم إرسال طلبك مع الإشعار ✓");alert("تم استلام طلبك وإشعار الدفع!\nسيراجع من الإدارة ونتواصل معك عند القبول.");}
 
 let upgradeChoice=null;
 function openUpgrade(){
@@ -2488,6 +2555,36 @@ window.handleAdImg=handleAdImg;window.submitAd=submitAd;window.openAdForm=openAd
 
 function upgradeMyStore(){if(!currentSeller)return;currentStoreId=currentSeller.id;openUpgrade();}
 window.upgradeMyStore=upgradeMyStore;
+
+let asImage="";
+const ADSPACE_PLANS={day:{label:"يوم واحد",price:20000,days:1},week:{label:"أسبوع كامل",price:100000,days:7},month:{label:"شهر كامل",price:300000,days:30}};
+function openAdSpace(){
+  ["as-title","as-name","as-phone"].forEach(function(id){var el=document.getElementById(id);if(el)el.value="";});
+  asImage="";
+  var pv=document.getElementById("as-img-preview");if(pv)pv.style.display="none";
+  var ph=document.getElementById("as-img-ph");if(ph)ph.style.display="block";
+  document.getElementById("as-err").textContent="";
+  document.getElementById("modal-adspace").classList.remove("hidden");
+}
+function handleAsImg(input){var f=input.files[0];if(!f)return;if(f.size>5*1024*1024){document.getElementById("as-err").textContent="حجم كبير";return;}var ph=document.getElementById("as-img-ph");ph.innerHTML='<div style="font-size:1.5rem">⏳</div>';var fd=new FormData();fd.append("image",f);fetch("https://api.imgbb.com/1/upload?key=16b4262b9ff85a10c0f3a4834a847184",{method:"POST",body:fd}).then(function(r){return r.json();}).then(function(d){if(d&&d.data&&d.data.url){asImage=d.data.url;var pv=document.getElementById("as-img-preview");pv.src=d.data.url;pv.style.display="block";ph.style.display="none";}else{document.getElementById("as-err").textContent="فشل الرفع";}ph.innerHTML='<div style="font-size:1.5rem">📷</div><div style="color:#6B7280;font-size:0.78rem">اضغط لرفع صورة</div>';}).catch(function(){document.getElementById("as-err").textContent="فشل الرفع";});}
+function submitAdSpace(){
+  var opt=document.querySelector('input[name="as-plan"]:checked');
+  var t=document.getElementById("as-title").value.trim();
+  var n=document.getElementById("as-name").value.trim();
+  var p=(document.getElementById("as-country").value+document.getElementById("as-phone").value.trim().replace(/^0+/,""));
+  var e=document.getElementById("as-err");
+  if(!opt){e.textContent="اختر مدة الإعلان";return;}
+  if(!t){e.textContent="أدخل عنوان الإعلان";return;}
+  if(!asImage){e.textContent="ارفع صورة الإعلان";return;}
+  if(!n){e.textContent="أدخل اسمك";return;}
+  if(!/^\d{6,15}$/.test(p.replace(/\D/g,""))){e.textContent="رقم غير صحيح";return;}
+  var pl=ADSPACE_PLANS[opt.value];
+  var data={id:"ADS-"+Date.now(),planKey:opt.value,planLabel:pl.label,days:pl.days,title:t,image:asImage,ownerName:n,phone:p};
+  closeModal("modal-adspace");
+  openPayment({kind:"adspace",data:data,amount:pl.price});
+}
+window.openAdSpace=openAdSpace;window.handleAsImg=handleAsImg;window.submitAdSpace=submitAdSpace;
+
 window.copyAccount=copyAccount;window.openPayment=openPayment;window.handlePayImg=handlePayImg;window.submitPayment=submitPayment;
 
 window.openAllStores=openAllStores;
