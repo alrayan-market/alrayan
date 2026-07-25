@@ -380,6 +380,7 @@ textarea.inp{height:64px;resize:none}
       <div id="tab-products"></div>
       <div id="tab-orders" class="hidden"></div>
       <div id="tab-messages" class="hidden"></div>
+      <div id="tab-mymessages" class="hidden"></div>
       <div id="tab-admin" class="hidden"></div>
       <div id="tab-channel" class="hidden"></div>
       <div id="tab-messages2" class="hidden"></div>
@@ -944,6 +945,7 @@ function listenAll(){
   onSnapshot(collection(db,"platformMessages"), snap=>{
     platformMessages=snap.docs.map(d=>d.data());
     if(isAdmin && activeTab==="messages2") renderPlatformMessages();
+    if(currentSeller && activeTab==="mymessages") renderMyPlatformMessages();
   });
   onSnapshot(collection(db,"inquiries"), snap=>{
     inquiries=snap.docs.map(d=>d.data());
@@ -1496,10 +1498,11 @@ function switchTab(tab){
   activeTab=tab;
   document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
   event.target.classList.add("active");
-  ["tab-products","tab-orders","tab-admin","tab-messages","tab-manage","tab-channel","tab-messages2"].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.add("hidden");});
+  ["tab-products","tab-orders","tab-admin","tab-messages","tab-manage","tab-channel","tab-messages2","tab-mymessages"].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.add("hidden");});
   const cur=document.getElementById("tab-"+tab); if(cur)cur.classList.remove("hidden");
   if(tab==="channel") renderChannelAdmin();
   if(tab==="messages2") renderPlatformMessages();
+  if(tab==="mymessages") renderMyPlatformMessages();
 }
 
 function renderDashboard(){
@@ -1526,7 +1529,8 @@ function renderDashboard(){
   document.getElementById("dash-tabs").innerHTML=`
     <button class="tab-btn ${activeTab==="products"?"active":""}" onclick="switchTab('products')">📦 منتجاتي (${myProds.length})</button>
     <button class="tab-btn ${activeTab==="orders"?"active":""}" onclick="switchTab('orders')">📋 الطلبات (${myOrders.length})</button>
-    <button class="tab-btn ${activeTab==="messages"?"active":""}" onclick="switchTab('messages')">💬 الاستفسارات (${(inquiries.filter(q=>q.sellerId===currentSeller.id)).length})${unreadChats?' <span style="color:#C9933A">●</span>':""}</button>`;
+    <button class="tab-btn ${activeTab==="messages"?"active":""}" onclick="switchTab('messages')">💬 الاستفسارات (${(inquiries.filter(q=>q.sellerId===currentSeller.id)).length})${unreadChats?' <span style="color:#C9933A">●</span>':""}</button>
+    <button class="tab-btn ${activeTab==="mymessages"?"active":""}" onclick="switchTab('mymessages')">📨 رسائل المنصة</button>`;
   const totalProdViews=myProds.reduce((s,p)=>s+(p.views||0),0);
   document.getElementById("dash-stats").innerHTML=`
     <div class="stat-card"><div class="stat-icon">📦</div><div class="stat-val">${myProds.length}</div><div class="stat-lbl">المنتجات</div></div>
@@ -2320,7 +2324,7 @@ async function submitContactPlatform(){
   if(!/^\d{6,15}$/.test(phone.replace(/\D/g,""))){err.textContent="يرجى إدخال رقم صحيح";return;}
   if(!msg){err.textContent="يرجى كتابة رسالتك";return;}
   const id="MSG-"+Date.now();
-  await dbSave("platformMessages",id,{id,name,phone,msg,createdAt:Date.now(),read:false});
+  await dbSave("platformMessages",id,{id,name,phone,msg,createdAt:Date.now(),read:false,sellerId:(typeof currentSeller!=="undefined"&&currentSeller)?currentSeller.id:null,replies:[]});
   try{ notifyAdmin(`📨 رسالة جديدة للمنصة\n━━━━━━━━━━\nالاسم: ${name}\nالهاتف: ${phone}\nالرسالة: ${msg}`); }catch(e){}
   closeModal("modal-contact-platform");
   showToast("تم إرسال رسالتك بنجاح ✓");
@@ -2338,12 +2342,17 @@ function renderPlatformMessages(){
           <a href="https://wa.me/${(m.phone||'').replace(/\D/g,'')}" target="_blank" style="color:#2E7D5E;font-weight:700;text-decoration:none;font-size:0.8rem">${m.phone||''} 📱</a>
         </div>
         <div style="color:#374151;font-size:0.86rem;margin-bottom:6px">${m.msg||""}</div>
-        <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <span style="color:#9CA3AF;font-size:0.72rem">${d.toLocaleDateString('ar')} ${d.toLocaleTimeString('ar',{hour:'2-digit',minute:'2-digit'})}</span>
           <div>
             ${m.read?'':`<button onclick="markMsgRead('${m.id}')" style="background:#EEF1F6;color:#1A2744;border:none;border-radius:7px;padding:5px 11px;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.75rem">تحديد كمقروء</button>`}
             <button onclick="delPlatformMsg('${m.id}')" style="background:#FEE;color:#D9534F;border:none;border-radius:7px;padding:5px 11px;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.75rem">حذف</button>
           </div>
+        </div>
+        ${(m.replies||[]).map(rp=>`<div style="background:${rp.from==='admin'?'#EEF0FF':'#fff'};border:1px solid #E5E7EB;border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:0.8rem"><b style="color:${rp.from==='admin'?'#1A2744':'#B8862B'}">${rp.from==='admin'?'أنت (المنصة)':'التاجر'}:</b> ${rp.text}</div>`).join("")}
+        <div style="display:flex;gap:6px;margin-top:6px">
+          <input class="inp" id="reply-inp-${m.id}" placeholder="اكتب رداً..." style="flex:1;font-size:0.8rem;padding:7px 10px">
+          <button onclick="sendPlatformReply('${m.id}')" style="background:#1A2744;color:#fff;border:none;border-radius:8px;padding:0 14px;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.8rem">رد</button>
         </div>
       </div>`;
     }).join(""))+`</div>`+renderInquiriesPanel();
@@ -2366,6 +2375,51 @@ function renderInquiriesPanel(){
 async function markMsgRead(id){ await dbUpdate("platformMessages",id,{read:true}); }
 async function delPlatformMsg(id){ if(confirm("حذف الرسالة؟")){ await dbDelete("platformMessages",id); showToast("تم الحذف"); } }
 window.renderPlatformMessages=renderPlatformMessages;
+
+async function sendPlatformReply(id){
+  const inp=document.getElementById("reply-inp-"+id);
+  const txt=inp.value.trim(); if(!txt)return;
+  const msg=platformMessages.find(x=>x.id===id); if(!msg)return;
+  const replies=[...(msg.replies||[]),{from:"admin",text:txt,time:Date.now()}];
+  await dbUpdate("platformMessages",id,{replies,read:true});
+  inp.value="";
+  showToast("تم إرسال الرد ✓");
+}
+
+function renderMyPlatformMessages(){
+  const t=document.getElementById("tab-mymessages"); if(!t||!currentSeller)return;
+  const list=platformMessages.filter(m=>m.sellerId===currentSeller.id).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  if(list.length===0){t.innerHTML='<div class="panel"><div class="no-items"><div class="icon">📨</div><div style="font-weight:700">لا توجد رسائل مع المنصة بعد</div></div></div>';return;}
+  t.innerHTML=`<div class="panel"><div class="panel-head"><span class="panel-title">📨 رسائلي مع المنصة (${list.length})</span></div>`+
+    list.map(function(m){
+      var d=new Date(m.createdAt||0);
+      var thread=(m.replies||[]).map(function(rp){
+        return '<div style="background:'+(rp.from==="admin"?"#EEF0FF":"#F4F6FA")+';border:1px solid #E5E7EB;border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:0.8rem"><b style="color:'+(rp.from==="admin"?"#1A2744":"#B8862B")+'">'+(rp.from==="admin"?"إدارة المنصة":"أنت")+':</b> '+rp.text+'</div>';
+      }).join("");
+      return '<div style="background:#F4F6FA;border-radius:11px;padding:13px;margin-bottom:9px">'
+        +'<div style="font-weight:800;color:#1A2744;margin-bottom:4px">رسالتي:</div>'
+        +'<div style="color:#374151;font-size:0.85rem;margin-bottom:8px">'+m.msg+'</div>'
+        +'<div style="color:#9CA3AF;font-size:0.72rem;margin-bottom:8px">'+d.toLocaleDateString("ar")+'</div>'
+        +thread
+        +'<div style="display:flex;gap:6px;margin-top:6px"><input class="inp" id="sreply-'+m.id+'" placeholder="اكتب رداً..." style="flex:1;font-size:0.8rem;padding:7px 10px"><button onclick="sendSellerReply(\''+m.id+'\')" style="background:#1A2744;color:#fff;border:none;border-radius:8px;padding:0 14px;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.8rem">رد</button></div>'
+        +'</div>';
+    }).join("")+"</div>";
+}
+async function sendSellerReply(id){
+  var inp=document.getElementById("sreply-"+id);
+  var txt=inp.value.trim(); if(!txt)return;
+  var msg=platformMessages.find(function(x){return x.id===id;}); if(!msg)return;
+  var replies=(msg.replies||[]).concat([{from:"seller",text:txt,time:Date.now()}]);
+  await dbUpdate("platformMessages",id,{replies:replies});
+  try{ notifyAdmin("📨 رد تاجر على رسالة المنصة:\n"+txt); }catch(e){}
+  inp.value="";
+  showToast("تم إرسال ردك ✓");
+}
+window.renderMyPlatformMessages=renderMyPlatformMessages;
+window.sendSellerReply=sendSellerReply;
+
+window.sendPlatformReply=sendPlatformReply;
+
 window.markMsgRead=markMsgRead;
 window.delPlatformMsg=delPlatformMsg;
 
