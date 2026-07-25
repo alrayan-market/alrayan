@@ -291,7 +291,7 @@ textarea.inp{height:64px;resize:none}
       <div class="home-card-ico">📺</div><div class="home-card-txt"><div class="home-card-title">القناة</div><div class="home-card-sub">فيديوهات واستطلاعات</div></div>
     </div>
   </div>
-  <div id="adspace-banner" onclick="openAdSpace()" style="margin:4px 16px 14px;background:linear-gradient(120deg,#1A2744 0%,#2A3C63 55%,#B8862B 130%);border-radius:18px;padding:18px 20px;cursor:pointer;position:relative;overflow:hidden;box-shadow:0 8px 24px rgba(26,39,68,.22)">
+  <div id="adspace-banner" onclick="openAdSpace()" style="margin:8px 16px 18px;background:linear-gradient(120deg,#1A2744 0%,#2A3C63 55%,#B8862B 130%);border-radius:20px;padding:0;cursor:pointer;position:relative;overflow:hidden;box-shadow:0 12px 32px rgba(26,39,68,.3);border:1px solid rgba(242,206,115,.25)">
     <div style="position:absolute;top:-20px;left:-20px;width:110px;height:110px;background:rgba(217,168,64,.18);border-radius:50%"></div>
     <div id="adspace-content" style="position:relative"></div>
   </div>
@@ -2500,23 +2500,28 @@ function renderAdSpaceBanner(){
   if(active){
     if(banner) banner.onclick=null;
     var ytid=active.video?ytId(active.video):"";
-    var mediaHtml=ytid
-      ?'<img src="https://i.ytimg.com/vi/'+ytid+'/hqdefault.jpg" style="width:58px;height:58px;border-radius:12px;object-fit:cover;flex-shrink:0;border:2px solid rgba(242,206,115,.6)">'
-      :(active.image?'<img src="'+active.image+'" style="width:58px;height:58px;border-radius:12px;object-fit:cover;flex-shrink:0;border:2px solid rgba(242,206,115,.6)">':'<div style="font-size:2.2rem">📣</div>');
-    box.innerHTML='<div style="display:flex;align-items:center;gap:14px">'
-      +(ytid?('<a href="https://www.youtube.com/watch?v='+ytid+'" target="_blank" style="position:relative;display:block;flex-shrink:0">'+mediaHtml+'<span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.1rem;text-shadow:0 1px 3px rgba(0,0,0,.6)">▶</span></a>'):mediaHtml)
-      +'<div style="flex:1;min-width:0"><div style="color:#F2CE73;font-weight:900;font-size:0.72rem;letter-spacing:.5px">'+(active.video?'🎥 ':'')+'إعلان مُموَّل</div>'
-      +'<div style="color:#fff;font-weight:800;font-size:0.98rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+active.title+'</div></div>'
-      +'<a href="https://wa.me/'+waNum(active.phone)+'" target="_blank" style="background:linear-gradient(100deg,#25D366,#1EBE57);color:#fff;font-weight:900;font-size:0.75rem;padding:8px 14px;border-radius:100px;white-space:nowrap;text-decoration:none">تواصل 💬</a>'
-      +'</div>';
+    var thumb=ytid?("https://i.ytimg.com/vi/"+ytid+"/hqdefault.jpg"):active.image;
+    box.innerHTML='<div style="position:relative;width:100%;height:190px;background:#0A1220">'
+      +(thumb?'<img src="'+thumb+'" style="width:100%;height:100%;object-fit:cover;opacity:.88">':'')
+      +'<div style="position:absolute;inset:0;background:linear-gradient(0deg,rgba(10,18,32,.92) 0%,rgba(10,18,32,.15) 55%,rgba(10,18,32,.05) 100%)"></div>'
+      +(ytid?'<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:56px;height:56px;background:rgba(255,255,255,.92);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:#1A2744;box-shadow:0 6px 18px rgba(0,0,0,.35)">▶</div>':'')
+      +'<div style="position:absolute;top:12px;right:14px;background:linear-gradient(100deg,#F2CE73,#D9A840);color:#12203A;font-weight:900;font-size:0.7rem;padding:5px 12px;border-radius:100px;letter-spacing:.3px">📣 إعلان مُموَّل</div>'
+      +'<div style="position:absolute;bottom:0;right:0;left:0;padding:16px 18px 18px">'
+      +'<div style="color:#fff;font-weight:900;font-size:1.15rem;line-height:1.35;margin-bottom:10px;text-shadow:0 2px 6px rgba(0,0,0,.5)">'+active.title+'</div>'
+      +'<a href="'+(ytid?('https://www.youtube.com/watch?v='+ytid):'#')+'" target="'+(ytid?'_blank':'_self')+'" onclick="'+(ytid?'':'event.preventDefault();')+'" style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(100deg,#25D366,#1EBE57);color:#fff;font-weight:900;font-size:0.85rem;padding:10px 20px;border-radius:100px;text-decoration:none;box-shadow:0 4px 14px rgba(37,211,102,.4);margin-left:8px">'+(ytid?'▶ شاهد الإعلان':'')+'</a>'
+      +'<a href="https://wa.me/'+waNum(active.phone)+'" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(100deg,#25D366,#1EBE57);color:#fff;font-weight:900;font-size:0.85rem;padding:10px 20px;border-radius:100px;text-decoration:none;box-shadow:0 4px 14px rgba(37,211,102,.4)">💬 تواصل مع المُعلن</a>'
+      +'</div></div>';
   }else{
     if(banner) banner.onclick=openAdSpace;
-    box.innerHTML='<div style="display:flex;align-items:center;gap:14px">'
-      +'<div style="font-size:2.2rem">📣</div>'
-      +'<div style="flex:1"><div style="color:#F2CE73;font-weight:900;font-size:1.05rem;letter-spacing:.3px">مساحة إعلانية</div>'
-      +'<div style="color:#C6CFDF;font-size:0.78rem;margin-top:3px">أعلن هنا ووصل لآلاف الزوار يومياً — باقات تبدأ من 20,000 ج.س</div></div>'
-      +'<div style="background:linear-gradient(100deg,#F2CE73,#D9A840);color:#12203A;font-weight:900;font-size:0.78rem;padding:8px 14px;border-radius:100px;white-space:nowrap">أعلن الآن ←</div>'
-      +'</div>';
+    box.innerHTML='<div style="padding:26px 22px;display:flex;align-items:center;gap:16px;position:relative;overflow:hidden">'
+      +'<div style="position:absolute;top:-30px;left:-30px;width:150px;height:150px;background:rgba(217,168,64,.16);border-radius:50%"></div>'
+      +'<div style="position:absolute;bottom:-40px;right:-20px;width:120px;height:120px;background:rgba(255,255,255,.05);border-radius:50%"></div>'
+      +'<div style="font-size:2.8rem;position:relative;flex-shrink:0">📣</div>'
+      +'<div style="flex:1;position:relative">'
+      +'<div style="color:#F2CE73;font-weight:900;font-size:1.35rem;letter-spacing:.3px;margin-bottom:6px">مساحة إعلانية مميزة</div>'
+      +'<div style="color:#C6CFDF;font-size:0.86rem;line-height:1.5;margin-bottom:14px">وصّل منتجك أو خدمتك لآلاف الزوار يومياً في أبرز مكان بالمنصة</div>'
+      +'<div style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(100deg,#F2CE73,#D9A840);color:#12203A;font-weight:900;font-size:0.88rem;padding:10px 22px;border-radius:100px">أعلن الآن — من 20,000 ج.س ←</div>'
+      +'</div></div>';
   }
 }
 window.renderAdSpaceBanner=renderAdSpaceBanner;
