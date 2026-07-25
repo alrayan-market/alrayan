@@ -1829,8 +1829,9 @@ async function openStore(sellerId){
     <div class="store-meta-item"><div class="store-meta-num">${seller.joinedAt}</div><div class="store-meta-lbl">انضم</div></div>`;
 
   // whatsapp
-  const waNum = waNum(seller.phone);
-  document.getElementById("store-wa-btn").dataset.x="1";
+  const waNumStore = waNum(seller.phone);
+  var swb=document.getElementById("store-wa-btn");
+  if(swb){ swb.dataset.phone=waNumStore; }
 
   // products
   document.getElementById("store-products-title").textContent = `منتجات المتجر (${storeProds.length})`;
