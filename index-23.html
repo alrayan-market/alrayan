@@ -412,7 +412,9 @@ textarea.inp{height:64px;resize:none}
 <div class="overlay hidden" id="modal-adspace">
   <div class="modal modal-sm" style="max-height:88vh;overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><h3 style="color:#1A2744;font-weight:900;font-size:1.05rem">📣 المساحة الإعلانية</h3><button onclick="closeModal('modal-adspace')" style="background:none;border:none;font-size:1.4rem;color:#9CA3AF;cursor:pointer">✕</button></div>
-    <p style="color:#6B7280;font-size:0.82rem;margin-bottom:14px">إعلانك في أبرز مكان بالمنصة — اختر مدة الظهور:</p>
+    <p style="color:#6B7280;font-size:0.82rem;margin-bottom:10px">إعلانك في أبرز مكان بالمنصة — اختر مدة الظهور:</p>
+    <button type="button" onclick="checkAdSpaceStatus()" style="width:100%;background:#EEF1F6;color:#1A2744;border:1.5px dashed #C6CFDF;border-radius:11px;padding:11px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.85rem;margin-bottom:8px">🔍 تحقق من حالة الحجز الآن</button>
+    <div id="adspace-status-box" class="hidden" style="margin-bottom:14px"></div>
     <div id="adspace-plans" style="display:grid;gap:9px;margin-bottom:14px">
       <label style="display:flex;justify-content:space-between;align-items:center;background:#F4F6FA;border-radius:11px;padding:13px;cursor:pointer;font-weight:800;color:#1A2744"><span><input type="radio" name="as-plan" value="day" style="margin-left:8px">📅 يوم واحد</span><span style="color:#2E7D5E">20,000 ج.س</span></label>
       <label style="display:flex;justify-content:space-between;align-items:center;background:#FFF9E9;border:1.5px solid #F0D98A;border-radius:11px;padding:13px;cursor:pointer;font-weight:800;color:#1A2744"><span><input type="radio" name="as-plan" value="week" style="margin-left:8px">⭐ أسبوع كامل</span><span style="color:#B8862B">100,000 ج.س</span></label>
@@ -2524,6 +2526,39 @@ function renderAdSpaceBanner(){
       +'</div></div>';
   }
 }
+
+function checkAdSpaceStatus(){
+  var box=document.getElementById("adspace-status-box");
+  var now=Date.now();
+  var active=(adSpaceReqs||[]).filter(function(r){return r.status==="approved"&&r.expiresAt&&r.expiresAt>now;})
+    .sort(function(a,b){return (b.approvedAt||0)-(a.approvedAt||0);})[0];
+  var pendingCount=(adSpaceReqs||[]).filter(function(r){return r.status==="pending";}).length;
+
+  var html="";
+  if(active){
+    var remain=active.expiresAt-now;
+    var days=Math.floor(remain/86400000);
+    var hours=Math.floor((remain%86400000)/3600000);
+    var mins=Math.floor((remain%3600000)/60000);
+    var remainTxt = days>0 ? (days+" يوم و"+hours+" ساعة") : (hours>0 ? (hours+" ساعة و"+mins+" دقيقة") : (mins+" دقيقة"));
+    html='<div style="background:#FFF9E9;border:1.5px solid #F0D98A;border-radius:12px;padding:13px">'
+      +'<div style="font-weight:900;color:#1A2744;margin-bottom:5px">⏳ يوجد إعلان نشط حالياً</div>'
+      +'<div style="color:#374151;font-size:0.85rem;margin-bottom:4px">"'+active.title+'"</div>'
+      +'<div style="color:#B8862B;font-weight:800;font-size:0.9rem">متبقي على انتهائه: '+remainTxt+'</div>';
+  }else{
+    html='<div style="background:#EEF8EE;border:1.5px solid #B7EBD0;border-radius:12px;padding:13px">'
+      +'<div style="font-weight:900;color:#2E7D5E;margin-bottom:4px">✅ المساحة متاحة الآن</div>'
+      +'<div style="color:#374151;font-size:0.85rem">لا يوجد إعلان نشط — إعلانك يظهر فوراً بعد الموافقة</div>';
+  }
+  if(pendingCount>0){
+    html+='<div style="margin-top:9px;padding-top:9px;border-top:1px solid rgba(0,0,0,.08);color:#6B7280;font-size:0.8rem">📋 يوجد '+pendingCount+' طلب بانتظار مراجعة الإدارة قبل طلبك</div>';
+  }
+  html+='</div>';
+  box.innerHTML=html;
+  box.classList.remove("hidden");
+}
+window.checkAdSpaceStatus=checkAdSpaceStatus;
+
 window.renderAdSpaceBanner=renderAdSpaceBanner;
 setInterval(renderAdSpaceBanner,60000);
 
@@ -2658,6 +2693,7 @@ function openAdSpace(){
   var pv=document.getElementById("as-img-preview");if(pv)pv.style.display="none";
   var ph=document.getElementById("as-img-ph");if(ph)ph.style.display="block";
   var vl=document.getElementById("as-video-link");if(vl)vl.value="";
+  var sb=document.getElementById("adspace-status-box");if(sb)sb.classList.add("hidden");
   document.querySelector('input[name="as-type"][value="image"]').checked=true;
   document.getElementById("as-image-field").classList.remove("hidden");
   document.getElementById("as-video-field").classList.add("hidden");
