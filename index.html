@@ -293,14 +293,7 @@ textarea.inp{height:64px;resize:none}
   </div>
   <div id="adspace-banner" onclick="openAdSpace()" style="margin:4px 16px 14px;background:linear-gradient(120deg,#1A2744 0%,#2A3C63 55%,#B8862B 130%);border-radius:18px;padding:18px 20px;cursor:pointer;position:relative;overflow:hidden;box-shadow:0 8px 24px rgba(26,39,68,.22)">
     <div style="position:absolute;top:-20px;left:-20px;width:110px;height:110px;background:rgba(217,168,64,.18);border-radius:50%"></div>
-    <div style="display:flex;align-items:center;gap:14px;position:relative">
-      <div style="font-size:2.2rem">📣</div>
-      <div style="flex:1">
-        <div style="color:#F2CE73;font-weight:900;font-size:1.05rem;letter-spacing:.3px">مساحة إعلانية</div>
-        <div style="color:#C6CFDF;font-size:0.78rem;margin-top:3px">أعلن هنا ووصل لآلاف الزوار يومياً — باقات تبدأ من 20,000 ج.س</div>
-      </div>
-      <div style="background:linear-gradient(100deg,#F2CE73,#D9A840);color:#12203A;font-weight:900;font-size:0.78rem;padding:8px 14px;border-radius:100px;white-space:nowrap">أعلن الآن ←</div>
-    </div>
+    <div id="adspace-content" style="position:relative"></div>
   </div>
 
   <div class="filters-wrap" style="display:none"><div class="filters" id="filters-bar"></div></div>
@@ -426,7 +419,17 @@ textarea.inp{height:64px;resize:none}
       <label style="display:flex;justify-content:space-between;align-items:center;background:#F4F6FA;border-radius:11px;padding:13px;cursor:pointer;font-weight:800;color:#1A2744"><span><input type="radio" name="as-plan" value="month" style="margin-left:8px">🏆 شهر كامل</span><span style="color:#2E7D5E">300,000 ج.س</span></label>
     </div>
     <div class="field"><label class="lbl">عنوان إعلانك</label><input class="inp" id="as-title"></div>
-    <div class="field"><label class="lbl">صورة الإعلان</label><div id="as-img-ph" onclick="document.getElementById('as-img-input').click()" style="background:#F4F6FA;border:2px dashed #D8D3C6;border-radius:12px;padding:20px;text-align:center;cursor:pointer"><div style="font-size:1.5rem">📷</div><div style="color:#6B7280;font-size:0.78rem">اضغط لرفع صورة</div></div><img id="as-img-preview" style="display:none;width:100%;border-radius:12px;margin-top:8px"><input type="file" id="as-img-input" accept="image/*" style="display:none" onchange="handleAsImg(this)"></div>
+    <div class="field"><label class="lbl">نوع الإعلان</label>
+      <div style="display:flex;gap:8px">
+        <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:#F4F6FA;border-radius:9px;padding:10px;cursor:pointer;font-weight:700;color:#1A2744"><input type="radio" name="as-type" value="image" checked onchange="toggleAsType()">🖼️ صورة</label>
+        <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:#F4F6FA;border-radius:9px;padding:10px;cursor:pointer;font-weight:700;color:#1A2744"><input type="radio" name="as-type" value="video" onchange="toggleAsType()">🎥 فيديو</label>
+      </div>
+    </div>
+    <div id="as-image-field" class="field"><label class="lbl">صورة الإعلان</label><div id="as-img-ph" onclick="document.getElementById('as-img-input').click()" style="background:#F4F6FA;border:2px dashed #D8D3C6;border-radius:12px;padding:20px;text-align:center;cursor:pointer"><div style="font-size:1.5rem">📷</div><div style="color:#6B7280;font-size:0.78rem">اضغط لرفع صورة</div></div><img id="as-img-preview" style="display:none;width:100%;border-radius:12px;margin-top:8px"><input type="file" id="as-img-input" accept="image/*" style="display:none" onchange="handleAsImg(this)"></div>
+    <div id="as-video-field" class="field hidden"><label class="lbl">رابط فيديو يوتيوب</label>
+      <input class="inp" id="as-video-link" placeholder="https://youtu.be/...">
+      <div class="inp-hint">ارفع الفيديو على يوتيوب (اجعله "غير مُدرَج / Unlisted")، وألصق رابطه هنا</div>
+    </div>
     <div class="field"><label class="lbl">اسمك</label><input class="inp" id="as-name"></div>
     <div class="field"><label class="lbl">الدولة</label><select class="inp" id="as-country"><option value="+249" selected>🇸🇩 السودان (+249)</option><option value="+966">🇸🇦 السعودية (+966)</option><option value="+20">🇪🇬 مصر (+20)</option><option value="+971">🇦🇪 الإمارات (+971)</option><option value="+90">🇹🇷 تركيا (+90)</option><option value="+1">🇺🇸 أمريكا (+1)</option></select></div>
     <div class="field"><label class="lbl">رقم التواصل</label><input class="inp" id="as-phone" placeholder="912345678"></div>
@@ -780,6 +783,7 @@ textarea.inp{height:64px;resize:none}
 // ══════════ FIREBASE ══════════
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, doc, setDoc, getDoc, getDocs, onSnapshot, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC7-MKB7Ix3k0gA7tGxCXNFaty5IQ-U3Xg",
@@ -792,6 +796,8 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const storage = getStorage(app);
+window._storage=storage; window._storageFns={storageRef,uploadBytes,getDownloadURL};
 window._fbImports={collection,query,orderBy,onSnapshot,doc,setDoc,getDoc,getDocs,updateDoc,deleteDoc};
 
 // ══════════ CONSTANTS ══════════
@@ -954,6 +960,7 @@ function listenAll(){
   onSnapshot(collection(db,"adSpaceRequests"), snap=>{
     adSpaceReqs=snap.docs.map(d=>d.data());
     if(isAdmin && activeTab==="manage") renderPendingRequests();
+    renderAdSpaceBanner();
   });
 }
 
@@ -999,6 +1006,7 @@ window.onload=async function(){
 
   await trackVisit();
   listenAll();
+  renderAdSpaceBanner();
   renderFilters();
   checkUrlProduct();
   checkUrlStore();
@@ -2483,6 +2491,38 @@ async function approveAdSpace(id){
 async function rejectAdSpace(id){ if(confirm("رفض هذا الإعلان؟")){await dbUpdate("adSpaceRequests",id,{status:"rejected"});showToast("تم الرفض");} }
 window.approveAdSpace=approveAdSpace;window.rejectAdSpace=rejectAdSpace;
 
+function renderAdSpaceBanner(){
+  var box=document.getElementById("adspace-content"); if(!box)return;
+  var now=Date.now();
+  var active=(adSpaceReqs||[]).filter(function(r){return r.status==="approved"&&r.expiresAt&&r.expiresAt>now;})
+    .sort(function(a,b){return (b.approvedAt||0)-(a.approvedAt||0);})[0];
+  var banner=document.getElementById("adspace-banner");
+  if(active){
+    if(banner) banner.onclick=null;
+    var ytid=active.video?ytId(active.video):"";
+    var mediaHtml=ytid
+      ?'<img src="https://i.ytimg.com/vi/'+ytid+'/hqdefault.jpg" style="width:58px;height:58px;border-radius:12px;object-fit:cover;flex-shrink:0;border:2px solid rgba(242,206,115,.6)">'
+      :(active.image?'<img src="'+active.image+'" style="width:58px;height:58px;border-radius:12px;object-fit:cover;flex-shrink:0;border:2px solid rgba(242,206,115,.6)">':'<div style="font-size:2.2rem">📣</div>');
+    box.innerHTML='<div style="display:flex;align-items:center;gap:14px">'
+      +(ytid?('<a href="https://www.youtube.com/watch?v='+ytid+'" target="_blank" style="position:relative;display:block;flex-shrink:0">'+mediaHtml+'<span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.1rem;text-shadow:0 1px 3px rgba(0,0,0,.6)">▶</span></a>'):mediaHtml)
+      +'<div style="flex:1;min-width:0"><div style="color:#F2CE73;font-weight:900;font-size:0.72rem;letter-spacing:.5px">'+(active.video?'🎥 ':'')+'إعلان مُموَّل</div>'
+      +'<div style="color:#fff;font-weight:800;font-size:0.98rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+active.title+'</div></div>'
+      +'<a href="https://wa.me/'+waNum(active.phone)+'" target="_blank" style="background:linear-gradient(100deg,#25D366,#1EBE57);color:#fff;font-weight:900;font-size:0.75rem;padding:8px 14px;border-radius:100px;white-space:nowrap;text-decoration:none">تواصل 💬</a>'
+      +'</div>';
+  }else{
+    if(banner) banner.onclick=openAdSpace;
+    box.innerHTML='<div style="display:flex;align-items:center;gap:14px">'
+      +'<div style="font-size:2.2rem">📣</div>'
+      +'<div style="flex:1"><div style="color:#F2CE73;font-weight:900;font-size:1.05rem;letter-spacing:.3px">مساحة إعلانية</div>'
+      +'<div style="color:#C6CFDF;font-size:0.78rem;margin-top:3px">أعلن هنا ووصل لآلاف الزوار يومياً — باقات تبدأ من 20,000 ج.س</div></div>'
+      +'<div style="background:linear-gradient(100deg,#F2CE73,#D9A840);color:#12203A;font-weight:900;font-size:0.78rem;padding:8px 14px;border-radius:100px;white-space:nowrap">أعلن الآن ←</div>'
+      +'</div>';
+  }
+}
+window.renderAdSpaceBanner=renderAdSpaceBanner;
+setInterval(renderAdSpaceBanner,60000);
+
+
 window.approveSeller=approveSeller;
 window.rejectSeller=rejectSeller;
 
@@ -2609,29 +2649,68 @@ let asImage="";
 const ADSPACE_PLANS={day:{label:"يوم واحد",price:20000,days:1},week:{label:"أسبوع كامل",price:100000,days:7},month:{label:"شهر كامل",price:300000,days:30}};
 function openAdSpace(){
   ["as-title","as-name","as-phone"].forEach(function(id){var el=document.getElementById(id);if(el)el.value="";});
-  asImage="";
+  asImage=""; asVideoUrl="";
   var pv=document.getElementById("as-img-preview");if(pv)pv.style.display="none";
   var ph=document.getElementById("as-img-ph");if(ph)ph.style.display="block";
+  var vl=document.getElementById("as-video-link");if(vl)vl.value="";
+  document.querySelector('input[name="as-type"][value="image"]').checked=true;
+  document.getElementById("as-image-field").classList.remove("hidden");
+  document.getElementById("as-video-field").classList.add("hidden");
   document.getElementById("as-err").textContent="";
   document.getElementById("modal-adspace").classList.remove("hidden");
 }
 function handleAsImg(input){var f=input.files[0];if(!f)return;if(f.size>5*1024*1024){document.getElementById("as-err").textContent="حجم كبير";return;}var ph=document.getElementById("as-img-ph");ph.innerHTML='<div style="font-size:1.5rem">⏳</div>';var fd=new FormData();fd.append("image",f);fetch("https://api.imgbb.com/1/upload?key=16b4262b9ff85a10c0f3a4834a847184",{method:"POST",body:fd}).then(function(r){return r.json();}).then(function(d){if(d&&d.data&&d.data.url){asImage=d.data.url;var pv=document.getElementById("as-img-preview");pv.src=d.data.url;pv.style.display="block";ph.style.display="none";}else{document.getElementById("as-err").textContent="فشل الرفع";}ph.innerHTML='<div style="font-size:1.5rem">📷</div><div style="color:#6B7280;font-size:0.78rem">اضغط لرفع صورة</div>';}).catch(function(){document.getElementById("as-err").textContent="فشل الرفع";});}
 function submitAdSpace(){
   var opt=document.querySelector('input[name="as-plan"]:checked');
+  var isVideo=document.querySelector('input[name="as-type"]:checked').value==="video";
   var t=document.getElementById("as-title").value.trim();
   var n=document.getElementById("as-name").value.trim();
   var p=(document.getElementById("as-country").value+document.getElementById("as-phone").value.trim().replace(/^0+/,""));
   var e=document.getElementById("as-err");
   if(!opt){e.textContent="اختر مدة الإعلان";return;}
   if(!t){e.textContent="أدخل عنوان الإعلان";return;}
-  if(!asImage){e.textContent="ارفع صورة الإعلان";return;}
+  var videoLink=document.getElementById("as-video-link").value.trim();
+  if(isVideo && !videoLink){e.textContent="ألصق رابط فيديو يوتيوب";return;}
+  if(isVideo && !ytId(videoLink)){e.textContent="رابط يوتيوب غير صالح";return;}
+  if(!isVideo && !asImage){e.textContent="ارفع صورة الإعلان";return;}
   if(!n){e.textContent="أدخل اسمك";return;}
   if(!/^\d{6,15}$/.test(p.replace(/\D/g,""))){e.textContent="رقم غير صحيح";return;}
   var pl=ADSPACE_PLANS[opt.value];
-  var data={id:"ADS-"+Date.now(),planKey:opt.value,planLabel:pl.label,days:pl.days,title:t,image:asImage,ownerName:n,phone:p};
+  var data={id:"ADS-"+Date.now(),planKey:opt.value,planLabel:pl.label,days:pl.days,title:t,image:isVideo?"":asImage,video:isVideo?videoLink:"",ownerName:n,phone:p};
   closeModal("modal-adspace");
   openPayment({kind:"adspace",data:data,amount:pl.price});
 }
+
+let asVideoUrl="";
+function toggleAsType(){
+  var isVideo=document.querySelector('input[name="as-type"]:checked').value==="video";
+  document.getElementById("as-image-field").classList.toggle("hidden",isVideo);
+  document.getElementById("as-video-field").classList.toggle("hidden",!isVideo);
+}
+window.toggleAsType=toggleAsType;
+async function handleAsVideo(input){
+  var f=input.files[0]; if(!f)return;
+  if(f.size>25*1024*1024){document.getElementById("as-err").textContent="حجم الفيديو كبير (الحد 25MB)";input.value="";return;}
+  var ph=document.getElementById("as-vid-ph");
+  ph.innerHTML='<div style="font-size:1.5rem">⏳</div><div style="color:#6B7280;font-size:0.78rem">جاري رفع الفيديو...</div>';
+  try{
+    var path="adspace-videos/"+Date.now()+"-"+f.name.replace(/[^a-zA-Z0-9.]/g,"_");
+    var ref=window._storageFns.storageRef(window._storage,path);
+    await window._storageFns.uploadBytes(ref,f);
+    var url=await window._storageFns.getDownloadURL(ref);
+    asVideoUrl=url;
+    var pv=document.getElementById("as-vid-preview");
+    pv.src=url; pv.style.display="block";
+    ph.style.display="none";
+    showToast("تم رفع الفيديو ✓");
+  }catch(err){
+    document.getElementById("as-err").textContent="فشل رفع الفيديو: "+(err.message||"خطأ غير معروف");
+    ph.innerHTML='<div style="font-size:1.5rem">🎥</div><div style="color:#6B7280;font-size:0.78rem">اضغط لاختيار فيديو من الجهاز (حتى 25MB)</div>';
+  }
+  input.value="";
+}
+window.handleAsVideo=handleAsVideo;
+
 window.openAdSpace=openAdSpace;window.handleAsImg=handleAsImg;window.submitAdSpace=submitAdSpace;
 
 window.copyAccount=copyAccount;window.openPayment=openPayment;window.handlePayImg=handlePayImg;window.submitPayment=submitPayment;
