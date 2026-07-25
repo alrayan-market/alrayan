@@ -1525,7 +1525,7 @@ function renderDashboard(){
   document.getElementById("dash-tabs").innerHTML=`
     <button class="tab-btn ${activeTab==="products"?"active":""}" onclick="switchTab('products')">📦 منتجاتي (${myProds.length})</button>
     <button class="tab-btn ${activeTab==="orders"?"active":""}" onclick="switchTab('orders')">📋 الطلبات (${myOrders.length})</button>
-    <button class="tab-btn ${activeTab==="messages"?"active":""}" onclick="switchTab('messages')">💬 الاستفسارات (${myChats.length})${unreadChats?' <span style="color:#C9933A">●</span>':""}</button>`;
+    <button class="tab-btn ${activeTab==="messages"?"active":""}" onclick="switchTab('messages')">💬 الاستفسارات (${(inquiries.filter(q=>q.sellerId===currentSeller.id)).length})${unreadChats?' <span style="color:#C9933A">●</span>':""}</button>`;
   const totalProdViews=myProds.reduce((s,p)=>s+(p.views||0),0);
   document.getElementById("dash-stats").innerHTML=`
     <div class="stat-card"><div class="stat-icon">📦</div><div class="stat-val">${myProds.length}</div><div class="stat-lbl">المنتجات</div></div>
@@ -1555,7 +1555,7 @@ function renderDashboard(){
     myOrders.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).map(o=>{
       const myItems=o.items.filter(i=>i.sellerId===currentSeller.id);
       const myTotal=myItems.reduce((s,i)=>s+(i.price*i.qty),0);
-      const waNum=waNum(o.buyerPhone);
+      const waNumVal=waNum(o.buyerPhone);
       const waMsg=encodeURIComponent(`مرحباً ${o.buyerName},\nطلبك رقم ${o.id} تم استلامه ✓`);
       return `<div class="order-row"><div class="order-info">
         <div class="order-id">${o.id} · ${o.date}</div>
@@ -1578,22 +1578,16 @@ function renderDashboard(){
     }).join("")+"</div>";}
   const mTab=document.getElementById("tab-messages");
   mTab.classList.toggle("hidden",activeTab!=="messages");
-  if(myChats.length===0){
+  const myInquiries=inquiries.filter(function(q){return q.sellerId===currentSeller.id;}).sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
+  if(myInquiries.length===0){
     mTab.innerHTML=`<div class="panel"><div class="no-items"><div class="icon">💬</div><div style="font-weight:700;margin-bottom:3px">لا توجد استفسارات بعد</div></div></div>`;
   } else {
-    mTab.innerHTML=`<div class="panel"><div class="panel-head"><span class="panel-title">الاستفسارات (${myChats.length})</span></div>`+
-      myChats.slice().sort((a,b)=>(b.lastMessageAt||0)-(a.lastMessageAt||0)).map(c=>{
-        const msgs=c.messages||[];
-        const lastMsgObj2=msgs.length?msgs[msgs.length-1]:null;
-        const lastMsg=lastMsgObj2?(lastMsgObj2.type==="image"?"📷 صورة":lastMsgObj2.type==="voice"?"🎤 رسالة صوتية":lastMsgObj2.text):"لا توجد رسائل بعد";
-        const unread=!c.sellerRead;
-        return `<div class="prod-row" style="cursor:pointer${unread?";border-color:#C9933A":""}" onclick="openChatWindow('${c.id}','seller')">
-          <div class="prod-row-left">
-            <div class="prod-emoji-box" style="background:#EEF0FF">👤</div>
-            <div><div class="prod-title">${c.customerName}${unread?' <span style="color:#C9933A">●</span>':""}</div><div class="prod-meta" style="max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${lastMsg}</div></div>
-          </div>
-          <div style="font-size:0.7rem;color:#9CA3AF;flex-shrink:0">${c.customerPhone}</div>
-        </div>`;
+    mTab.innerHTML=`<div class="panel"><div class="panel-head"><span class="panel-title">استفسارات الواتساب (${myInquiries.length})</span></div>`+
+      myInquiries.map(function(q){
+        var d=new Date(q.createdAt||0);
+        return '<div class="prod-row"><div class="prod-row-left"><div class="prod-emoji-box" style="background:#EEF8EE">💬</div>'
+          +'<div><div class="prod-title">'+q.name+'</div><div class="prod-meta">'+(q.productName||"")+' · '+d.toLocaleDateString("ar")+'</div></div></div>'
+          +'<a href="https://wa.me/'+waNum(q.phone)+'" target="_blank" style="background:#25D366;color:#fff;border-radius:8px;padding:6px 12px;font-size:0.75rem;font-weight:700;text-decoration:none">واتساب</a></div>';
       }).join("")+"</div>";
   }
 }
