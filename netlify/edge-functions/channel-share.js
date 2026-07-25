@@ -20,15 +20,16 @@ export default async (request, context) => {
       const d=await fireGet("entVideos",vid);
       const f=d&&d.fields||{};
       title=f.title?.stringValue||"فيديو على قناة الريان";
-      desc="شاهد الآن على قناة الريان 🎥";
+      desc="شاهد الآن على قناة الريان";
       const yid=ytId(f.url?.stringValue||"");
       if(yid) image=`https://i.ytimg.com/vi/${yid}/hqdefault.jpg`;
     }else if(poll){
       const d=await fireGet("entPredicts",poll);
       const f=d&&d.fields||{};
       title=f.title?.stringValue||"استطلاع على قناة الريان";
-      desc=f.sub?.stringValue||"شارك برأيك في استطلاع الريان 📊";
-      image=SITE_LOGO;
+      desc=f.sub?.stringValue||"شارك برأيك في استطلاع الريان";
+      const pimg=f.image?.stringValue||"";
+      if(pimg) image=pimg;
     }
   }catch(e){ return context.next(); }
   const res=await context.next();
