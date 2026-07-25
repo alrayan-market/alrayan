@@ -447,6 +447,11 @@ textarea.inp{height:64px;resize:none}
     <div class="field"><label class="lbl">عنوان الاستطلاع</label><input class="inp" id="ep-title"></div>
     <div class="field"><label class="lbl">وصف (اختياري)</label><input class="inp" id="ep-sub"></div>
     <div class="field"><label class="lbl">الخيارات (افصل بفاصلة أو شرطة)</label><input class="inp" id="ep-opts"></div>
+    <div class="field"><label class="lbl">صورة الاستطلاع (اختياري)</label>
+      <div id="ep-img-ph" onclick="document.getElementById('ep-img-input').click()" style="background:#F4F6FA;border:2px dashed #D8D3C6;border-radius:12px;padding:18px;text-align:center;cursor:pointer"><div style="font-size:1.4rem">🖼️</div><div style="color:#6B7280;font-size:0.76rem">اضغط لرفع صورة</div></div>
+      <img id="ep-img-preview" style="display:none;width:100%;border-radius:12px;margin-top:8px">
+      <input type="file" id="ep-img-input" accept="image/*" style="display:none" onchange="handlePollImg(this,'ep')">
+    </div>
     <div style="background:#FFF9E9;border:1px solid #F0D98A;border-radius:9px;padding:9px 11px;font-size:0.78rem;color:#8A6A1F;margin-bottom:10px">⚠️ تعديل الخيارات قد يؤثر على نتائج التصويت السابقة</div>
     <div id="ep-err" style="color:#D9534F;font-size:0.8rem;margin-bottom:8px"></div>
     <button class="btn-navy" style="width:100%" onclick="saveEditPoll()">💾 حفظ التعديلات</button>
@@ -2257,6 +2262,7 @@ function renderEntQuiz(){
       inner=`<button class="btn-navy" style="width:100%;margin-top:6px" onclick="openPredict('${p.id}')">شارك برأيك 📊</button>`;
     }
     return `<div style="background:#F4F6FA;border-radius:12px;padding:14px;margin-bottom:12px">
+      ${p.image?`<img src="${p.image}" style="width:100%;max-height:170px;object-fit:cover;border-radius:10px;margin-bottom:10px">`:''}
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:4px"><div style="font-weight:800;color:#1A2744">${p.title}</div><button onclick="sharePoll('${p.id}')" style="background:#EEF8EE;border:none;border-radius:8px;padding:5px 10px;font-weight:800;color:#2E7D5E;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.78rem;flex-shrink:0">📤</button></div>
       ${p.sub?`<div style="color:#6B7280;font-size:0.8rem;margin-bottom:10px">${p.sub}</div>`:'<div style="margin-bottom:8px"></div>'}
       ${inner}
@@ -2823,6 +2829,11 @@ function renderChannelAdmin(){
     <div class="field"><label class="lbl">عنوان الاستطلاع</label><input class="inp" id="ap-title" placeholder="سؤال الاستطلاع"></div>
     <div class="field"><label class="lbl">وصف (اختياري)</label><input class="inp" id="ap-sub" placeholder="نهائي كأس العالم"></div>
     <div class="field"><label class="lbl">الخيارات (افصل بينها بفاصلة أو شرطة)</label><input class="inp" id="ap-opts" placeholder="الأرجنتين, إسبانيا, تعادل"></div>
+    <div class="field"><label class="lbl">صورة الاستطلاع (اختياري)</label>
+      <div id="ap-img-ph" onclick="document.getElementById('ap-img-input').click()" style="background:#F4F6FA;border:2px dashed #D8D3C6;border-radius:12px;padding:18px;text-align:center;cursor:pointer"><div style="font-size:1.4rem">🖼️</div><div style="color:#6B7280;font-size:0.76rem">اضغط لرفع صورة</div></div>
+      <img id="ap-img-preview" style="display:none;width:100%;border-radius:12px;margin-top:8px">
+      <input type="file" id="ap-img-input" accept="image/*" style="display:none" onchange="handlePollImg(this,'ap')">
+    </div>
     <button class="btn-navy" style="width:100%" onclick="addPredict()">إنشاء الاستطلاع</button>
   </div>
   <div class="panel"><div class="panel-head"><span class="panel-title">الاستطلاعات (${preds.length})</span></div>
@@ -2867,8 +2878,11 @@ async function addPredict(){
   const opts=document.getElementById("ap-opts").value.split(/[,،/\n]+/).map(x=>x.trim()).filter(Boolean);
   if(!title||opts.length<2){showToast("أدخل العنوان وخيارين على الأقل");return;}
   const id="PR-"+Date.now();
-  await dbSave("entPredicts",id,{id,title,sub,options:opts,showResults:false,active:true,createdAt:Date.now()});
+  await dbSave("entPredicts",id,{id,title,sub,options:opts,image:pollImgCreate||"",showResults:false,active:true,createdAt:Date.now()});
   document.getElementById("ap-title").value="";document.getElementById("ap-sub").value="";document.getElementById("ap-opts").value="";
+  pollImgCreate="";
+  var apv=document.getElementById("ap-img-preview");if(apv){apv.style.display="none";apv.src="";}
+  var aph=document.getElementById("ap-img-ph");if(aph)aph.style.display="block";
   showToast("تم إنشاء الاستطلاع ✓");
 }
 async function toggleResults(id,show){
@@ -2901,6 +2915,10 @@ function editPoll(id){
   document.getElementById("ep-sub").value=p.sub||"";
   document.getElementById("ep-opts").value=(p.options||[]).join("، ");
   document.getElementById("ep-err").textContent="";
+  pollImgEdit=p.image||"";
+  var epv=document.getElementById("ep-img-preview"), eph=document.getElementById("ep-img-ph");
+  if(p.image){ epv.src=p.image; epv.style.display="block"; eph.style.display="none"; }
+  else { epv.style.display="none"; epv.src=""; eph.style.display="block"; }
   document.getElementById("modal-edit-poll").classList.remove("hidden");
 }
 async function saveEditPoll(){
@@ -2911,10 +2929,31 @@ async function saveEditPoll(){
   var e=document.getElementById("ep-err");
   if(!title){e.textContent="أدخل عنوان الاستطلاع";return;}
   if(opts.length<2){e.textContent="أدخل خيارين على الأقل";return;}
-  await dbUpdate("entPredicts",id,{title:title,sub:sub,options:opts});
+  await dbUpdate("entPredicts",id,{title:title,sub:sub,options:opts,image:pollImgEdit||""});
   closeModal("modal-edit-poll");
   showToast("تم تعديل الاستطلاع ✓");
 }
+
+let pollImgCreate="", pollImgEdit="";
+function handlePollImg(input,mode){
+  var f=input.files[0]; if(!f)return;
+  if(f.size>5*1024*1024){showToast("حجم الصورة كبير (الحد 5MB)");input.value="";return;}
+  var ph=document.getElementById(mode+"-img-ph");
+  ph.innerHTML='<div style="font-size:1.4rem">⏳</div><div style="color:#6B7280;font-size:0.76rem">جاري الرفع...</div>';
+  var fd=new FormData(); fd.append("image",f);
+  fetch("https://api.imgbb.com/1/upload?key=16b4262b9ff85a10c0f3a4834a847184",{method:"POST",body:fd}).then(function(r){return r.json();}).then(function(d){
+    if(d&&d.data&&d.data.url){
+      if(mode==="ap") pollImgCreate=d.data.url; else pollImgEdit=d.data.url;
+      var pv=document.getElementById(mode+"-img-preview");
+      pv.src=d.data.url; pv.style.display="block"; ph.style.display="none";
+      showToast("تم رفع الصورة ✓");
+    }else{ showToast("فشل رفع الصورة"); }
+    ph.innerHTML='<div style="font-size:1.4rem">🖼️</div><div style="color:#6B7280;font-size:0.76rem">اضغط لرفع صورة</div>';
+  }).catch(function(){ showToast("فشل الرفع"); });
+  input.value="";
+}
+window.handlePollImg=handlePollImg;
+
 window.editPoll=editPoll;
 window.saveEditPoll=saveEditPoll;
 
