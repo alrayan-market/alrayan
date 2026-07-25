@@ -1312,7 +1312,7 @@ async function submitDirectOrder(){
   if(seller){
     const waNumV=waNum(seller.phone);
     const waMsg=encodeURIComponent(`🛒 طلب جديد من منصة الريان!\n━━━━━━━━━━\nرقم الطلب: ${orderId}\nالزبون: ${name}\nالهاتف: ${phone}\nالعنوان: ${address}\n${notes?"ملاحظات: "+notes+"\n":""}━━━━━━━━━━\n${p.name} × ${qty}${deliveryText}\nالإجمالي: ${totalText}`);
-    waLink=`https://wa.me/${waNumV}?text=${waMsg}`;
+    waLink=`https://wa.me/${waNumVal}?text=${waMsg}`;
     if(seller.pushSubscription){
       sendPushNotification(seller.pushSubscription,"🛒 طلب جديد!",`${p.name} × ${qty} — ${totalText}`,"/");
     }
@@ -1573,7 +1573,7 @@ function renderDashboard(){
           <option value="done" ${o.status==="done"?"selected":""}>مكتمل</option>
           <option value="cancel" ${o.status==="cancel"?"selected":""}>ملغي</option>
         </select>
-        <a class="order-wa-btn" href="https://wa.me/${waNumV}?text=${waMsg}" target="_blank">📱 واتساب</a>
+        <a class="order-wa-btn" href="https://wa.me/${waNumVal}?text=${waMsg}" target="_blank">📱 واتساب</a>
       </div></div>`;
     }).join("")+"</div>";}
   const mTab=document.getElementById("tab-messages");
