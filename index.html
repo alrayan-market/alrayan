@@ -440,6 +440,18 @@ textarea.inp{height:64px;resize:none}
     <button class="btn-navy" style="width:100%" onclick="submitAdSpace()">متابعة للدفع 📣</button>
   </div>
 </div>
+<div class="overlay hidden" id="modal-edit-poll">
+  <div class="modal modal-sm">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><h3 style="color:#1A2744;font-weight:900;font-size:1.05rem">✏️ تعديل الاستطلاع</h3><button onclick="closeModal('modal-edit-poll')" style="background:none;border:none;font-size:1.4rem;color:#9CA3AF;cursor:pointer">✕</button></div>
+    <input type="hidden" id="ep-id">
+    <div class="field"><label class="lbl">عنوان الاستطلاع</label><input class="inp" id="ep-title"></div>
+    <div class="field"><label class="lbl">وصف (اختياري)</label><input class="inp" id="ep-sub"></div>
+    <div class="field"><label class="lbl">الخيارات (افصل بفاصلة أو شرطة)</label><input class="inp" id="ep-opts"></div>
+    <div style="background:#FFF9E9;border:1px solid #F0D98A;border-radius:9px;padding:9px 11px;font-size:0.78rem;color:#8A6A1F;margin-bottom:10px">⚠️ تعديل الخيارات قد يؤثر على نتائج التصويت السابقة</div>
+    <div id="ep-err" style="color:#D9534F;font-size:0.8rem;margin-bottom:8px"></div>
+    <button class="btn-navy" style="width:100%" onclick="saveEditPoll()">💾 حفظ التعديلات</button>
+  </div>
+</div>
 <div class="overlay hidden" id="modal-payment">
   <div class="modal modal-sm" style="max-height:88vh;overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
@@ -2830,6 +2842,7 @@ function renderChannelAdmin(){
         <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
         <button onclick="toggleResults('${p.id}',${p.showResults?'false':'true'})" style="background:${p.showResults?'#2E7D5E':'#EEF1F6'};color:${p.showResults?'#fff':'#1A2744'};border:none;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.8rem">${p.showResults?'✅ النتائج ظاهرة للجمهور':'إظهار النتائج للجمهور'}</button>
         <button onclick="showEntries('${p.id}')" style="background:#EEF1F6;color:#1A2744;border:none;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.8rem">المشاركون (${total})</button>
+        <button onclick="editPoll('${p.id}')" style="background:#EEF0FF;color:#1A2744;border:none;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.8rem">✏️ تعديل</button>
         <button onclick="delPredict('${p.id}')" style="background:#FEE;color:#D9534F;border:none;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.8rem">حذف</button>
         </div>
         <div id="entries-${p.id}" class="hidden" style="margin-top:10px"></div>
@@ -2880,6 +2893,31 @@ function showEntries(pid){
   box.classList.remove("hidden");
 }
 window.addVideo=addVideo;window.delVideo=delVideo;window.addPredict=addPredict;
+
+function editPoll(id){
+  var p=entPredicts.find(function(x){return x.id===id;}); if(!p)return;
+  document.getElementById("ep-id").value=id;
+  document.getElementById("ep-title").value=p.title||"";
+  document.getElementById("ep-sub").value=p.sub||"";
+  document.getElementById("ep-opts").value=(p.options||[]).join("، ");
+  document.getElementById("ep-err").textContent="";
+  document.getElementById("modal-edit-poll").classList.remove("hidden");
+}
+async function saveEditPoll(){
+  var id=document.getElementById("ep-id").value;
+  var title=document.getElementById("ep-title").value.trim();
+  var sub=document.getElementById("ep-sub").value.trim();
+  var opts=document.getElementById("ep-opts").value.split(/[,،/\n]+/).map(function(x){return x.trim();}).filter(Boolean);
+  var e=document.getElementById("ep-err");
+  if(!title){e.textContent="أدخل عنوان الاستطلاع";return;}
+  if(opts.length<2){e.textContent="أدخل خيارين على الأقل";return;}
+  await dbUpdate("entPredicts",id,{title:title,sub:sub,options:opts});
+  closeModal("modal-edit-poll");
+  showToast("تم تعديل الاستطلاع ✓");
+}
+window.editPoll=editPoll;
+window.saveEditPoll=saveEditPoll;
+
 window.toggleResults=toggleResults;window.delPredict=delPredict;window.showEntries=showEntries;
 window.renderChannelAdmin=renderChannelAdmin;
 
