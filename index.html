@@ -27,10 +27,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 <style>
 
-:root{color-scheme:only light}
-html{-webkit-text-size-adjust:100%;forced-color-adjust:none}
+
+:root{color-scheme:only light !important;forced-color-adjust:none !important}
+html,body{color-scheme:only light !important;background-color:#FAFAF7 !important}
+*{forced-color-adjust:none !important}
 @media (prefers-color-scheme: dark){
-  html,body{background:#FAFAF7 !important;color:#1A2744 !important}
+  :root,html,body,*{color-scheme:only light !important;forced-color-adjust:none !important}
+  html,body{background-color:#FAFAF7 !important;color:#1A2744 !important}
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Tajawal',sans-serif;background:#FAFAF7;color:#1A2744;direction:rtl}
