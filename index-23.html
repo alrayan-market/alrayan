@@ -12,6 +12,8 @@
 <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#1A2744">
+<meta name="color-scheme" content="light only">
+<meta name="supported-color-schemes" content="light">
 <link rel="apple-touch-icon" href="/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -24,6 +26,12 @@
 <meta name="twitter:card" content="summary_large_image">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 <style>
+
+:root{color-scheme:only light}
+html{-webkit-text-size-adjust:100%;forced-color-adjust:none}
+@media (prefers-color-scheme: dark){
+  html,body{background:#FAFAF7 !important;color:#1A2744 !important}
+}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Tajawal',sans-serif;background:#FAFAF7;color:#1A2744;direction:rtl}
 button,input,select,textarea{font-family:'Tajawal',sans-serif}
@@ -1455,7 +1463,7 @@ async function submitDirectOrder(){
   const seller=sellers.find(s=>s.id===p.sellerId);
   let waLink="";
   if(seller){
-    const waNumV=waNum(seller.phone);
+    const waNumVal=waNum(seller.phone);
     const waMsg=encodeURIComponent(`🛒 طلب جديد من منصة الريان!\n━━━━━━━━━━\nرقم الطلب: ${orderId}\nالزبون: ${name}\nالهاتف: ${phone}\nالعنوان: ${address}\n${notes?"ملاحظات: "+notes+"\n":""}━━━━━━━━━━\n${p.name} × ${qty}${deliveryText}\nالإجمالي: ${totalText}`);
     waLink=`https://wa.me/${waNumVal}?text=${waMsg}`;
     if(seller.pushSubscription){
