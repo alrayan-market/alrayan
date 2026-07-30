@@ -1655,7 +1655,6 @@ function renderDashboard(){
   document.getElementById("dash-main-btn").onclick=openAddProduct;
   document.getElementById("dash-share-strip").classList.remove("hidden");
   renderWalletCard();
-  renderTopWallet();
   const myProds=products.filter(p=>p.sellerId===currentSeller.id);
   const myOrders=orders.filter(o=>o.items.some(i=>i.sellerId===currentSeller.id));
   const myChats=chats.filter(c=>c.sellerId===currentSeller.id);
