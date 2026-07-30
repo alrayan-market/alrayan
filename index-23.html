@@ -486,6 +486,29 @@ textarea.inp{height:64px;resize:none}
     <button class="btn-navy" style="width:100%" onclick="saveChangePlan()">💾 حفظ التعديل</button>
   </div>
 </div>
+<div class="overlay hidden" id="modal-install">
+  <div class="modal modal-sm">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><h3 style="color:#1A2744;font-weight:900;font-size:1.05rem">📲 تثبيت تطبيق الريان</h3><button onclick="closeModal('modal-install')" style="background:none;border:none;font-size:1.4rem;color:#9CA3AF;cursor:pointer">✕</button></div>
+    <p style="color:#6B7280;font-size:0.82rem;margin-bottom:16px">اختر طريقة التثبيت المناسبة لك</p>
+    <div onclick="downloadApk()" style="background:linear-gradient(135deg,#1A2744,#2A3C63);border-radius:14px;padding:16px;margin-bottom:11px;cursor:pointer;color:#fff">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="font-size:2rem">📦</div>
+        <div style="flex:1"><div style="font-weight:900;font-size:1rem">تحميل التطبيق (APK)</div>
+        <div style="color:#C6CFDF;font-size:0.76rem;margin-top:2px">تطبيق كامل · 2.2 ميجابايت · يعمل بدون متصفح</div></div>
+      </div>
+    </div>
+    <div onclick="closeModal('modal-install');installFromBrowser()" style="background:#F4F6FA;border:1.5px solid #E5E0D8;border-radius:14px;padding:16px;cursor:pointer">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="font-size:2rem">⚡</div>
+        <div style="flex:1"><div style="font-weight:900;font-size:1rem;color:#1A2744">تثبيت سريع من المتصفح</div>
+        <div style="color:#6B7280;font-size:0.76rem;margin-top:2px">بدون تحميل · فوري</div></div>
+      </div>
+    </div>
+    <div style="background:#FFF9E9;border:1px solid #F0D98A;border-radius:10px;padding:10px 12px;margin-top:12px;font-size:0.74rem;color:#8A6A1F;line-height:1.6">
+      💡 عند تحميل APK: اسمح بالتثبيت من مصادر غير معروفة عند طلب الجهاز
+    </div>
+  </div>
+</div>
 <div class="overlay hidden" id="modal-payment">
   <div class="modal modal-sm" style="max-height:88vh;overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
@@ -3401,21 +3424,30 @@ window.addEventListener("appinstalled",()=>{
   const btn=document.getElementById("install-app-btn");
   if(btn){btn.textContent="✓ تم تثبيت التطبيق";btn.disabled=true;btn.style.opacity="0.6";}
 });
-async function triggerAppInstall(){
+function triggerAppInstall(){
+  document.getElementById("modal-install").classList.remove("hidden");
+}
+function downloadApk(){
+  closeModal("modal-install");
+  var a=document.createElement("a");
+  a.href="/alrayan.apk";
+  a.setAttribute("download","alrayan.apk");
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  showToast("جاري تحميل التطبيق...");
+}
+async function installFromBrowser(){
   if(deferredInstallPrompt){
     deferredInstallPrompt.prompt();
-    const choice=await deferredInstallPrompt.userChoice;
+    await deferredInstallPrompt.userChoice;
     deferredInstallPrompt=null;
     return;
   }
-  // fallback: browser doesn't support auto-prompt (e.g. iOS Safari) or already installed
-  const isIos=/iphone|ipad|ipod/i.test(navigator.userAgent);
-  if(isIos){
-    alert("لتثبيت التطبيق: اضغط زر المشاركة ⬆️ في المتصفح، ثم اختر \"إضافة إلى الشاشة الرئيسية\"");
-  } else {
-    alert("لتثبيت التطبيق: افتح قائمة المتصفح (⋮) واختر \"تثبيت التطبيق\" أو \"إضافة إلى الشاشة الرئيسية\"");
-  }
+  var isIos=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  if(isIos){ alert("لتثبيت التطبيق: اضغط زر المشاركة في المتصفح، ثم اختر إضافة إلى الشاشة الرئيسية"); }
+  else { alert("لتثبيت التطبيق: افتح قائمة المتصفح واختر تثبيت التطبيق أو إضافة إلى الشاشة الرئيسية"); }
 }
+window.downloadApk=downloadApk;
+window.installFromBrowser=installFromBrowser;
 window.triggerAppInstall=triggerAppInstall;
 </script>
 </body>
