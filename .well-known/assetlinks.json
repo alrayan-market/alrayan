@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.netlify.alrayanmarket.twa",
+        "sha256_cert_fingerprints": ["68:3E:6C:2C:E4:9F:16:70:18:DB:05:48:02:61:AF:1D:A4:70:AD:0A:37:E8:94:2A:5C:5D:30:22:4B:D6:A4:FB"]
+      }
+    }]
