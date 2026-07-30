@@ -359,6 +359,7 @@ textarea.inp{height:64px;resize:none}
         <button class="btn-gold" id="dash-main-btn" onclick="openAddProduct()">➕ أضف منتجاً</button>
       </div>
       <div class="stats-grid" id="dash-stats"></div>
+      <div id="dash-wallet-card"></div>
       <div class="share-strip" id="dash-share-strip">
         <div><div style="font-weight:800;color:#1A2744;margin-bottom:2px;font-size:0.93rem">🔗 رابط متجرك</div><div style="color:#6B7280;font-size:0.78rem">شاركه للتسويق</div></div>
         <div style="display:flex;gap:8px;flex-shrink:0">
@@ -824,7 +825,7 @@ window._fbImports={collection,query,orderBy,onSnapshot,doc,setDoc,getDoc,getDocs
 const CATS=["أغذية ومشروبات","عطور وبخور","أعشاب وصحة","هدايا وحرف","إلكترونيات","ملابس وأزياء","مواد بناء","سيارات","عقارات","أنشطة متعددة","أخرى"];
 const EMOJIS={"أغذية ومشروبات":"☕","عطور وبخور":"🕌","أعشاب وصحة":"🌿","هدايا وحرف":"🎁","إلكترونيات":"📱","ملابس وأزياء":"👗","مواد بناء":"🧱","سيارات":"🚗","عقارات":"🏠","أنشطة متعددة":"🎯","أخرى":"📦"};
 const BG={"أغذية ومشروبات":"#FFF0E8","عطور وبخور":"#FFF8EE","أعشاب وصحة":"#EEF8EE","هدايا وحرف":"#EEF0FF","إلكترونيات":"#F0F8FF","ملابس وأزياء":"#FFF0F8","مواد بناء":"#F0EEE8","سيارات":"#E8F0FF","عقارات":"#FFF0EC","أنشطة متعددة":"#F5F0FF","أخرى":"#F5F5F5"};
-const PLANS=[{id:"ad",name:"إعلان",price:10000,commission:0,maxProducts:1,type:"ad",desc:"إعلان واحد — 10,000 ج.س"},{id:"basic",name:"ابتدائية",price:50000,commission:0,maxProducts:999,type:"store",desc:"متجر — 50,000 ج.س/شهر"},{id:"standard",name:"أساسية",price:100000,commission:0,maxProducts:999,type:"store",desc:"متجر — 100,000 ج.س/شهر"},{id:"silver",name:"فضية",price:300000,commission:0,maxProducts:999,type:"store",desc:"متجر — 300,000 ج.س/شهر · مميزات إضافية"},{id:"gold",name:"ذهبية",price:500000,commission:0,maxProducts:999,type:"store",desc:"متجر — 500,000 ج.س/شهر · إبراز وأولوية"}];
+const PLANS=[{id:"ad",name:"إعلان",price:10000,commission:0,maxProducts:1,wallet:0,leadCost:0,type:"ad",desc:"إعلان واحد — 10,000 ج.س"},{id:"basic",name:"ابتدائية",price:50000,commission:0,maxProducts:999,wallet:50000,leadCost:2500,type:"store",desc:"رصيد 50,000 ج.س · 20 عميل محتمل"},{id:"standard",name:"أساسية",price:100000,commission:0,maxProducts:999,wallet:100000,leadCost:2000,type:"store",desc:"رصيد 100,000 ج.س · 50 عميل محتمل"},{id:"silver",name:"فضية",price:300000,commission:0,maxProducts:999,wallet:300000,leadCost:1200,type:"store",desc:"رصيد 300,000 ج.س · 250 عميل محتمل"},{id:"gold",name:"ذهبية",price:500000,commission:0,maxProducts:999,wallet:500000,leadCost:1000,type:"store",desc:"رصيد 500,000 ج.س · 500 عميل محتمل"}];
 const ADMIN_PASS="alrayan2026";
 const SDG=n=>Number(n).toLocaleString("ar")+" ج.س";
 const TODAY=()=>new Date().toLocaleDateString("ar",{year:"numeric",month:"long",day:"numeric"});
@@ -898,7 +899,7 @@ let chatPrefillText="";
 let customerPhone="";
 try{ customerPhone = localStorage.getItem("rayan_customer_phone")||""; }catch(e){}
 let visits={total:0,today:0,lastDate:""};
-let entVideos=[], entPredicts=[], entEntries=[], platformMessages=[], inquiries=[], adSpaceReqs=[], currentPredictId=null;
+let entVideos=[], entPredicts=[], entEntries=[], platformMessages=[], inquiries=[], adSpaceReqs=[], upgradeReqs=[], currentPredictId=null;
 let cart={};
 let currentSeller=null;
 let isAdmin=false;
@@ -982,6 +983,10 @@ function listenAll(){
     if(isAdmin && activeTab==="manage") renderPendingRequests();
     renderAdSpaceBanner();
   });
+  onSnapshot(collection(db,"upgradeRequests"), snap=>{
+    upgradeReqs=snap.docs.map(d=>d.data());
+    if(isAdmin && activeTab==="manage") renderPendingRequests();
+  });
 }
 
 // track visit (unique per device per day)
@@ -1018,6 +1023,7 @@ window.onload=async function(){
         <div class="plan-price ${isFirst?"sel":""}" id="plan-price-${p.id}">${p.price===0?"بدون رسوم شهرية":SDG(p.price)+"/شهر"}</div>
       </div>
       <div class="plan-meta">${p.desc}</div>
+      ${(p.type==="store"&&p.leads)?`<div style="margin-top:8px;background:#EEF8EE;border:1px solid #B7EBD0;border-radius:9px;padding:8px 11px;display:flex;justify-content:space-between;align-items:center"><span style="color:#2E7D5E;font-weight:800;font-size:0.82rem">👥 السعة: ${p.leads} عميل محتمل</span><span style="color:#6B7280;font-size:0.72rem">العميل = ${SDG(p.leadCost)}</span></div>`:""}
     </div>`;
   });
 
@@ -1245,7 +1251,7 @@ function renderProducts(filter){
         ${p.desc?'<div class="product-desc">'+p.desc+'</div>':''}
         <div class="product-footer">
           <span class="product-price" ${p.priceOnRequest?'style="font-size:0.82rem;color:#C9933A"':''}>${p.priceOnRequest?"السعر عند الطلب":SDG(p.price)}</span>
-          <button class="order-now-btn" onclick="openDirectOrder('${p.id}')">تواصل واطلب</button>
+          ${isSellerFrozen(p.sellerId)?`<button class="order-now-btn" style="background:#E5E7EB;color:#9CA3AF;cursor:not-allowed" onclick="showToast('المتجر غير متاح للتواصل حالياً')">غير متاح</button>`:`<button class="order-now-btn" onclick="openDirectOrder('${p.id}')">تواصل واطلب</button>`}
         </div>
         <div style="display:flex;gap:6px;margin-top:8px">
           <button onclick="openWaInquire('${p.id}')" style="flex:1;padding:7px;border-radius:8px;border:1.5px solid #E5E0D8;background:#fff;color:#6B7280;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">💬 استفسر</button>
@@ -1336,6 +1342,8 @@ async function submitDirectOrder(){
   const totalText=p.priceOnRequest?"يُحدد عند التواصل":SDG(total);
   const orderId="ORD-"+Date.now().toString().slice(-6);
   const order={id:orderId,createdAt:Date.now(),buyerName:name,buyerPhone:phone,buyerAddress:address,notes,items:[{productId:p.id,name:p.name,price:p.price,qty,sellerId:p.sellerId,sellerName:p.sellerName}],deliveryFee,total,priceOnRequest:!!p.priceOnRequest,date:TODAY(),status:"new"};
+  if(isSellerFrozen(p.sellerId)){showErr("co-err","هذا المتجر غير متاح للطلب حالياً");return;}
+  await chargeLead(p.sellerId,"طلبية: "+p.name);
   await dbSave("orders",orderId,order);
   notifyAdmin(`🛒 طلب ${orderId}\n${p.name} x${qty}\nالزبون: ${name}\n${phone}`);
   const seller=sellers.find(s=>s.id===p.sellerId);
@@ -1546,6 +1554,7 @@ function renderDashboard(){
   document.getElementById("dash-main-btn").textContent="➕ أضف منتجاً";
   document.getElementById("dash-main-btn").onclick=openAddProduct;
   document.getElementById("dash-share-strip").classList.remove("hidden");
+  renderWalletCard();
   const myProds=products.filter(p=>p.sellerId===currentSeller.id);
   const myOrders=orders.filter(o=>o.items.some(i=>i.sellerId===currentSeller.id));
   const myChats=chats.filter(c=>c.sellerId===currentSeller.id);
@@ -1634,6 +1643,7 @@ function renderAdminDashboard(){
   document.getElementById("dash-main-btn").textContent="";
   document.getElementById("dash-main-btn").onclick=null;
   document.getElementById("dash-share-strip").classList.add("hidden");
+  var _wc=document.getElementById("dash-wallet-card"); if(_wc)_wc.innerHTML="";
   const totalRevenue=orders.filter(o=>o.status==="done").reduce((s,o)=>s+o.total,0);
   const todayOrders=orders.filter(o=>o.date===TODAY());
   document.getElementById("dash-stats").innerHTML=`
@@ -1745,6 +1755,12 @@ function doLogin(){
   if(!found)return showErr("login-err","رقم الهاتف غير مسجل");
   currentSeller=found;isAdmin=false;activeTab="products";
   enableSellerPushNotifications(found.id);
+  setTimeout(function(){
+    if(isSellerFrozen(found.id)){
+      alert("⚠️ نفد رصيد محفظتك وتم تجميد باقتك.\n\nمنتجاتك ما زالت ظاهرة، لكن أزرار التواصل معطّلة حتى تجديد الاشتراك.\n\nاضغط \"تجديد الاشتراك\" لإعادة التعبئة.");
+      if(typeof upgradeMyStore==="function") upgradeMyStore();
+    }
+  },900);
   closeModal("modal-login");showView("dashboard");renderDashboard();
 }
 document.getElementById("l-phone").addEventListener("keydown",e=>{if(e.key==="Enter")doLogin();});
@@ -1872,7 +1888,7 @@ async function openStore(sellerId){
           ${p.desc?'<div class="product-desc">'+p.desc+'</div>':''}
           <div class="product-footer">
             <span class="product-price" ${p.priceOnRequest?'style="font-size:0.82rem;color:#C9933A"':''}>${p.priceOnRequest?"السعر عند الطلب":SDG(p.price)}</span>
-            <button class="order-now-btn" onclick="openDirectOrder('${p.id}')">تواصل واطلب</button>
+            ${isSellerFrozen(p.sellerId)?`<button class="order-now-btn" style="background:#E5E7EB;color:#9CA3AF;cursor:not-allowed" onclick="showToast('المتجر غير متاح للتواصل حالياً')">غير متاح</button>`:`<button class="order-now-btn" onclick="openDirectOrder('${p.id}')">تواصل واطلب</button>`}
           </div>
           <div style="display:flex;gap:6px;margin-top:8px">
             <button onclick="openWaInquire('${p.id}')" style="flex:1;padding:7px;border-radius:8px;border:1.5px solid #E5E0D8;background:#fff;color:#6B7280;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">💬 استفسر</button>
@@ -2456,6 +2472,20 @@ window.delPlatformMsg=delPlatformMsg;
 
 // ═══ موافقات الطلبات ═══
 function renderPendingRequests(){
+  const upPend=(upgradeReqs||[]).filter(function(x){return x.status==="pending";});
+  const upHtml=upPend.map(function(r){
+    var pl=PLANS.find(function(p){return p.id===r.newPlan;});
+    return '<div style="background:#FFF4E0;border:1px solid #F0D98A;border-radius:12px;padding:13px;margin-bottom:10px">'
+      +'<div style="font-weight:800;color:#1A2744;margin-bottom:5px">⭐ ترقية: '+(r.storeName||"")+' → '+(r.planName||"")+'</div>'
+      +'<div style="font-size:0.8rem;color:#374151">'+(r.name||"")+' · <a href="https://wa.me/'+(r.phone||"").replace(/\D/g,'')+'" target="_blank" style="color:#2E7D5E;font-weight:700">'+(r.phone||"")+' 📱</a></div>'
+      +'<div style="font-size:0.78rem;color:#6B7280;margin-top:4px">💳 يُضاف للمحفظة: '+(pl?(pl.wallet||0).toLocaleString("ar"):"0")+' ج.س</div>'
+      +(r.paymentImage?'<a href="'+r.paymentImage+'" target="_blank" style="display:inline-block;margin-top:6px;color:#1A2744;font-weight:700;font-size:0.78rem">🧾 إشعار الدفع</a>':'')
+      +'<div style="display:flex;gap:8px;margin-top:10px">'
+      +'<button onclick="approveUpgrade(\''+r.id+'\')" style="flex:1;background:#2E7D5E;color:#fff;border:none;border-radius:9px;padding:9px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif">✓ قبول</button>'
+      +'<button onclick="rejectUpgrade(\''+r.id+'\')" style="flex:1;background:#FEE;color:#D9534F;border:none;border-radius:9px;padding:9px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif">✕ رفض</button>'
+      +'</div></div>';
+  }).join("");
+
   const asPend=adSpaceReqs.filter(x=>x.status==="pending").sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
   const asHtml=asPend.map(r=>`<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:12px;padding:13px;margin-bottom:10px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><div style="font-weight:800;color:#1A2744">📣 ${r.title}</div><span style="background:#3B82F6;color:#fff;font-size:0.7rem;font-weight:700;padding:3px 9px;border-radius:100px">${r.planLabel}</span></div>
@@ -2470,8 +2500,8 @@ function renderPendingRequests(){
   const box=document.getElementById("pending-requests-box");
   if(!box)return;
   const pend=sellers.filter(x=>x.status==="pending").sort((a,b)=>(b.id||0)-(a.id||0));
-  if(pend.length===0&&asPend.length===0){box.innerHTML='<div style="color:#9CA3AF;font-size:0.82rem;padding:10px 0">لا توجد طلبات معلّقة</div>';return;}
-  box.innerHTML=asHtml+pend.map(sr=>{
+  if(pend.length===0&&asPend.length===0&&upPend.length===0){box.innerHTML='<div style="color:#9CA3AF;font-size:0.82rem;padding:10px 0">لا توجد طلبات معلّقة</div>';return;}
+  box.innerHTML=upHtml+asHtml+pend.map(sr=>{
     const plan=PLANS.find(p=>p.id===sr.plan);
     const isAd=plan&&plan.type==="ad";
     return `<div style="background:#FFF9E9;border:1px solid #F0D98A;border-radius:12px;padding:13px;margin-bottom:10px">
@@ -2492,7 +2522,9 @@ function renderPendingRequests(){
 }
 async function approveSeller(id){
   const sr=sellers.find(x=>x.id===id); if(!sr)return;
-  await dbUpdate("sellers",id,{status:"approved"});
+  var plan0=PLANS.find(function(x){return x.id===sr.plan;});
+  var w0=plan0?(plan0.wallet||0):0;
+  await dbUpdate("sellers",id,{status:"approved",wallet:w0,walletLog:[{type:"credit",amount:w0,note:"تعبئة عند قبول الاشتراك ("+(plan0?plan0.name:"")+")",time:Date.now()}]});
   try{ const num=(sr.phone||'').replace(/\D/g,''); const msg=encodeURIComponent(`مرحباً ${sr.ownerName}،\nتم قبول طلبك في منصة الريان ✓\nمتجرك الآن فعّال. مرحباً بك!`); if(confirm("تم القبول. إرسال إشعار واتساب للتاجر؟")) window.open(`https://wa.me/${num}?text=${msg}`,"_blank"); }catch(e){}
   showToast("تم قبول الطلب ✓");
 }
@@ -2511,6 +2543,22 @@ async function approveAdSpace(id){
   showToast("تم قبول الإعلان ✓");
 }
 async function rejectAdSpace(id){ if(confirm("رفض هذا الإعلان؟")){await dbUpdate("adSpaceRequests",id,{status:"rejected"});showToast("تم الرفض");} }
+
+async function approveUpgrade(id){
+  var r=upgradeReqs.find(function(x){return x.id===id;}); if(!r)return;
+  var sl=sellers.find(function(x){return x.id===r.storeId;}); if(!sl){showToast("المتجر غير موجود");return;}
+  var pl=PLANS.find(function(p){return p.id===r.newPlan;});
+  var add=pl?(pl.wallet||0):0;
+  var bal=(typeof sl.wallet==="number"?sl.wallet:0)+add;
+  var log=(sl.walletLog||[]).concat([{type:"credit",amount:add,note:"تعبئة عند ترقية الباقة",time:Date.now()}]);
+  if(log.length>100) log=log.slice(-100);
+  await dbUpdate("sellers",r.storeId,{plan:r.newPlan,wallet:bal,walletLog:log,status:"approved"});
+  await dbUpdate("upgradeRequests",id,{status:"approved",approvedAt:Date.now()});
+  showToast("تم قبول الترقية وتعبئة الرصيد");
+}
+async function rejectUpgrade(id){ if(confirm("رفض طلب الترقية؟")){ await dbUpdate("upgradeRequests",id,{status:"rejected"}); showToast("تم الرفض"); } }
+window.approveUpgrade=approveUpgrade;window.rejectUpgrade=rejectUpgrade;
+
 window.approveAdSpace=approveAdSpace;window.rejectAdSpace=rejectAdSpace;
 
 function renderAdSpaceBanner(){
@@ -2658,6 +2706,8 @@ async function goWhatsAppInquire(){
   if(!sel){e.textContent="المتجر غير متاح";return;}
   var selPhone=(sel.phone||"").replace(/\D/g,"");
   if(!selPhone){e.textContent="رقم التاجر غير متاح";return;}
+  if(isSellerFrozen(sel.id)){e.textContent="هذا المتجر غير متاح للتواصل حالياً";return;}
+  await chargeLead(sel.id,"عميل محتمل: "+(prodName||"تواصل عام"));
   var iid="INQ-"+Date.now();
   try{ await dbSave("inquiries",iid,{id:iid,productId:prodId,productName:prodName,sellerId:sel.id,sellerName:sel.storeName||"",name:n,phone:p,createdAt:Date.now()}); }catch(err){}
   closeModal("modal-wa-inquire");
@@ -2693,6 +2743,79 @@ function openWaStoreInquire(){
   document.getElementById("modal-wa-inquire").classList.remove("hidden");
 }
 window.openWaStoreInquire=openWaStoreInquire;
+
+
+// ══════════ محفظة التاجر ══════════
+function sellerWallet(sid){
+  var sl=sellers.find(function(x){return x.id===sid;});
+  return sl?(typeof sl.wallet==="number"?sl.wallet:0):0;
+}
+function sellerLeadCost(sid){
+  var sl=sellers.find(function(x){return x.id===sid;});
+  if(!sl)return 0;
+  var pl=PLANS.find(function(p){return p.id===sl.plan;});
+  return pl?(pl.leadCost||0):0;
+}
+function isSellerFrozen(sid){
+  var sl=sellers.find(function(x){return x.id===sid;});
+  if(!sl)return false;
+  var pl=PLANS.find(function(p){return p.id===sl.plan;});
+  if(!pl||pl.type!=="store")return false;
+  return sellerWallet(sid) < sellerLeadCost(sid);
+}
+async function chargeLead(sid,note){
+  var sl=sellers.find(function(x){return x.id===sid;});
+  if(!sl)return false;
+  var pl=PLANS.find(function(p){return p.id===sl.plan;});
+  if(!pl||pl.type!=="store")return true;
+  var cost=pl.leadCost||0;
+  var bal=(typeof sl.wallet==="number"?sl.wallet:0);
+  if(bal<cost) return false;
+  var log=(sl.walletLog||[]).concat([{type:"debit",amount:cost,note:note||"عميل محتمل",time:Date.now()}]);
+  if(log.length>100) log=log.slice(-100);
+  await dbUpdate("sellers",sid,{wallet:bal-cost,walletLog:log});
+  if((bal-cost)<cost){
+    try{ notifyAdmin("⚠️ نفاذ رصيد التاجر: "+(sl.storeName||"")+"\nتم تجميد باقته."); }catch(e){}
+  }
+  return true;
+}
+
+function renderWalletCard(){
+  var box=document.getElementById("dash-wallet-card");
+  if(!box||!currentSeller){ if(box)box.innerHTML=""; return; }
+  var pl=PLANS.find(function(p){return p.id===currentSeller.plan;});
+  if(!pl||pl.type!=="store"){ box.innerHTML=""; return; }
+  var bal=sellerWallet(currentSeller.id);
+  var cost=pl.leadCost||1;
+  var leadsLeft=Math.floor(bal/cost);
+  var frozen=bal<cost;
+  var log=(currentSeller.walletLog||[]).slice().reverse().slice(0,12);
+  box.innerHTML='<div style="background:'+(frozen?'linear-gradient(135deg,#7F1D1D,#B91C1C)':'linear-gradient(135deg,#1A2744,#2A3C63)')+';border-radius:14px;padding:16px 18px;margin-bottom:14px;color:#fff">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">'
+    +'<div><div style="color:'+(frozen?'#FCA5A5':'#C6CFDF')+';font-size:0.76rem">💳 رصيد محفظتك</div>'
+    +'<div style="font-weight:900;font-size:1.5rem;margin-top:2px">'+bal.toLocaleString("ar")+' <span style="font-size:0.85rem">ج.س</span></div>'
+    +'<div style="color:'+(frozen?'#FCA5A5':'#F2CE73')+';font-size:0.8rem;margin-top:3px">'+(frozen?'⚠️ الباقة مجمّدة — أعد التعبئة':('يكفي لـ '+leadsLeft+' عميل محتمل'))+'</div></div>'
+    +'<button onclick="upgradeMyStore()" style="background:'+(frozen?'#fff':'linear-gradient(100deg,#F2CE73,#D9A840)')+';color:#12203A;border:none;border-radius:100px;padding:10px 18px;font-weight:900;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.85rem">'+(frozen?'🔄 تجديد الاشتراك':'⭐ ترقية / تعبئة')+'</button>'
+    +'</div>'
+    +'<div style="margin-top:12px;background:rgba(255,255,255,.09);border:1px solid rgba(242,206,115,.35);border-radius:10px;padding:10px 12px"><div style="color:#F2CE73;font-weight:800;font-size:0.76rem;margin-bottom:4px">تنبيه حول صلاحية الرصيد</div><div style="color:rgba(255,255,255,.8);font-size:0.72rem;line-height:1.6">هذا الرصيد مخصص للعملاء المحتملين لمتجرك فقط، ويُخصم عند كل تواصل أو طلبية. وهو غير صالح للاشتراكات المنفصلة عن الباقة مثل المساحة الإعلانية أو الإعلانات المفردة، تلك تُدفع بشكل مستقل.</div></div>'+'<div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.15)">'
+    +'<div style="color:#C6CFDF;font-size:0.74rem;margin-bottom:6px">📋 سجل الحركات (قيمة العميل: '+cost.toLocaleString("ar")+' ج.س)</div>'
+    +(log.length===0?'<div style="color:rgba(255,255,255,.5);font-size:0.76rem">لا توجد حركات بعد</div>'
+      :log.map(function(t){
+        var d=new Date(t.time||0);
+        var isC=t.type==="credit";
+        return '<div style="display:flex;justify-content:space-between;align-items:center;font-size:0.76rem;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.07)">'
+          +'<span style="color:rgba(255,255,255,.85);flex:1;min-width:0">'+(isC?'⬆️ ':'⬇️ ')+(t.note||"")+'</span>'
+          +'<span style="color:'+(isC?'#86EFAC':'#FCA5A5')+';font-weight:800;white-space:nowrap;margin-right:8px">'+(isC?'+':'−')+(t.amount||0).toLocaleString("ar")+'</span>'
+          +'<span style="color:rgba(255,255,255,.4);font-size:0.68rem;white-space:nowrap">'+d.toLocaleDateString("ar")+'</span>'
+          +'</div>';
+      }).join(""))
+    +'</div></div>';
+}
+window.renderWalletCard=renderWalletCard;
+
+window.sellerWallet=sellerWallet;
+window.isSellerFrozen=isSellerFrozen;
+window.chargeLead=chargeLead;
 
 window.openWaInquire=openWaInquire;
 window.goWhatsAppInquire=goWhatsAppInquire;
