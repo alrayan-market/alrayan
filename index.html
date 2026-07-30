@@ -342,7 +342,6 @@ textarea.inp{height:64px;resize:none}
       </div>
       <div style="display:flex;gap:7px">
         <button class="share-btn share-wa" style="padding:5px 11px;font-size:0.78rem;margin-bottom:0;width:auto;border-radius:7px" onclick="openShare()">📣 سوّق</button>
-        <span id="dash-top-wallet"></span>
         <button class="btn-navy" onclick="openContactPlatform()" style="background:#F2CE73;color:#12203A">📨 تواصل مع المنصة</button>
         <button class="btn-navy" onclick="doLogout()">خروج</button>
       </div>
@@ -365,7 +364,6 @@ textarea.inp{height:64px;resize:none}
         <div><div style="font-weight:800;color:#1A2744;margin-bottom:2px;font-size:0.93rem">🔗 رابط متجرك</div><div style="color:#6B7280;font-size:0.78rem">شاركه للتسويق</div></div>
         <div style="display:flex;gap:8px;flex-shrink:0">
           <button class="btn-navy" onclick="editMyStore()" style="background:#EEF8EE;color:#2E7D5E">✏️ تعديل المتجر</button>
-          <button class="btn-navy" onclick="upgradeMyStore()" style="background:#FFF4E0;color:#B8862B">⭐ ترقية الباقة</button>
           <button class="btn-navy" onclick="openShare()">📣 مشاركة</button>
         </div>
       </div>
@@ -2805,41 +2803,44 @@ function renderWalletCard(){
   var cost=pl.leadCost||1;
   var leadsLeft=Math.floor(bal/cost);
   var frozen=bal<cost;
-  var log=(currentSeller.walletLog||[]).slice().reverse().slice(0,12);
-  box.innerHTML='<div style="background:'+(frozen?'linear-gradient(135deg,#7F1D1D,#B91C1C)':'linear-gradient(135deg,#1A2744,#2A3C63)')+';border-radius:14px;padding:16px 18px;margin-bottom:14px;color:#fff">'
-    +'<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">'
-    +'<div><div style="color:'+(frozen?'#FCA5A5':'#C6CFDF')+';font-size:0.76rem">💳 رصيد محفظتك</div>'
-    +'<div style="font-weight:900;font-size:1.5rem;margin-top:2px">'+bal.toLocaleString("ar")+' <span style="font-size:0.85rem">ج.س</span></div>'
-    +'<div style="color:'+(frozen?'#FCA5A5':'#F2CE73')+';font-size:0.8rem;margin-top:3px">'+(frozen?'⚠️ الباقة مجمّدة — أعد التعبئة':('يكفي لـ '+leadsLeft+' عميل محتمل'))+'</div></div>'
-    +'<button onclick="upgradeMyStore()" style="background:'+(frozen?'#fff':'linear-gradient(100deg,#F2CE73,#D9A840)')+';color:#12203A;border:none;border-radius:100px;padding:10px 18px;font-weight:900;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.85rem">'+(frozen?'🔄 تجديد الاشتراك':'⭐ ترقية / تعبئة')+'</button>'
+  var cap=pl.leads||1;
+  var pct=Math.max(0,Math.min(100,Math.round((leadsLeft/cap)*100)));
+  var log=(currentSeller.walletLog||[]).slice().reverse().slice(0,8);
+  box.innerHTML=
+  '<div style="background:#fff;border:1px solid '+(frozen?'#FCA5A5':'#E5E0D8')+';border-radius:14px;overflow:hidden;margin-bottom:14px;box-shadow:0 3px 12px rgba(26,39,68,.06)">'
+    +'<div style="background:'+(frozen?'linear-gradient(135deg,#7F1D1D,#B91C1C)':'linear-gradient(135deg,#1A2744,#2A3C63)')+';padding:16px 18px;color:#fff">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">'
+        +'<div><div style="color:'+(frozen?'#FCA5A5':'#C6CFDF')+';font-size:0.74rem;margin-bottom:2px">رصيد المحفظة · باقة '+pl.name+'</div>'
+        +'<div style="font-weight:900;font-size:1.6rem;line-height:1.1">'+bal.toLocaleString("ar")+' <span style="font-size:0.8rem;font-weight:700">ج.س</span></div></div>'
+        +'<button onclick="upgradeMyStore()" style="background:'+(frozen?'#fff':'linear-gradient(100deg,#F2CE73,#D9A840)')+';color:#12203A;border:none;border-radius:100px;padding:9px 17px;font-weight:900;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.83rem;flex-shrink:0">'+(frozen?'🔄 تجديد الاشتراك':'⭐ ترقية / تعبئة')+'</button>'
+      +'</div>'
+      +'<div style="margin-top:14px">'
+        +'<div style="display:flex;justify-content:space-between;font-size:0.76rem;margin-bottom:5px">'
+          +'<span style="color:'+(frozen?'#FCA5A5':'#F2CE73')+';font-weight:800">'+(frozen?'⚠️ الباقة مجمّدة':('👥 '+leadsLeft+' عميل محتمل متبقي'))+'</span>'
+          +'<span style="color:rgba(255,255,255,.55)">من '+cap+'</span>'
+        +'</div>'
+        +'<div style="background:rgba(255,255,255,.15);border-radius:100px;height:7px;overflow:hidden"><div style="width:'+pct+'%;height:100%;background:'+(frozen?'#FCA5A5':'linear-gradient(90deg,#F2CE73,#D9A840)')+';border-radius:100px"></div></div>'
+      +'</div>'
     +'</div>'
-    +'<div style="margin-top:12px;background:rgba(255,255,255,.09);border:1px solid rgba(242,206,115,.35);border-radius:10px;padding:10px 12px"><div style="color:#F2CE73;font-weight:800;font-size:0.76rem;margin-bottom:4px">تنبيه حول صلاحية الرصيد</div><div style="color:rgba(255,255,255,.8);font-size:0.72rem;line-height:1.6">هذا الرصيد مخصص للعملاء المحتملين لمتجرك فقط، ويُخصم عند كل تواصل أو طلبية. وهو غير صالح للاشتراكات المنفصلة عن الباقة مثل المساحة الإعلانية أو الإعلانات المفردة، تلك تُدفع بشكل مستقل.</div></div>'+'<div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.15)">'
-    +'<div style="color:#C6CFDF;font-size:0.74rem;margin-bottom:6px">📋 سجل الحركات (قيمة العميل: '+cost.toLocaleString("ar")+' ج.س)</div>'
-    +(log.length===0?'<div style="color:rgba(255,255,255,.5);font-size:0.76rem">لا توجد حركات بعد</div>'
-      :log.map(function(t){
-        var d=new Date(t.time||0);
-        var isC=t.type==="credit";
-        return '<div style="display:flex;justify-content:space-between;align-items:center;font-size:0.76rem;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.07)">'
-          +'<span style="color:rgba(255,255,255,.85);flex:1;min-width:0">'+(isC?'⬆️ ':'⬇️ ')+(t.note||"")+'</span>'
-          +'<span style="color:'+(isC?'#86EFAC':'#FCA5A5')+';font-weight:800;white-space:nowrap;margin-right:8px">'+(isC?'+':'−')+(t.amount||0).toLocaleString("ar")+'</span>'
-          +'<span style="color:rgba(255,255,255,.4);font-size:0.68rem;white-space:nowrap">'+d.toLocaleDateString("ar")+'</span>'
+    +'<div style="padding:13px 16px;background:#FFFDF7;border-bottom:1px solid #F0E8D8">'
+      +'<div style="color:#B8862B;font-weight:800;font-size:0.76rem;margin-bottom:3px">صلاحية الرصيد</div>'
+      +'<div style="color:#6B7280;font-size:0.73rem;line-height:1.65">يُخصم '+cost.toLocaleString("ar")+' ج.س عن كل عميل محتمل (تواصل أو طلبية). <b style="color:#B8862B">غير صالح</b> للاشتراكات المنفصلة عن الباقة كالمساحة الإعلانية والإعلانات المفردة.</div>'
+    +'</div>'
+    +'<div style="padding:13px 16px">'
+      +'<div style="color:#1A2744;font-weight:800;font-size:0.8rem;margin-bottom:8px">آخر الحركات</div>'
+      +(log.length===0?'<div style="color:#9CA3AF;font-size:0.76rem">لا توجد حركات بعد</div>'
+        :log.map(function(t){
+          var d=new Date(t.time||0);
+          var isC=t.type==="credit";
+          return '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:0.76rem;padding:6px 0;border-bottom:1px solid #F3F4F6">'
+            +'<span style="color:#4B5563;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(isC?"+ ":"- ")+(t.note||"")+'</span>'
+            +'<span style="color:'+(isC?"#2E7D5E":"#D9534F")+';font-weight:800;white-space:nowrap">'+(isC?"+":"-")+(t.amount||0).toLocaleString("ar")+'</span>'
+            +'<span style="color:#9CA3AF;font-size:0.68rem;white-space:nowrap">'+d.toLocaleDateString("ar")+'</span>'
           +'</div>';
-      }).join(""))
-    +'</div></div>';
+        }).join(""))
+    +'</div>'
+  +'</div>';
 }
-
-function renderTopWallet(){
-  var el=document.getElementById("dash-top-wallet"); if(!el)return;
-  if(!currentSeller){ el.innerHTML=""; return; }
-  var pl=PLANS.find(function(p){return p.id===currentSeller.plan;});
-  if(!pl||pl.type!=="store"){ el.innerHTML=""; return; }
-  var bal=sellerWallet(currentSeller.id);
-  var cost=pl.leadCost||1;
-  var left=Math.floor(bal/cost);
-  var fz=bal<cost;
-  el.innerHTML='<span onclick="upgradeMyStore()" style="display:inline-flex;align-items:center;gap:7px;background:'+(fz?'#B91C1C':'rgba(255,255,255,.14)')+';border:1px solid '+(fz?'#FCA5A5':'rgba(242,206,115,.5)')+';border-radius:100px;padding:6px 14px;cursor:pointer;margin-left:6px"><span style="font-size:0.95rem">💳</span><span style="color:'+(fz?'#fff':'#F2CE73')+';font-weight:900;font-size:0.86rem">'+bal.toLocaleString("ar")+' ج.س</span><span style="color:rgba(255,255,255,.7);font-size:0.72rem">'+(fz?'⚠️ مجمّد':('· '+left+' عميل'))+'</span></span>';
-}
-window.renderTopWallet=renderTopWallet;
 
 window.renderWalletCard=renderWalletCard;
 
