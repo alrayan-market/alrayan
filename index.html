@@ -342,6 +342,7 @@ textarea.inp{height:64px;resize:none}
       </div>
       <div style="display:flex;gap:7px">
         <button class="share-btn share-wa" style="padding:5px 11px;font-size:0.78rem;margin-bottom:0;width:auto;border-radius:7px" onclick="openShare()">📣 سوّق</button>
+        <span id="dash-top-wallet"></span>
         <button class="btn-navy" onclick="openContactPlatform()" style="background:#F2CE73;color:#12203A">📨 تواصل مع المنصة</button>
         <button class="btn-navy" onclick="doLogout()">خروج</button>
       </div>
@@ -456,6 +457,18 @@ textarea.inp{height:64px;resize:none}
     <div style="background:#FFF9E9;border:1px solid #F0D98A;border-radius:9px;padding:9px 11px;font-size:0.78rem;color:#8A6A1F;margin-bottom:10px">⚠️ تعديل الخيارات قد يؤثر على نتائج التصويت السابقة</div>
     <div id="ep-err" style="color:#D9534F;font-size:0.8rem;margin-bottom:8px"></div>
     <button class="btn-navy" style="width:100%" onclick="saveEditPoll()">💾 حفظ التعديلات</button>
+  </div>
+</div>
+<div class="overlay hidden" id="modal-change-plan">
+  <div class="modal modal-sm">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><h3 style="color:#1A2744;font-weight:900;font-size:1.05rem">💎 تعديل باقة التاجر</h3><button onclick="closeModal('modal-change-plan')" style="background:none;border:none;font-size:1.4rem;color:#9CA3AF;cursor:pointer">✕</button></div>
+    <input type="hidden" id="cp-seller-id">
+    <p style="color:#6B7280;font-size:0.82rem;margin-bottom:12px" id="cp-seller-name"></p>
+    <div id="cp-plans" style="display:grid;gap:9px;margin-bottom:12px"></div>
+    <div class="field"><label class="lbl">رصيد المحفظة الجديد (ج.س)</label><input class="inp" type="number" id="cp-wallet" min="0"></div>
+    <div style="background:#EEF1F6;border-radius:9px;padding:9px 11px;font-size:0.76rem;color:#4B5563;margin-bottom:10px">💡 يُقترح رصيد الباقة تلقائياً عند اختيارها، ويمكنك تعديله يدوياً</div>
+    <div id="cp-err" style="color:#D9534F;font-size:0.8rem;margin-bottom:8px"></div>
+    <button class="btn-navy" style="width:100%" onclick="saveChangePlan()">💾 حفظ التعديل</button>
   </div>
 </div>
 <div class="overlay hidden" id="modal-payment">
@@ -1555,6 +1568,7 @@ function renderDashboard(){
   document.getElementById("dash-main-btn").onclick=openAddProduct;
   document.getElementById("dash-share-strip").classList.remove("hidden");
   renderWalletCard();
+  renderTopWallet();
   const myProds=products.filter(p=>p.sellerId===currentSeller.id);
   const myOrders=orders.filter(o=>o.items.some(i=>i.sellerId===currentSeller.id));
   const myChats=chats.filter(c=>c.sellerId===currentSeller.id);
@@ -1644,6 +1658,7 @@ function renderAdminDashboard(){
   document.getElementById("dash-main-btn").onclick=null;
   document.getElementById("dash-share-strip").classList.add("hidden");
   var _wc=document.getElementById("dash-wallet-card"); if(_wc)_wc.innerHTML="";
+  var _tw=document.getElementById("dash-top-wallet"); if(_tw)_tw.innerHTML="";
   const totalRevenue=orders.filter(o=>o.status==="done").reduce((s,o)=>s+o.total,0);
   const todayOrders=orders.filter(o=>o.date===TODAY());
   document.getElementById("dash-stats").innerHTML=`
@@ -1705,6 +1720,7 @@ function renderAdminDashboard(){
           </div>
           <div style="display:flex;gap:5px;flex-wrap:wrap">
             <button onclick="adminEditSeller('${s.id}')" class="btn-edit" style="font-size:0.72rem">✏️ تعديل التاجر</button>
+            <button onclick="openChangePlan('${s.id}')" class="btn-edit" style="font-size:0.72rem;background:#FFF4E0;color:#B8862B">💎 تعديل الباقة</button>
             <button onclick="adminAddProductForSeller('${s.id}')" class="btn-add-sm" style="font-size:0.72rem">➕ أضف منتج</button>
             <button onclick="adminDeleteSeller('${s.id}')" class="btn-red" style="font-size:0.72rem">🗑 حذف التاجر</button>
           </div>
@@ -2811,6 +2827,20 @@ function renderWalletCard(){
       }).join(""))
     +'</div></div>';
 }
+
+function renderTopWallet(){
+  var el=document.getElementById("dash-top-wallet"); if(!el)return;
+  if(!currentSeller){ el.innerHTML=""; return; }
+  var pl=PLANS.find(function(p){return p.id===currentSeller.plan;});
+  if(!pl||pl.type!=="store"){ el.innerHTML=""; return; }
+  var bal=sellerWallet(currentSeller.id);
+  var cost=pl.leadCost||1;
+  var left=Math.floor(bal/cost);
+  var fz=bal<cost;
+  el.innerHTML='<span onclick="upgradeMyStore()" style="display:inline-flex;align-items:center;gap:7px;background:'+(fz?'#B91C1C':'rgba(255,255,255,.14)')+';border:1px solid '+(fz?'#FCA5A5':'rgba(242,206,115,.5)')+';border-radius:100px;padding:6px 14px;cursor:pointer;margin-left:6px"><span style="font-size:0.95rem">💳</span><span style="color:'+(fz?'#fff':'#F2CE73')+';font-weight:900;font-size:0.86rem">'+bal.toLocaleString("ar")+' ج.س</span><span style="color:rgba(255,255,255,.7);font-size:0.72rem">'+(fz?'⚠️ مجمّد':('· '+left+' عميل'))+'</span></span>';
+}
+window.renderTopWallet=renderTopWallet;
+
 window.renderWalletCard=renderWalletCard;
 
 window.sellerWallet=sellerWallet;
@@ -3284,7 +3314,47 @@ window.regNext=regNext;window.regBack=regBack;window.regSubmit=regSubmit;window.
 window.openAddProduct=openAddProduct;window.openEditProduct=openEditProduct;window.submitProduct=submitProduct;window.deleteProduct=deleteProduct;
 window.openDirectOrder=openDirectOrder;window.submitDirectOrder=submitDirectOrder;
 window.updateOrderStatus=updateOrderStatus;window.switchTab=switchTab;
-window.openShare=openShare;window.shareProduct=shareProduct;window.copyProductLink=copyProductLink;window.shareProductOther=shareProductOther;window.openStore=openStore;window.closeStore=closeStore;window.shareCurrentStore=shareCurrentStore;window.openRating=openRating;window.setRating=setRating;window.submitRating=submitRating;window.adminEditProduct=adminEditProduct;window.adminDeleteProduct=adminDeleteProduct;window.adminDeleteSeller=adminDeleteSeller;window.adminEditSeller=adminEditSeller;window.submitEditSeller=submitEditSeller;window.adminAddProductForSeller=adminAddProductForSeller;window.copyLink=copyLink;window.shareOther=shareOther;window.editMyStore=editMyStore;
+window.openShare=openShare;window.shareProduct=shareProduct;window.copyProductLink=copyProductLink;window.shareProductOther=shareProductOther;window.openStore=openStore;window.closeStore=closeStore;window.shareCurrentStore=shareCurrentStore;window.openRating=openRating;window.setRating=setRating;window.submitRating=submitRating;window.adminEditProduct=adminEditProduct;window.adminDeleteProduct=adminDeleteProduct;window.adminDeleteSeller=adminDeleteSeller;
+function openChangePlan(sid){
+  var sl=sellers.find(function(x){return x.id===sid;}); if(!sl)return;
+  document.getElementById("cp-seller-id").value=sid;
+  document.getElementById("cp-seller-name").textContent=sl.storeName||"";
+  document.getElementById("cp-err").textContent="";
+  var storePlans=PLANS.filter(function(p){return p.type==="store";});
+  document.getElementById("cp-plans").innerHTML=storePlans.map(function(p){
+    var sel=(sl.plan===p.id)?"checked":"";
+    return '<label style="display:flex;justify-content:space-between;align-items:center;background:'+(sl.plan===p.id?"#FFF9E9":"#F4F6FA")+';border-radius:10px;padding:11px;cursor:pointer;font-weight:700;color:#1A2744"><span><input type="radio" name="cp-plan" value="'+p.id+'" '+sel+' onchange="suggestCpWallet(\''+p.id+'\')" style="margin-left:8px">'+p.name+'</span><span style="color:#2E7D5E;font-size:0.8rem">'+p.leads+' عميل · '+SDG(p.wallet)+'</span></label>';
+  }).join("");
+  document.getElementById("cp-wallet").value=(typeof sl.wallet==="number"?sl.wallet:0);
+  document.getElementById("modal-change-plan").classList.remove("hidden");
+}
+function suggestCpWallet(pid){
+  var p=PLANS.find(function(x){return x.id===pid;});
+  if(p) document.getElementById("cp-wallet").value=p.wallet||0;
+}
+async function saveChangePlan(){
+  var sid=document.getElementById("cp-seller-id").value;
+  var opt=document.querySelector('input[name="cp-plan"]:checked');
+  var wal=parseInt(document.getElementById("cp-wallet").value);
+  var e=document.getElementById("cp-err");
+  if(!opt){e.textContent="اختر الباقة";return;}
+  if(isNaN(wal)||wal<0){e.textContent="أدخل رصيداً صحيحاً";return;}
+  var sl=sellers.find(function(x){return x.id===sid;}); if(!sl)return;
+  var pl=PLANS.find(function(p){return p.id===opt.value;});
+  var oldW=(typeof sl.wallet==="number"?sl.wallet:0);
+  var diff=wal-oldW;
+  var log=(sl.walletLog||[]).concat([{type:diff>=0?"credit":"debit",amount:Math.abs(diff),note:"تعديل من الإدارة — باقة "+(pl?pl.name:""),time:Date.now()}]);
+  if(log.length>100) log=log.slice(-100);
+  await dbUpdate("sellers",sid,{plan:opt.value,wallet:wal,walletLog:log});
+  if(currentSeller&&currentSeller.id===sid){ currentSeller.plan=opt.value; currentSeller.wallet=wal; currentSeller.walletLog=log; }
+  closeModal("modal-change-plan");
+  showToast("تم تعديل الباقة والرصيد ✓");
+}
+window.openChangePlan=openChangePlan;
+window.suggestCpWallet=suggestCpWallet;
+window.saveChangePlan=saveChangePlan;
+
+window.adminEditSeller=adminEditSeller;window.submitEditSeller=submitEditSeller;window.adminAddProductForSeller=adminAddProductForSeller;window.copyLink=copyLink;window.shareOther=shareOther;window.editMyStore=editMyStore;
 window.handleImgUpload=handleImgUpload;window.handleStoreImgUpload=handleStoreImgUpload;window.closeModal=closeModal;
 window.togglePriceOnRequest=togglePriceOnRequest;window.inquirePrice=inquirePrice;window.inquireAboutProduct=inquireAboutProduct;window.focusOrderForm=focusOrderForm;
 window.removeProductImage=removeProductImage;window.shiftDirectGallery=shiftDirectGallery;
