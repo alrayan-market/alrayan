@@ -10,6 +10,18 @@
 <meta name="msapplication-TileColor" content="#1A2744">
 <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XS52VKE8GW"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag("js", new Date());
+gtag("config", "G-XS52VKE8GW");
+(function(){
+  var isApp = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true || document.referrer.indexOf("android-app://") === 0;
+  gtag("set", "user_properties", { app_mode: isApp ? "installed_app" : "browser" });
+  gtag("event", "app_open", { mode: isApp ? "installed_app" : "browser" });
+})();
+</script>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#1A2744">
 <meta name="color-scheme" content="light only">
