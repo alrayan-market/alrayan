@@ -295,7 +295,7 @@ textarea.inp{height:64px;resize:none}
     </div>
     <div style="display:flex;gap:7px;align-items:center">
       <div class="cart-badge hidden" id="cart-count-badge" onclick="openCart()">🛒 0</div>
-      <button class="chats-nav-btn" id="contact-nav-btn" onclick="openContactPlatform()">📨</button>
+      <button class="chats-nav-btn" id="contact-nav-btn" onclick="openContactPlatform()" style="background:linear-gradient(100deg,#F2CE73,#D9A840);color:#12203A;font-weight:900;padding:7px 14px;display:inline-flex;align-items:center;gap:5px;font-size:0.82rem">📨 تواصل معنا</button>
       
       
     </div>
@@ -1191,6 +1191,7 @@ window.onload=async function(){
   checkUrlChat();
   checkUrlRegister();
   checkUrlChannel();
+  checkUrlContact();
 };
 
 // ══════════ IMAGE UPLOAD (via ImgBB) ══════════
@@ -2117,6 +2118,20 @@ function checkUrlRegister(){
     setTimeout(tryOpen,1500);
   }
 }
+
+function checkUrlContact(){
+  var params=new URLSearchParams(window.location.search);
+  if(params.get("contact")!=="1") return;
+  var tries=0;
+  var tryOpen=function(){
+    tries++;
+    if(typeof openContactPlatform==="function" && document.getElementById("modal-contact-platform")){
+      openContactPlatform();
+    } else if(tries<20){ setTimeout(tryOpen,300); }
+  };
+  setTimeout(tryOpen,1200);
+}
+
 function checkUrlChannel(){
   const params=new URLSearchParams(window.location.search);
   const wantsChannel=params.get("channel")==="1";
