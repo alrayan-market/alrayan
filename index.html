@@ -2531,18 +2531,20 @@ function openContactPlatform(){
   document.getElementById("modal-contact-platform").classList.remove("hidden");
 }
 async function submitContactPlatform(){
-  const name=document.getElementById("cp-name").value.trim();
-  const phone=(document.getElementById("cp-country").value+document.getElementById("cp-phone").value.trim().replace(/^0+/,""));
-  const msg=document.getElementById("cp-msg").value.trim();
-  const err=document.getElementById("cp-err");
+  var name=document.getElementById("cp-name").value.trim();
+  var phone=(document.getElementById("cp-country").value+document.getElementById("cp-phone").value.trim().replace(/^0+/,""));
+  var msg=document.getElementById("cp-msg").value.trim();
+  var err=document.getElementById("cp-err");
   if(!name){err.textContent="يرجى إدخال الاسم";return;}
   if(!/^\d{6,15}$/.test(phone.replace(/\D/g,""))){err.textContent="يرجى إدخال رقم صحيح";return;}
   if(!msg){err.textContent="يرجى كتابة رسالتك";return;}
-  const id="MSG-"+Date.now();
-  await dbSave("platformMessages",id,{id,name,phone,msg,createdAt:Date.now(),read:false,sellerId:(typeof currentSeller!=="undefined"&&currentSeller)?currentSeller.id:null,replies:[]});
-  try{ notifyAdmin(`📨 رسالة جديدة للمنصة\n━━━━━━━━━━\nالاسم: ${name}\nالهاتف: ${phone}\nالرسالة: ${msg}`); }catch(e){}
+  var id="MSG-"+Date.now();
+  try{ await dbSave("platformMessages",id,{id:id,name:name,phone:phone,msg:msg,createdAt:Date.now(),read:false,sellerId:(typeof currentSeller!=="undefined"&&currentSeller)?currentSeller.id:null,replies:[]}); }catch(e){}
+  try{ notifyAdmin("رسالة جديدة للمنصة\n"+name+"\n"+phone+"\n"+msg); }catch(e){}
   closeModal("modal-contact-platform");
-  showToast("تم إرسال رسالتك بنجاح ✓");
+  showToast("تم إرسال رسالتك");
+  var wmsg=encodeURIComponent("مرحباً منصة الريان\nالاسم: "+name+"\nالرقم: "+phone+"\n\n"+msg);
+  setTimeout(function(){ window.open("https://wa.me/249128781247?text="+wmsg,"_blank"); },400);
 }
 
 function renderPlatformMessages(){
@@ -3002,8 +3004,7 @@ window.copyAccount=copyAccount;window.openPayment=openPayment;window.handlePayIm
 window.openAllStores=openAllStores;
 
 function contactPlatformWhatsApp(){
-  var msg=encodeURIComponent("مرحباً منصة الريان، عندي استفسار:");
-  window.open("https://wa.me/249128781247?text="+msg,"_blank");
+  openContactPlatform();
 }
 window.contactPlatformWhatsApp=contactPlatformWhatsApp;
 window.openContactPlatform=openContactPlatform;
