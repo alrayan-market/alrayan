@@ -295,7 +295,7 @@ textarea.inp{height:64px;resize:none}
     </div>
     <div style="display:flex;gap:7px;align-items:center">
       <div class="cart-badge hidden" id="cart-count-badge" onclick="openCart()">🛒 0</div>
-      <button class="chats-nav-btn" id="contact-nav-btn" onclick="openContactPlatform()" style="background:linear-gradient(100deg,#F2CE73,#D9A840);color:#12203A;font-weight:900;padding:7px 14px;display:inline-flex;align-items:center;gap:5px;font-size:0.82rem">📨 تواصل معنا</button>
+      <button class="chats-nav-btn" id="contact-nav-btn" onclick="contactPlatformWhatsApp()" style="background:linear-gradient(100deg,#F2CE73,#D9A840);color:#12203A;font-weight:900;padding:7px 14px;display:inline-flex;align-items:center;gap:5px;font-size:0.82rem">📨 تواصل معنا</button>
       
       
     </div>
@@ -371,7 +371,7 @@ textarea.inp{height:64px;resize:none}
       </div>
       <div style="display:flex;gap:7px">
         <button class="share-btn share-wa" style="padding:5px 11px;font-size:0.78rem;margin-bottom:0;width:auto;border-radius:7px" onclick="openShare()">📣 سوّق</button>
-        <button class="btn-navy" onclick="openContactPlatform()" style="background:#F2CE73;color:#12203A">📨 تواصل مع المنصة</button>
+        <button class="btn-navy" onclick="contactPlatformWhatsApp()" style="background:#F2CE73;color:#12203A">📨 تواصل مع المنصة</button>
         <button class="btn-navy" onclick="doLogout()">خروج</button>
       </div>
     </div>
@@ -2125,8 +2125,8 @@ function checkUrlContact(){
   var tries=0;
   var tryOpen=function(){
     tries++;
-    if(typeof openContactPlatform==="function" && document.getElementById("modal-contact-platform")){
-      openContactPlatform();
+    if(typeof contactPlatformWhatsApp==="function"){
+      contactPlatformWhatsApp();
     } else if(tries<20){ setTimeout(tryOpen,300); }
   };
   setTimeout(tryOpen,1200);
@@ -3000,6 +3000,12 @@ window.openAdSpace=openAdSpace;window.handleAsImg=handleAsImg;window.submitAdSpa
 window.copyAccount=copyAccount;window.openPayment=openPayment;window.handlePayImg=handlePayImg;window.submitPayment=submitPayment;
 
 window.openAllStores=openAllStores;
+
+function contactPlatformWhatsApp(){
+  var msg=encodeURIComponent("مرحباً منصة الريان، عندي استفسار:");
+  window.open("https://wa.me/249128781247?text="+msg,"_blank");
+}
+window.contactPlatformWhatsApp=contactPlatformWhatsApp;
 window.openContactPlatform=openContactPlatform;
 window.submitContactPlatform=submitContactPlatform;
 
