@@ -2856,6 +2856,25 @@ async function rejectSeller(id){
 }
 window.renderPendingRequests=renderPendingRequests;
 
+
+async function approveAd(id){
+  try{
+    await dbUpdate("ads", id, {status:"approved", approvedAt:Date.now(), expiresAt:Date.now()+7*24*60*60*1000});
+    showToast("تم قبول الاعلان");
+    if(isAdmin && activeTab==="manage") renderPendingRequests();
+  }catch(e){ showToast("تعذر القبول"); }
+}
+async function rejectAd(id){
+  if(!confirm("رفض هذا الاعلان؟")) return;
+  try{
+    await dbUpdate("ads", id, {status:"rejected"});
+    showToast("تم الرفض");
+    if(isAdmin && activeTab==="manage") renderPendingRequests();
+  }catch(e){ showToast("تعذر الرفض"); }
+}
+window.approveAd = approveAd;
+window.rejectAd = rejectAd;
+
 async function approveAdSpace(id){
   const r=adSpaceReqs.find(x=>x.id===id); if(!r)return;
   const exp=Date.now()+ (r.days||1)*24*60*60*1000;
