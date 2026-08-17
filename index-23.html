@@ -1151,7 +1151,7 @@ let chatPrefillText="";
 let customerPhone="";
 try{ customerPhone = localStorage.getItem("rayan_customer_phone")||""; }catch(e){}
 let visits={total:0,today:0,lastDate:""};
-let entVideos=[], entPredicts=[], entEntries=[], platformMessages=[], inquiries=[], adSpaceReqs=[], upgradeReqs=[], currentPredictId=null;
+let entVideos=[], entPredicts=[], entEntries=[], platformMessages=[], inquiries=[], adSpaceReqs=[], adsList=[], upgradeReqs=[], currentPredictId=null;
 let cart={};
 let currentSeller=null;
 let isAdmin=false;
@@ -1234,6 +1234,11 @@ function listenAll(){
     adSpaceReqs=snap.docs.map(d=>d.data());
     if(isAdmin && activeTab==="manage") renderPendingRequests();
     renderAdSpaceBanner();
+  });
+  onSnapshot(collection(db,"ads"), snap=>{
+    adsList=snap.docs.map(d=>d.data());
+    renderProducts((document.querySelector(".filter-btn.active")||{}).textContent||"الكل");
+    if(isAdmin && activeTab==="manage") renderPendingRequests();
   });
   onSnapshot(collection(db,"upgradeRequests"), snap=>{
     upgradeReqs=snap.docs.map(d=>d.data());
@@ -1480,6 +1485,16 @@ function renderFilters(){
   });
 }
 
+
+function activeAds(){
+  var now=Date.now();
+  return (adsList||[]).filter(function(a){return a.status==="approved"&&(!a.expiresAt||a.expiresAt>now);}).sort(function(a,b){return (b.approvedAt||0)-(a.approvedAt||0);});
+}
+function adCardHtml(a){
+  return '<div class="product-card" style="border:2px solid #E8B660;position:relative"><div style="position:absolute;top:8px;right:8px;z-index:3;background:linear-gradient(100deg,#F2CE73,#D9A840);color:#12203A;font-weight:900;font-size:0.64rem;padding:3px 10px;border-radius:100px">اعلان</div><div class="product-img" style="background:#F5F5F5">'+(a.adImage?'<img src="'+a.adImage+'" style="width:100%;height:100%;object-fit:cover">':'')+'</div><div class="product-body"><div class="product-name">'+(a.adTitle||"")+'</div>'+(a.adDesc?'<div class="product-desc">'+a.adDesc+'</div>':'')+'<div class="product-footer"><span class="product-price" style="font-size:0.8rem;color:#B8862B">اعلان مموّل</span><a href="https://wa.me/'+waNum(a.phone)+'" target="_blank" class="order-now-btn" style="text-decoration:none;display:inline-block">تواصل</a></div></div></div>';
+}
+window.activeAds=activeAds;
+
 function renderProducts(filter){
   const wrap=document.getElementById("products-container");
   const okSellers=new Set(sellers.filter(x=>x.status!=="pending"&&x.status!=="rejected").map(x=>x.id));const visP=products.filter(p=>okSellers.has(p.sellerId));const list=sortByPopularity(filter==="الكل"?visP:visP.filter(p=>p.category===filter));
@@ -1489,6 +1504,19 @@ function renderProducts(filter){
     return;
   }
   wrap.innerHTML=`<div class="products-grid" id="pg"></div>`;
+  (function(){
+    try{
+      var ads=activeAds();
+      if(ads.length){
+        var g=document.getElementById("pg");
+        ads.forEach(function(a){
+          var d=document.createElement("div");
+          d.innerHTML=adCardHtml(a);
+          if(d.firstChild) g.appendChild(d.firstChild);
+        });
+      }
+    }catch(e){}
+  })();
   const grid=document.getElementById("pg");
   list.forEach(p=>{
     const div=document.createElement("div");div.className="product-card";
@@ -2760,6 +2788,11 @@ window.delPlatformMsg=delPlatformMsg;
 
 // ═══ موافقات الطلبات ═══
 function renderPendingRequests(){
+  const adsPend=(adsList||[]).filter(function(x){return x.status==="pending";});
+  const adsHtml=adsPend.map(function(a){
+    return '<div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:12px;padding:13px;margin-bottom:10px"><div style="font-weight:800;color:#1A2744;margin-bottom:6px">اعلان: '+(a.adTitle||"")+'</div>'+(a.adImage?'<img src="'+a.adImage+'" style="width:100%;border-radius:9px;margin-bottom:8px;max-height:180px;object-fit:cover">':'')+(a.adDesc?'<div style="color:#4B5563;font-size:0.82rem;margin-bottom:6px">'+a.adDesc+'</div>':'')+'<div style="font-size:0.8rem;color:#374151">'+(a.ownerName||"")+' · <a href="https://wa.me/'+(a.phone||"").replace(/\D/g,"")+'" target="_blank" style="color:#2E7D5E;font-weight:700">'+(a.phone||"")+'</a></div>'+(a.paymentImage?'<a href="'+a.paymentImage+'" target="_blank" style="display:inline-block;margin-top:6px;color:#1A2744;font-weight:700;font-size:0.78rem">اشعار الدفع</a>':'')+'<div style="display:flex;gap:8px;margin-top:10px"><button onclick="approveAd(&quot;'+a.id+'&quot;)" style="flex:1;background:#2E7D5E;color:#fff;border:none;border-radius:9px;padding:9px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif">قبول</button><button onclick="rejectAd(&quot;'+a.id+'&quot;)" style="flex:1;background:#FEE;color:#D9534F;border:none;border-radius:9px;padding:9px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif">رفض</button></div></div>';
+  }).join("");
+
   const upPend=(upgradeReqs||[]).filter(function(x){return x.status==="pending";});
   const upHtml=upPend.map(function(r){
     var pl=PLANS.find(function(p){return p.id===r.newPlan;});
@@ -2788,8 +2821,8 @@ function renderPendingRequests(){
   const box=document.getElementById("pending-requests-box");
   if(!box)return;
   const pend=sellers.filter(x=>x.status==="pending").sort((a,b)=>(b.id||0)-(a.id||0));
-  if(pend.length===0&&asPend.length===0&&upPend.length===0){box.innerHTML='<div style="color:#9CA3AF;font-size:0.82rem;padding:10px 0">لا توجد طلبات معلّقة</div>';return;}
-  box.innerHTML=upHtml+asHtml+pend.map(sr=>{
+  if(pend.length===0&&asPend.length===0&&upPend.length===0&&adsPend.length===0){box.innerHTML='<div style="color:#9CA3AF;font-size:0.82rem;padding:10px 0">لا توجد طلبات معلّقة</div>';return;}
+  box.innerHTML=adsHtml+upHtml+asHtml+pend.map(sr=>{
     const plan=PLANS.find(p=>p.id===sr.plan);
     const isAd=plan&&plan.type==="ad";
     return `<div style="background:#FFF9E9;border:1px solid #F0D98A;border-radius:12px;padding:13px;margin-bottom:10px">
@@ -2927,7 +2960,7 @@ let payContext=null,payNotifImage="";
 function copyAccount(){navigator.clipboard.writeText("1978584").catch(()=>{});showToast("تم نسخ رقم الحساب ✓");}
 function openPayment(ctx){payContext=ctx;payNotifImage="";document.getElementById("pay-amount").textContent=SDG(ctx.amount);document.getElementById("pay-img-preview").style.display="none";document.getElementById("pay-img-placeholder").style.display="block";document.getElementById("pay-err").textContent="";document.getElementById("pay-img-input").value="";document.getElementById("modal-payment").classList.remove("hidden");}
 function handlePayImg(input){const file=input.files[0];if(!file)return;if(file.size>5*1024*1024){document.getElementById("pay-err").textContent="حجم الصورة كبير (الحد 5MB)";return;}const ph=document.getElementById("pay-img-placeholder");ph.innerHTML='<div style="font-size:1.8rem">⏳</div><div style="color:#6B7280;font-size:0.82rem">جاري الرفع...</div>';const fd=new FormData();fd.append("image",file);fetch("https://api.imgbb.com/1/upload?key=16b4262b9ff85a10c0f3a4834a847184",{method:"POST",body:fd}).then(r=>r.json()).then(d=>{if(d&&d.data&&d.data.url){payNotifImage=d.data.url;const pv=document.getElementById("pay-img-preview");pv.src=d.data.url;pv.style.display="block";ph.style.display="none";}else{document.getElementById("pay-err").textContent="فشل الرفع، حاول ثانية";}ph.innerHTML='<div style="font-size:1.8rem;margin-bottom:4px">📸</div><div style="color:#6B7280;font-size:0.82rem">اضغط لرفع صورة الإشعار</div>';}).catch(()=>{document.getElementById("pay-err").textContent="فشل الرفع";});}
-async function submitPayment(){if(!payNotifImage){document.getElementById("pay-err").textContent="يرجى رفع صورة إشعار الدفع";return;}const c=payContext;if(!c)return;if(c.kind==="store"||c.kind==="ad"){const rec={...c.data,paymentImage:payNotifImage,status:"pending",createdAt:Date.now()};await dbSave("sellers",rec.id,rec);const plan=PLANS.find(p=>p.id===rec.plan);notifyAdmin(`🆕 طلب ${c.kind==="ad"?"إعلان":"متجر"} + إشعار دفع\n━━━━━━━━━━\n${rec.storeName}\nالمالك: ${rec.ownerName}\nالهاتف: ${rec.phone}\nالباقة: ${plan?plan.name:rec.plan} (${SDG(c.amount)})\nالإشعار: ${payNotifImage}`);}else if(c.kind==="adspace"){
+async function submitPayment(){if(!payNotifImage){document.getElementById("pay-err").textContent="يرجى رفع صورة إشعار الدفع";return;}const c=payContext;if(!c)return;if(c.kind==="ad"){const rec={...c.data,paymentImage:payNotifImage,status:"pending",createdAt:Date.now()};await dbSave("ads",rec.id,rec);notifyAdmin("طلب اعلان + اشعار دفع\n"+rec.adTitle+"\n"+rec.ownerName+" "+rec.phone+"\n"+payNotifImage);}else if(c.kind==="store"){const rec={...c.data,paymentImage:payNotifImage,status:"pending",createdAt:Date.now()};await dbSave("sellers",rec.id,rec);const plan=PLANS.find(p=>p.id===rec.plan);notifyAdmin(`🆕 طلب ${c.kind==="ad"?"إعلان":"متجر"} + إشعار دفع\n━━━━━━━━━━\n${rec.storeName}\nالمالك: ${rec.ownerName}\nالهاتف: ${rec.phone}\nالباقة: ${plan?plan.name:rec.plan} (${SDG(c.amount)})\nالإشعار: ${payNotifImage}`);}else if(c.kind==="adspace"){
     await dbSave("adSpaceRequests",c.data.id,{...c.data,paymentImage:payNotifImage,status:"pending",createdAt:Date.now()});
     notifyAdmin(`📣 طلب مساحة إعلانية + دفع\n${c.data.title}\n${c.data.planLabel} (${SDG(c.amount)})\n${c.data.ownerName} ${c.data.phone}`);
   }else if(c.kind==="upgrade"){await dbSave("upgradeRequests",c.data.id,{...c.data,paymentImage:payNotifImage,status:"pending",createdAt:Date.now()});notifyAdmin(`⭐ طلب ترقية + إشعار دفع\n━━━━━━━━━━\nالمتجر: ${c.data.storeName}\nالباقة: ${c.data.planName} (${SDG(c.amount)})\nالهاتف: ${c.data.phone}\nالإشعار: ${payNotifImage}`);}closeModal("modal-payment");showToast("تم إرسال طلبك مع الإشعار ✓");alert("تم استلام طلبك وإشعار الدفع!\nسيراجع من الإدارة ونتواصل معك عند القبول.");}
