@@ -1648,6 +1648,7 @@ function openJoinChoice(){
   document.getElementById("modal-join-choice").classList.remove("hidden");
 }
 function startJoin(type){joinType=type;closeModal("modal-join-choice");if(type==="ad"){openAdForm();}else{openRegister();}}
+let adImage="";
 function openAdForm(){["ad-title","ad-desc","ad-name","ad-phone"].forEach(function(id){var el=document.getElementById(id);if(el)el.value="";});adImage="";var pv=document.getElementById("ad-img-preview");if(pv)pv.style.display="none";var ph=document.getElementById("ad-img-ph");if(ph){ph.style.display="block";}var e=document.getElementById("ad-err");if(e)e.textContent="";document.getElementById("modal-ad").classList.remove("hidden");}
 window.openJoinChoice=openJoinChoice;
 window.startJoin=startJoin;
@@ -3038,7 +3039,6 @@ window.openWaStoreInquire=openWaStoreInquire;
 window.openWaInquire=openWaInquire;
 window.goWhatsAppInquire=goWhatsAppInquire;
 
-let adImage="";
 function handleAdImg(input){var f=input.files[0];if(!f)return;if(f.size>5*1024*1024){document.getElementById("ad-err").textContent="حجم كبير";return;}var ph=document.getElementById("ad-img-ph");ph.innerHTML='<div style="font-size:1.6rem">⏳</div>';var fd=new FormData();fd.append("image",f);fetch("https://api.imgbb.com/1/upload?key=16b4262b9ff85a10c0f3a4834a847184",{method:"POST",body:fd}).then(function(r){return r.json();}).then(function(d){if(d&&d.data&&d.data.url){adImage=d.data.url;var pv=document.getElementById("ad-img-preview");pv.src=d.data.url;pv.style.display="block";ph.style.display="none";}else{document.getElementById("ad-err").textContent="فشل الرفع";}ph.innerHTML='<div style="font-size:1.6rem">📷</div><div style="color:#6B7280;font-size:0.8rem">اضغط لرفع صورة</div>';}).catch(function(){document.getElementById("ad-err").textContent="فشل الرفع";});}
 function submitAd(){var t=document.getElementById("ad-title").value.trim();var de=document.getElementById("ad-desc").value.trim();var n=document.getElementById("ad-name").value.trim();var p=(document.getElementById("ad-country").value+document.getElementById("ad-phone").value.trim().replace(/^0+/,""));var e=document.getElementById("ad-err");if(!t){e.textContent="أدخل عنوان الإعلان";return;}if(!adImage){e.textContent="ارفع صورة الإعلان";return;}if(!n){e.textContent="أدخل اسمك";return;}if(!/^\d{6,15}$/.test(p.replace(/\D/g,""))){e.textContent="رقم غير صحيح";return;}var ad={id:"AD-"+Date.now(),type:"ad",adTitle:t,adDesc:de,adImage:adImage,storeImage:adImage,ownerName:n,storeName:t,phone:p,plan:"ad",expiresAt:Date.now()+7*24*60*60*1000};closeModal("modal-ad");openPayment({kind:"ad",data:ad,amount:10000});}
 window.handleAdImg=handleAdImg;window.submitAd=submitAd;window.openAdForm=openAdForm;
