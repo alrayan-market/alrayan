@@ -1491,8 +1491,28 @@ function activeAds(){
   return (adsList||[]).filter(function(a){return a.status==="approved"&&(!a.expiresAt||a.expiresAt>now);}).sort(function(a,b){return (b.approvedAt||0)-(a.approvedAt||0);});
 }
 function adCardHtml(a){
-  return '<div class="product-card" style="border:2px solid #E8B660;position:relative"><div style="position:absolute;top:8px;right:8px;z-index:3;background:linear-gradient(100deg,#F2CE73,#D9A840);color:#12203A;font-weight:900;font-size:0.64rem;padding:3px 10px;border-radius:100px">اعلان</div><div class="product-img" style="background:#F5F5F5">'+(a.adImage?'<img src="'+a.adImage+'" style="width:100%;height:100%;object-fit:cover">':'')+'</div><div class="product-body"><div class="product-name">'+(a.adTitle||"")+'</div>'+(a.adDesc?'<div class="product-desc">'+a.adDesc+'</div>':'')+'<div class="product-footer"><span class="product-price" style="font-size:0.8rem;color:#B8862B">اعلان مموّل</span><a href="https://wa.me/'+waNum(a.phone)+'" target="_blank" class="order-now-btn" style="text-decoration:none;display:inline-block">تواصل</a></div></div></div>';
+  return '<div class="product-card" style="border:2px solid #E8B660;position:relative"><div style="position:absolute;top:8px;right:8px;z-index:3;background:linear-gradient(100deg,#F2CE73,#D9A840);color:#12203A;font-weight:900;font-size:0.64rem;padding:3px 10px;border-radius:100px">اعلان</div><div class="product-img" style="background:#F5F5F5">'+(a.adImage?'<img src="'+a.adImage+'" style="width:100%;height:100%;object-fit:cover">':'')+'</div><div class="product-body"><div class="product-name">'+(a.adTitle||"")+'</div>'+(a.adDesc?'<div class="product-desc">'+a.adDesc+'</div>':'')+'<div class="product-footer"><span class="product-price" style="font-size:0.8rem;color:#B8862B">اعلان مموّل</span><button data-adid="'+a.id+'" onclick="contactAdvertiser(this.dataset.adid)" class="order-now-btn" style="border:none;cursor:pointer;font-family:Tajawal,sans-serif">تواصل</button></div><div style="display:flex;gap:6px;margin-top:8px"><button data-adid="'+a.id+'" onclick="shareAd(this.dataset.adid)" style="flex:1;padding:7px;border-radius:8px;border:1.5px solid #E5E0D8;background:#fff;color:#6B7280;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">مشاركة</button></div></div></div>';
 }
+
+function shareAd(id){
+  var a=(adsList||[]).find(function(x){return x.id===id;}); if(!a)return;
+  var txt="اعلان: "+(a.adTitle||"")+(a.adDesc?"\n"+a.adDesc:"")+"\nللتواصل: "+(a.phone||"");
+  var url=baseUrl()+"/?ad="+id;
+  if(navigator.share){ navigator.share({text:txt,url:url}).catch(function(){}); }
+  else { navigator.clipboard.writeText(txt+"\n"+url).catch(function(){}); showToast("تم نسخ الاعلان"); }
+}
+
+function contactAdvertiser(id){
+  var a=(adsList||[]).find(function(x){return x.id===id;}); if(!a)return;
+  adContactTarget=id;
+  ["wa-name","wa-phone"].forEach(function(x){var el=document.getElementById(x);if(el)el.value="";});
+  var e=document.getElementById("wa-err"); if(e)e.textContent="";
+  waInquireProduct=null; waInquireStore=null;
+  document.getElementById("modal-wa-inquire").classList.remove("hidden");
+}
+let adContactTarget=null;
+window.contactAdvertiser=contactAdvertiser;
+window.shareAd=shareAd;
 window.activeAds=activeAds;
 
 function renderProducts(filter){
@@ -3033,6 +3053,19 @@ async function goWhatsAppInquire(){
   var e=document.getElementById("wa-err");
   if(!n){e.textContent="أدخل اسمك";return;}
   if(!/^\d{6,15}$/.test(p.replace(/\D/g,""))){e.textContent="رقم غير صحيح";return;}
+  if(typeof adContactTarget!=="undefined" && adContactTarget){
+    var ad=(adsList||[]).find(function(x){return x.id===adContactTarget;});
+    if(ad){
+      var iid2="INQ-"+Date.now();
+      try{ await dbSave("inquiries",iid2,{id:iid2,productId:"",productName:"(إعلان) "+(ad.adTitle||""),sellerId:"AD",sellerName:"إعلان ممول - "+(ad.ownerName||""),name:n,phone:p,createdAt:Date.now()}); }catch(err){}
+      try{ notifyAdmin("تواصل مع معلن\n"+n+" "+p+"\nالاعلان: "+(ad.adTitle||"")); }catch(err){}
+      closeModal("modal-wa-inquire");
+      var amsg=encodeURIComponent("مرحباً، أنا "+n+"\nبخصوص إعلانك: "+(ad.adTitle||"")+"\n(من منصة الريان)");
+      window.open("https://wa.me/"+waNum(ad.phone)+"?text="+amsg,"_blank");
+      adContactTarget=null;
+      return;
+    }
+  }
   var sel=null, prodName="", prodId="";
   if(waInquireProduct){
     var prod=products.find(function(x){return x.id===waInquireProduct;});
