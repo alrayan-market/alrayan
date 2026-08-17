@@ -1296,6 +1296,7 @@ window.onload=async function(){
   checkUrlChat();
   checkUrlRegister();
   checkUrlChannel();
+  checkUrlAd();
   checkUrlContact();
 };
 
@@ -2293,6 +2294,24 @@ function checkUrlContact(){
     if(typeof contactPlatformWhatsApp==="function"){
       contactPlatformWhatsApp();
     } else if(tries<20){ setTimeout(tryOpen,300); }
+  };
+  setTimeout(tryOpen,1200);
+}
+
+
+function checkUrlAd(){
+  var params=new URLSearchParams(window.location.search);
+  var id=params.get("ad");
+  if(!id) return;
+  var tries=0;
+  var tryOpen=function(){
+    tries++;
+    var a=(adsList||[]).find(function(x){return x.id===id;});
+    if(a){
+      showToast("الاعلان: "+(a.adTitle||""));
+      var el=document.getElementById("products-container");
+      if(el) el.scrollIntoView({behavior:"smooth",block:"start"});
+    } else if(tries<25){ setTimeout(tryOpen,400); }
   };
   setTimeout(tryOpen,1200);
 }
