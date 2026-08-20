@@ -619,6 +619,25 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
     </div>
   </div>
 </div>
+<div class="overlay hidden" id="modal-edit-ad">
+  <div class="modal modal-sm" style="max-height:88vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><h3 style="color:#1A2744;font-weight:900;font-size:1.05rem" id="ea-title-h">تعديل الإعلان</h3><button onclick="closeModal('modal-edit-ad')" style="background:none;border:none;font-size:1.4rem;color:#9CA3AF;cursor:pointer">✕</button></div>
+    <input type="hidden" id="ea-id">
+    <div class="field"><label class="lbl">عنوان الإعلان</label><input class="inp" id="ea-title"></div>
+    <div class="field"><label class="lbl">الوصف</label><textarea class="inp" id="ea-desc" rows="3" style="resize:vertical"></textarea></div>
+    <div class="field"><label class="lbl">صورة الإعلان</label>
+      <div id="ea-img-ph" onclick="document.getElementById('ea-img-input').click()" style="background:#F4F6FA;border:2px dashed #D8D3C6;border-radius:12px;padding:20px;text-align:center;cursor:pointer"><div style="font-size:1.5rem">🖼️</div><div style="color:#6B7280;font-size:0.78rem">اضغط لرفع صورة</div></div>
+      <img id="ea-img-preview" style="display:none;width:100%;border-radius:12px;margin-top:8px">
+      <input type="file" id="ea-img-input" accept="image/*" style="display:none" onchange="handleEaImg(this)">
+    </div>
+    <div class="field"><label class="lbl">اسم المعلن</label><input class="inp" id="ea-name"></div>
+    <div class="field"><label class="lbl">الدولة</label><select class="inp" id="ea-country"><option value="+249" selected>🇸🇩 السودان (+249)</option><option value="+966">🇸🇦 السعودية (+966)</option><option value="+20">🇪🇬 مصر (+20)</option><option value="+971">🇦🇪 الإمارات (+971)</option><option value="+90">🇹🇷 تركيا (+90)</option></select></div>
+    <div class="field"><label class="lbl">رقم التواصل</label><input class="inp" id="ea-phone" placeholder="912345678"></div>
+    <div class="field"><label class="lbl">مدة الظهور (أيام)</label><input class="inp" type="number" id="ea-days" value="7" min="1"></div>
+    <div id="ea-err" style="color:#D9534F;font-size:0.8rem;margin-bottom:8px"></div>
+    <button class="btn-navy" style="width:100%" onclick="saveEditAd()">💾 حفظ</button>
+  </div>
+</div>
 <div class="overlay hidden" id="modal-payment">
   <div class="modal modal-sm" style="max-height:88vh;overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
@@ -2829,6 +2848,9 @@ window.delPlatformMsg=delPlatformMsg;
 // ═══ موافقات الطلبات ═══
 function renderPendingRequests(){
   const adsPend=(adsList||[]).filter(function(x){return x.status==="pending";});
+  const adsActive=(adsList||[]).filter(function(x){return x.status==="approved";}).sort(function(a,b){return (b.approvedAt||0)-(a.approvedAt||0);});
+  const adsMgmt='<div style="background:#F4F6FA;border-radius:12px;padding:13px;margin-bottom:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><span style="font-weight:800;color:#1A2744;font-size:0.88rem">الاعلانات النشطة ('+adsActive.length+')</span><button onclick="openEditAd(String())" style="background:#1A2744;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.78rem">+ انشاء اعلان</button></div>'+adsActive.map(function(a){var left=a.expiresAt?Math.max(0,Math.ceil((a.expiresAt-Date.now())/86400000)):0;return '<div style="background:#fff;border:1px solid #E5E0D8;border-radius:10px;padding:10px;margin-bottom:8px;display:flex;gap:10px;align-items:center">'+(a.adImage?'<img src="'+a.adImage+'" style="width:44px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0">':'')+'<div style="flex:1;min-width:0"><div style="font-weight:800;color:#1A2744;font-size:0.84rem">'+(a.adTitle||"")+'</div><div style="color:#6B7280;font-size:0.72rem">متبقي '+left+' يوم · '+(a.ownerName||"")+'</div></div><button data-adid="'+a.id+'" onclick="openEditAd(this.dataset.adid)" style="background:#EEF0FF;color:#1A2744;border:none;border-radius:7px;padding:6px 10px;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.72rem">تعديل</button><button data-adid="'+a.id+'" onclick="delAd(this.dataset.adid)" style="background:#FEE;color:#D9534F;border:none;border-radius:7px;padding:6px 10px;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.72rem">حذف</button></div>';}).join("")+'</div>';
+
   const adsHtml=adsPend.map(function(a){
     return '<div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:12px;padding:13px;margin-bottom:10px"><div style="font-weight:800;color:#1A2744;margin-bottom:6px">اعلان: '+(a.adTitle||"")+'</div>'+(a.adImage?'<img src="'+a.adImage+'" style="width:100%;border-radius:9px;margin-bottom:8px;max-height:180px;object-fit:cover">':'')+(a.adDesc?'<div style="color:#4B5563;font-size:0.82rem;margin-bottom:6px">'+a.adDesc+'</div>':'')+'<div style="font-size:0.8rem;color:#374151">'+(a.ownerName||"")+' · <a href="https://wa.me/'+(a.phone||"").replace(/\D/g,"")+'" target="_blank" style="color:#2E7D5E;font-weight:700">'+(a.phone||"")+'</a></div>'+(a.paymentImage?'<a href="'+a.paymentImage+'" target="_blank" style="display:inline-block;margin-top:6px;color:#1A2744;font-weight:700;font-size:0.78rem">اشعار الدفع</a>':'')+'<div style="display:flex;gap:8px;margin-top:10px"><button data-adid="'+a.id+'" onclick="approveAd(this.dataset.adid)" style="flex:1;background:#2E7D5E;color:#fff;border:none;border-radius:9px;padding:9px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif">قبول</button><button data-adid="'+a.id+'" onclick="rejectAd(this.dataset.adid)" style="flex:1;background:#FEE;color:#D9534F;border:none;border-radius:9px;padding:9px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif">رفض</button></div></div>';
   }).join("");
@@ -2861,8 +2883,8 @@ function renderPendingRequests(){
   const box=document.getElementById("pending-requests-box");
   if(!box)return;
   const pend=sellers.filter(x=>x.status==="pending").sort((a,b)=>(b.id||0)-(a.id||0));
-  if(pend.length===0&&asPend.length===0&&upPend.length===0&&adsPend.length===0){box.innerHTML='<div style="color:#9CA3AF;font-size:0.82rem;padding:10px 0">لا توجد طلبات معلّقة</div>';return;}
-  box.innerHTML=adsHtml+upHtml+asHtml+pend.map(sr=>{
+  if(pend.length===0&&asPend.length===0&&upPend.length===0&&adsPend.length===0){box.innerHTML=adsMgmt+'<div style="color:#9CA3AF;font-size:0.82rem;padding:10px 0">لا توجد طلبات معلّقة</div>';return;}
+  box.innerHTML=adsMgmt+adsHtml+upHtml+asHtml+pend.map(sr=>{
     const plan=PLANS.find(p=>p.id===sr.plan);
     const isAd=plan&&plan.type==="ad";
     return `<div style="background:#FFF9E9;border:1px solid #F0D98A;border-radius:12px;padding:13px;margin-bottom:10px">
@@ -2896,6 +2918,66 @@ async function rejectSeller(id){
 }
 window.renderPendingRequests=renderPendingRequests;
 
+
+
+let eaImage="";
+function openEditAd(id){
+  var isNew = !id;
+  document.getElementById("ea-title-h").textContent = isNew ? "انشاء اعلان جديد" : "تعديل الاعلان";
+  document.getElementById("ea-id").value = id || "";
+  var a = isNew ? {} : ((adsList||[]).find(function(x){return x.id===id;}) || {});
+  document.getElementById("ea-title").value = a.adTitle || "";
+  document.getElementById("ea-desc").value = a.adDesc || "";
+  document.getElementById("ea-name").value = a.ownerName || "";
+  document.getElementById("ea-phone").value = (a.phone||"").replace(/^\+?249/,"");
+  document.getElementById("ea-days").value = 7;
+  eaImage = a.adImage || "";
+  var pv=document.getElementById("ea-img-preview"), phh=document.getElementById("ea-img-ph");
+  if(eaImage){ pv.src=eaImage; pv.style.display="block"; phh.style.display="none"; }
+  else { pv.style.display="none"; pv.src=""; phh.style.display="block"; }
+  document.getElementById("ea-err").textContent="";
+  document.getElementById("modal-edit-ad").classList.remove("hidden");
+}
+function handleEaImg(input){
+  var f=input.files[0]; if(!f)return;
+  if(f.size>5*1024*1024){ document.getElementById("ea-err").textContent="حجم الصورة كبير"; return; }
+  var ph=document.getElementById("ea-img-ph");
+  ph.innerHTML='<div style="font-size:1.5rem">...</div>';
+  var fd=new FormData(); fd.append("image",f);
+  fetch("https://api.imgbb.com/1/upload?key=16b4262b9ff85a10c0f3a4834a847184",{method:"POST",body:fd}).then(function(r){return r.json();}).then(function(d){
+    if(d&&d.data&&d.data.url){ eaImage=d.data.url; var pv=document.getElementById("ea-img-preview"); pv.src=eaImage; pv.style.display="block"; ph.style.display="none"; showToast("تم رفع الصورة"); }
+    else { document.getElementById("ea-err").textContent="فشل رفع الصورة"; }
+    ph.innerHTML='<div style="font-size:1.5rem">صورة</div><div style="color:#6B7280;font-size:0.78rem">اضغط لرفع صورة</div>';
+  }).catch(function(){ document.getElementById("ea-err").textContent="فشل الرفع"; });
+  input.value="";
+}
+async function saveEditAd(){
+  var id=document.getElementById("ea-id").value;
+  var t=document.getElementById("ea-title").value.trim();
+  var de=document.getElementById("ea-desc").value.trim();
+  var n=document.getElementById("ea-name").value.trim();
+  var p=(document.getElementById("ea-country").value+document.getElementById("ea-phone").value.trim().replace(/^0+/,""));
+  var days=parseInt(document.getElementById("ea-days").value)||7;
+  var e=document.getElementById("ea-err");
+  if(!t){ e.textContent="أدخل عنوان الاعلان"; return; }
+  if(!eaImage){ e.textContent="ارفع صورة الاعلان"; return; }
+  if(!n){ e.textContent="أدخل اسم المعلن"; return; }
+  if(!/^\d{6,15}$/.test(p.replace(/\D/g,""))){ e.textContent="رقم غير صحيح"; return; }
+  try{
+    if(id){ await dbUpdate("ads",id,{adTitle:t,adDesc:de,adImage:eaImage,ownerName:n,phone:p}); showToast("تم تعديل الاعلان"); }
+    else { var nid="AD-"+Date.now(); await dbSave("ads",nid,{id:nid,adTitle:t,adDesc:de,adImage:eaImage,ownerName:n,phone:p,status:"approved",approvedAt:Date.now(),expiresAt:Date.now()+days*24*60*60*1000,createdAt:Date.now(),byAdmin:true}); showToast("تم انشاء الاعلان ونشره"); }
+    closeModal("modal-edit-ad");
+    if(isAdmin && activeTab==="manage") renderPendingRequests();
+  }catch(err){ e.textContent="تعذر الحفظ"; }
+}
+async function delAd(id){
+  if(!confirm("حذف هذا الاعلان نهائيا؟")) return;
+  try{ await dbDelete("ads",id); showToast("تم الحذف"); if(isAdmin && activeTab==="manage") renderPendingRequests(); }catch(e){ showToast("تعذر الحذف"); }
+}
+window.openEditAd=openEditAd;
+window.handleEaImg=handleEaImg;
+window.saveEditAd=saveEditAd;
+window.delAd=delAd;
 
 async function approveAd(id){
   try{
