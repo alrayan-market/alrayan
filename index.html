@@ -93,7 +93,7 @@ nav{background:rgba(26,39,68,0.97);padding:0 4%;display:flex;align-items:center;
 .order-now-btn{background:linear-gradient(135deg,#C9933A,#E8B660);color:#1A2744;border:none;border-radius:7px;padding:7px 14px;font-weight:800;font-size:0.8rem;cursor:pointer;white-space:nowrap}
 
 /* FLOAT */
-.float-btn{position:fixed;bottom:22px;left:22px;background:#1A2744;color:#fff;border:none;border-radius:11px;padding:10px 18px;font-weight:800;font-size:0.86rem;cursor:pointer;box-shadow:0 6px 22px rgba(0,0,0,0.28);z-index:50}
+.float-btn{position:fixed;bottom:22px;left:22px;background:#1A2744;color:#fff;border:none;border-radius:11px;padding:12px 20px;font-weight:800;font-size:0.86rem;cursor:pointer;box-shadow:0 6px 22px rgba(0,0,0,0.28);z-index:9000;pointer-events:auto;touch-action:manipulation}
 
 /* MODAL */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);display:flex;align-items:center;justify-content:center;z-index:2000;padding:14px;overflow-y:auto}
@@ -418,7 +418,7 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
       <div class="home-card-ico">📺</div><div class="home-card-txt"><div class="home-card-title">القناة</div><div class="home-card-sub">فيديوهات واستطلاعات</div></div>
     </div>
   </div>
-  <div id="adspace-banner" onclick="openAdSpace()" style="display:none;margin:8px 16px 18px;background:linear-gradient(120deg,#1A2744 0%,#2A3C63 55%,#B8862B 130%);border-radius:20px;padding:0;cursor:pointer;position:relative;overflow:hidden;box-shadow:0 12px 32px rgba(26,39,68,.3);border:1px solid rgba(242,206,115,.25)">
+  <div id="adspace-banner" onclick="openAdSpace()" style="display:none;pointer-events:none;margin:8px 16px 18px;background:linear-gradient(120deg,#1A2744 0%,#2A3C63 55%,#B8862B 130%);border-radius:20px;padding:0;cursor:pointer;position:relative;overflow:hidden;box-shadow:0 12px 32px rgba(26,39,68,.3);border:1px solid rgba(242,206,115,.25)">
     <div style="position:absolute;top:-20px;left:-20px;width:110px;height:110px;background:rgba(217,168,64,.18);border-radius:50%"></div>
     <div id="adspace-content" style="position:relative"></div>
     <button type="button" onclick="event.stopPropagation();openAdSpace()" style="position:absolute;top:10px;left:10px;z-index:5;background:rgba(255,255,255,.95);color:#1A2744;border:none;border-radius:100px;padding:7px 14px;font-weight:900;font-size:0.74rem;cursor:pointer;font-family:Tajawal,sans-serif;box-shadow:0 3px 10px rgba(0,0,0,.25)">📣 أعلن هنا</button>
@@ -996,6 +996,10 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+let adImagesArr=[], eaImagesArr=[];
+let eaImage="";
+let adContactTarget=null;
+let avImgs=[], avVid="";
 const storage = getStorage(app);
 window._storage=storage; window._storageFns={storageRef,uploadBytes,getDownloadURL};
 window._fbImports={collection,query,orderBy,onSnapshot,doc,setDoc,getDoc,getDocs,updateDoc,deleteDoc};
@@ -1520,7 +1524,6 @@ function shareAd(id){
 }
 
 
-let avImgs=[], avVid="";
 function openAdView(id){
   var a=(adsList||[]).find(function(x){return x.id===id;}); if(!a)return;
   document.getElementById("av-id").value=id;
@@ -1561,7 +1564,6 @@ function contactAdvertiser(id){
   waInquireProduct=null; waInquireStore=null;
   document.getElementById("modal-wa-inquire").classList.remove("hidden");
 }
-let adContactTarget=null;
 window.contactAdvertiser=contactAdvertiser;
 window.shareAd=shareAd;
 window.activeAds=activeAds;
@@ -1748,7 +1750,51 @@ function openJoinChoice(){
   document.getElementById("modal-join-choice").classList.remove("hidden");
 }
 function startJoin(type){joinType=type;closeModal("modal-join-choice");if(type==="ad"){openAdForm();}else{openRegister();}}
-let adImage="";
+
+function openAdSpace(){
+  ["as-title","as-name","as-phone"].forEach(function(id){var el=document.getElementById(id);if(el)el.value="";});
+  asImage=""; asVideoUrl="";
+  var pv=document.getElementById("as-img-preview");if(pv)pv.style.display="none";
+  var ph=document.getElementById("as-img-ph");if(ph)ph.style.display="block";
+  var vl=document.getElementById("as-video-link");if(vl)vl.value="";
+  var sb=document.getElementById("adspace-status-box");if(sb)sb.classList.add("hidden");
+  var rb=document.querySelector('input[name="as-type"][value="image"]');if(rb)rb.checked=true;
+  var imf=document.getElementById("as-image-field");if(imf)imf.classList.remove("hidden");
+  var vif=document.getElementById("as-video-field");if(vif)vif.classList.add("hidden");
+  var e=document.getElementById("as-err");if(e)e.textContent="";
+  document.getElementById("modal-adspace").classList.remove("hidden");
+}
+function openCart(){
+  if(typeof renderCart==="function"){ renderCart(); }
+  var m=document.getElementById("modal-cart");
+  if(m) m.classList.remove("hidden");
+}
+function submitAd(){
+  var t=document.getElementById("ad-title").value.trim();
+  var de=document.getElementById("ad-desc").value.trim();
+  var n=document.getElementById("ad-name").value.trim();
+  var p=(document.getElementById("ad-country").value+document.getElementById("ad-phone").value.trim().replace(/^0+/,""));
+  var e=document.getElementById("ad-err");
+  if(!t){e.textContent="أدخل عنوان الاعلان";return;}
+  if(!adImagesArr.length){e.textContent="ارفع صورة واحدة على الاقل";return;}
+  if(!n){e.textContent="أدخل اسمك";return;}
+  if(!/^\d{6,15}$/.test(p.replace(/\D/g,""))){e.textContent="رقم غير صحيح";return;}
+  var adVid=(document.getElementById("ad-video")||{}).value||"";
+  var ad={id:"AD-"+Date.now(),type:"ad",adTitle:t,adDesc:de,adImage:adImagesArr[0]||"",adImages:adImagesArr.slice(),adVideo:adVid,ownerName:n,phone:p,plan:"ad",expiresAt:Date.now()+7*24*60*60*1000};
+  closeModal("modal-ad");
+  openPayment({kind:"ad",data:ad,amount:10000});
+}
+function upgradeMyStore(){
+  if(!currentSeller)return;
+  currentStoreId=currentSeller.id;
+  openUpgrade();
+}
+window.openAdSpace=openAdSpace;
+window.openCart=openCart;
+window.submitAd=submitAd;
+window.upgradeMyStore=upgradeMyStore;
+window.showToast=showToast;
+
 function openAdForm(){["ad-title","ad-desc","ad-name","ad-phone"].forEach(function(id){var el=document.getElementById(id);if(el)el.value="";});adImagesArr=[];renderImgsList("ad");var av=document.getElementById("ad-video");if(av)av.value="";var pv=document.getElementById("ad-img-preview");if(pv)pv.style.display="none";var ph=document.getElementById("ad-img-ph");if(ph){ph.style.display="block";}var e=document.getElementById("ad-err");if(e)e.textContent="";document.getElementById("modal-ad").classList.remove("hidden");}
 window.openJoinChoice=openJoinChoice;
 window.startJoin=startJoin;
@@ -2952,7 +2998,6 @@ window.renderPendingRequests=renderPendingRequests;
 
 
 
-let adImagesArr=[], eaImagesArr=[];
 function renderImgsList(mode){
   var arr = mode==="ad" ? adImagesArr : eaImagesArr;
   var box = document.getElementById(mode+"-imgs-list");
@@ -2987,7 +3032,6 @@ function uploadAdImage(input,mode){
 }
 window.removeImgAt=removeImgAt;
 
-let eaImage="";
 function openEditAd(id){
   var isNew = !id;
   document.getElementById("ea-title-h").textContent = isNew ? "انشاء اعلان جديد" : "تعديل الاعلان";
