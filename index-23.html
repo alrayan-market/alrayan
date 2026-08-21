@@ -812,8 +812,15 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
     </div>
     <div class="field">
       <label class="lbl">فيديو المنتج (اختياري)</label>
-      <input class="inp" id="p-video" placeholder="رابط يوتيوب أو رابط فيديو مباشر">
-      <div class="inp-hint">مثال: رابط يوتيوب، أو رابط ملف فيديو مباشر (mp4)</div>
+      <div id="pv-upload-ph" onclick="document.getElementById('pv-file-input').click()" style="background:#F4F6FA;border:2px dashed #D8D3C6;border-radius:12px;padding:18px;text-align:center;cursor:pointer">
+        <div style="font-size:1.5rem">🎥</div><div style="color:#6B7280;font-size:0.78rem">اضغط لرفع فيديو من الجهاز (حتى 25MB)</div>
+      </div>
+      <video id="pv-preview" controls style="display:none;width:100%;border-radius:12px;margin-top:8px;max-height:200px;background:#000"></video>
+      <button type="button" id="pv-remove-btn" onclick="removeProdVideo()" class="hidden" style="margin-top:6px;background:#FEE;color:#D9534F;border:none;border-radius:8px;padding:7px 12px;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.78rem">إزالة الفيديو</button>
+      <input type="file" id="pv-file-input" accept="video/*" style="display:none" onchange="handleProdVideo(this)">
+      <input class="inp" id="p-video" placeholder="أو الصق رابط يوتيوب" style="margin-top:8px" oninput="onVideoLinkTyped()">
+      <div class="inp-hint">ارفع فيديو من جهازك، أو الصق رابط يوتيوب كبديل</div>
+      <div id="pv-err" style="color:#D9534F;font-size:0.78rem;margin-top:4px"></div>
     </div>
     <div class="field"><label class="lbl">اسم المنتج</label><input class="inp" id="p-name" placeholder="عسل نحل طبيعي" oninput="autoSuggestCat()"></div>
     <div class="field"><label class="lbl">السعر (ج.س)</label><input class="inp" type="number" id="p-price" placeholder="5000" min="1"></div>
@@ -874,6 +881,7 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
     <div style="display:flex;gap:8px;margin-bottom:18px">
       <button type="button" onclick="whatsAppFromDirectOrder()" style="flex:1;padding:11px;border-radius:9px;border:1.5px solid #E5E0D8;background:#FAFAF7;color:#1A2744;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:Tajawal,sans-serif">💬 استفسر</button>
       <button type="button" onclick="focusOrderForm()" style="flex:1;padding:11px;border-radius:9px;border:none;background:linear-gradient(135deg,#C9933A,#E8B660);color:#1A2744;font-weight:800;font-size:0.85rem;cursor:pointer;font-family:Tajawal,sans-serif">🛒 تواصل واطلب</button>
+      <button type="button" onclick="shareCurrentProduct()" style="flex:0 0 auto;padding:11px 14px;border-radius:9px;border:1.5px solid #E5E0D8;background:#fff;color:#6B7280;font-weight:700;font-size:0.85rem;cursor:pointer;font-family:Tajawal,sans-serif">📤</button>
     </div>
     <div class="field"><label class="lbl">اسمك الكامل</label><input class="inp" id="co-name" placeholder="أحمد محمد"></div>
     <div class="field"><label class="lbl">الدولة</label><select class="inp" id="co-country"><option value="+249" selected>🇸🇩 السودان (+249)</option><option value="+966">🇸🇦 السعودية (+966)</option><option value="+20">🇪🇬 مصر (+20)</option><option value="+971">🇦🇪 الإمارات (+971)</option><option value="+974">🇶🇦 قطر (+974)</option><option value="+965">🇰🇼 الكويت (+965)</option><option value="+973">🇧🇭 البحرين (+973)</option><option value="+968">🇴🇲 عُمان (+968)</option><option value="+962">🇯🇴 الأردن (+962)</option><option value="+961">🇱🇧 لبنان (+961)</option><option value="+963">🇸🇾 سوريا (+963)</option><option value="+964">🇮🇶 العراق (+964)</option><option value="+970">🇵🇸 فلسطين (+970)</option><option value="+967">🇾🇪 اليمن (+967)</option><option value="+218">🇱🇾 ليبيا (+218)</option><option value="+216">🇹🇳 تونس (+216)</option><option value="+213">🇩🇿 الجزائر (+213)</option><option value="+212">🇲🇦 المغرب (+212)</option><option value="+222">🇲🇷 موريتانيا (+222)</option><option value="+252">🇸🇴 الصومال (+252)</option><option value="+253">🇩🇯 جيبوتي (+253)</option><option value="+211">🇸🇸 جنوب السودان (+211)</option><option value="+235">🇹🇩 تشاد (+235)</option><option value="+251">🇪🇹 إثيوبيا (+251)</option><option value="+291">🇪🇷 إريتريا (+291)</option><option value="+254">🇰🇪 كينيا (+254)</option><option value="+256">🇺🇬 أوغندا (+256)</option><option value="+90">🇹🇷 تركيا (+90)</option><option value="+1">🇺🇸 الولايات المتحدة (+1)</option><option value="+44">🇬🇧 المملكة المتحدة (+44)</option><option value="+33">🇫🇷 فرنسا (+33)</option><option value="+49">🇩🇪 ألمانيا (+49)</option><option value="+39">🇮🇹 إيطاليا (+39)</option><option value="+34">🇪🇸 إسبانيا (+34)</option><option value="+31">🇳🇱 هولندا (+31)</option><option value="+46">🇸🇪 السويد (+46)</option><option value="+47">🇳🇴 النرويج (+47)</option><option value="+41">🇨🇭 سويسرا (+41)</option><option value="+7">🇷🇺 روسيا (+7)</option><option value="+86">🇨🇳 الصين (+86)</option><option value="+91">🇮🇳 الهند (+91)</option><option value="+92">🇵🇰 باكستان (+92)</option><option value="+62">🇮🇩 إندونيسيا (+62)</option><option value="+60">🇲🇾 ماليزيا (+60)</option><option value="+81">🇯🇵 اليابان (+81)</option><option value="+82">🇰🇷 كوريا الجنوبية (+82)</option><option value="+61">🇦🇺 أستراليا (+61)</option><option value="+234">🇳🇬 نيجيريا (+234)</option><option value="+27">🇿🇦 جنوب أفريقيا (+27)</option><option value="+55">🇧🇷 البرازيل (+55)</option></select></div>
@@ -1673,6 +1681,77 @@ function dismissCatHint(){
 }
 window.handleAdImg=handleAdImg;
 window.handleEaImg=handleEaImg;
+
+let prodVideoUrl="";
+async function handleProdVideo(input){
+  var f=input.files[0]; if(!f)return;
+  if(f.size>25*1024*1024){document.getElementById("pv-err").textContent="حجم الفيديو كبير (الحد 25MB)";input.value="";return;}
+  var ph=document.getElementById("pv-upload-ph");
+  ph.innerHTML='<div style="font-size:1.5rem">⏳</div><div style="color:#6B7280;font-size:0.78rem">جاري رفع الفيديو...</div>';
+  document.getElementById("pv-err").textContent="";
+  try{
+    var path="product-videos/"+Date.now()+"-"+f.name.replace(/[^a-zA-Z0-9.]/g,"_");
+    var ref=window._storageFns.storageRef(window._storage,path);
+    await window._storageFns.uploadBytes(ref,f);
+    var url=await window._storageFns.getDownloadURL(ref);
+    prodVideoUrl=url;
+    document.getElementById("p-video").value="";
+  if(typeof resetProdVideoField==="function") resetProdVideoField();
+    document.getElementById("p-video").disabled=true;
+    var pv=document.getElementById("pv-preview");
+    pv.src=url; pv.style.display="block";
+    ph.style.display="none";
+    document.getElementById("pv-remove-btn").classList.remove("hidden");
+    showToast("تم رفع الفيديو ✓");
+  }catch(err){
+    document.getElementById("pv-err").textContent="فشل الرفع: "+(err.message||"تأكد من تفعيل Storage");
+    ph.innerHTML='<div style="font-size:1.5rem">🎥</div><div style="color:#6B7280;font-size:0.78rem">اضغط لرفع فيديو من الجهاز (حتى 25MB)</div>';
+  }
+  input.value="";
+}
+function removeProdVideo(){
+  prodVideoUrl="";
+  document.getElementById("pv-preview").style.display="none";
+  document.getElementById("pv-preview").src="";
+  document.getElementById("pv-upload-ph").style.display="block";
+  document.getElementById("pv-remove-btn").classList.add("hidden");
+  document.getElementById("p-video").disabled=false;
+}
+function onVideoLinkTyped(){
+  var v=document.getElementById("p-video").value.trim();
+  if(v){
+    prodVideoUrl="";
+    document.getElementById("pv-preview").style.display="none";
+    document.getElementById("pv-remove-btn").classList.add("hidden");
+    document.getElementById("pv-upload-ph").style.display=v?"none":"block";
+  } else {
+    document.getElementById("pv-upload-ph").style.display="block";
+  }
+}
+function resetProdVideoField(){
+  prodVideoUrl="";
+  var pv=document.getElementById("pv-preview"); if(pv){pv.style.display="none";pv.src="";}
+  var ph=document.getElementById("pv-upload-ph"); if(ph){ph.style.display="block";ph.innerHTML='<div style="font-size:1.5rem">🎥</div><div style="color:#6B7280;font-size:0.78rem">اضغط لرفع فيديو من الجهاز (حتى 25MB)</div>';}
+  var rb=document.getElementById("pv-remove-btn"); if(rb) rb.classList.add("hidden");
+  var pvi=document.getElementById("p-video"); if(pvi){pvi.value="";pvi.disabled=false;}
+  var e=document.getElementById("pv-err"); if(e) e.textContent="";
+}
+window.handleProdVideo=handleProdVideo;
+window.removeProdVideo=removeProdVideo;
+window.onVideoLinkTyped=onVideoLinkTyped;
+
+function shareCurrentProduct(){
+  var p = products.find(function(x){return x.id===directProductId;});
+  if(!p) return;
+  var url = baseUrl()+"/?product="+p.id;
+  var txt = p.name+(p.priceOnRequest?"":" - "+SDG(p.price));
+  if(navigator.share){ navigator.share({title:p.name,text:txt,url:url}).catch(function(){}); }
+  else { navigator.clipboard.writeText(txt+"\n"+url).catch(function(){}); showToast("تم نسخ رابط المنتج"); }
+}
+window.shareCurrentProduct=shareCurrentProduct;
+
+window.resetProdVideoField=resetProdVideoField;
+
 window.autoSuggestCat=autoSuggestCat;
 window.applyCatSuggest=applyCatSuggest;
 window.dismissCatHint=dismissCatHint;
@@ -2056,7 +2135,10 @@ function openEditProduct(productId){
   document.getElementById("p-cat").value=p.category;
   document.getElementById("p-price-on-request").checked=!!p.priceOnRequest;
   togglePriceOnRequest();
-  document.getElementById("p-video").value=p.videoUrl||"";
+  if(typeof resetProdVideoField==="function") resetProdVideoField();
+  if(p.videoUrl){
+    document.getElementById("p-video").value=p.videoUrl;
+  }
   document.getElementById("p-img-input").value="";
   renderProductImagesUI();
   hideErr("prod-err");
@@ -2079,7 +2161,7 @@ async function submitProduct(){
   const location=document.getElementById("p-location").value.trim();
   const deliveryPriceRaw=document.getElementById("p-delivery-price").value;
   const deliveryPrice=deliveryPriceRaw===""?null:parseFloat(deliveryPriceRaw);
-  const videoUrl=document.getElementById("p-video").value.trim();
+  const videoUrl=(typeof prodVideoUrl!=="undefined"&&prodVideoUrl)?prodVideoUrl:document.getElementById("p-video").value.trim();
   const editId=document.getElementById("p-edit-id").value;
   if(!name)return showErr("prod-err","اسم المنتج مطلوب");
   if(!priceOnRequest && price<=0)return showErr("prod-err","يرجى إدخال سعر صحيح");
