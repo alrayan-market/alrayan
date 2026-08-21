@@ -379,6 +379,30 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
 .store-hero::before{content:"";position:absolute;top:-50px;left:-30px;width:220px;height:220px;background:radial-gradient(circle,rgba(232,182,96,.2),transparent 70%);border-radius:50%;animation:heroGlow 7s ease-in-out infinite;pointer-events:none}
 .store-avatar{animation:popIn .6s cubic-bezier(.2,.9,.3,1) both;box-shadow:0 8px 24px rgba(0,0,0,.3)}
 @media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}}
+
+/* ===== البحث والتصنيفات ===== */
+.search-wrap{padding:14px 16px 6px;position:relative}
+.search-box{display:flex;align-items:center;gap:9px;background:#fff;border:1.5px solid #E5E0D8;border-radius:14px;padding:11px 14px;box-shadow:0 3px 14px rgba(26,39,68,.07);transition:border-color .22s,box-shadow .22s}
+.search-box:focus-within{border-color:#D9A840;box-shadow:0 5px 20px rgba(217,168,64,.22)}
+.search-ico{font-size:1rem;opacity:.55;flex-shrink:0}
+.search-input{flex:1;border:none;outline:none;background:transparent;font-family:Tajawal,sans-serif;font-size:0.92rem;font-weight:600;color:#1A2744;min-width:0}
+.search-input::placeholder{color:#9CA3AF;font-weight:500}
+.search-clear{background:#EEF1F6;border:none;border-radius:50%;width:24px;height:24px;color:#6B7280;cursor:pointer;font-size:0.75rem;flex-shrink:0;font-family:inherit}
+.search-hint{padding:8px 4px 0;color:#6B7280;font-size:0.78rem;font-weight:600}
+.cats-strip{display:flex;gap:8px;overflow-x:auto;padding:12px 16px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.cats-strip::-webkit-scrollbar{display:none}
+.cat-chip{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1.5px solid #E5E0D8;border-radius:100px;padding:8px 15px;font-family:Tajawal,sans-serif;font-weight:700;font-size:0.82rem;color:#1A2744;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .2s}
+.cat-chip:active{transform:scale(.95)}
+.cat-chip.on{background:linear-gradient(135deg,#1A2744,#2A3C63);color:#fff;border-color:#1A2744;box-shadow:0 4px 14px rgba(26,39,68,.26)}
+.cat-chip .c-ico{font-size:0.95rem}
+.cat-chip .c-num{background:rgba(0,0,0,.07);border-radius:100px;padding:1px 7px;font-size:0.7rem;font-weight:800}
+.cat-chip.on .c-num{background:rgba(255,255,255,.2)}
+.sec-head{display:flex;justify-content:space-between;align-items:baseline;padding:18px 16px 4px}
+.sec-title{font-weight:900;color:#1A2744;font-size:1.05rem}
+.sec-sub{color:#9CA3AF;font-size:0.75rem;font-weight:600}
+.no-results{text-align:center;padding:40px 20px;color:#9CA3AF}
+.no-results .nr-ico{font-size:2.6rem;margin-bottom:10px}
+.no-results .nr-t{font-weight:800;color:#6B7280;font-size:0.95rem;margin-bottom:4px}
 </style>
 </head>
 <body>
@@ -404,6 +428,15 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
     <p>منتجات حقيقية من تجار سودانيين</p>
     <button type="button" id="install-app-btn" onclick="triggerAppInstall()" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#C9933A,#E8B660);color:#1A2744;border:none;border-radius:10px;padding:10px 22px;font-weight:800;font-size:0.9rem;cursor:pointer;margin-top:16px;font-family:Tajawal,sans-serif">📲 ثبّت تطبيق الريان</button>
   </div>
+  <div class="search-wrap">
+    <div class="search-box">
+      <span class="search-ico">🔍</span>
+      <input type="text" id="search-input" class="search-input" placeholder="ابحث عن منتج أو متجر..." oninput="handleSearch(this.value)" autocomplete="off">
+      <button id="search-clear" class="search-clear hidden" onclick="clearSearch()">✕</button>
+    </div>
+    <div id="search-hint" class="search-hint hidden"></div>
+  </div>
+  <div class="cats-strip" id="cats-strip"></div>
   <div class="home-cards">
     <div class="home-card" onclick="startJoin('store')" style="background:linear-gradient(160deg,#1A2744,#2A3C63)">
       <div class="home-card-ico">🏪</div><div class="home-card-txt"><div class="home-card-title">إنشاء متجر</div><div class="home-card-sub">باقات شهرية</div></div>
@@ -761,7 +794,7 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
       <input class="inp" id="p-video" placeholder="رابط يوتيوب أو رابط فيديو مباشر">
       <div class="inp-hint">مثال: رابط يوتيوب، أو رابط ملف فيديو مباشر (mp4)</div>
     </div>
-    <div class="field"><label class="lbl">اسم المنتج</label><input class="inp" id="p-name" placeholder="عسل نحل طبيعي"></div>
+    <div class="field"><label class="lbl">اسم المنتج</label><input class="inp" id="p-name" placeholder="عسل نحل طبيعي" oninput="autoSuggestCat()"></div>
     <div class="field"><label class="lbl">السعر (ج.س)</label><input class="inp" type="number" id="p-price" placeholder="5000" min="1"></div>
     <div class="field" style="display:flex;align-items:center;gap:8px">
       <input type="checkbox" id="p-price-on-request" onchange="togglePriceOnRequest()" style="width:17px;height:17px;flex-shrink:0">
@@ -769,7 +802,7 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
     </div>
     <div class="field"><label class="lbl">مكان المنتج (اختياري)</label><input class="inp" id="p-location" placeholder="مثال: الخرطوم، السوق العربي"></div>
     <div class="field"><label class="lbl">سعر التوصيل (ج.س) — اختياري</label><input class="inp" type="number" id="p-delivery-price" placeholder="اتركه فارغاً لو التوصيل بالتفاوض، أو 0 لو مجاني" min="0"></div>
-    <div class="field"><label class="lbl">التصنيف</label><select class="inp" id="p-cat"></select></div>
+    <div class="field"><label class="lbl">التصنيف</label><select class="inp" id="p-cat" onchange="dismissCatHint()"></select><div id="cat-suggest" class="hidden" style="margin-top:7px;background:#EEF8EE;border:1px solid #B7EBD0;border-radius:9px;padding:9px 11px;font-size:0.8rem;color:#2E7D5E;display:flex;align-items:center;justify-content:space-between;gap:8px"></div></div>
     <div class="field"><label class="lbl">وصف المنتج (اختياري)</label><textarea class="inp" id="p-desc" placeholder="مميزات منتجك..."></textarea></div>
     <div id="prod-err" class="err-box hidden"></div>
     <div class="modal-btns">
@@ -1568,10 +1601,128 @@ window.contactAdvertiser=contactAdvertiser;
 window.shareAd=shareAd;
 window.activeAds=activeAds;
 
+
+// ══════════ التصنيف الذكي والبحث ══════════
+const CAT_KEYWORDS = {
+  "أغذية ومشروبات":["اكل","طعام","غذاء","عصير","مشروب","شاي","قهوة","بن","سكر","دقيق","زيت","تمر","عسل","حلوى","بسكويت","معلبات","ارز","رز","فول","عدس","توابل","بهارات","لحم","دجاج","سمك","خضار","فاكهة","خبز","جبن","لبن","حليب","ماء","مياه معدنية"],
+  "عطور وبخور":["عطر","عطور","بخور","عود","مسك","دهن","كولونيا","برفان","صندل","طيب","معمول","دخان"],
+  "أعشاب وصحة":["عشب","اعشاب","دواء","صحة","فيتامين","مكمل","علاج","طبي","كريم","مرهم","زيت طبيعي","حبة البركة","كركم","زنجبيل","نعناع","كبسولات"],
+  "هدايا وحرف":["هدية","هدايا","حرف","يدوي","تحفة","ديكور","زينة","اكسسوار","خرز","سلة","خيزران","فخار","نحاس"],
+  "إلكترونيات":["جوال","موبايل","هاتف","لابتوب","كمبيوتر","شاشة","سماعة","شاحن","كيبل","بطارية","تلفزيون","راوتر","كاميرا","ساعة ذكية","طابعة","ماوس","فلاش","ايفون","سامسونج","لمبة","كهرب","مروحة","ثلاجة","غسالة","مكيف"],
+  "ملابس وأزياء":["ملابس","قميص","بنطلون","فستان","توب","جلابية","ثوب","عباية","حجاب","طرحة","حذاء","جزمة","شنطة","حقيبة","جاكيت","بلوزة","تيشيرت","بدلة","عمامة","شماغ","صندل"],
+  "مواد بناء":["اسمنت","حديد","طوب","بلاط","سيراميك","رمل","زلط","دهان","بويا","جبس","خشب","الواح","انابيب","مواسير","باب","شباك","عازل"],
+  "خزانات ومياه":["خزان","خزانات","تانك","مياه","ماء","فلتر","مضخة","طلمبة","برميل","صهريج","لتر"],
+  "سيارات":["سيارة","عربة","اطار","كاوتش","محرك","موتور","زيت محرك","قطع غيار","بطارية سيارة","دراجة","موتسيكل","تويوتا","هيونداي","شاحنة","لوري"],
+  "عقارات":["عقار","شقة","منزل","بيت","ارض","قطعة","فيلا","محل","مكتب","ايجار","للبيع","مساحة","دور","عمارة"],
+};
+function suggestCategory(name, desc){
+  var txt = ((name||"")+" "+(desc||"")).toLowerCase();
+  var best = null, bestScore = 0;
+  for(var cat in CAT_KEYWORDS){
+    var score = 0;
+    CAT_KEYWORDS[cat].forEach(function(kw){
+      if(txt.indexOf(kw) !== -1) score += kw.length > 4 ? 2 : 1;
+    });
+    if(score > bestScore){ bestScore = score; best = cat; }
+  }
+  return bestScore >= 1 ? best : null;
+}
+window.suggestCategory = suggestCategory;
+
+function autoSuggestCat(){
+  var nm=(document.getElementById("p-name")||{}).value||"";
+  var ds=(document.getElementById("p-desc")||{}).value||"";
+  var box=document.getElementById("cat-suggest");
+  var sel=document.getElementById("p-cat");
+  if(!box||!sel) return;
+  if(nm.trim().length<3){ box.classList.add("hidden"); return; }
+  var sug=suggestCategory(nm,ds);
+  if(sug && sel.value!==sug){
+    box.innerHTML='<span>مقترح: <b>'+(EMOJIS[sug]||"")+' '+sug+'</b></span><button type="button" data-c="'+sug+'" onclick="applyCatSuggest(this.dataset.c)" style="background:#2E7D5E;color:#fff;border:none;border-radius:7px;padding:5px 12px;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.75rem;flex-shrink:0">تطبيق</button>';
+    box.classList.remove("hidden");
+  } else { box.classList.add("hidden"); }
+}
+function applyCatSuggest(c){
+  var sel=document.getElementById("p-cat"); if(sel) sel.value=c;
+  dismissCatHint();
+  showToast("تم اختيار التصنيف");
+}
+function dismissCatHint(){
+  var box=document.getElementById("cat-suggest"); if(box) box.classList.add("hidden");
+}
+window.handleAdImg=handleAdImg;
+window.handleEaImg=handleEaImg;
+window.autoSuggestCat=autoSuggestCat;
+window.applyCatSuggest=applyCatSuggest;
+window.dismissCatHint=dismissCatHint;
+
+
+let searchQuery = "";
+let activeCat = "الكل";
+function handleSearch(v){
+  searchQuery = (v||"").trim().toLowerCase();
+  var clr = document.getElementById("search-clear");
+  if(clr) clr.classList.toggle("hidden", !searchQuery);
+  renderProducts(activeCat);
+}
+function clearSearch(){
+  searchQuery = "";
+  var el = document.getElementById("search-input"); if(el) el.value = "";
+  var clr = document.getElementById("search-clear"); if(clr) clr.classList.add("hidden");
+  renderProducts(activeCat);
+}
+function pickCat(c){
+  activeCat = c;
+  renderCatsStrip();
+  renderProducts(c);
+  var pc = document.getElementById("products-container");
+  if(pc) pc.scrollIntoView({behavior:"smooth", block:"start"});
+}
+function renderCatsStrip(){
+  var strip = document.getElementById("cats-strip");
+  if(!strip) return;
+  var okS = new Set((sellers||[]).filter(function(x){return x.status!=="pending"&&x.status!=="rejected";}).map(function(x){return x.id;}));
+  var vis = (products||[]).filter(function(p){return okS.has(p.sellerId);});
+  var counts = {};
+  vis.forEach(function(p){ counts[p.category] = (counts[p.category]||0)+1; });
+  var items = [{c:"الكل", i:"🛍️", n:vis.length}];
+  CATS.forEach(function(c){ if(counts[c]) items.push({c:c, i:(EMOJIS[c]||"📦"), n:counts[c]}); });
+  strip.innerHTML = items.map(function(it){
+    return '<button class="cat-chip'+(activeCat===it.c?" on":"")+'" data-c="'+it.c+'" onclick="pickCat(this.dataset.c)"><span class="c-ico">'+it.i+'</span>'+it.c+'<span class="c-num">'+it.n+'</span></button>';
+  }).join("");
+}
+window.handleSearch = handleSearch;
+window.clearSearch = clearSearch;
+window.pickCat = pickCat;
+window.renderCatsStrip = renderCatsStrip;
+
 function renderProducts(filter){
   const wrap=document.getElementById("products-container");
-  const okSellers=new Set(sellers.filter(x=>x.status!=="pending"&&x.status!=="rejected").map(x=>x.id));const visP=products.filter(p=>okSellers.has(p.sellerId));const list=sortByPopularity(filter==="الكل"?visP:visP.filter(p=>p.category===filter));
+  const okSellers=new Set(sellers.filter(x=>x.status!=="pending"&&x.status!=="rejected").map(x=>x.id));
+  let visP=products.filter(p=>okSellers.has(p.sellerId));
+  if(filter && filter!=="الكل") visP=visP.filter(p=>p.category===filter);
+  if(typeof searchQuery!=="undefined" && searchQuery){
+    const q=searchQuery;
+    visP=visP.filter(function(p){
+      const sl=sellers.find(function(x){return x.id===p.sellerId;});
+      return (p.name||"").toLowerCase().indexOf(q)!==-1
+        || (p.desc||"").toLowerCase().indexOf(q)!==-1
+        || (p.category||"").toLowerCase().indexOf(q)!==-1
+        || (p.location||"").toLowerCase().indexOf(q)!==-1
+        || (sl && (sl.storeName||"").toLowerCase().indexOf(q)!==-1);
+    });
+  }
+  const list=sortByPopularity(visP);
+  (function(){ var h=document.getElementById("search-hint"); if(!h)return;
+    if(typeof searchQuery!=="undefined" && searchQuery){ h.textContent="نتائج البحث عن \""+searchQuery+"\": "+list.length; h.classList.remove("hidden"); }
+    else h.classList.add("hidden");
+  })();
+  if(typeof renderCatsStrip==="function") renderCatsStrip();
   document.getElementById("hero-counts").textContent=`🟢 سوق نشط يومياً`;
+  if(list.length===0 && typeof searchQuery!=="undefined" && searchQuery){
+    wrap.innerHTML='<div class="no-results"><div class="nr-ico">🔍</div><div class="nr-t">لا توجد نتائج لـ "'+searchQuery+'"</div><div style="font-size:0.82rem;margin-bottom:14px">جرّب كلمة أخرى أو تصفّح التصنيفات</div><button class="btn-gold" onclick="clearSearch()">عرض كل المنتجات</button></div>';
+    return;
+  }
   if(list.length===0){
     wrap.innerHTML=`<div style="text-align:center;padding:60px 20px;color:#9CA3AF"><div style="font-size:2.6rem;margin-bottom:12px">🏪</div><div style="font-weight:800;color:#6B7280;margin-bottom:7px">لا توجد منتجات بعد</div><div style="font-size:0.83rem;margin-bottom:16px">كن أول تاجر ينشر منتجات هنا!</div><button class="btn-gold" onclick="openRegister()">افتح متجرك الآن</button></div>`;
     return;
