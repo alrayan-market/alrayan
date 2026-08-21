@@ -3284,6 +3284,7 @@ async function goWhatsAppInquire(){
   await chargeLead(sel.id,"عميل محتمل: "+(prodName||"تواصل عام"));
   var iid="INQ-"+Date.now();
   try{ await dbSave("inquiries",iid,{id:iid,productId:prodId,productName:prodName,sellerId:sel.id,sellerName:sel.storeName||"",name:n,phone:p,createdAt:Date.now()}); }catch(err){}
+  try{ notifyAdmin("استفسار جديد\n"+n+" "+p+"\nالمتجر: "+(sel.storeName||"")+"\n"+(prodName||"")); }catch(err){}
   closeModal("modal-wa-inquire");
   var msg=encodeURIComponent("مرحباً، أنا "+n+(prodId?"\nعندي استفسار عن: "+prodName:"")+"\n(من منصة الريان)");
   window.open("https://wa.me/"+selPhone+"?text="+msg,"_blank");
