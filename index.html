@@ -422,6 +422,37 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
 .biz-item.gold{background:linear-gradient(135deg,#FFF9E9,#FFF4DB);border-color:#F0D98A}
 .biz-item.gold .bi-a{color:#B8862B}
 @media (prefers-reduced-motion: reduce){.biz-track{animation:none;overflow-x:auto}}
+
+/* ===== صفحة المنتج المستقلة ===== */
+.prodpg-hero{background:linear-gradient(135deg,#1A2744,#243460);padding-bottom:10px}
+.prodpg-gallery{margin-top:-4px;background:#fff;border-radius:20px 20px 0 0;overflow:hidden;box-shadow:0 8px 30px rgba(26,39,68,.12);position:relative;z-index:2}
+.prodpg-media{width:100%;aspect-ratio:1/1;max-height:420px;background:#F5F5F5;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.prodpg-media img{width:100%;height:100%;object-fit:cover}
+.prodpg-media iframe,.prodpg-media video{width:100%;height:100%;border:0;background:#000}
+.prodpg-media .pp-emoji{font-size:5rem}
+.prodpg-nav-btn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.9);border:none;border-radius:50%;width:38px;height:38px;font-size:1.1rem;color:#1A2744;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.2);z-index:3}
+.prodpg-nav-btn.right{right:12px}
+.prodpg-nav-btn.left{left:12px}
+.prodpg-thumbs{display:flex;gap:8px;padding:12px 14px;overflow-x:auto;background:#fff}
+.prodpg-thumb{width:58px;height:58px;border-radius:10px;object-fit:cover;flex-shrink:0;cursor:pointer;border:2px solid transparent;opacity:.65;transition:all .2s}
+.prodpg-thumb.on{border-color:#D9A840;opacity:1}
+.prodpg-thumb.video-thumb{background:#1A2744;color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.3rem}
+.prodpg-body{background:#fff;border-radius:0 0 20px 20px;padding:20px 18px 10px;box-shadow:0 8px 30px rgba(26,39,68,.08);position:relative;z-index:1;margin-bottom:16px}
+.prodpg-title-row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px}
+.prodpg-title{font-size:1.35rem;font-weight:900;color:#1A2744;line-height:1.35}
+.prodpg-icon-btn{background:#F4F6FA;border:1.5px solid #E5E0D8;border-radius:11px;width:40px;height:40px;font-size:1.05rem;cursor:pointer;flex-shrink:0}
+.prodpg-price{color:#C9933A;font-weight:900;font-size:1.55rem;margin-bottom:10px}
+.prodpg-meta{display:flex;flex-wrap:wrap;gap:10px;color:#6B7280;font-size:0.82rem;margin-bottom:14px}
+.prodpg-store{margin-bottom:14px}
+.prodpg-desc-box{background:#FAFAF7;border:1px solid #EEF0F4;border-radius:12px;padding:14px 15px;margin-bottom:18px;color:#4B5563;font-size:0.9rem;line-height:1.85;white-space:pre-wrap}
+.prodpg-actions{display:flex;gap:9px;padding-bottom:10px}
+.prodpg-order-btn{flex:2;background:linear-gradient(135deg,#C9933A,#E8B660);color:#1A2744;border:none;border-radius:13px;padding:15px;font-weight:900;font-size:0.95rem;cursor:pointer;font-family:Tajawal,sans-serif;box-shadow:0 6px 18px rgba(201,147,58,.3)}
+.prodpg-inquire-btn{flex:1;background:#fff;border:1.5px solid #E5E0D8;color:#1A2744;border-radius:13px;padding:15px;font-weight:800;font-size:0.9rem;cursor:pointer;font-family:Tajawal,sans-serif}
+.prodpg-related{margin-top:8px}
+@media (min-width:640px){
+  .prodpg-gallery,.prodpg-body{border-radius:20px}
+  .prodpg-media{aspect-ratio:16/10}
+}
 </style>
 </head>
 <body>
@@ -483,6 +514,37 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
   <button class="float-btn" onclick="openLogin()">🏪 دخول التجار</button>
 </div>
 
+
+<!-- ═══ PRODUCT PAGE ═══ -->
+<div id="view-product" class="hidden">
+  <div class="prodpg-hero">
+    <div style="max-width:900px;margin:0 auto;padding:14px 4% 0">
+      <button class="store-back-btn" onclick="closeProductPage()">← رجوع للسوق</button>
+    </div>
+  </div>
+  <div style="max-width:900px;margin:0 auto;padding:0 4% 30px">
+    <div class="prodpg-gallery" id="pp-gallery">
+      <div class="prodpg-media" id="pp-media"></div>
+      <div class="prodpg-thumbs" id="pp-thumbs"></div>
+    </div>
+    <div class="prodpg-body">
+      <div class="prodpg-title-row">
+        <h1 class="prodpg-title" id="pp-name">—</h1>
+        <button class="prodpg-icon-btn" onclick="shareCurrentProduct()">🔗</button>
+      </div>
+      <div class="prodpg-price" id="pp-price">—</div>
+      <div class="prodpg-meta" id="pp-meta"></div>
+      <div class="prodpg-store" id="pp-store"></div>
+      <div class="prodpg-desc-box" id="pp-desc"></div>
+      <div class="prodpg-actions">
+        <button class="prodpg-order-btn" id="pp-order-btn" onclick="openDirectOrder(document.getElementById('pp-id').value)">🛒 تواصل واطلب</button>
+        <button class="prodpg-inquire-btn" onclick="openWaInquire(document.getElementById('pp-id').value)">💬 استفسر</button>
+      </div>
+      <input type="hidden" id="pp-id">
+    </div>
+    <div class="prodpg-related" id="pp-related"></div>
+  </div>
+</div>
 
 <!-- ═══ STORE PAGE ═══ -->
 <div id="view-store" class="hidden">
@@ -1741,7 +1803,8 @@ window.removeProdVideo=removeProdVideo;
 window.onVideoLinkTyped=onVideoLinkTyped;
 
 function shareCurrentProduct(){
-  var p = products.find(function(x){return x.id===directProductId;});
+  var pid = (document.getElementById("pp-id") && document.getElementById("pp-id").value) || directProductId;
+  var p = products.find(function(x){return x.id===pid;});
   if(!p) return;
   var url = baseUrl()+"/?product="+p.id;
   var txt = p.name+(p.priceOnRequest?"":" - "+SDG(p.price));
@@ -1848,11 +1911,11 @@ function renderProducts(filter){
     const imgHtml=p.image?`<img src="${p.image}" style="width:100%;height:100%;object-fit:cover" onerror="this.onerror=null;this.outerHTML='<span style=&quot;font-size:52px&quot;>${fbIco}</span>'">`:`<span style="font-size:52px">${fbIco}</span>`;
     const mediaBadge=((p.images&&p.images.length>1)||p.videoUrl)?`<div style="position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,0.6);color:#fff;font-size:0.65rem;padding:2px 7px;border-radius:100px;display:flex;align-items:center;gap:3px">${p.videoUrl?"🎥":""}${(p.images&&p.images.length>1)?" "+p.images.length+" صور":""}</div>`:"";
     div.innerHTML=`
-      <div class="product-img" style="background:${BG[p.category]||"#F5F5F5"}">${imgHtml}${mediaBadge}</div>
+      <div class="product-img" style="background:${BG[p.category]||"#F5F5F5"};cursor:pointer" onclick="openProductPage('${p.id}')">${imgHtml}${mediaBadge}</div>
       <div class="product-body">
         <div class="seller-row" onclick="openStore('${p.sellerId}')" style="cursor:pointer"><div class="seller-dot"></div><span class="seller-nm" style="text-decoration:underline;text-decoration-style:dotted">${p.sellerName}</span><span style="color:#C9933A;font-size:0.65rem;margin-right:3px">↗</span></div>
         ${(()=>{const s=sellers.find(x=>x.id===p.sellerId);const avg=s&&s.ratingCount?Math.round((s.ratingSum/s.ratingCount)*10)/10:0;const cnt=s&&s.ratingCount?s.ratingCount:0;if(!cnt)return "";const stars="★".repeat(Math.round(avg))+"☆".repeat(5-Math.round(avg));return '<div class="seller-rating"><span style="color:#F59E0B;font-size:0.9rem">'+stars+'</span><span class="rating-num">'+avg+'</span><span class="rating-count">('+cnt+')</span></div>';})()}
-        <div class="product-name">${p.name}</div>
+        <div class="product-name" style="cursor:pointer" onclick="openProductPage('${p.id}')">${p.name}</div>
         ${p.location?'<div style="color:#9CA3AF;font-size:0.72rem;margin-bottom:3px">📍 '+p.location+'</div>':''}
         ${p.desc?'<div class="product-desc">'+p.desc+'</div>':''}
         <div class="product-footer">
@@ -1871,6 +1934,149 @@ function renderProducts(filter){
 }
 
 // ══════════ DIRECT ORDER ══════════
+
+// ══════════ صفحة المنتج المستقلة ══════════
+let ppImages=[], ppVideoUrl="", ppIndex=0, ppShowingVideo=false;
+function openProductPage(productId){
+  const p=products.find(x=>x.id===productId); if(!p)return;
+  document.getElementById("pp-id").value=productId;
+  document.getElementById("pp-name").textContent=p.name;
+  document.getElementById("pp-price").textContent=p.priceOnRequest?"السعر عند الطلب":SDG(p.price);
+  const metaParts=[];
+  if(p.location) metaParts.push("📍 "+p.location);
+  if(p.deliveryPrice!=null) metaParts.push(p.deliveryPrice===0?"🚚 توصيل مجاني":"🚚 توصيل "+SDG(p.deliveryPrice));
+  if((p.views||0)>0) metaParts.push("👁 "+(p.views||0).toLocaleString("ar")+" مشاهدة");
+  document.getElementById("pp-meta").innerHTML=metaParts.map(function(m){return "<span>"+m+"</span>";}).join("");
+  const sl=sellers.find(function(x){return x.id===p.sellerId;});
+  const stBox=document.getElementById("pp-store");
+  if(sl){
+    const avg=sl.ratingCount?Math.round((sl.ratingSum/sl.ratingCount)*10)/10:0;
+    stBox.innerHTML='<div onclick="openStoreFromProduct(\''+sl.id+'\')" style="display:flex;align-items:center;gap:11px;background:#F4F6FA;border-radius:12px;padding:11px 13px;cursor:pointer">'
+      +(sl.storeImage?'<img src="'+sl.storeImage+'" style="width:42px;height:42px;border-radius:10px;object-fit:cover;flex-shrink:0">':'<div style="width:42px;height:42px;border-radius:10px;background:#1A2744;display:grid;place-items:center;font-size:1.2rem;flex-shrink:0">🏪</div>')
+      +'<div style="flex:1;min-width:0"><div style="font-weight:800;color:#1A2744;font-size:0.9rem">'+(sl.storeName||"")+'</div>'
+      +'<div style="color:#6B7280;font-size:0.74rem">'+(avg>0?("⭐ "+avg+" · "):"")+(sl.category||"")+'</div></div>'
+      +'<span style="color:#C9933A;font-size:0.76rem;font-weight:700">زيارة المتجر ›</span></div>';
+  } else { stBox.innerHTML=""; }
+  document.getElementById("pp-desc").innerHTML = p.desc ? p.desc : '<span style="color:#9CA3AF">لا يوجد وصف لهذا المنتج</span>';
+  ppImages = (p.images && p.images.length) ? p.images.slice() : (p.image ? [p.image] : []);
+  ppVideoUrl = p.videoUrl || "";
+  ppIndex = 0; ppShowingVideo = false;
+  renderPpThumbs();
+  renderPpMedia(p);
+  const orderBtn=document.getElementById("pp-order-btn");
+  if(isSellerFrozen(p.sellerId)){
+    orderBtn.textContent="غير متاح حالياً";
+    orderBtn.disabled=true;
+    orderBtn.style.opacity="0.55";
+  } else {
+    orderBtn.textContent="🛒 تواصل واطلب";
+    orderBtn.disabled=false;
+    orderBtn.style.opacity="1";
+  }
+  renderPpRelated(p);
+  try{
+    const pRef=doc(db,"products",productId);
+    updateDoc(pRef,{views:(p.views||0)+1}).catch(function(){});
+  }catch(e){}
+  const url=window.location.href.split("?")[0]+"?product="+productId;
+  window.history.pushState({},"",url);
+  document.getElementById("view-market").classList.add("hidden");
+  document.getElementById("view-store").classList.add("hidden");
+  document.getElementById("view-dashboard").classList.add("hidden");
+  document.getElementById("view-product").classList.remove("hidden");
+  window.scrollTo(0,0);
+}
+function renderPpMedia(p){
+  const box=document.getElementById("pp-media");
+  document.querySelectorAll(".prodpg-nav-btn").forEach(function(b){b.remove();});
+  if(ppShowingVideo && ppVideoUrl){
+    const yid=ytId(ppVideoUrl);
+    if(yid){
+      box.innerHTML='<iframe src="https://www.youtube.com/embed/'+yid+'" allowfullscreen></iframe>';
+    } else {
+      box.innerHTML='<video src="'+ppVideoUrl+'" controls autoplay></video>';
+    }
+    return;
+  }
+  if(ppImages.length===0){
+    box.innerHTML='<span class="pp-emoji">'+(EMOJIS[p.category]||"📦")+'</span>';
+    return;
+  }
+  box.innerHTML='<img src="'+ppImages[ppIndex]+'">';
+  if(ppImages.length>1){
+    const prevBtn=document.createElement("button");
+    prevBtn.className="prodpg-nav-btn right"; prevBtn.textContent="›";
+    prevBtn.onclick=function(){ shiftPpImage(-1); };
+    const nextBtn=document.createElement("button");
+    nextBtn.className="prodpg-nav-btn left"; nextBtn.textContent="‹";
+    nextBtn.onclick=function(){ shiftPpImage(1); };
+    box.appendChild(prevBtn); box.appendChild(nextBtn);
+  }
+}
+function shiftPpImage(dir){
+  if(ppImages.length===0)return;
+  ppShowingVideo=false;
+  ppIndex=(ppIndex+dir+ppImages.length)%ppImages.length;
+  const p=products.find(function(x){return x.id===document.getElementById("pp-id").value;});
+  renderPpMedia(p); renderPpThumbs();
+}
+function renderPpThumbs(){
+  const box=document.getElementById("pp-thumbs");
+  const items=[];
+  ppImages.forEach(function(u,i){
+    items.push('<img class="prodpg-thumb'+((!ppShowingVideo&&i===ppIndex)?" on":"")+'" src="'+u+'" data-i="'+i+'" onclick="selectPpThumb(this.dataset.i)">');
+  });
+  if(ppVideoUrl){
+    items.push('<div class="prodpg-thumb video-thumb'+(ppShowingVideo?" on":"")+'" onclick="selectPpVideoThumb()">▶</div>');
+  }
+  box.innerHTML = items.length>1 ? items.join("") : "";
+}
+function selectPpThumb(i){
+  ppShowingVideo=false; ppIndex=parseInt(i);
+  const p=products.find(function(x){return x.id===document.getElementById("pp-id").value;});
+  renderPpMedia(p); renderPpThumbs();
+}
+function selectPpVideoThumb(){
+  ppShowingVideo=true;
+  const p=products.find(function(x){return x.id===document.getElementById("pp-id").value;});
+  renderPpMedia(p); renderPpThumbs();
+}
+function renderPpRelated(p){
+  const box=document.getElementById("pp-related");
+  const okS=new Set(sellers.filter(function(x){return x.status!=="pending"&&x.status!=="rejected";}).map(function(x){return x.id;}));
+  const related=products.filter(function(x){return x.id!==p.id && x.category===p.category && okS.has(x.sellerId);}).slice(0,4);
+  if(related.length===0){ box.innerHTML=""; return; }
+  box.innerHTML='<div class="sec-title" style="margin-bottom:10px">منتجات مشابهة</div><div class="products-grid" id="pp-related-grid"></div>';
+  const grid=document.getElementById("pp-related-grid");
+  related.forEach(function(rp){
+    const div=document.createElement("div");
+    div.className="product-card";
+    div.style.cursor="pointer";
+    div.onclick=function(){ openProductPage(rp.id); };
+    const img=rp.image?('<img src="'+rp.image+'" style="width:100%;height:100%;object-fit:cover">'):('<span style="font-size:52px">'+(EMOJIS[rp.category]||"📦")+'</span>');
+    div.innerHTML='<div class="product-img" style="background:'+(BG[rp.category]||"#F5F5F5")+'">'+img+'</div>'
+      +'<div class="product-body"><div class="product-name">'+rp.name+'</div>'
+      +'<div class="product-footer"><span class="product-price">'+(rp.priceOnRequest?"عند الطلب":SDG(rp.price))+'</span></div></div>';
+    grid.appendChild(div);
+  });
+}
+function closeProductPage(){
+  window.history.pushState({},"",window.location.href.split("?")[0]);
+  document.getElementById("view-product").classList.add("hidden");
+  document.getElementById("view-market").classList.remove("hidden");
+}
+function openStoreFromProduct(sellerId){
+  document.getElementById("view-product").classList.add("hidden");
+  openStore(sellerId);
+}
+window.openProductPage=openProductPage;
+window.closeProductPage=closeProductPage;
+window.shiftPpImage=shiftPpImage;
+window.selectPpThumb=selectPpThumb;
+window.selectPpVideoThumb=selectPpVideoThumb;
+window.openStoreFromProduct=openStoreFromProduct;
+window.shareCurrentProduct=shareCurrentProduct;
+
 function openDirectOrder(productId){
   const p=products.find(x=>x.id===productId);if(!p)return;
   directProductId=productId;
@@ -2488,10 +2694,9 @@ function checkUrlProduct(){
   const params=new URLSearchParams(window.location.search);
   const pid=params.get("product");
   if(pid){
-    // wait for products to load then open
     const tryOpen=()=>{
       const p=products.find(x=>x.id===pid);
-      if(p){openDirectOrder(pid);}
+      if(p){openProductPage(pid);}
       else{setTimeout(tryOpen,500);}
     };
     setTimeout(tryOpen,1000);
@@ -2552,9 +2757,9 @@ async function openStore(sellerId){
       const imgHtml = p.image ? `<img src="${p.image}" style="width:100%;height:100%;object-fit:cover">` : `<span style="font-size:52px">${EMOJIS[p.category]||"📦"}</span>`;
       const mediaBadge=((p.images&&p.images.length>1)||p.videoUrl)?`<div style="position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,0.6);color:#fff;font-size:0.65rem;padding:2px 7px;border-radius:100px;display:flex;align-items:center;gap:3px">${p.videoUrl?"🎥":""}${(p.images&&p.images.length>1)?" "+p.images.length+" صور":""}</div>`:"";
       div.innerHTML = `
-        <div class="product-img" style="background:${BG[p.category]||"#F5F5F5"}">${imgHtml}${mediaBadge}</div>
+        <div class="product-img" style="background:${BG[p.category]||"#F5F5F5"};cursor:pointer" onclick="openProductPage('${p.id}')">${imgHtml}${mediaBadge}</div>
         <div class="product-body">
-          <div class="product-name">${p.name}</div>
+          <div class="product-name" style="cursor:pointer" onclick="openProductPage('${p.id}')">${p.name}</div>
           ${p.location?'<div style="color:#9CA3AF;font-size:0.72rem;margin-bottom:3px">📍 '+p.location+'</div>':''}
           <div style="color:#9CA3AF;font-size:0.72rem;margin-bottom:3px" id="pv_${p.id}">${(p.views||0)>0?"👁 "+(p.views||0).toLocaleString("ar")+" مشاهدة":""}</div>
           ${p.desc?'<div class="product-desc">'+p.desc+'</div>':''}
