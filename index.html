@@ -875,7 +875,7 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
     <div class="field">
       <label class="lbl">فيديو المنتج (اختياري)</label>
       <div id="pv-upload-ph" onclick="document.getElementById('pv-file-input').click()" style="background:#F4F6FA;border:2px dashed #D8D3C6;border-radius:12px;padding:18px;text-align:center;cursor:pointer">
-        <div style="font-size:1.5rem">🎥</div><div style="color:#6B7280;font-size:0.78rem">اضغط لرفع فيديو من الجهاز (حتى 25MB)</div>
+        <div style="font-size:1.5rem">🎥</div><div style="color:#6B7280;font-size:0.78rem">اضغط لرفع فيديو من الجهاز (حتى 200MB)</div>
       </div>
       <video id="pv-preview" controls style="display:none;width:100%;border-radius:12px;margin-top:8px;max-height:200px;background:#000"></video>
       <button type="button" id="pv-remove-btn" onclick="removeProdVideo()" class="hidden" style="margin-top:6px;background:#FEE;color:#D9534F;border:none;border-radius:8px;padding:7px 12px;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.78rem">إزالة الفيديو</button>
@@ -1747,7 +1747,7 @@ window.handleEaImg=handleEaImg;
 let prodVideoUrl="";
 async function handleProdVideo(input){
   var f=input.files[0]; if(!f)return;
-  if(f.size>25*1024*1024){document.getElementById("pv-err").textContent="حجم الفيديو كبير (الحد 25MB)";input.value="";return;}
+  if(f.size>200*1024*1024){document.getElementById("pv-err").textContent="حجم الفيديو كبير (الحد 200MB)";input.value="";return;}
   var ph=document.getElementById("pv-upload-ph");
   ph.innerHTML='<div style="font-size:1.5rem">⏳</div><div style="color:#6B7280;font-size:0.78rem">جاري رفع الفيديو...</div>';
   document.getElementById("pv-err").textContent="";
@@ -1767,7 +1767,7 @@ async function handleProdVideo(input){
     showToast("تم رفع الفيديو ✓");
   }catch(err){
     document.getElementById("pv-err").textContent="فشل الرفع: "+(err.message||"تأكد من تفعيل Storage");
-    ph.innerHTML='<div style="font-size:1.5rem">🎥</div><div style="color:#6B7280;font-size:0.78rem">اضغط لرفع فيديو من الجهاز (حتى 25MB)</div>';
+    ph.innerHTML='<div style="font-size:1.5rem">🎥</div><div style="color:#6B7280;font-size:0.78rem">اضغط لرفع فيديو من الجهاز (حتى 200MB)</div>';
   }
   input.value="";
 }
@@ -1793,7 +1793,7 @@ function onVideoLinkTyped(){
 function resetProdVideoField(){
   prodVideoUrl="";
   var pv=document.getElementById("pv-preview"); if(pv){pv.style.display="none";pv.src="";}
-  var ph=document.getElementById("pv-upload-ph"); if(ph){ph.style.display="block";ph.innerHTML='<div style="font-size:1.5rem">🎥</div><div style="color:#6B7280;font-size:0.78rem">اضغط لرفع فيديو من الجهاز (حتى 25MB)</div>';}
+  var ph=document.getElementById("pv-upload-ph"); if(ph){ph.style.display="block";ph.innerHTML='<div style="font-size:1.5rem">🎥</div><div style="color:#6B7280;font-size:0.78rem">اضغط لرفع فيديو من الجهاز (حتى 200MB)</div>';}
   var rb=document.getElementById("pv-remove-btn"); if(rb) rb.classList.add("hidden");
   var pvi=document.getElementById("p-video"); if(pvi){pvi.value="";pvi.disabled=false;}
   var e=document.getElementById("pv-err"); if(e) e.textContent="";
@@ -3833,7 +3833,7 @@ async function handleAsVideo(input){
     showToast("تم رفع الفيديو ✓");
   }catch(err){
     document.getElementById("as-err").textContent="فشل رفع الفيديو: "+(err.message||"خطأ غير معروف");
-    ph.innerHTML='<div style="font-size:1.5rem">🎥</div><div style="color:#6B7280;font-size:0.78rem">اضغط لاختيار فيديو من الجهاز (حتى 25MB)</div>';
+    ph.innerHTML='<div style="font-size:1.5rem">🎥</div><div style="color:#6B7280;font-size:0.78rem">اضغط لاختيار فيديو من الجهاز (حتى 200MB)</div>';
   }
   input.value="";
 }
