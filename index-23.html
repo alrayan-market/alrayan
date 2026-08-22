@@ -652,7 +652,7 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
     <button class="btn-navy" style="width:100%" onclick="goWhatsAppInquire()">متابعة لواتساب 💬</button>
   </div>
 </div>
-<div class="overlay hidden" id="modal-ad"><div class="modal modal-sm" style="max-height:88vh;overflow-y:auto"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><h3 style="color:#1A2744;font-weight:900;font-size:1.05rem">📢 نشر إعلان</h3><button onclick="closeModal('modal-ad')" style="background:none;border:none;font-size:1.4rem;color:#9CA3AF;cursor:pointer">✕</button></div><p style="color:#6B7280;font-size:0.82rem;margin-bottom:14px">إعلان واحد يظهر أسبوع — 10,000 ج.س</p><div class="field"><label class="lbl">عنوان الإعلان</label><input class="inp" id="ad-title"></div><div class="field"><label class="lbl">الوصف</label><textarea class="inp" id="ad-desc" rows="3"></textarea></div><div class="field"><label class="lbl">صور الاعلان (حتى 5)</label><div id="ad-img-ph" onclick="document.getElementById('ad-img-input').click()" style="background:#F4F6FA;border:2px dashed #D8D3C6;border-radius:12px;padding:20px;text-align:center;cursor:pointer"><div style="font-size:1.6rem">صورة</div><div style="color:#6B7280;font-size:0.8rem">اضغط لاضافة صورة</div></div><div id="ad-imgs-list" style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:8px"></div><img id="ad-img-preview" style="display:none"><input type="file" id="ad-img-input" accept="image/*" style="display:none" onchange="handleAdImg(this)"></div><div class="field"><label class="lbl">رابط فيديو يوتيوب (اختياري)</label><input class="inp" id="ad-video" placeholder="https://youtu.be/..."></div><div class="field"><label class="lbl">اسمك</label><input class="inp" id="ad-name"></div><div class="field"><label class="lbl">الدولة</label><select class="inp" id="ad-country"><option value="+249" selected>🇸🇩 السودان (+249)</option><option value="+966">🇸🇦 السعودية (+966)</option><option value="+20">🇪🇬 مصر (+20)</option><option value="+90">🇹🇷 تركيا (+90)</option><option value="+1">🇺🇸 أمريكا (+1)</option></select></div><div class="field"><label class="lbl">رقم التواصل</label><input class="inp" id="ad-phone" placeholder="912345678"></div><div id="ad-err" style="color:#D9534F;font-size:0.8rem;margin-bottom:8px"></div><button class="btn-navy" style="width:100%" onclick="submitAd()">متابعة للدفع 📢</button></div></div>
+<div class="overlay hidden" id="modal-ad"><div class="modal modal-sm" style="max-height:88vh;overflow-y:auto"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><h3 style="color:#1A2744;font-weight:900;font-size:1.05rem">📢 نشر إعلان</h3><button onclick="closeModal('modal-ad')" style="background:none;border:none;font-size:1.4rem;color:#9CA3AF;cursor:pointer">✕</button></div><p style="color:#6B7280;font-size:0.82rem;margin-bottom:14px">إعلان واحد يظهر أسبوع — 10,000 ج.س</p><div class="field"><label class="lbl">عنوان الإعلان</label><input class="inp" id="ad-title"></div><div class="field"><label class="lbl">الوصف</label><textarea class="inp" id="ad-desc" rows="3"></textarea></div><div class="field"><label class="lbl">صور الاعلان (حتى 5)</label><div id="ad-img-ph" onclick="document.getElementById('ad-img-input').click()" style="background:#F4F6FA;border:2px dashed #D8D3C6;border-radius:12px;padding:20px;text-align:center;cursor:pointer"><div style="font-size:1.6rem">صورة</div><div style="color:#6B7280;font-size:0.8rem">اضغط لاضافة صورة</div></div><div id="ad-imgs-list" style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:8px"></div><img id="ad-img-preview" style="display:none"><input type="file" id="ad-img-input" accept="image/*" style="display:none" onchange="handleAdImg(this)"></div><div class="field"><label class="lbl">فيديو الإعلان (اختياري)</label><div id="ad-vid-ph" onclick="document.getElementById('ad-vid-input').click()" style="background:#F4F6FA;border:2px dashed #D8D3C6;border-radius:12px;padding:18px;text-align:center;cursor:pointer"><div style="font-size:1.5rem">🎥</div><div style="color:#6B7280;font-size:0.78rem">اضغط لرفع فيديو من الجهاز (حتى 200MB)</div></div><div id="ad-vid-progress-box" class="hidden" style="background:#F4F6FA;border-radius:12px;padding:14px;text-align:center"><div id="ad-vid-progress-label" style="color:#1A2744;font-weight:800;font-size:0.85rem;margin-bottom:9px">جاري الرفع... 0%</div><div style="background:#E5E0D8;border-radius:100px;height:9px;overflow:hidden"><div id="ad-vid-progress-bar" style="width:0%;height:100%;background:linear-gradient(90deg,#C9933A,#E8B660);border-radius:100px;transition:width .2s"></div></div><div id="ad-vid-progress-sub" style="color:#9CA3AF;font-size:0.72rem;margin-top:7px">0 MB / 0 MB</div></div><video id="ad-vid-preview" controls style="display:none;width:100%;border-radius:12px;margin-top:8px;max-height:200px;background:#000"></video><button type="button" id="ad-vid-remove-btn" class="hidden" onclick="removeAdVideo('ad')" style="margin-top:7px;background:#FEE;color:#D9534F;border:none;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.78rem">إزالة الفيديو</button><input type="file" id="ad-vid-input" accept="video/*" style="display:none" onchange="handleAdVideoUpload(this,'ad')"><div id="ad-vid-err" style="color:#D9534F;font-size:0.78rem;margin-top:5px"></div></div><div class="field"><label class="lbl">اسمك</label><input class="inp" id="ad-name"></div><div class="field"><label class="lbl">الدولة</label><select class="inp" id="ad-country"><option value="+249" selected>🇸🇩 السودان (+249)</option><option value="+966">🇸🇦 السعودية (+966)</option><option value="+20">🇪🇬 مصر (+20)</option><option value="+90">🇹🇷 تركيا (+90)</option><option value="+1">🇺🇸 أمريكا (+1)</option></select></div><div class="field"><label class="lbl">رقم التواصل</label><input class="inp" id="ad-phone" placeholder="912345678"></div><div id="ad-err" style="color:#D9534F;font-size:0.8rem;margin-bottom:8px"></div><button class="btn-navy" style="width:100%" onclick="submitAd()">متابعة للدفع 📢</button></div></div>
 <div class="overlay hidden" id="modal-adspace">
   <div class="modal modal-sm" style="max-height:88vh;overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><h3 style="color:#1A2744;font-weight:900;font-size:1.05rem">📣 المساحة الإعلانية</h3><button onclick="closeModal('modal-adspace')" style="background:none;border:none;font-size:1.4rem;color:#9CA3AF;cursor:pointer">✕</button></div>
@@ -741,7 +741,7 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
     <input type="hidden" id="ea-id">
     <div class="field"><label class="lbl">عنوان الإعلان</label><input class="inp" id="ea-title"></div>
     <div class="field"><label class="lbl">الوصف</label><textarea class="inp" id="ea-desc" rows="3" style="resize:vertical"></textarea></div>
-    <div class="field"><label class="lbl">صور الاعلان (حتى 5)</label><div id="ea-img-ph" onclick="document.getElementById('ea-img-input').click()" style="background:#F4F6FA;border:2px dashed #D8D3C6;border-radius:12px;padding:18px;text-align:center;cursor:pointer"><div style="font-size:1.4rem">صورة</div><div style="color:#6B7280;font-size:0.78rem">اضغط لاضافة صورة</div></div><div id="ea-imgs-list" style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:8px"></div><img id="ea-img-preview" style="display:none"><input type="file" id="ea-img-input" accept="image/*" style="display:none" onchange="handleEaImg(this)"></div><div class="field"><label class="lbl">رابط فيديو يوتيوب (اختياري)</label><input class="inp" id="ea-video" placeholder="https://youtu.be/..."></div>
+    <div class="field"><label class="lbl">صور الاعلان (حتى 5)</label><div id="ea-img-ph" onclick="document.getElementById('ea-img-input').click()" style="background:#F4F6FA;border:2px dashed #D8D3C6;border-radius:12px;padding:18px;text-align:center;cursor:pointer"><div style="font-size:1.4rem">صورة</div><div style="color:#6B7280;font-size:0.78rem">اضغط لاضافة صورة</div></div><div id="ea-imgs-list" style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:8px"></div><img id="ea-img-preview" style="display:none"><input type="file" id="ea-img-input" accept="image/*" style="display:none" onchange="handleEaImg(this)"></div><div class="field"><label class="lbl">فيديو الإعلان (اختياري)</label><div id="ea-vid-ph" onclick="document.getElementById('ea-vid-input').click()" style="background:#F4F6FA;border:2px dashed #D8D3C6;border-radius:12px;padding:18px;text-align:center;cursor:pointer"><div style="font-size:1.5rem">🎥</div><div style="color:#6B7280;font-size:0.78rem">اضغط لرفع فيديو من الجهاز (حتى 200MB)</div></div><div id="ea-vid-progress-box" class="hidden" style="background:#F4F6FA;border-radius:12px;padding:14px;text-align:center"><div id="ea-vid-progress-label" style="color:#1A2744;font-weight:800;font-size:0.85rem;margin-bottom:9px">جاري الرفع... 0%</div><div style="background:#E5E0D8;border-radius:100px;height:9px;overflow:hidden"><div id="ea-vid-progress-bar" style="width:0%;height:100%;background:linear-gradient(90deg,#C9933A,#E8B660);border-radius:100px;transition:width .2s"></div></div><div id="ea-vid-progress-sub" style="color:#9CA3AF;font-size:0.72rem;margin-top:7px">0 MB / 0 MB</div></div><video id="ea-vid-preview" controls style="display:none;width:100%;border-radius:12px;margin-top:8px;max-height:200px;background:#000"></video><button type="button" id="ea-vid-remove-btn" class="hidden" onclick="removeAdVideo('ea')" style="margin-top:7px;background:#FEE;color:#D9534F;border:none;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.78rem">إزالة الفيديو</button><input type="file" id="ea-vid-input" accept="video/*" style="display:none" onchange="handleAdVideoUpload(this,'ea')"><div id="ea-vid-err" style="color:#D9534F;font-size:0.78rem;margin-top:5px"></div></div>
     <div class="field"><label class="lbl">اسم المعلن</label><input class="inp" id="ea-name"></div>
     <div class="field"><label class="lbl">الدولة</label><select class="inp" id="ea-country"><option value="+249" selected>🇸🇩 السودان (+249)</option><option value="+966">🇸🇦 السعودية (+966)</option><option value="+20">🇪🇬 مصر (+20)</option><option value="+971">🇦🇪 الإمارات (+971)</option><option value="+90">🇹🇷 تركيا (+90)</option></select></div>
     <div class="field"><label class="lbl">رقم التواصل</label><input class="inp" id="ea-phone" placeholder="912345678"></div>
@@ -876,6 +876,11 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
       <label class="lbl">فيديو المنتج (اختياري)</label>
       <div id="pv-upload-ph" onclick="document.getElementById('pv-file-input').click()" style="background:#F4F6FA;border:2px dashed #D8D3C6;border-radius:12px;padding:18px;text-align:center;cursor:pointer">
         <div style="font-size:1.5rem">🎥</div><div style="color:#6B7280;font-size:0.78rem">اضغط لرفع فيديو من الجهاز (حتى 200MB)</div>
+      </div>
+      <div id="pv-progress-box" class="hidden" style="background:#F4F6FA;border-radius:12px;padding:14px;text-align:center">
+        <div id="pv-progress-label" style="color:#1A2744;font-weight:800;font-size:0.85rem;margin-bottom:9px">جاري الرفع... 0%</div>
+        <div style="background:#E5E0D8;border-radius:100px;height:9px;overflow:hidden"><div id="pv-progress-bar" style="width:0%;height:100%;background:linear-gradient(90deg,#C9933A,#E8B660);border-radius:100px;transition:width .2s"></div></div>
+        <div id="pv-progress-sub" style="color:#9CA3AF;font-size:0.72rem;margin-top:7px">0 MB / 0 MB</div>
       </div>
       <video id="pv-preview" controls style="display:none;width:100%;border-radius:12px;margin-top:8px;max-height:200px;background:#000"></video>
       <button type="button" id="pv-remove-btn" onclick="removeProdVideo()" class="hidden" style="margin-top:6px;background:#FEE;color:#D9534F;border:none;border-radius:8px;padding:7px 12px;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.78rem">إزالة الفيديو</button>
@@ -1107,7 +1112,7 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
 // ══════════ FIREBASE ══════════
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, doc, setDoc, getDoc, getDocs, onSnapshot, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+import { getStorage, ref as storageRef, uploadBytes, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC7-MKB7Ix3k0gA7tGxCXNFaty5IQ-U3Xg",
@@ -1125,7 +1130,7 @@ let eaImage="";
 let adContactTarget=null;
 let avImgs=[], avVid="";
 const storage = getStorage(app);
-window._storage=storage; window._storageFns={storageRef,uploadBytes,getDownloadURL};
+window._storage=storage; window._storageFns={storageRef,uploadBytes,uploadBytesResumable,getDownloadURL};
 window._fbImports={collection,query,orderBy,onSnapshot,doc,setDoc,getDoc,getDocs,updateDoc,deleteDoc};
 
 // ══════════ CONSTANTS ══════════
@@ -1671,7 +1676,8 @@ function showAvMedia(i){
   var box=document.getElementById("av-media");
   if(i==="v" && avVid){
     var yid=ytId(avVid);
-    box.innerHTML=yid?('<iframe src="https://www.youtube.com/embed/'+yid+'" style="width:100%;height:100%;border:0" allowfullscreen></iframe>'):"";
+    if(yid){ box.innerHTML='<iframe src="https://www.youtube.com/embed/'+yid+'" style="width:100%;height:100%;border:0" allowfullscreen></iframe>'; }
+    else { box.innerHTML='<video src="'+avVid+'" controls autoplay style="width:100%;height:100%;background:#000"></video>'; }
     return;
   }
   var u=avImgs[parseInt(i)||0];
@@ -1745,29 +1751,110 @@ window.handleAdImg=handleAdImg;
 window.handleEaImg=handleEaImg;
 
 let prodVideoUrl="";
+
+function uploadVideoWithProgress(file, pathPrefix, onProgress){
+  return new Promise(function(resolve, reject){
+    try{
+      var path=pathPrefix+"/"+Date.now()+"-"+file.name.replace(/[^a-zA-Z0-9.]/g,"_");
+      var ref=window._storageFns.storageRef(window._storage,path);
+      var task=window._storageFns.uploadBytesResumable(ref,file);
+      task.on("state_changed",
+        function(snap){
+          var pct=Math.round((snap.bytesTransferred/snap.totalBytes)*100);
+          if(onProgress) onProgress(pct, snap.bytesTransferred, snap.totalBytes);
+        },
+        function(err){ reject(err); },
+        function(){
+          window._storageFns.getDownloadURL(task.snapshot.ref).then(resolve).catch(reject);
+        }
+      );
+    }catch(err){ reject(err); }
+  });
+}
+function fmtMB(bytes){ return (bytes/1024/1024).toFixed(1); }
+window.uploadVideoWithProgress = uploadVideoWithProgress;
+
+let adVideoUrls = { ad: "", ea: "" };
+async function handleAdVideoUpload(input, prefix){
+  var f=input.files[0]; if(!f)return;
+  if(f.size>200*1024*1024){document.getElementById(prefix+"-vid-err").textContent="حجم الفيديو كبير (الحد 200MB)";input.value="";return;}
+  var ph=document.getElementById(prefix+"-vid-ph");
+  var box=document.getElementById(prefix+"-vid-progress-box");
+  var label=document.getElementById(prefix+"-vid-progress-label");
+  var bar=document.getElementById(prefix+"-vid-progress-bar");
+  var sub=document.getElementById(prefix+"-vid-progress-sub");
+  document.getElementById(prefix+"-vid-err").textContent="";
+  ph.classList.add("hidden");
+  box.classList.remove("hidden");
+  label.textContent="جاري الرفع... 0%";
+  bar.style.width="0%";
+  sub.textContent="0 MB / "+fmtMB(f.size)+" MB";
+  try{
+    var url=await uploadVideoWithProgress(f,"ad-videos",function(pct,sent,total){
+      label.textContent="جاري الرفع... "+pct+"%";
+      bar.style.width=pct+"%";
+      sub.textContent=fmtMB(sent)+" MB / "+fmtMB(total)+" MB";
+    });
+    label.textContent="تم الرفع بنجاح ✓";
+    bar.style.width="100%";
+    adVideoUrls[prefix]=url;
+    var pv=document.getElementById(prefix+"-vid-preview");
+    pv.src=url; pv.style.display="block";
+    setTimeout(function(){ box.classList.add("hidden"); },900);
+    document.getElementById(prefix+"-vid-remove-btn").classList.remove("hidden");
+    showToast("تم رفع الفيديو ✓");
+  }catch(err){
+    document.getElementById(prefix+"-vid-err").textContent="فشل الرفع: "+(err.message||"تأكد من تفعيل Storage");
+    box.classList.add("hidden");
+    ph.classList.remove("hidden");
+  }
+  input.value="";
+}
+function removeAdVideo(prefix){
+  adVideoUrls[prefix]="";
+  var pv=document.getElementById(prefix+"-vid-preview"); if(pv){pv.style.display="none";pv.src="";}
+  var ph=document.getElementById(prefix+"-vid-ph"); if(ph)ph.classList.remove("hidden");
+  var rb=document.getElementById(prefix+"-vid-remove-btn"); if(rb)rb.classList.add("hidden");
+}
+window.handleAdVideoUpload=handleAdVideoUpload;
+window.removeAdVideo=removeAdVideo;
+
+
 async function handleProdVideo(input){
   var f=input.files[0]; if(!f)return;
   if(f.size>200*1024*1024){document.getElementById("pv-err").textContent="حجم الفيديو كبير (الحد 200MB)";input.value="";return;}
   var ph=document.getElementById("pv-upload-ph");
-  ph.innerHTML='<div style="font-size:1.5rem">⏳</div><div style="color:#6B7280;font-size:0.78rem">جاري رفع الفيديو...</div>';
+  var box=document.getElementById("pv-progress-box");
+  var label=document.getElementById("pv-progress-label");
+  var bar=document.getElementById("pv-progress-bar");
+  var sub=document.getElementById("pv-progress-sub");
   document.getElementById("pv-err").textContent="";
+  ph.classList.add("hidden");
+  box.classList.remove("hidden");
+  label.textContent="جاري الرفع... 0%";
+  bar.style.width="0%";
+  sub.textContent="0 MB / "+fmtMB(f.size)+" MB";
   try{
-    var path="product-videos/"+Date.now()+"-"+f.name.replace(/[^a-zA-Z0-9.]/g,"_");
-    var ref=window._storageFns.storageRef(window._storage,path);
-    await window._storageFns.uploadBytes(ref,f);
-    var url=await window._storageFns.getDownloadURL(ref);
+    var url=await uploadVideoWithProgress(f,"product-videos",function(pct,sent,total){
+      label.textContent="جاري الرفع... "+pct+"%";
+      bar.style.width=pct+"%";
+      sub.textContent=fmtMB(sent)+" MB / "+fmtMB(total)+" MB";
+    });
+    label.textContent="تم الرفع بنجاح ✓";
+    bar.style.width="100%";
     prodVideoUrl=url;
     document.getElementById("p-video").value="";
-  if(typeof resetProdVideoField==="function") resetProdVideoField();
+    if(typeof resetProdVideoField==="function") resetProdVideoField();
     document.getElementById("p-video").disabled=true;
     var pv=document.getElementById("pv-preview");
     pv.src=url; pv.style.display="block";
-    ph.style.display="none";
+    setTimeout(function(){ box.classList.add("hidden"); },900);
     document.getElementById("pv-remove-btn").classList.remove("hidden");
     showToast("تم رفع الفيديو ✓");
   }catch(err){
     document.getElementById("pv-err").textContent="فشل الرفع: "+(err.message||"تأكد من تفعيل Storage");
-    ph.innerHTML='<div style="font-size:1.5rem">🎥</div><div style="color:#6B7280;font-size:0.78rem">اضغط لرفع فيديو من الجهاز (حتى 200MB)</div>';
+    box.classList.add("hidden");
+    ph.classList.remove("hidden");
   }
   input.value="";
 }
@@ -2236,7 +2323,7 @@ function submitAd(){
   if(!adImagesArr.length){e.textContent="ارفع صورة واحدة على الاقل";return;}
   if(!n){e.textContent="أدخل اسمك";return;}
   if(!/^\d{6,15}$/.test(p.replace(/\D/g,""))){e.textContent="رقم غير صحيح";return;}
-  var adVid=(document.getElementById("ad-video")||{}).value||"";
+  var adVid=adVideoUrls.ad||"";
   var ad={id:"AD-"+Date.now(),type:"ad",adTitle:t,adDesc:de,adImage:adImagesArr[0]||"",adImages:adImagesArr.slice(),adVideo:adVid,ownerName:n,phone:p,plan:"ad",expiresAt:Date.now()+7*24*60*60*1000};
   closeModal("modal-ad");
   openPayment({kind:"ad",data:ad,amount:10000});
@@ -2252,7 +2339,7 @@ window.submitAd=submitAd;
 window.upgradeMyStore=upgradeMyStore;
 window.showToast=showToast;
 
-function openAdForm(){["ad-title","ad-desc","ad-name","ad-phone"].forEach(function(id){var el=document.getElementById(id);if(el)el.value="";});adImagesArr=[];renderImgsList("ad");var av=document.getElementById("ad-video");if(av)av.value="";var pv=document.getElementById("ad-img-preview");if(pv)pv.style.display="none";var ph=document.getElementById("ad-img-ph");if(ph){ph.style.display="block";}var e=document.getElementById("ad-err");if(e)e.textContent="";document.getElementById("modal-ad").classList.remove("hidden");}
+function openAdForm(){["ad-title","ad-desc","ad-name","ad-phone"].forEach(function(id){var el=document.getElementById(id);if(el)el.value="";});adImagesArr=[];renderImgsList("ad");adVideoUrls.ad=""; var avp=document.getElementById("ad-vid-preview"); if(avp){avp.style.display="none";avp.src="";} var avph=document.getElementById("ad-vid-ph"); if(avph)avph.classList.remove("hidden"); var avrb=document.getElementById("ad-vid-remove-btn"); if(avrb)avrb.classList.add("hidden");var pv=document.getElementById("ad-img-preview");if(pv)pv.style.display="none";var ph=document.getElementById("ad-img-ph");if(ph){ph.style.display="block";}var e=document.getElementById("ad-err");if(e)e.textContent="";document.getElementById("modal-ad").classList.remove("hidden");}
 window.openJoinChoice=openJoinChoice;
 window.startJoin=startJoin;
 
@@ -3503,7 +3590,10 @@ function openEditAd(id){
   document.getElementById("ea-days").value = 7;
   eaImagesArr = (a.adImages && a.adImages.length) ? a.adImages.slice() : (a.adImage ? [a.adImage] : []);
   renderImgsList("ea");
-  var evd=document.getElementById("ea-video"); if(evd) evd.value=a.adVideo||"";
+  adVideoUrls.ea = a.adVideo || "";
+  var eavp=document.getElementById("ea-vid-preview"), eavph=document.getElementById("ea-vid-ph"), eavrb=document.getElementById("ea-vid-remove-btn");
+  if(a.adVideo){ eavp.src=a.adVideo; eavp.style.display="block"; eavph.classList.add("hidden"); eavrb.classList.remove("hidden"); }
+  else { eavp.style.display="none"; eavp.src=""; eavph.classList.remove("hidden"); eavrb.classList.add("hidden"); }
   document.getElementById("ea-err").textContent="";
   document.getElementById("modal-edit-ad").classList.remove("hidden");
 }
@@ -3522,8 +3612,8 @@ async function saveEditAd(){
   if(!n){ e.textContent="أدخل اسم المعلن"; return; }
   if(!/^\d{6,15}$/.test(p.replace(/\D/g,""))){ e.textContent="رقم غير صحيح"; return; }
   try{
-    if(id){ await dbUpdate("ads",id,{adTitle:t,adDesc:de,adImage:eaImagesArr[0]||"",adImages:eaImagesArr.slice(),adVideo:(document.getElementById("ea-video")||{}).value||"",ownerName:n,phone:p}); showToast("تم تعديل الاعلان"); }
-    else { var nid="AD-"+Date.now(); await dbSave("ads",nid,{id:nid,adTitle:t,adDesc:de,adImage:eaImagesArr[0]||"",adImages:eaImagesArr.slice(),adVideo:(document.getElementById("ea-video")||{}).value||"",ownerName:n,phone:p,status:"approved",approvedAt:Date.now(),expiresAt:Date.now()+days*24*60*60*1000,createdAt:Date.now(),byAdmin:true}); showToast("تم انشاء الاعلان ونشره"); }
+    if(id){ await dbUpdate("ads",id,{adTitle:t,adDesc:de,adImage:eaImagesArr[0]||"",adImages:eaImagesArr.slice(),adVideo:adVideoUrls.ea||"",ownerName:n,phone:p}); showToast("تم تعديل الاعلان"); }
+    else { var nid="AD-"+Date.now(); await dbSave("ads",nid,{id:nid,adTitle:t,adDesc:de,adImage:eaImagesArr[0]||"",adImages:eaImagesArr.slice(),adVideo:adVideoUrls.ea||"",ownerName:n,phone:p,status:"approved",approvedAt:Date.now(),expiresAt:Date.now()+days*24*60*60*1000,createdAt:Date.now(),byAdmin:true}); showToast("تم انشاء الاعلان ونشره"); }
     closeModal("modal-edit-ad");
     if(isAdmin && activeTab==="manage") renderPendingRequests();
   }catch(err){ e.textContent="تعذر الحفظ"; }
