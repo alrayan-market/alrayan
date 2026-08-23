@@ -457,6 +457,74 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
 </head>
 <body>
 
+
+
+<div class="overlay hidden" id="modal-customer-auth" style="z-index:99999">
+  <div class="modal modal-sm">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3 id="auth-title" style="color:#1A2744;font-weight:900;font-size:1.1rem">تسجيل الدخول</h3>
+      <button onclick="closeModal(&quot;modal-customer-auth&quot;)" style="background:none;border:none;font-size:1.3rem;color:#9CA3AF;cursor:pointer">✕</button>
+    </div>
+    <div id="auth-signup-name-field" class="field hidden">
+      <label class="lbl">الاسم</label>
+      <input class="inp" id="auth-name" placeholder="اسمك الكامل">
+    </div>
+    <div class="field">
+      <label class="lbl">رقم الهاتف</label>
+      <div style="display:flex;gap:8px">
+        <select class="inp" id="auth-country" style="flex:0 0 110px"><option value="+249" selected>🇸🇩 +249</option><option value="+966">🇸🇦 +966</option><option value="+20">🇪🇬 +20</option><option value="+971">🇦🇪 +971</option></select>
+        <input class="inp" id="auth-phone" placeholder="912345678" style="flex:1">
+      </div>
+    </div>
+    <div class="field">
+      <label class="lbl">كلمة المرور</label>
+      <input class="inp" type="password" id="auth-pass" placeholder="••••••">
+    </div>
+    <div id="auth-err" style="color:#D9534F;font-size:0.8rem;margin-bottom:10px"></div>
+    <button class="btn-navy" id="auth-submit-btn" style="width:100%" onclick="submitCustomerAuth()">دخول</button>
+    <div style="text-align:center;margin-top:14px;font-size:0.82rem;color:#6B7280">
+      <span id="auth-switch-text">ليس لديك حساب؟</span> <a href="javascript:void(0)" onclick="toggleAuthMode()" style="color:#C9933A;font-weight:800;text-decoration:none" id="auth-switch-link">أنشئ حساباً</a>
+    </div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="modal-my-account">
+  <div class="modal modal-sm">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3 style="color:#1A2744;font-weight:900;font-size:1.1rem">👤 حسابي</h3>
+      <button onclick="closeModal('modal-my-account')" style="background:none;border:none;font-size:1.3rem;color:#9CA3AF;cursor:pointer">✕</button>
+    </div>
+    <div style="background:#F4F6FA;border-radius:12px;padding:14px;margin-bottom:14px">
+      <div id="acc-name" style="font-weight:800;color:#1A2744;font-size:1rem;margin-bottom:2px"></div>
+      <div id="acc-phone" style="color:#6B7280;font-size:0.8rem"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <button onclick="closeModal('modal-my-account');openMyOrders()" style="flex:1;background:#EEF0FF;color:#1A2744;border:none;border-radius:10px;padding:11px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif">📋 طلباتي</button>
+      <button onclick="closeModal('modal-my-account');openMyFavorites()" style="flex:1;background:#FFF4E0;color:#B8862B;border:none;border-radius:10px;padding:11px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif">❤️ مفضلتي</button>
+    </div>
+    <button onclick="customerLogout()" style="width:100%;background:#FEE;color:#D9534F;border:none;border-radius:10px;padding:11px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif">تسجيل الخروج</button>
+  </div>
+</div>
+
+<div class="overlay hidden" id="modal-my-orders">
+  <div class="modal modal-sm" style="max-height:80vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3 style="color:#1A2744;font-weight:900;font-size:1.1rem">📋 طلباتي</h3>
+      <button onclick="closeModal('modal-my-orders')" style="background:none;border:none;font-size:1.3rem;color:#9CA3AF;cursor:pointer">✕</button>
+    </div>
+    <div id="my-orders-body"></div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="modal-my-favorites">
+  <div class="modal modal-sm" style="max-height:80vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3 style="color:#1A2744;font-weight:900;font-size:1.1rem">❤️ مفضلتي</h3>
+      <button onclick="closeModal('modal-my-favorites')" style="background:none;border:none;font-size:1.3rem;color:#9CA3AF;cursor:pointer">✕</button>
+    </div>
+    <div id="my-favorites-body"></div>
+  </div>
+</div>
 <!-- ═══ MARKET ═══ -->
 <div id="view-market">
   <nav>
@@ -468,6 +536,7 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
     <div style="display:flex;gap:7px;align-items:center">
       <div class="cart-badge hidden" id="cart-count-badge" onclick="openCart()">🛒 0</div>
       <button class="chats-nav-btn" id="contact-nav-btn" onclick="contactPlatformWhatsApp()" style="background:linear-gradient(100deg,#F2CE73,#D9A840);color:#12203A;font-weight:900;padding:7px 14px;display:inline-flex;align-items:center;gap:5px;font-size:0.82rem">📨 تواصل معنا</button>
+      <button class="chats-nav-btn" id="account-nav-btn" onclick="openAccountArea()" title="حسابي">👤</button>
       
       
     </div>
@@ -1445,6 +1514,7 @@ window.onload=async function(){
   checkUrlChat();
   checkUrlRegister();
   checkUrlChannel();
+  loadCustomerSession();
   checkUrlAd();
   checkUrlContact();
 };
@@ -1712,6 +1782,163 @@ const CAT_KEYWORDS = {
   "سيارات":["سيارة","عربة","اطار","كاوتش","محرك","موتور","زيت محرك","قطع غيار","بطارية سيارة","دراجة","موتسيكل","تويوتا","هيونداي","شاحنة","لوري"],
   "عقارات":["عقار","شقة","منزل","بيت","ارض","قطعة","فيلا","محل","مكتب","ايجار","للبيع","مساحة","دور","عمارة"],
 };
+
+// ══════════ حساب المشتري (اختياري تماماً) ══════════
+let authMode = "login";
+let currentCustomer = null;
+
+function loadCustomerSession(){
+  try{
+    const saved = localStorage.getItem("rayan_customer_account");
+    if(saved){ currentCustomer = JSON.parse(saved); }
+  }catch(e){}
+  updateAccountBtn();
+}
+function updateAccountBtn(){
+  const btn = document.getElementById("account-nav-btn");
+  if(!btn) return;
+  btn.textContent = currentCustomer ? "👤" : "👤";
+  btn.style.background = currentCustomer ? "#EEF8EE" : "";
+  btn.style.color = currentCustomer ? "#2E7D5E" : "";
+}
+function openAccountArea(){
+  if(currentCustomer){
+    document.getElementById("acc-name").textContent = currentCustomer.name;
+    document.getElementById("acc-phone").textContent = currentCustomer.phone;
+    document.getElementById("modal-my-account").classList.remove("hidden");
+  } else {
+    showAuthMode("login");
+    document.getElementById("modal-customer-auth").classList.remove("hidden");
+  }
+}
+function showAuthMode(mode){
+  authMode = mode;
+  const nameField = document.getElementById("auth-signup-name-field");
+  const title = document.getElementById("auth-title");
+  const btn = document.getElementById("auth-submit-btn");
+  const switchText = document.getElementById("auth-switch-text");
+  const switchLink = document.getElementById("auth-switch-link");
+  if(mode === "signup"){
+    nameField.classList.remove("hidden");
+    title.textContent = "إنشاء حساب جديد";
+    btn.textContent = "إنشاء الحساب";
+    switchText.textContent = "لديك حساب بالفعل؟";
+    switchLink.textContent = "سجّل الدخول";
+  } else {
+    nameField.classList.add("hidden");
+    title.textContent = "تسجيل الدخول";
+    btn.textContent = "دخول";
+    switchText.textContent = "ليس لديك حساب؟";
+    switchLink.textContent = "أنشئ حساباً";
+  }
+  ["auth-name","auth-phone","auth-pass"].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=""; });
+  var err = document.getElementById("auth-err"); if(err) err.textContent = "";
+}
+function toggleAuthMode(){ showAuthMode(authMode === "login" ? "signup" : "login"); }
+
+async function submitCustomerAuth(){
+  const phone = (document.getElementById("auth-country").value + document.getElementById("auth-phone").value.trim().replace(/^0+/,""));
+  const pass = document.getElementById("auth-pass").value;
+  const err = document.getElementById("auth-err");
+  if(!/^\d{6,15}$/.test(phone.replace(/\D/g,""))){ err.textContent = "أدخل رقم هاتف صحيح"; return; }
+  if(!pass || pass.length < 4){ err.textContent = "كلمة المرور 4 أحرف على الأقل"; return; }
+
+  if(authMode === "signup"){
+    const name = document.getElementById("auth-name").value.trim();
+    if(!name){ err.textContent = "أدخل اسمك"; return; }
+    try{
+      const existing = await getDoc(doc(db,"customers",phone));
+      if(existing.exists()){ err.textContent = "هذا الرقم مسجّل بالفعل، سجّل الدخول بدلاً من ذلك"; return; }
+      const acc = { phone, name, pass, createdAt: Date.now(), favorites: [] };
+      await setDoc(doc(db,"customers",phone), acc);
+      currentCustomer = { phone, name, favorites: [] };
+      finishCustomerAuth();
+    }catch(e){ err.textContent = "تعذّر إنشاء الحساب، حاول مجدداً"; }
+  } else {
+    try{
+      const snap = await getDoc(doc(db,"customers",phone));
+      if(!snap.exists()){ err.textContent = "لا يوجد حساب بهذا الرقم"; return; }
+      const data = snap.data();
+      if(data.pass !== pass){ err.textContent = "كلمة المرور غير صحيحة"; return; }
+      currentCustomer = { phone: data.phone, name: data.name, favorites: data.favorites || [] };
+      finishCustomerAuth();
+    }catch(e){ err.textContent = "تعذّر تسجيل الدخول، حاول مجدداً"; }
+  }
+}
+function finishCustomerAuth(){
+  try{ localStorage.setItem("rayan_customer_account", JSON.stringify(currentCustomer)); }catch(e){}
+  closeModal("modal-customer-auth");
+  updateAccountBtn();
+  showToast("مرحباً " + currentCustomer.name + " 👋");
+}
+function customerLogout(){
+  currentCustomer = null;
+  try{ localStorage.removeItem("rayan_customer_account"); }catch(e){}
+  closeModal("modal-my-account");
+  updateAccountBtn();
+  showToast("تم تسجيل الخروج");
+}
+
+// ══════════ المفضلة ══════════
+function isFavorite(productId){
+  return !!(currentCustomer && (currentCustomer.favorites||[]).indexOf(productId) !== -1);
+}
+async function toggleFavorite(productId){
+  if(!currentCustomer){
+    showToast("سجّل دخولك لإضافة المفضلة");
+    openAccountArea();
+    return;
+  }
+  const favs = currentCustomer.favorites || [];
+  const idx = favs.indexOf(productId);
+  if(idx === -1){ favs.push(productId); } else { favs.splice(idx,1); }
+  currentCustomer.favorites = favs;
+  try{
+    localStorage.setItem("rayan_customer_account", JSON.stringify(currentCustomer));
+    await updateDoc(doc(db,"customers",currentCustomer.phone), { favorites: favs });
+  }catch(e){}
+  renderProducts(typeof activeCat!=="undefined"?activeCat:"الكل");
+  showToast(idx === -1 ? "أُضيف للمفضلة ❤️" : "أُزيل من المفضلة");
+}
+function openMyFavorites(){
+  const body = document.getElementById("my-favorites-body");
+  if(!currentCustomer){ body.innerHTML = "<div class=\"no-items\"><div>سجّل دخولك أولاً</div></div>"; document.getElementById("modal-my-favorites").classList.remove("hidden"); return; }
+  const favIds = currentCustomer.favorites || [];
+  const favProds = products.filter(function(p){ return favIds.indexOf(p.id) !== -1; });
+  if(favProds.length === 0){
+    body.innerHTML = "<div class=\"no-items\"><div class=\"icon\">❤️</div><div style=\"font-weight:700\">لا توجد منتجات مفضلة بعد</div></div>";
+  } else {
+    body.innerHTML = favProds.map(function(p){
+      var thumb = p.image ? '<img class="prod-thumb" src="'+p.image+'">' : '<div class="prod-emoji-box" style="background:'+(BG[p.category]||"#F5F5F5")+'">'+(EMOJIS[p.category]||"📦")+'</div>';
+      return '<div class="prod-row" style="cursor:pointer" onclick="closeModal(\'modal-my-favorites\');openDirectOrder(\''+p.id+'\')"><div class="prod-row-left">'+thumb+'<div><div class="prod-title">'+p.name+'</div><div class="prod-meta">'+(p.priceOnRequest?"عند الطلب":SDG(p.price))+'</div></div></div></div>';
+    }).join("");
+  }
+  document.getElementById("modal-my-favorites").classList.remove("hidden");
+}
+function openMyOrders(){
+  const body = document.getElementById("my-orders-body");
+  if(!currentCustomer){ body.innerHTML = "<div class=\"no-items\"><div>سجّل دخولك أولاً</div></div>"; document.getElementById("modal-my-orders").classList.remove("hidden"); return; }
+  const myOrders = orders.filter(function(o){ return o.buyerPhone === currentCustomer.phone; }).sort(function(a,b){ return (b.createdAt||0)-(a.createdAt||0); });
+  if(myOrders.length === 0){
+    body.innerHTML = "<div class=\"no-items\"><div class=\"icon\">📋</div><div style=\"font-weight:700\">لا توجد طلبات بعد</div></div>";
+  } else {
+    body.innerHTML = myOrders.map(function(o){
+      return '<div class="order-row"><div class="order-info"><div class="order-id">'+o.id+' · '+o.date+'</div><div class="order-detail">'+o.items.map(function(i){return i.name+' ×'+i.qty;}).join(" · ")+'</div><span class="status-badge '+(STATUS_CLASS[o.status]||"s-new")+'">'+(STATUS_LABELS[o.status]||"جديد")+'</span></div><div class="order-right"><div class="order-total">'+SDG(o.total)+'</div></div></div>';
+    }).join("");
+  }
+  document.getElementById("modal-my-orders").classList.remove("hidden");
+}
+
+window.openAccountArea = openAccountArea;
+window.showAuthMode = showAuthMode;
+window.toggleAuthMode = toggleAuthMode;
+window.submitCustomerAuth = submitCustomerAuth;
+window.customerLogout = customerLogout;
+window.toggleFavorite = toggleFavorite;
+window.isFavorite = isFavorite;
+window.openMyFavorites = openMyFavorites;
+window.openMyOrders = openMyOrders;
+
 function suggestCategory(name, desc){
   var txt = ((name||"")+" "+(desc||"")).toLowerCase();
   var best = null, bestScore = 0;
