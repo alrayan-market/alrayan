@@ -536,7 +536,13 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
     <div style="display:flex;gap:7px;align-items:center">
       <div class="cart-badge hidden" id="cart-count-badge" onclick="openCart()">🛒 0</div>
       <button class="chats-nav-btn" id="contact-nav-btn" onclick="contactPlatformWhatsApp()" style="background:linear-gradient(100deg,#F2CE73,#D9A840);color:#12203A;font-weight:900;padding:7px 14px;display:inline-flex;align-items:center;gap:5px;font-size:0.82rem">📨 تواصل معنا</button>
-      <button class="chats-nav-btn" id="account-nav-btn" onclick="openAccountArea()" title="حسابي">👤</button>
+      <div style="position:relative;display:inline-block">
+        <button class="chats-nav-btn" id="account-nav-btn" onclick="openAccountArea()" style="display:inline-flex;align-items:center;gap:5px;font-size:0.82rem;font-weight:900">👤 <span id="account-nav-label">حسابي</span></button>
+        <div id="account-tooltip" class="hidden" style="position:absolute;top:calc(100% + 8px);left:0;background:#1A2744;color:#fff;font-size:0.72rem;font-weight:700;padding:8px 12px;border-radius:9px;white-space:nowrap;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:200;animation:fadeUp .4s ease both">
+          سجّل واحفظ طلباتك ✨
+          <div style="position:absolute;bottom:100%;left:16px;border:6px solid transparent;border-bottom-color:#1A2744"></div>
+        </div>
+      </div>
       
       
     </div>
@@ -1515,6 +1521,7 @@ window.onload=async function(){
   checkUrlRegister();
   checkUrlChannel();
   loadCustomerSession();
+  showAccountTooltipOnce();
   checkUrlAd();
   checkUrlContact();
 };
@@ -1786,6 +1793,53 @@ const CAT_KEYWORDS = {
 // ══════════ حساب المشتري (اختياري تماماً) ══════════
 let authMode = "login";
 let currentCustomer = null;
+
+
+// ══════════ شارة تحفيزية للتسجيل (مرة واحدة) ══════════
+function showAccountTooltipOnce(){
+  if(currentCustomer) return;
+  try{
+    if(localStorage.getItem("rayan_tooltip_shown")) return;
+    localStorage.setItem("rayan_tooltip_shown","1");
+  }catch(e){}
+  var tip = document.getElementById("account-tooltip");
+  if(!tip) return;
+  setTimeout(function(){
+    tip.classList.remove("hidden");
+    setTimeout(function(){ tip.classList.add("hidden"); }, 4500);
+  }, 2200);
+}
+window.showAccountTooltipOnce = showAccountTooltipOnce;
+
+// ══════════ دعوة تسجيل بعد أول طلب ناجح ══════════
+function maybeInviteSignup(){
+  if(currentCustomer) return;
+  try{
+    if(localStorage.getItem("rayan_order_invite_shown")) return;
+  }catch(e){}
+  var box = document.createElement("div");
+  box.id = "post-order-invite";
+  box.style.cssText = "position:fixed;bottom:18px;left:16px;right:16px;max-width:420px;margin:0 auto;background:#fff;border:1.5px solid #E5E0D8;border-radius:14px;padding:14px 16px;box-shadow:0 12px 32px rgba(26,39,68,.25);z-index:9500;display:flex;align-items:center;gap:12px;animation:fadeUp .4s ease both";
+  box.innerHTML =
+    '<div style="font-size:1.6rem;flex-shrink:0">📦</div>'
+    + '<div style="flex:1;min-width:0"><div style="font-weight:800;color:#1A2744;font-size:0.85rem">احفظ رقمك لتتبّع طلباتك القادمة بسهولة</div></div>'
+    + '<button onclick="acceptInviteSignup()" style="background:linear-gradient(100deg,#F2CE73,#D9A840);color:#12203A;border:none;border-radius:9px;padding:9px 14px;font-weight:900;font-size:0.78rem;cursor:pointer;font-family:Tajawal,sans-serif;flex-shrink:0">سجّل الآن</button>'
+    + '<button onclick="dismissInviteSignup()" style="background:none;border:none;color:#9CA3AF;font-size:1.1rem;cursor:pointer;flex-shrink:0">✕</button>';
+  document.body.appendChild(box);
+  try{ localStorage.setItem("rayan_order_invite_shown","1"); }catch(e){}
+}
+function acceptInviteSignup(){
+  dismissInviteSignup();
+  showAuthMode("signup");
+  document.getElementById("modal-customer-auth").classList.remove("hidden");
+}
+function dismissInviteSignup(){
+  var box = document.getElementById("post-order-invite");
+  if(box) box.remove();
+}
+window.maybeInviteSignup = maybeInviteSignup;
+window.acceptInviteSignup = acceptInviteSignup;
+window.dismissInviteSignup = dismissInviteSignup;
 
 function loadCustomerSession(){
   try{
@@ -2503,6 +2557,7 @@ async function submitDirectOrder(){
   document.getElementById("success-msg").textContent=p.priceOnRequest?`سيتواصل معك التاجر على ${phone} لتحديد السعر قريباً`:`سيتواصل معك التاجر على ${phone} قريباً`;
   document.getElementById("wa-fallback-btn").href=waLink||"#";
   document.getElementById("modal-order-success").classList.remove("hidden");
+  setTimeout(maybeInviteSignup, 1200);
   if(waLink)setTimeout(()=>window.open(waLink,"_blank"),500);
 }
 
