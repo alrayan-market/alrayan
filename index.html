@@ -453,6 +453,30 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
   .prodpg-gallery,.prodpg-body{border-radius:20px}
   .prodpg-media{aspect-ratio:16/10}
 }
+
+/* ===== صفحة الحساب المطوّرة ===== */
+.acc-modal{padding:0;overflow:hidden}
+.acc-close{position:absolute;top:14px;left:14px;background:rgba(255,255,255,.18);border:none;border-radius:50%;width:30px;height:30px;color:#fff;font-size:1.05rem;cursor:pointer;z-index:5}
+.acc-head{background:linear-gradient(150deg,#1A2744,#2A3C63);padding:34px 20px 22px;text-align:center;position:relative;overflow:hidden}
+.acc-head::before{content:"";position:absolute;top:-40px;right:-30px;width:160px;height:160px;background:radial-gradient(circle,rgba(232,182,96,.2),transparent 70%);border-radius:50%}
+.acc-avatar{width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,#F2CE73,#D9A840);color:#12203A;font-weight:900;font-size:1.7rem;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;box-shadow:0 8px 22px rgba(0,0,0,.25);position:relative}
+.acc-name{color:#fff;font-weight:900;font-size:1.15rem;position:relative}
+.acc-phone{color:#C6CFDF;font-size:0.8rem;margin-top:3px;position:relative}
+.acc-since{color:rgba(255,255,255,.45);font-size:0.68rem;margin-top:6px;position:relative}
+.acc-stats{display:flex;background:#fff;border-bottom:1px solid #F0EEE8;padding:14px 8px}
+.acc-stat{flex:1;text-align:center;border-left:1px solid #F0EEE8}
+.acc-stat:last-child{border-left:none}
+.acc-stat-num{font-weight:900;color:#1A2744;font-size:1.15rem}
+.acc-stat-lbl{color:#9CA3AF;font-size:0.68rem;font-weight:700;margin-top:2px}
+.acc-menu{padding:10px 12px}
+.acc-item{width:100%;display:flex;align-items:center;gap:11px;background:none;border:none;border-radius:11px;padding:13px 10px;cursor:pointer;font-family:Tajawal,sans-serif;text-align:right;transition:background .18s}
+.acc-item:active{background:#F4F6FA}
+.acc-item-ico{font-size:1.15rem;width:26px;text-align:center;flex-shrink:0}
+.acc-item-txt{flex:1;color:#1A2744;font-weight:800;font-size:0.9rem}
+.acc-item-badge{background:#D9534F;color:#fff;font-size:0.68rem;font-weight:800;border-radius:100px;padding:2px 8px;flex-shrink:0}
+.acc-item-arrow{color:#C9CDD6;font-size:1.1rem;flex-shrink:0}
+.acc-logout{width:calc(100% - 24px);margin:6px 12px 16px;background:#FAFAF7;color:#9CA3AF;border:1px solid #EEEAE2;border-radius:11px;padding:12px;font-weight:800;font-size:0.85rem;cursor:pointer;font-family:Tajawal,sans-serif}
+.acc-logout:active{background:#FEE;color:#D9534F;border-color:#F5C6C6}
 </style>
 </head>
 <body>
@@ -489,20 +513,61 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
 </div>
 
 <div class="overlay hidden" id="modal-my-account">
+  <div class="modal modal-sm acc-modal">
+    <button onclick="closeModal('modal-my-account')" class="acc-close">✕</button>
+    <div class="acc-head">
+      <div class="acc-avatar" id="acc-avatar">؟</div>
+      <div id="acc-name" class="acc-name"></div>
+      <div id="acc-phone" class="acc-phone"></div>
+      <div id="acc-since" class="acc-since"></div>
+    </div>
+    <div class="acc-stats">
+      <div class="acc-stat"><div class="acc-stat-num" id="acc-stat-orders">0</div><div class="acc-stat-lbl">طلب</div></div>
+      <div class="acc-stat"><div class="acc-stat-num" id="acc-stat-favs">0</div><div class="acc-stat-lbl">مفضلة</div></div>
+      <div class="acc-stat"><div class="acc-stat-num" id="acc-stat-spent">0</div><div class="acc-stat-lbl">إجمالي مشترياتي</div></div>
+    </div>
+    <div class="acc-menu">
+      <button class="acc-item" onclick="closeModal('modal-my-account');openMyOrders()">
+        <span class="acc-item-ico">📋</span><span class="acc-item-txt">طلباتي</span>
+        <span class="acc-item-badge hidden" id="acc-orders-badge"></span>
+        <span class="acc-item-arrow">‹</span>
+      </button>
+      <button class="acc-item" onclick="closeModal('modal-my-account');openMyFavorites()">
+        <span class="acc-item-ico">❤️</span><span class="acc-item-txt">مفضلتي</span>
+        <span class="acc-item-arrow">‹</span>
+      </button>
+      <button class="acc-item" onclick="closeModal('modal-my-account');openMyStores()">
+        <span class="acc-item-ico">🏪</span><span class="acc-item-txt">متاجري المفضلة</span>
+        <span class="acc-item-arrow">‹</span>
+      </button>
+      <button class="acc-item" onclick="openEditProfile()">
+        <span class="acc-item-ico">✏️</span><span class="acc-item-txt">تعديل بياناتي</span>
+        <span class="acc-item-arrow">‹</span>
+      </button>
+    </div>
+    <button onclick="customerLogout()" class="acc-logout">تسجيل الخروج</button>
+  </div>
+</div>
+
+<div class="overlay hidden" id="modal-edit-profile">
   <div class="modal modal-sm">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-      <h3 style="color:#1A2744;font-weight:900;font-size:1.1rem">👤 حسابي</h3>
-      <button onclick="closeModal('modal-my-account')" style="background:none;border:none;font-size:1.3rem;color:#9CA3AF;cursor:pointer">✕</button>
+      <h3 style="color:#1A2744;font-weight:900;font-size:1.1rem">✏️ تعديل بياناتي</h3>
+      <button onclick="closeModal('modal-edit-profile')" style="background:none;border:none;font-size:1.3rem;color:#9CA3AF;cursor:pointer">✕</button>
     </div>
-    <div style="background:#F4F6FA;border-radius:12px;padding:14px;margin-bottom:14px">
-      <div id="acc-name" style="font-weight:800;color:#1A2744;font-size:1rem;margin-bottom:2px"></div>
-      <div id="acc-phone" style="color:#6B7280;font-size:0.8rem"></div>
+    <div class="field"><label class="lbl">الاسم</label><input class="inp" id="edit-name"></div>
+    <div id="edit-profile-err" style="color:#D9534F;font-size:0.8rem;margin-bottom:10px"></div>
+    <button class="btn-navy" style="width:100%" onclick="saveProfileEdit()">حفظ التعديلات</button>
+  </div>
+</div>
+
+<div class="overlay hidden" id="modal-my-stores">
+  <div class="modal modal-sm" style="max-height:80vh;overflow-y:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3 style="color:#1A2744;font-weight:900;font-size:1.1rem">🏪 متاجري المفضلة</h3>
+      <button onclick="closeModal('modal-my-stores')" style="background:none;border:none;font-size:1.3rem;color:#9CA3AF;cursor:pointer">✕</button>
     </div>
-    <div style="display:flex;gap:8px;margin-bottom:14px">
-      <button onclick="closeModal('modal-my-account');openMyOrders()" style="flex:1;background:#EEF0FF;color:#1A2744;border:none;border-radius:10px;padding:11px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif">📋 طلباتي</button>
-      <button onclick="closeModal('modal-my-account');openMyFavorites()" style="flex:1;background:#FFF4E0;color:#B8862B;border:none;border-radius:10px;padding:11px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif">❤️ مفضلتي</button>
-    </div>
-    <button onclick="customerLogout()" style="width:100%;background:#FEE;color:#D9534F;border:none;border-radius:10px;padding:11px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif">تسجيل الخروج</button>
+    <div id="my-stores-body"></div>
   </div>
 </div>
 
@@ -1857,14 +1922,96 @@ function updateAccountBtn(){
 }
 function openAccountArea(){
   if(currentCustomer){
-    document.getElementById("acc-name").textContent = currentCustomer.name;
-    document.getElementById("acc-phone").textContent = currentCustomer.phone;
+    renderAccountPanel();
     document.getElementById("modal-my-account").classList.remove("hidden");
   } else {
     showAuthMode("login");
     document.getElementById("modal-customer-auth").classList.remove("hidden");
   }
 }
+function renderAccountPanel(){
+  if(!currentCustomer) return;
+  document.getElementById("acc-name").textContent = currentCustomer.name;
+  document.getElementById("acc-phone").textContent = currentCustomer.phone;
+  document.getElementById("acc-avatar").textContent = (currentCustomer.name||"؟").trim().charAt(0);
+  var since = currentCustomer.createdAt ? new Date(currentCustomer.createdAt).toLocaleDateString("ar") : "";
+  document.getElementById("acc-since").textContent = since ? ("عضو منذ " + since) : "";
+
+  var myOrders = orders.filter(function(o){ return o.buyerPhone === currentCustomer.phone; });
+  var doneOrders = myOrders.filter(function(o){ return o.status === "done"; });
+  var pendingCount = myOrders.filter(function(o){ return o.status === "new" || o.status === "confirmed"; }).length;
+  var totalSpent = doneOrders.reduce(function(sum,o){ return sum + (o.total||0); }, 0);
+
+  document.getElementById("acc-stat-orders").textContent = myOrders.length;
+  document.getElementById("acc-stat-favs").textContent = (currentCustomer.favorites||[]).length;
+  document.getElementById("acc-stat-spent").textContent = totalSpent >= 1000 ? Math.round(totalSpent/1000)+"ك" : totalSpent;
+
+  var badge = document.getElementById("acc-orders-badge");
+  if(pendingCount > 0){ badge.textContent = pendingCount; badge.classList.remove("hidden"); }
+  else { badge.classList.add("hidden"); }
+}
+window.renderAccountPanel = renderAccountPanel;
+
+function openEditProfile(){
+  if(!currentCustomer) return;
+  document.getElementById("edit-name").value = currentCustomer.name || "";
+  document.getElementById("edit-profile-err").textContent = "";
+  closeModal("modal-my-account");
+  document.getElementById("modal-edit-profile").classList.remove("hidden");
+}
+async function saveProfileEdit(){
+  var name = document.getElementById("edit-name").value.trim();
+  var err = document.getElementById("edit-profile-err");
+  if(!name){ err.textContent = "أدخل اسمك"; return; }
+  try{
+    await updateDoc(doc(db,"customers",currentCustomer.phone), { name: name });
+    currentCustomer.name = name;
+    localStorage.setItem("rayan_customer_account", JSON.stringify(currentCustomer));
+    closeModal("modal-edit-profile");
+    showToast("تم تحديث بياناتك");
+    openAccountArea();
+  }catch(e){ err.textContent = "تعذّر الحفظ، حاول مجدداً"; }
+}
+window.openEditProfile = openEditProfile;
+window.saveProfileEdit = saveProfileEdit;
+
+// ══════════ المتاجر المفضلة ══════════
+function isFavoriteStore(sellerId){
+  return !!(currentCustomer && (currentCustomer.favStores||[]).indexOf(sellerId) !== -1);
+}
+async function toggleFavoriteStore(sellerId){
+  if(!currentCustomer){ showToast("سجّل دخولك لإضافة متاجر مفضلة"); openAccountArea(); return; }
+  var favs = currentCustomer.favStores || [];
+  var idx = favs.indexOf(sellerId);
+  if(idx === -1){ favs.push(sellerId); } else { favs.splice(idx,1); }
+  currentCustomer.favStores = favs;
+  try{
+    localStorage.setItem("rayan_customer_account", JSON.stringify(currentCustomer));
+    await updateDoc(doc(db,"customers",currentCustomer.phone), { favStores: favs });
+  }catch(e){}
+  showToast(idx === -1 ? "أُضيف متجرك المفضل 🏪" : "أُزيل من المفضلة");
+}
+function openMyStores(){
+  var body = document.getElementById("my-stores-body");
+  if(!currentCustomer){ body.innerHTML = "<div class=\"no-items\"><div>سجّل دخولك أولاً</div></div>"; document.getElementById("modal-my-stores").classList.remove("hidden"); return; }
+  var favIds = currentCustomer.favStores || [];
+  var favSellers = sellers.filter(function(s){ return favIds.indexOf(s.id) !== -1; });
+  if(favSellers.length === 0){
+    body.innerHTML = "<div class=\"no-items\"><div class=\"icon\">🏪</div><div style=\"font-weight:700\">لا توجد متاجر مفضلة بعد</div></div>";
+  } else {
+    body.innerHTML = favSellers.map(function(sl){
+      var avg = sl.ratingCount ? Math.round((sl.ratingSum/sl.ratingCount)*10)/10 : 0;
+      return '<div style="display:flex;align-items:center;gap:11px;background:#F4F6FA;border-radius:11px;padding:11px;margin-bottom:8px;cursor:pointer" onclick="closeModal(\'modal-my-stores\');openStore(\''+sl.id+'\')">'
+        + (sl.storeImage ? '<img src="'+sl.storeImage+'" style="width:44px;height:44px;border-radius:9px;object-fit:cover;flex-shrink:0">' : '<div style="width:44px;height:44px;border-radius:9px;background:#1A2744;display:grid;place-items:center;font-size:1.2rem;flex-shrink:0">🏪</div>')
+        + '<div style="flex:1;min-width:0"><div style="font-weight:800;color:#1A2744;font-size:0.88rem">'+(sl.storeName||"")+'</div>'
+        + '<div style="color:#6B7280;font-size:0.72rem">'+(avg>0?("⭐ "+avg):"بدون تقييم")+'</div></div></div>';
+    }).join("");
+  }
+  document.getElementById("modal-my-stores").classList.remove("hidden");
+}
+window.isFavoriteStore = isFavoriteStore;
+window.toggleFavoriteStore = toggleFavoriteStore;
+window.openMyStores = openMyStores;
 function showAuthMode(mode){
   authMode = mode;
   const nameField = document.getElementById("auth-signup-name-field");
