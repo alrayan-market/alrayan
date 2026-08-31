@@ -4001,22 +4001,53 @@ function removeImgAt(mode,idx){
   if(mode==="ad") adImagesArr.splice(idx,1); else eaImagesArr.splice(idx,1);
   renderImgsList(mode);
 }
-function uploadAdImage(input,mode){
+function verifyImageLoads(url){
+  return new Promise(function(resolve){
+    var testImg = new Image();
+    var settled = false;
+    var timer = setTimeout(function(){ if(!settled){ settled=true; resolve(false); } }, 12000);
+    testImg.onload = function(){ if(!settled){ settled=true; clearTimeout(timer); resolve(true); } };
+    testImg.onerror = function(){ if(!settled){ settled=true; clearTimeout(timer); resolve(false); } };
+    testImg.src = url;
+  });
+}
+function isValidImgUrl(u){
+  return typeof u==="string" && /^https?:\/\/.+\.(png|jpe?g|gif|webp)(\?.*)?$/i.test(u.split("?")[0]) || (typeof u==="string" && u.indexOf("i.ibb.co")>-1 && u.length>25);
+}
+async function uploadAdImage(input,mode){
   var f=input.files[0]; if(!f)return;
   var arr = mode==="ad" ? adImagesArr : eaImagesArr;
   var errId = mode==="ad" ? "ad-err" : "ea-err";
-  if(arr.length>=5){ document.getElementById(errId).textContent="الحد الاقصى 5 صور"; input.value=""; return; }
-  if(f.size>5*1024*1024){ document.getElementById(errId).textContent="حجم الصورة كبير"; input.value=""; return; }
+  var errEl = document.getElementById(errId);
+  errEl.textContent = "";
+  if(arr.length>=5){ errEl.textContent="الحد الاقصى 5 صور"; input.value=""; return; }
+  if(f.size>5*1024*1024){ errEl.textContent="حجم الصورة كبير (الحد 5MB)"; input.value=""; return; }
   var ph=document.getElementById(mode+"-img-ph");
   var orig=ph.innerHTML;
-  ph.innerHTML='<div style="color:#6B7280;font-size:0.8rem">جاري الرفع...</div>';
-  var fd=new FormData(); fd.append("image",f);
-  fetch("https://api.imgbb.com/1/upload?key=16b4262b9ff85a10c0f3a4834a847184",{method:"POST",body:fd}).then(function(r){return r.json();}).then(function(d){
-    if(d&&d.data&&d.data.url){ arr.push(d.data.url); renderImgsList(mode); showToast("تمت اضافة الصورة"); }
-    else { document.getElementById(errId).textContent="فشل رفع الصورة"; }
-    ph.innerHTML=orig;
-  }).catch(function(){ document.getElementById(errId).textContent="فشل الرفع"; ph.innerHTML=orig; });
-  input.value="";
+  ph.innerHTML='<div style="color:#6B7280;font-size:0.8rem">1/2 - جاري رفع الصورة...</div>';
+  try{
+    var fd=new FormData(); fd.append("image",f);
+    var res = await fetch("https://api.imgbb.com/1/upload?key=16b4262b9ff85a10c0f3a4834a847184",{method:"POST",body:fd});
+    var d = await res.json();
+    var url = (d && d.data && d.data.url) ? d.data.url : "";
+    if(!url || !isValidImgUrl(url)){
+      errEl.textContent = "فشل رفع الصورة (رابط غير صالح) — جرّب صورة أخرى أو تحقق من الاتصال";
+      ph.innerHTML = orig; input.value=""; return;
+    }
+    ph.innerHTML = '<div style="color:#6B7280;font-size:0.8rem">2/2 - جاري التحقق من الصورة...</div>';
+    var loads = await verifyImageLoads(url);
+    if(!loads){
+      errEl.textContent = "الصورة رُفعت لكن رابطها لا يعمل — جرّب مرة أخرى أو استخدم صورة مختلفة";
+      ph.innerHTML = orig; input.value=""; return;
+    }
+    arr.push(url);
+    renderImgsList(mode);
+    showToast("تمت إضافة الصورة والتحقق منها ✓");
+  }catch(err){
+    errEl.textContent = "فشل الرفع — تحقق من الاتصال بالإنترنت وحاول مجدداً";
+  }
+  ph.innerHTML = orig;
+  input.value = "";
 }
 window.removeImgAt=removeImgAt;
 
@@ -4054,8 +4085,9 @@ async function saveEditAd(){
   if(!n){ e.textContent="أدخل اسم المعلن"; return; }
   if(!/^\d{6,15}$/.test(p.replace(/\D/g,""))){ e.textContent="رقم غير صحيح"; return; }
   try{
-    if(id){ await dbUpdate("ads",id,{adTitle:t,adDesc:de,adImage:eaImagesArr[0]||"",adImages:eaImagesArr.slice(),adVideo:adVideoUrls.ea||"",ownerName:n,phone:p}); showToast("تم تعديل الاعلان"); }
-    else { var nid="AD-"+Date.now(); await dbSave("ads",nid,{id:nid,adTitle:t,adDesc:de,adImage:eaImagesArr[0]||"",adImages:eaImagesArr.slice(),adVideo:adVideoUrls.ea||"",ownerName:n,phone:p,status:"approved",approvedAt:Date.now(),expiresAt:Date.now()+days*24*60*60*1000,createdAt:Date.now(),byAdmin:true}); showToast("تم انشاء الاعلان ونشره"); }
+    var cleanImgs = eaImagesArr.filter(function(u){ return u && u.indexOf("http")===0 && u.length>15; });
+    if(id){ await dbUpdate("ads",id,{adTitle:t,adDesc:de,adImage:cleanImgs[0]||"",adImages:cleanImgs,adVideo:adVideoUrls.ea||"",ownerName:n,phone:p}); showToast("تم تعديل الاعلان"); }
+    else { var nid="AD-"+Date.now()+"-"+Math.random().toString(36).slice(2,7); await dbSave("ads",nid,{id:nid,adTitle:t,adDesc:de,adImage:cleanImgs[0]||"",adImages:cleanImgs,adVideo:adVideoUrls.ea||"",ownerName:n,phone:p,status:"approved",approvedAt:Date.now(),expiresAt:Date.now()+days*24*60*60*1000,createdAt:Date.now(),byAdmin:true}); showToast("تم انشاء الاعلان ونشره"); }
     closeModal("modal-edit-ad");
     if(isAdmin && activeTab==="manage") renderPendingRequests();
   }catch(err){ e.textContent="تعذر الحفظ"; }
