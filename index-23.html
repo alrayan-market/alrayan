@@ -1803,7 +1803,9 @@ function openAdView(id){
   d.innerHTML=a.adDesc?('<div style="background:#FAFAF7;border:1px solid #EEF0F4;border-radius:11px;padding:12px 13px"><div style="color:#4B5563;font-size:0.86rem;line-height:1.75;white-space:pre-wrap">'+a.adDesc+'</div></div>'):"";
   var left=a.expiresAt?Math.max(0,Math.ceil((a.expiresAt-Date.now())/86400000)):0;
   document.getElementById("av-expiry").textContent=left>0?("ينتهي خلال "+left+" يوم"):"";
-  avImgs=(a.adImages&&a.adImages.length)?a.adImages.slice():(a.adImage?[a.adImage]:[]);
+  var validImgs=(a.adImages&&a.adImages.length)?a.adImages.filter(function(u){return u&&u.indexOf("http")===0;}):[];
+  if(a.adImage && validImgs.indexOf(a.adImage)===-1){ validImgs.unshift(a.adImage); }
+  avImgs=validImgs.length?validImgs:(a.adImage?[a.adImage]:[]);
   avVid=a.adVideo||"";
   showAvMedia(0);
   var th=document.getElementById("av-thumbs");
