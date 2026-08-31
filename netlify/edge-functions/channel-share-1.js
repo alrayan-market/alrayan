@@ -22,7 +22,10 @@ export default async (request, context) => {
       const f=d&&d.fields||{};
       title=f.adTitle?.stringValue||"إعلان على منصة الريان";
       desc=f.adDesc?.stringValue||"شاهد الإعلان على منصة الريان";
-      const aimg=f.adImage?.stringValue||"";
+      let aimg=f.adImage?.stringValue||"";
+      if(!aimg && f.adImages && f.adImages.arrayValue && f.adImages.arrayValue.values && f.adImages.arrayValue.values.length){
+        aimg = f.adImages.arrayValue.values[0].stringValue || "";
+      }
       if(aimg) image=aimg;
     }else if(vid){
       const d=await fireGet("entVideos",vid);
