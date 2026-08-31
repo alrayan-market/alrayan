@@ -1783,7 +1783,7 @@ function activeAds(){
   return (adsList||[]).filter(function(a){return a.status==="approved"&&(!a.expiresAt||a.expiresAt>now);}).sort(function(a,b){return (b.approvedAt||0)-(a.approvedAt||0);});
 }
 function adCardHtml(a){
-  return '<div class="product-card" style="border:2px solid #E8B660;position:relative"><div style="position:absolute;top:8px;right:8px;z-index:3;background:linear-gradient(100deg,#F2CE73,#D9A840);color:#12203A;font-weight:900;font-size:0.64rem;padding:3px 10px;border-radius:100px">اعلان</div><div class="product-img" style="background:#F5F5F5;cursor:pointer" data-adid="'+a.id+'" onclick="openAdView(this.dataset.adid)">'+((a.adImage||(a.adImages&&a.adImages[0]))?'<img src="'+(a.adImage||a.adImages[0])+'" style="width:100%;height:100%;object-fit:cover">':'')+'</div><div class="product-body"><div class="product-name">'+(a.adTitle||"")+'</div>'+(a.adDesc?'<div class="product-desc">'+a.adDesc+'</div>':'')+'<div class="product-footer"><span class="product-price" style="font-size:0.8rem;color:#B8862B">اعلان مموّل</span><button data-adid="'+a.id+'" onclick="contactAdvertiser(this.dataset.adid)" class="order-now-btn" style="border:none;cursor:pointer;font-family:Tajawal,sans-serif">تواصل</button></div><div style="display:flex;gap:6px;margin-top:8px"><button data-adid="'+a.id+'" onclick="shareAd(this.dataset.adid)" style="flex:1;padding:7px;border-radius:8px;border:1.5px solid #E5E0D8;background:#fff;color:#6B7280;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">مشاركة</button></div></div></div>';
+  return '<div class="product-card" style="border:2px solid #E8B660;position:relative"><div style="position:absolute;top:8px;right:8px;z-index:3;background:linear-gradient(100deg,#F2CE73,#D9A840);color:#12203A;font-weight:900;font-size:0.64rem;padding:3px 10px;border-radius:100px">اعلان</div><div class="product-img" style="background:#F5F5F5;cursor:pointer" data-adid="'+a.id+'" onclick="openAdView(this.dataset.adid)">'+((a.adImage||(a.adImages&&a.adImages[0]))?'<img src="'+(a.adImage||a.adImages[0])+'" style="width:100%;height:100%;object-fit:cover" onerror="this.onerror=null;this.outerHTML=&quot;<span style=&amp;quot;font-size:52px&amp;quot;>📢</span>&quot;">':'<span style="font-size:52px">📢</span>')+'</div><div class="product-body"><div class="product-name">'+(a.adTitle||"")+'</div>'+(a.adDesc?'<div class="product-desc">'+a.adDesc+'</div>':'')+'<div class="product-footer"><span class="product-price" style="font-size:0.8rem;color:#B8862B">اعلان مموّل</span><button data-adid="'+a.id+'" onclick="contactAdvertiser(this.dataset.adid)" class="order-now-btn" style="border:none;cursor:pointer;font-family:Tajawal,sans-serif">تواصل</button></div><div style="display:flex;gap:6px;margin-top:8px"><button data-adid="'+a.id+'" onclick="shareAd(this.dataset.adid)" style="flex:1;padding:7px;border-radius:8px;border:1.5px solid #E5E0D8;background:#fff;color:#6B7280;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">مشاركة</button></div></div></div>';
 }
 
 function shareAd(id){
@@ -1825,8 +1825,21 @@ function showAvMedia(i){
     return;
   }
   var u=avImgs[parseInt(i)||0];
-  box.innerHTML=u?('<img src="'+u+'" style="width:100%;height:100%;object-fit:cover">'):"";
+  box.innerHTML=u
+    ? ('<img src="'+u+'" style="width:100%;height:100%;object-fit:cover" onerror="handleAvImgError(this)">')
+    : '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#F5F5F5;font-size:2.5rem">📢</div>';
 }
+function handleAvImgError(imgEl){
+  var box = document.getElementById("av-media");
+  var idx = avImgs.indexOf(imgEl.getAttribute("src"));
+  var nextIdx = idx > -1 ? idx + 1 : -1;
+  if(nextIdx > -1 && nextIdx < avImgs.length){
+    showAvMedia(nextIdx);
+  } else {
+    box.innerHTML = '<div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#F5F5F5;color:#9CA3AF;gap:6px"><div style="font-size:2.5rem">📢</div><div style="font-size:0.75rem;font-weight:700">صورة الإعلان غير متاحة</div></div>';
+  }
+}
+window.handleAvImgError = handleAvImgError;
 window.openAdView=openAdView;
 window.showAvMedia=showAvMedia;
 
