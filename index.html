@@ -1712,6 +1712,7 @@ window.onload=async function(){
   showAccountTooltipOnce();
   checkUrlAd();
   checkUrlProp();
+  checkUrlJoin();
   checkUrlContact();
 };
 
@@ -5152,6 +5153,10 @@ window.waAskOwner=waAskOwner; window.openTanks=openTanks; window.openTankProduct
 
 
 // ══════════════ لوحة المالك: العقارات والبوت ══════════════
+function checkUrlJoin(){
+  var v=new URLSearchParams(window.location.search).get("publish"); if(!v) return;
+  setTimeout(function(){ if(v==="property") openPropForm(); else if(v==="office") openOfficeForm(); },1200);
+}
 function rePendingCount(){
   return (propsList||[]).filter(function(x){return x.status==="pending";}).length+(officesList||[]).filter(function(x){return x.status==="pending";}).length;
 }
