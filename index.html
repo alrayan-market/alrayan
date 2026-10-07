@@ -511,7 +511,12 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
 .pr-tag.rent{background:#E8F0FE;color:#2F5BD3}
 .pr-tag.role{background:#FFF4D6;color:#8A6410}
 .pr-badge-ver{position:absolute;top:8px;right:8px;z-index:2;background:#2E7D5E;color:#fff;font-size:0.66rem;font-weight:900;padding:3px 9px;border-radius:100px}
-.role-pick{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.role-pick{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}
+.office-strip{margin:8px 16px 4px;border:2px dashed #C9933A;background:#FFF8E8;border-radius:16px;padding:13px 14px;display:flex;align-items:center;gap:12px;cursor:pointer}
+.office-strip:active{transform:scale(.98)}
+.office-strip .o-t{color:#1A2744;font-weight:900;font-size:0.95rem}
+.office-strip .o-s{color:#6B7280;font-size:0.72rem;margin-top:2px}
+.office-strip .o-go{margin-right:auto;background:#1A2744;color:#fff;font-weight:900;font-size:0.76rem;padding:8px 13px;border-radius:100px;white-space:nowrap}
 .role-btn{border:2px solid #E5E0D8;background:#fff;border-radius:12px;padding:10px 4px;text-align:center;cursor:pointer;font-family:Tajawal,sans-serif;color:#4B5563;font-weight:800;font-size:0.78rem}
 .role-btn .r-i{font-size:1.4rem;display:block;margin-bottom:3px}
 .role-btn.on{border-color:#C9933A;background:#FFF8E8;color:#1A2744}
@@ -670,6 +675,7 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
     <div class="re-mini" onclick="openTanks()" style="background:linear-gradient(160deg,#0E5A8A,#1C86C6);color:#fff"><div class="m-ico">💧</div><div class="m-t">خزانات المياه</div><div class="m-s">منصة الريان لخزانات المياه</div></div>
     <div class="re-mini" onclick="openPropForm()" style="background:linear-gradient(160deg,#F2CE73,#D9A840);color:#12203A"><div class="m-ico">🏠</div><div class="m-t">انشر عقارك</div><div class="m-s">مالك · وكيل · وسيط</div></div>
   </div>
+  <div class="office-strip" onclick="openOfficeForm()"><div style="font-size:1.9rem">🏢</div><div><div class="o-t">أصحاب المكاتب العقارية</div><div class="o-s">سجّل مكتبك واحصل على شارة «مكتب موثّق»</div></div><div class="o-go">تسجيل مكتب</div></div>
   <div class="sec-head"><b>🏬 المتاجر والقناة</b><small>منتجات التجار داخل المتاجر</small></div>
   <div class="home-cards two">
     <div class="home-card" onclick="openAllStores()" style="background:linear-gradient(160deg,#1A2744,#2A3C63)">
@@ -980,6 +986,7 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
       <button type="button" class="role-btn on" data-role="owner" onclick="setPropRole('owner')"><span class="r-i">✅</span>مالك</button>
       <button type="button" class="role-btn" data-role="agent" onclick="setPropRole('agent')"><span class="r-i">📜</span>وكيل عن المالك</button>
       <button type="button" class="role-btn" data-role="broker" onclick="setPropRole('broker')"><span class="r-i">🤝</span>وسيط</button>
+      <button type="button" class="role-btn" data-role="office" onclick="setPropRole('office')"><span class="r-i">🏢</span>مكتب عقاري مسجّل</button>
     </div></div>
   <div class="field"><label class="lbl">نوع العقار</label><select class="inp" id="pf-type"><option value="land">🌍 أرض</option><option value="house">🏠 منزل</option><option value="apartment">🏢 شقة</option><option value="shop">🏪 محل</option><option value="farm">🌾 مزرعة</option><option value="office">🏛️ مكتب / مبنى</option></select></div>
   <div class="field"><label class="lbl">نوع العرض</label><select class="inp" id="pf-deal"><option value="sale">للبيع</option><option value="rent">للإيجار</option></select></div>
@@ -1014,7 +1021,7 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
   <div class="pr-chips" id="props-type-chips"></div>
   <div id="props-count" style="color:#9CA3AF;font-size:0.74rem;margin:2px 0 8px"></div>
   <div class="pr-grid" id="props-list"></div>
-  <button class="btn-navy" style="width:100%;margin-top:14px" onclick="closeModal('modal-props');openPropForm()">🏠 انشر عقارك</button>
+  <div style="display:flex;gap:8px;margin-top:14px"><button class="btn-navy" style="flex:1" onclick="closeModal('modal-props');openPropForm()">🏠 انشر عقارك</button><button type="button" onclick="closeModal('modal-props');openOffices()" style="flex:1;border:2px solid #C9933A;background:#FFF8E8;color:#1A2744;border-radius:12px;font-weight:900;cursor:pointer;font-family:Tajawal,sans-serif">🏢 المكاتب الموثّقة</button></div>
 </div></div>
 
 <!-- ═══ عقارات: التفاصيل ═══ -->
@@ -1035,6 +1042,38 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
     <div id="tanks-list" class="pr-grid"></div>
     <button class="btn-navy" style="width:100%;margin-top:14px" onclick="contactPlatformWhatsApp()">📨 اطلب عرض سعر / تواصل معنا</button>
   </div>
+</div></div>
+
+
+<!-- ═══ تسجيل مكتب عقاري ═══ -->
+<div class="overlay hidden" id="modal-office-form"><div class="modal modal-sm" style="max-height:92vh;overflow-y:auto">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><h3 style="color:#1A2744;font-weight:900;font-size:1.05rem">🏢 تسجيل مكتب عقاري</h3><button onclick="closeModal('modal-office-form')" style="background:none;border:none;font-size:1.4rem;color:#9CA3AF;cursor:pointer">✕</button></div>
+  <p style="color:#6B7280;font-size:0.78rem;margin-bottom:12px;line-height:1.7">بعد اعتماد أوراق مكتبك تظهر شارة «مكتب موثّق» على عقاراتك، ويمكنك النشر بصفة مكتب.</p>
+  <div class="field"><label class="lbl">اسم المكتب</label><input class="inp" id="of-name"></div>
+  <div class="field"><label class="lbl">اسم مدير المكتب</label><input class="inp" id="of-owner"></div>
+  <div class="field"><label class="lbl">المدينة</label><input class="inp" id="of-city"></div>
+  <div class="field"><label class="lbl">العنوان (اختياري)</label><input class="inp" id="of-address"></div>
+  <div class="field"><label class="lbl">رقم الترخيص (اختياري)</label><input class="inp" id="of-license"></div>
+  <div class="field"><label class="lbl">الدولة</label><select class="inp" id="of-country"><option value="+249" selected>🇸🇩 السودان (+249)</option><option value="+966">🇸🇦 السعودية (+966)</option><option value="+20">🇪🇬 مصر (+20)</option><option value="+971">🇦🇪 الإمارات (+971)</option><option value="+90">🇹🇷 تركيا (+90)</option></select></div>
+  <div class="field"><label class="lbl">رقم المكتب (واتساب)</label><input class="inp" id="of-phone" inputmode="numeric" placeholder="912345678"></div>
+  <div class="field"><label class="lbl">شعار المكتب (اختياري)</label>
+    <div id="of-logo-ph" onclick="document.getElementById('of-logo-input').click()" style="background:#F4F6FA;border:2px dashed #D8D3C6;border-radius:12px;padding:12px;text-align:center;cursor:pointer;color:#6B7280;font-size:0.8rem">🖼️ اضغط لرفع الشعار</div>
+    <div id="of-logo-prev"></div><input type="file" id="of-logo-input" accept="image/*" style="display:none" onchange="uploadOfficeImage(this,'logo')"></div>
+  <div class="field" style="background:#FFF8E8;border:1px solid #F0D98A;border-radius:12px;padding:11px"><label class="lbl">📄 ترخيص المكتب أو السجل التجاري</label>
+    <div style="color:#6B7280;font-size:0.72rem;margin-bottom:7px;line-height:1.6">صوّر الورقة بوضوح (حتى 3 صور). تُراجَع من الإدارة فقط.</div>
+    <div id="of-doc-ph" onclick="document.getElementById('of-doc-input').click()" style="background:#fff;border:2px dashed #D8B66A;border-radius:12px;padding:14px;text-align:center;cursor:pointer;color:#8A6410;font-size:0.8rem;font-weight:800">📎 اضغط لرفع صورة الأوراق</div>
+    <div id="of-docs" style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:8px"></div>
+    <input type="file" id="of-doc-input" accept="image/*" style="display:none" onchange="uploadOfficeImage(this,'doc')"></div>
+  <label style="display:flex;gap:8px;align-items:flex-start;font-size:0.76rem;color:#4B5563;line-height:1.6;margin-bottom:10px"><input type="checkbox" id="of-ack" style="margin-top:3px"> أقرّ بصحة بيانات المكتب والأوراق المرفقة.</label>
+  <div id="of-err" style="color:#D9534F;font-size:0.8rem;margin-bottom:8px"></div>
+  <button class="btn-navy" id="of-submit" style="width:100%" onclick="submitOffice()">إرسال طلب التسجيل ✓</button>
+</div></div>
+
+<!-- ═══ دليل المكاتب ═══ -->
+<div class="overlay hidden" id="modal-offices"><div class="modal" style="max-width:520px;max-height:93vh;overflow-y:auto">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h3 style="color:#1A2744;font-weight:900;font-size:1.1rem">🏢 المكاتب العقارية الموثّقة</h3><button onclick="closeModal('modal-offices')" style="background:none;border:none;font-size:1.4rem;color:#9CA3AF;cursor:pointer">✕</button></div>
+  <div id="offices-list" class="pr-grid"></div>
+  <button class="btn-navy" style="width:100%;margin-top:14px" onclick="closeModal('modal-offices');openOfficeForm()">🏢 سجّل مكتبك</button>
 </div></div>
 
 <div class="overlay hidden" id="modal-all-stores">
@@ -5017,6 +5056,7 @@ window.installFromBrowser=installFromBrowser;
 window.triggerAppInstall=triggerAppInstall;
 
 // ══════════════ العقارات (properties) ══════════════
+var officesList=[], officeDocImgs=[], officeLogoUrl="";
 var propsList=[], propImgs=[], propDocImgs=[], propRole="owner";
 var propFilter={deal:"all",type:"all",q:""}, propViewImgs=[];
 const PROP_TYPES={land:"🌍 أرض",house:"🏠 منزل",apartment:"🏢 شقة",shop:"🏪 محل",farm:"🌾 مزرعة",office:"🏛️ مكتب / مبنى"};
@@ -5024,13 +5064,20 @@ const PROP_DEALS={sale:"للبيع",rent:"للإيجار"};
 const PROP_ROLES={
   owner:{n:"مالك",ico:"✅",doc:"📄 صورة سند الملكية أو شهادة البحث"},
   agent:{n:"وكيل عن المالك",ico:"📜",doc:"📄 صورة الوكالة الرسمية + إثبات المالك"},
-  broker:{n:"وسيط",ico:"🤝",doc:"📄 ترخيص السمسرة أو تفويض كتابي من المالك"}
+  broker:{n:"وسيط",ico:"🤝",doc:"📄 ترخيص السمسرة أو تفويض كتابي من المالك"},
+  office:{n:"مكتب عقاري",ico:"🏢",doc:"📄 تفويض المالك أو عقد الوساطة للعقار (المكتب مسجّل ومعتمد مسبقاً)"}
 };
 function pEsc(t){ return String(t==null?"":t).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
 function pPrice(p){ var n=Number(p.price)||0; return n>0 ? n.toLocaleString("ar")+" ج.س" : "السعر عند التواصل"; }
 function approvedProps(){ return (propsList||[]).filter(function(x){return x.status==="approved";}).sort(function(a,b){return (b.approvedAt||0)-(a.approvedAt||0);}); }
 
 function startPropsListener(){
+  onSnapshot(collection(db,"offices"), function(snap){
+    officesList=snap.docs.map(function(d){return d.data();});
+    if(isAdmin && activeTab==="manage") renderPendingRequests();
+    var m=document.getElementById("modal-offices");
+    if(m && !m.classList.contains("hidden")) renderOfficesList();
+  });
   onSnapshot(collection(db,"properties"), function(snap){
     propsList=snap.docs.map(function(d){return d.data();});
     if(isAdmin && activeTab==="manage") renderPendingRequests();
@@ -5097,13 +5144,18 @@ async function submitProperty(){
   if(!name){e.textContent="أدخل اسمك";return;}
   if(!/^\d{6,15}$/.test(phone.replace(/\D/g,""))){e.textContent="رقم غير صحيح";return;}
   if(!document.getElementById("pf-ack").checked){e.textContent="يجب الإقرار بصحة البيانات";return;}
+  var off=null;
+  if(propRole==="office"){
+    off=(officesList||[]).find(function(o){return o.status==="approved" && waNum(o.phone)===waNum(phone);});
+    if(!off){ e.textContent="هذا الرقم غير مسجّل كمكتب معتمد. سجّل مكتبك أولاً وانتظر الاعتماد، أو استخدم رقم المكتب المسجّل."; return; }
+  }
   e.textContent=""; btn.disabled=true; btn.textContent="جاري الإرسال...";
   var id="PR-"+Date.now()+"-"+Math.random().toString(36).slice(2,6);
   try{
     await setDoc(doc(db,"properties",id),{
       id:id,title:title,type:document.getElementById("pf-type").value,deal:document.getElementById("pf-deal").value,
       city:city,district:g("pf-district"),area:area,price:price,desc:g("pf-desc"),
-      images:propImgs.slice(),image:propImgs[0],role:propRole,ownerName:name,phone:phone,
+      images:propImgs.slice(),image:propImgs[0],role:propRole,ownerName:name,phone:phone,officeId:off?off.id:"",officeName:off?off.officeName:"",
       status:"pending",createdAt:Date.now()
     });
     await setDoc(doc(db,"propDocs",id),{id:id,role:propRole,docs:propDocImgs.slice(),createdAt:Date.now()});
@@ -5133,7 +5185,7 @@ function renderPropsList(keepChips){
   var list=approvedProps().filter(function(p){
     if(propFilter.deal!=="all" && p.deal!==propFilter.deal) return false;
     if(propFilter.type!=="all" && p.type!==propFilter.type) return false;
-    if(q){ var hay=((p.title||"")+" "+(p.city||"")+" "+(p.district||"")+" "+(p.desc||"")).toLowerCase(); if(hay.indexOf(q)===-1) return false; }
+    if(q){ var hay=((p.title||"")+" "+(p.city||"")+" "+(p.district||"")+" "+(p.desc||"")+" "+(p.officeName||"")).toLowerCase(); if(hay.indexOf(q)===-1) return false; }
     return true;
   });
   document.getElementById("props-count").textContent=list.length+" عقار";
@@ -5159,7 +5211,7 @@ function openPropView(id){
     +'<div style="color:#B8862B;font-weight:900;font-size:1.25rem;margin-top:12px">'+pEsc(pPrice(p))+'</div>'
     +'<h2 style="color:#1A2744;font-weight:900;font-size:1.08rem;margin:4px 0 6px">'+pEsc(p.title)+'</h2>'
     +'<div><span class="pr-tag '+(p.deal==="rent"?'rent':'sale')+'">'+(PROP_DEALS[p.deal]||"")+'</span><span class="pr-tag role">'+(PROP_TYPES[p.type]||"")+'</span></div>'
-    +'<div class="pv-grid"><div class="pv-cell"><span>المساحة</span><b>'+pEsc(p.area)+' م²</b></div><div class="pv-cell"><span>المدينة</span><b>'+pEsc(p.city)+'</b></div>'+(p.district?'<div class="pv-cell"><span>الحي</span><b>'+pEsc(p.district)+'</b></div>':'')+'<div class="pv-cell"><span>المعلن</span><b>'+role.n+'</b></div></div>'
+    +'<div class="pv-grid"><div class="pv-cell"><span>المساحة</span><b>'+pEsc(p.area)+' م²</b></div><div class="pv-cell"><span>المدينة</span><b>'+pEsc(p.city)+'</b></div>'+(p.district?'<div class="pv-cell"><span>الحي</span><b>'+pEsc(p.district)+'</b></div>':'')+'<div class="pv-cell"><span>المعلن</span><b>'+(p.officeName?pEsc(p.officeName):role.n)+'</b></div></div>'
     +(p.desc?'<div style="background:#FAFAF7;border:1px solid #EEF0F4;border-radius:11px;padding:12px;color:#4B5563;font-size:0.86rem;line-height:1.8;white-space:pre-wrap;margin-bottom:12px">'+pEsc(p.desc)+'</div>':'')
     +'<div class="ver-box">'+role.ico+' تم التحقق من أوراق المعلن بصفته: '+role.n+'<br><span style="font-weight:600;font-size:0.74rem">راجعت المنصة المستند المرفق قبل النشر. ننصح دائماً بمعاينة العقار والتأكد من الأوراق قبل أي دفع.</span></div>'
     +'<div style="display:flex;gap:8px;margin-top:14px"><button class="btn-navy" style="flex:2" data-id="'+pEsc(p.id)+'" onclick="contactProperty(this.dataset.id)">📱 تواصل واتساب</button><button type="button" data-id="'+pEsc(p.id)+'" onclick="shareProperty(this.dataset.id)" style="flex:1;border:1.5px solid #E5E0D8;background:#fff;color:#4B5563;border-radius:12px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif">🔗 شارك</button></div>';
@@ -5191,6 +5243,23 @@ function checkUrlProp(){
 }
 
 // ── مراجعة المالك ──
+function officePendingHtml(){
+  var btn='font-family:Tajawal,sans-serif;font-weight:800;cursor:pointer;border:none;border-radius:9px;padding:9px;';
+  var pend=(officesList||[]).filter(function(x){return x.status==="pending";}).sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
+  var live=(officesList||[]).filter(function(x){return x.status==="approved";});
+  var h=pend.map(function(o){
+    return '<div style="background:#FFF8E8;border:1px solid #F0D98A;border-radius:12px;padding:13px;margin-bottom:10px">'
+      +'<div style="font-weight:800;color:#1A2744;margin-bottom:5px">🏢 تسجيل مكتب: '+pEsc(o.officeName)+'</div>'
+      +'<div style="font-size:0.8rem;color:#374151;line-height:1.8">المدير: '+pEsc(o.ownerName)+' · <a href="https://wa.me/'+waNum(o.phone)+'" target="_blank" style="color:#2E7D5E;font-weight:700">'+pEsc(o.phone)+' 📱</a><br>'+pEsc(o.city)+(o.address?' — '+pEsc(o.address):'')+(o.licenseNo?'<br>رقم الترخيص: '+pEsc(o.licenseNo):'')+'</div>'
+      +(o.logo?'<img src="'+pEsc(o.logo)+'" style="width:64px;height:64px;object-fit:cover;border-radius:10px;margin-top:8px">':'')
+      +'<button type="button" data-id="'+pEsc(o.id)+'" onclick="viewPropDocs(this.dataset.id)" style="'+btn+'background:#1A2744;color:#fff;width:100%;margin-top:8px">📄 عرض أوراق المكتب</button>'
+      +'<div id="pd-'+pEsc(o.id)+'" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"></div>'
+      +'<div style="display:flex;gap:8px;margin-top:10px"><button data-id="'+pEsc(o.id)+'" onclick="approveOffice(this.dataset.id)" style="'+btn+'flex:1;background:#2E7D5E;color:#fff">✓ اعتماد المكتب</button><button data-id="'+pEsc(o.id)+'" onclick="rejectOffice(this.dataset.id)" style="'+btn+'flex:1;background:#FEE;color:#D9534F">✕ رفض</button></div></div>';
+  }).join("");
+  var mg='<div style="background:#F4F6FA;border-radius:12px;padding:13px;margin-bottom:12px"><div style="font-weight:800;color:#1A2744;font-size:0.88rem;margin-bottom:8px">🏢 المكاتب المعتمدة ('+live.length+')</div>'
+    +(live.length?live.map(function(o){return '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-top:1px solid #E5E7EB;font-size:0.8rem"><span style="color:#374151">'+pEsc(o.officeName)+' · '+pEsc(o.city)+'</span><button data-id="'+pEsc(o.id)+'" onclick="deleteOffice(this.dataset.id)" style="font-family:Tajawal,sans-serif;background:#FEE;color:#D9534F;border:none;border-radius:8px;padding:5px 10px;font-weight:800;cursor:pointer">حذف</button></div>';}).join(""):'<div style="color:#9CA3AF;font-size:0.78rem">لا توجد مكاتب معتمدة</div>')+'</div>';
+  return h+mg;
+}
 function propPendingHtml(){
   var pend=(propsList||[]).filter(function(x){return x.status==="pending";}).sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
   var live=approvedProps();
@@ -5207,7 +5276,7 @@ function propPendingHtml(){
   }).join("");
   var mg='<div style="background:#F4F6FA;border-radius:12px;padding:13px;margin-bottom:12px"><div style="font-weight:800;color:#1A2744;font-size:0.88rem;margin-bottom:8px">🏡 العقارات المنشورة ('+live.length+')</div>'
     +(live.length?live.map(function(p){return '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-top:1px solid #E5E7EB;font-size:0.8rem"><span style="color:#374151">'+pEsc(p.title)+'</span><button data-id="'+pEsc(p.id)+'" onclick="deleteProperty(this.dataset.id)" style="font-family:Tajawal,sans-serif;background:#FEE;color:#D9534F;border:none;border-radius:8px;padding:5px 10px;font-weight:800;cursor:pointer">حذف</button></div>';}).join(""):'<div style="color:#9CA3AF;font-size:0.78rem">لا توجد عقارات منشورة</div>')+'</div>';
-  return mg+h;
+  return officePendingHtml()+mg+h;
 }
 async function viewPropDocs(id){
   var box=document.getElementById("pd-"+id); if(!box) return;
@@ -5274,6 +5343,97 @@ window.setPropQ=setPropQ; window.setPropFilter=setPropFilter; window.openPropVie
 window.contactProperty=contactProperty; window.shareProperty=shareProperty; window.viewPropDocs=viewPropDocs;
 window.approveProperty=approveProperty; window.rejectProperty=rejectProperty; window.deleteProperty=deleteProperty;
 window.openTanks=openTanks; window.openTankProduct=openTankProduct;
+
+// ══════════════ المكاتب العقارية ══════════════
+async function uploadOfficeImage(input,kind){
+  var f=input.files[0]; if(!f) return;
+  var err=document.getElementById("of-err"), ph=document.getElementById(kind==="logo"?"of-logo-ph":"of-doc-ph");
+  err.textContent="";
+  if(kind==="doc" && officeDocImgs.length>=3){ err.textContent="الحد الأقصى 3 صور للأوراق"; input.value=""; return; }
+  if(f.size>5*1024*1024){ err.textContent="حجم الصورة كبير (الحد 5MB)"; input.value=""; return; }
+  var orig=ph.innerHTML; ph.textContent="جاري الرفع والتحقق...";
+  try{
+    var fd=new FormData(); fd.append("image",f);
+    var r=await fetch("https://api.imgbb.com/1/upload?key=16b4262b9ff85a10c0f3a4834a847184",{method:"POST",body:fd});
+    var d=await r.json(); var url=(d&&d.data&&d.data.url)?d.data.url:"";
+    if(!url){ err.textContent="فشل رفع الصورة، جرّب مرة أخرى"; }
+    else if(!(await verifyImageLoads(url))){ err.textContent="الصورة رُفعت لكن رابطها لا يعمل، أعد المحاولة"; }
+    else { if(kind==="logo") officeLogoUrl=url; else officeDocImgs.push(url); renderOfficeThumbs(); showToast("تمت إضافة الصورة ✓"); }
+  }catch(e){ err.textContent="فشل الرفع — تحقق من الاتصال"; }
+  ph.innerHTML=orig; input.value="";
+}
+function renderOfficeThumbs(){
+  document.getElementById("of-docs").innerHTML=officeDocImgs.map(function(u,i){
+    return '<div style="position:relative"><img src="'+pEsc(u)+'" style="width:100%;height:78px;object-fit:cover;border-radius:9px;border:1px solid #E5E0D8"><button type="button" data-i="'+i+'" onclick="removeOfficeDoc(this.dataset.i)" style="position:absolute;top:3px;left:3px;background:#D9534F;color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:0.7rem;cursor:pointer">✕</button></div>';
+  }).join("");
+  document.getElementById("of-logo-prev").innerHTML=officeLogoUrl?'<img src="'+pEsc(officeLogoUrl)+'" style="width:70px;height:70px;object-fit:cover;border-radius:12px;margin-top:8px">':"";
+}
+function removeOfficeDoc(i){ officeDocImgs.splice(parseInt(i),1); renderOfficeThumbs(); }
+function openOfficeForm(){
+  ["of-name","of-owner","of-city","of-address","of-license","of-phone"].forEach(function(id){document.getElementById(id).value="";});
+  document.getElementById("of-ack").checked=false; document.getElementById("of-err").textContent="";
+  officeDocImgs=[]; officeLogoUrl=""; renderOfficeThumbs();
+  document.getElementById("modal-office-form").classList.remove("hidden");
+}
+async function submitOffice(){
+  var g=function(id){return document.getElementById(id).value.trim();};
+  var e=document.getElementById("of-err"), btn=document.getElementById("of-submit");
+  var name=g("of-name"), owner=g("of-owner"), city=g("of-city");
+  var phone=document.getElementById("of-country").value+g("of-phone").replace(/^0+/,"");
+  if(!name){e.textContent="أدخل اسم المكتب";return;}
+  if(!owner){e.textContent="أدخل اسم مدير المكتب";return;}
+  if(!city){e.textContent="أدخل المدينة";return;}
+  if(!/^\d{6,15}$/.test(phone.replace(/\D/g,""))){e.textContent="رقم غير صحيح";return;}
+  if(!officeDocImgs.length){e.textContent="ارفع صورة ترخيص المكتب أو السجل التجاري";return;}
+  if(!document.getElementById("of-ack").checked){e.textContent="يجب الإقرار بصحة البيانات";return;}
+  var dup=(officesList||[]).find(function(o){return waNum(o.phone)===waNum(phone) && o.status!=="rejected";});
+  if(dup){ e.textContent=dup.status==="approved"?"هذا الرقم مسجّل كمكتب معتمد بالفعل":"طلب تسجيل هذا الرقم قيد المراجعة"; return; }
+  e.textContent=""; btn.disabled=true; btn.textContent="جاري الإرسال...";
+  var id="OF-"+Date.now()+"-"+Math.random().toString(36).slice(2,6);
+  try{
+    await setDoc(doc(db,"offices",id),{id:id,officeName:name,ownerName:owner,city:city,address:g("of-address"),licenseNo:g("of-license"),phone:phone,logo:officeLogoUrl,status:"pending",createdAt:Date.now()});
+    await setDoc(doc(db,"propDocs",id),{id:id,role:"office",docs:officeDocImgs.slice(),createdAt:Date.now()});
+    closeModal("modal-office-form");
+    try{ notifyAdmin("🏢 طلب تسجيل مكتب عقاري\n"+name+"\n"+owner+" - "+phone+"\n"+city); }catch(x){}
+    alert("تم إرسال طلب تسجيل مكتبك ✓\nبعد مراجعة أوراقك واعتمادها ستظهر شارة «مكتب موثّق» ويمكنك نشر عقاراتك بصفة مكتب.");
+  }catch(err){ e.textContent="تعذر الإرسال، تحقق من الاتصال وأعد المحاولة"; }
+  btn.disabled=false; btn.textContent="إرسال طلب التسجيل ✓";
+}
+async function approveOffice(id){
+  try{ await updateDoc(doc(db,"offices",id),{status:"approved",approvedAt:Date.now()}); showToast("تم اعتماد المكتب ✓"); }
+  catch(e){ showToast("تعذر الاعتماد"); }
+}
+async function rejectOffice(id){
+  if(!confirm("رفض طلب تسجيل هذا المكتب؟")) return;
+  try{ await updateDoc(doc(db,"offices",id),{status:"rejected"}); showToast("تم الرفض"); }
+  catch(e){ showToast("تعذر الرفض"); }
+}
+async function deleteOffice(id){
+  if(!confirm("حذف هذا المكتب نهائياً؟")) return;
+  try{ await deleteDoc(doc(db,"offices",id)); await deleteDoc(doc(db,"propDocs",id)); showToast("تم الحذف"); }
+  catch(e){ showToast("تعذر الحذف"); }
+}
+function openOffices(){ document.getElementById("modal-offices").classList.remove("hidden"); renderOfficesList(); }
+function renderOfficesList(){
+  var list=(officesList||[]).filter(function(o){return o.status==="approved";});
+  var box=document.getElementById("offices-list");
+  if(!list.length){ box.innerHTML='<div style="text-align:center;padding:30px 10px;color:#9CA3AF"><div style="font-size:2.4rem">🏢</div><div style="font-weight:800;margin-top:6px">لا توجد مكاتب معتمدة بعد</div></div>'; return; }
+  box.innerHTML=list.map(function(o){
+    var n=approvedProps().filter(function(p){return p.officeId===o.id;}).length;
+    return '<div class="pr-card" style="cursor:default"><div class="pc-body" style="display:flex;gap:11px;align-items:center">'
+      +'<div style="width:54px;height:54px;border-radius:12px;background:#F4F6FA;display:grid;place-items:center;font-size:1.6rem;overflow:hidden;flex-shrink:0;position:relative">🏢'+(o.logo?'<img src="'+pEsc(o.logo)+'" style="position:absolute;inset:0;width:54px;height:54px;object-fit:cover" onerror="this.style.display=\'none\'">':'')+'</div>'
+      +'<div style="flex:1;min-width:0"><div class="pc-title">'+pEsc(o.officeName)+' <span class="pr-tag role">🏢 مكتب موثّق</span></div><div class="pc-loc">📍 '+pEsc(o.city)+(o.address?' · '+pEsc(o.address):'')+'</div><div class="pc-loc">'+n+' عقار منشور</div></div></div>'
+      +'<div style="display:flex;gap:7px;padding:0 13px 12px"><button type="button" data-n="'+pEsc(o.officeName)+'" onclick="openOfficeProps(this.dataset.n)" style="flex:1;border:1.5px solid #E5E0D8;background:#fff;color:#1A2744;border-radius:10px;padding:8px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.78rem">🏡 عقارات المكتب</button><button type="button" data-p="'+pEsc(o.phone)+'" onclick="window.open(\'https://wa.me/\'+waNum(this.dataset.p),\'_blank\')" style="flex:1;border:none;background:#2E7D5E;color:#fff;border-radius:10px;padding:8px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.78rem">📱 واتساب</button></div></div>';
+  }).join("");
+}
+function openOfficeProps(name){
+  closeModal("modal-offices"); openProps("all","all");
+  document.getElementById("props-q").value=name; setPropQ(name);
+}
+window.openOfficeForm=openOfficeForm; window.submitOffice=submitOffice; window.uploadOfficeImage=uploadOfficeImage;
+window.removeOfficeDoc=removeOfficeDoc; window.approveOffice=approveOffice; window.rejectOffice=rejectOffice;
+window.deleteOffice=deleteOffice; window.openOffices=openOffices; window.openOfficeProps=openOfficeProps;
+
 </script>
 </body>
 </html>
