@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="السوق السوداني الموثوق - منتجات حقيقية من تجار سودانيين">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="application-name" content="منصة الريان">
+<meta name="application-name" content="منصة الريان السوق السوداني">
 <meta name="msapplication-TileColor" content="#1A2744">
 <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
@@ -29,9 +29,9 @@ gtag("config", "G-XS52VKE8GW");
 <link rel="apple-touch-icon" href="/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="منصة الريان">
-<title>منصة الريان — السوق السوداني</title>
-<meta property="og:title" content="منصة الريان — السوق السوداني الموثوق">
+<meta name="apple-mobile-web-app-title" content="منصة الريان السوق السوداني">
+<title>منصة الريان السوق السوداني</title>
+<meta property="og:title" content="منصة الريان السوق السوداني">
 <meta property="og:description" content="منتجات حقيقية من تجار سودانيين">
 <meta property="og:image" content="">
 <meta property="og:type" content="website">
@@ -657,8 +657,8 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
   </nav>
   <div class="hero">
     <div class="hero-badge" id="hero-counts">🟢 0 تاجر · 0 منتج</div>
-    <h1><span style="font-size:1.2em">🏠</span> منصة <span>الريان</span> العقارية</h1>
-    <p>عقارات موثّقة المعلن · خزانات مياه · وسوق منتجات</p>
+    <h1>منصة <span>الريان</span><br>السوق السوداني</h1>
+    <p>عقارات موثّقة · منصة الريان لخزانات المياه · متاجر سودانية</p>
     <button type="button" id="install-app-btn" onclick="triggerAppInstall()" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#C9933A,#E8B660);color:#1A2744;border:none;border-radius:10px;padding:10px 22px;font-weight:800;font-size:0.9rem;cursor:pointer;margin-top:16px;font-family:Tajawal,sans-serif">📲 ثبّت تطبيق الريان</button>
   </div>
   <div class="re-hero-card" onclick="openProps('all','all')">
@@ -667,10 +667,10 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
     <div class="rh-go">تصفّح ←</div>
   </div>
   <div class="re-two">
-    <div class="re-mini" onclick="openTanks()" style="background:linear-gradient(160deg,#0E5A8A,#1C86C6);color:#fff"><div class="m-ico">💧</div><div class="m-t">خزانات المياه</div><div class="m-s">متجر الريان للخزانات</div></div>
+    <div class="re-mini" onclick="openTanks()" style="background:linear-gradient(160deg,#0E5A8A,#1C86C6);color:#fff"><div class="m-ico">💧</div><div class="m-t">خزانات المياه</div><div class="m-s">منصة الريان لخزانات المياه</div></div>
     <div class="re-mini" onclick="openPropForm()" style="background:linear-gradient(160deg,#F2CE73,#D9A840);color:#12203A"><div class="m-ico">🏠</div><div class="m-t">انشر عقارك</div><div class="m-s">مالك · وكيل · وسيط</div></div>
   </div>
-  <div class="sec-head"><b>🛒 سوق المنتجات</b><small>القسم الثانوي</small></div>
+  <div class="sec-head"><b>🏬 المتاجر والقناة</b><small>منتجات التجار داخل المتاجر</small></div>
   <div class="home-cards two">
     <div class="home-card" onclick="openAllStores()" style="background:linear-gradient(160deg,#1A2744,#2A3C63)">
       <div class="home-card-ico">🏬</div><div class="home-card-txt"><div class="home-card-title">المتاجر</div><div class="home-card-sub">تصفّح كل المتاجر</div></div>
@@ -687,6 +687,8 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
       <button class="biz-item gold" onclick="startJoin('ad')"><span class="bi-q">عايز تعمل إعلان؟</span><span class="bi-a">📢 انشر إعلانك</span></button>
     </div>
   </div>
+  <div id="home-ads" style="display:none"><div class="sec-head"><b>📢 إعلانات</b></div><div class="products-grid" id="home-ads-grid" style="padding:8px 16px 10px"></div></div>
+  <div style="display:none" aria-hidden="true">
   <div class="search-wrap">
     <div class="search-box">
       <span class="search-ico">🔍</span>
@@ -696,6 +698,7 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
     <div id="search-hint" class="search-hint hidden"></div>
   </div>
   <div class="cats-strip" id="cats-strip"></div>
+  </div>
   <div id="adspace-banner" onclick="openAdSpace()" style="display:none;pointer-events:none;margin:8px 16px 18px;background:linear-gradient(120deg,#1A2744 0%,#2A3C63 55%,#B8862B 130%);border-radius:20px;padding:0;cursor:pointer;position:relative;overflow:hidden;box-shadow:0 12px 32px rgba(26,39,68,.3);border:1px solid rgba(242,206,115,.25)">
     <div style="position:absolute;top:-20px;left:-20px;width:110px;height:110px;background:rgba(217,168,64,.18);border-radius:50%"></div>
     <div id="adspace-content" style="position:relative"></div>
@@ -703,7 +706,7 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
   </div>
 
   <div class="filters-wrap" style="display:none"><div class="filters" id="filters-bar"></div></div>
-  <div id="products-container"></div>
+  <div id="products-container" style="display:none"></div>
   <button class="float-btn" onclick="openLogin()">🏪 دخول التجار</button>
 </div>
 
@@ -1025,7 +1028,7 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
   <div style="background:linear-gradient(160deg,#0E5A8A,#1C86C6);color:#fff;padding:20px 18px;border-radius:18px 18px 0 0;position:relative">
     <button onclick="closeModal('modal-tanks')" style="position:absolute;top:10px;left:12px;background:none;border:none;font-size:1.4rem;color:#fff;cursor:pointer">✕</button>
     <div style="font-size:2.2rem">💧</div>
-    <div style="font-weight:900;font-size:1.2rem;margin-top:4px">متجر الريان لخزانات المياه</div>
+    <div style="font-weight:900;font-size:1.2rem;margin-top:4px">منصة الريان لخزانات المياه</div>
     <div style="font-size:0.78rem;opacity:.9;margin-top:4px;line-height:1.7">خزانات بأحجام ومواد مختلفة — اطلب مباشرة أو استفسر</div>
   </div>
   <div style="padding:14px 16px 18px">
@@ -1647,6 +1650,7 @@ function listenAll(){
   onSnapshot(collection(db,"ads"), snap=>{
     adsList=snap.docs.map(d=>d.data());
     renderProducts((document.querySelector(".filter-btn.active")||{}).textContent||"الكل");
+    renderHomeAds();
     if(isAdmin && activeTab==="manage") renderPendingRequests();
   });
   startPropsListener();
@@ -5230,7 +5234,26 @@ async function deleteProperty(id){
 }
 
 // ══════════════ متجر الخزانات ══════════════
+function renderHomeAds(){
+  var box=document.getElementById("home-ads"), g=document.getElementById("home-ads-grid");
+  if(!box||!g) return;
+  var ads=[]; try{ ads=activeAds(); }catch(e){}
+  g.innerHTML=ads.map(adCardHtml).join("");
+  box.style.display=ads.length?"block":"none";
+}
+setInterval(function(){ try{ renderHomeAds(); }catch(e){} },60000);
+function findTanksStore(){
+  var ok=sellers.filter(function(x){return x.status!=="pending"&&x.status!=="rejected";});
+  var nm=function(x){return String(x.storeName||"");};
+  return ok.find(function(x){return nm(x).indexOf("الريان")>-1&&nm(x).indexOf("خزانات")>-1;})
+      || ok.find(function(x){return nm(x).indexOf("خزانات")>-1;}) || null;
+}
 function openTanks(){
+  var st=findTanksStore();
+  if(st){ openStore(st.id); return; }
+  openTanksFallback();
+}
+function openTanksFallback(){
   var ok=new Set(sellers.filter(function(x){return x.status!=="pending"&&x.status!=="rejected";}).map(function(x){return x.id;}));
   var list=products.filter(function(p){return ok.has(p.sellerId) && p.category==="خزانات ومياه";});
   var box=document.getElementById("tanks-list");
