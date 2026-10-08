@@ -833,6 +833,7 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
       <div id="tab-messages2" class="hidden"></div>
     </div>
       <div id="tab-realestate" class="hidden"></div>
+      <div id="tab-notify" class="hidden"></div>
       <div id="tab-manage" class="hidden"></div>
     </div>
   </div>
@@ -1227,7 +1228,7 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
   <div class="modal modal-sm">
     <h3 style="color:#1A2744;font-weight:900;font-size:1.05rem;margin-bottom:4px">🔑 دخول</h3>
     <p style="color:#6B7280;font-size:0.82rem;margin-bottom:16px">أدخل رقم هاتفك أو كلمة مرور المالك</p>
-    <input class="inp" id="l-phone" placeholder="رقم الهاتف أو كلمة مرور المالك" style="margin-bottom:10px">
+    <input class="inp" id="l-phone" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="رقم الهاتف أو كلمة مرور المالك" style="margin-bottom:10px">
     <div id="login-err" class="err-box hidden"></div>
     <div class="modal-btns">
       <button class="btn-back" onclick="closeModal('modal-login')">إلغاء</button>
@@ -1426,7 +1427,8 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
 <script type="module">
 // ══════════ FIREBASE ══════════
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, doc, setDoc, getDoc, getDocs, onSnapshot, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, doc, setDoc, getDoc, getDocs, onSnapshot, updateDoc, deleteDoc, query, orderBy, limit, deleteField } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, signOut, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getStorage, ref as storageRef, uploadBytes, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 const firebaseConfig = {
@@ -1440,6 +1442,10 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
+// حساب المالك في Firebase Authentication (كلمة المرور تُحدَّد في Firebase وليست في الصفحة)
+const ADMIN_EMAIL = "owner@alrayan-market.app";
+setPersistence(auth, browserSessionPersistence).catch(function(){});
 let adImagesArr=[], eaImagesArr=[];
 let eaImage="";
 let adContactTarget=null;
@@ -1542,7 +1548,6 @@ window.renderWalletCard=renderWalletCard;
 window.sellerWallet=sellerWallet;
 window.isSellerFrozen=isSellerFrozen;
 window.chargeLead=chargeLead;
-const ADMIN_PASS="alrayan2026";
 const SDG=n=>Number(n).toLocaleString("ar")+" ج.س";
 const TODAY=()=>new Date().toLocaleDateString("ar",{year:"numeric",month:"long",day:"numeric"});
 // قائمة دول العالم مع المفاتيح (السودان افتراضي)
@@ -1830,8 +1835,6 @@ async function notifyChatRecipient(chat,senderRole,previewText){
 }
 
 // ══════════ ADMIN WHATSAPP NOTIFICATIONS (via CallMeBot) ══════════
-const ADMIN_NOTIFY_PHONE = "249966009977";
-const ADMIN_NOTIFY_APIKEY = "7899312";
 
 function waNum(phone){
   var d=String(phone||"").replace(/\D/g,"");
@@ -1842,11 +1845,22 @@ window.waNum=waNum;
 
 function notifyAdmin(text){
   try{
-    text="🔔 الريان\n"+text;
+    text="🔔 الريان\n"+String(text||"");
     if(text.length>250) text=text.slice(0,247)+"...";
-    const url=`https://api.callmebot.com/whatsapp.php?phone=${ADMIN_NOTIFY_PHONE}&text=${encodeURIComponent(text)}&apikey=${ADMIN_NOTIFY_APIKEY}`;
-    fetch(url,{mode:"no-cors"}).catch(()=>{});
+    var id="NL-"+Date.now()+"-"+Math.random().toString(36).slice(2,6);
+    var ref=doc(db,"notifyLog",id);
+    var created=setDoc(ref,{id:id,text:text,status:"pending",createdAt:Date.now()}).then(function(){return true;}).catch(function(){return false;});
+    Promise.all([created,sendNotify(text)]).then(function(r){
+      if(r[0]) updateDoc(ref,{status:r[1].ok?"sent":"failed",sentAt:Date.now(),detail:String(r[1].detail||"").slice(0,180)}).catch(function(){});
+    });
   }catch(e){}
+}
+async function sendNotify(text){
+  try{
+    var res=await fetch("/.netlify/functions/notify-admin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:text}),keepalive:true});
+    var j=await res.json().catch(function(){return {};});
+    return {ok:!!(res.ok&&j.ok),detail:j.detail||j.error||("HTTP "+res.status)};
+  }catch(e){ return {ok:false,detail:"تعذر الوصول لدالة الإشعار"}; }
 }
 
 async function handleImgUpload(input){
@@ -2214,6 +2228,12 @@ function showAuthMode(mode){
 }
 function toggleAuthMode(){ showAuthMode(authMode === "login" ? "signup" : "login"); }
 
+async function hashPass(phone,pass){
+  try{
+    var buf=await crypto.subtle.digest("SHA-256",new TextEncoder().encode("alrayan|"+phone+"|"+pass));
+    return Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,"0");}).join("");
+  }catch(e){ return ""; }
+}
 async function submitCustomerAuth(){
   const phone = (document.getElementById("auth-country").value + document.getElementById("auth-phone").value.trim().replace(/^0+/,""));
   const pass = document.getElementById("auth-pass").value;
@@ -2227,7 +2247,9 @@ async function submitCustomerAuth(){
     try{
       const existing = await getDoc(doc(db,"customers",phone));
       if(existing.exists()){ err.textContent = "هذا الرقم مسجّل بالفعل، سجّل الدخول بدلاً من ذلك"; return; }
-      const acc = { phone, name, pass, createdAt: Date.now(), favorites: [] };
+      const passHash = await hashPass(phone, pass);
+      if(!passHash){ err.textContent = "تعذّر إنشاء الحساب على هذا المتصفح"; return; }
+      const acc = { phone, name, passHash, createdAt: Date.now(), favorites: [] };
       await setDoc(doc(db,"customers",phone), acc);
       currentCustomer = { phone, name, favorites: [] };
       finishCustomerAuth();
@@ -2237,7 +2259,10 @@ async function submitCustomerAuth(){
       const snap = await getDoc(doc(db,"customers",phone));
       if(!snap.exists()){ err.textContent = "لا يوجد حساب بهذا الرقم"; return; }
       const data = snap.data();
-      if(data.pass !== pass){ err.textContent = "كلمة المرور غير صحيحة"; return; }
+      const h = await hashPass(phone, pass);
+      const okPass = data.passHash ? (!!h && data.passHash === h) : (data.pass === pass);
+      if(!okPass){ err.textContent = "كلمة المرور غير صحيحة"; return; }
+      if(!data.passHash && h){ try{ await updateDoc(doc(db,"customers",phone),{ passHash: h, pass: deleteField() }); }catch(e){} }
       currentCustomer = { phone: data.phone, name: data.name, favorites: data.favorites || [] };
       finishCustomerAuth();
     }catch(e){ err.textContent = "تعذّر تسجيل الدخول، حاول مجدداً"; }
@@ -3089,15 +3114,16 @@ function switchTab(tab){
   activeTab=tab;
   document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
   event.target.classList.add("active");
-  ["tab-products","tab-orders","tab-admin","tab-messages","tab-manage","tab-realestate","tab-channel","tab-messages2","tab-mymessages"].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.add("hidden");});
+  ["tab-products","tab-orders","tab-admin","tab-messages","tab-manage","tab-realestate","tab-notify","tab-channel","tab-messages2","tab-mymessages"].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.add("hidden");});
   const cur=document.getElementById("tab-"+tab); if(cur)cur.classList.remove("hidden");
   if(tab==="channel") renderChannelAdmin();
+  if(tab==="notify") renderNotifyTab();
   if(tab==="messages2") renderPlatformMessages();
   if(tab==="mymessages") renderMyPlatformMessages();
 }
 
 function renderDashboard(){
-  if(!isAdmin){ var _re=document.getElementById("tab-realestate"); if(_re) _re.classList.add("hidden"); }
+  if(!isAdmin){ ["tab-realestate","tab-notify"].forEach(function(t){ var _e=document.getElementById(t); if(_e) _e.classList.add("hidden"); }); }
   if(isAdmin){renderAdminDashboard();return;}
   if(!currentSeller)return;
   const plan=PLANS.find(p=>p.id===currentSeller.plan)||PLANS[0];
@@ -3195,6 +3221,7 @@ function renderAdminDashboard(){
   document.getElementById("dash-sub").textContent="مرحباً، مالك المنصة";
   document.getElementById("dash-store-name").textContent="منصة الريان السوق السوداني";
   renderRealEstateTab();
+  renderNotifyTab();
   document.getElementById("dash-plan-badge").textContent="مالك المنصة";
   document.getElementById("dash-joined").textContent="";
   document.getElementById("dash-main-btn").textContent="";
@@ -3215,7 +3242,7 @@ function renderAdminDashboard(){
     <button class="tab-btn ${activeTab==="orders"?"active":""}" onclick="switchTab('orders')">📋 الطلبات</button>
     
     <button class="tab-btn ${activeTab==="manage"?"active":""}" onclick="switchTab('manage')">🏪 المتاجر</button>
-    <button class="tab-btn ${activeTab==="channel"?"active":""}" onclick="switchTab('channel')">📺 القناة</button><button class="tab-btn ${activeTab==="messages2"?"active":""}" onclick="switchTab('messages2')">📨 رسائل المنصة</button>`;
+    <button class="tab-btn ${activeTab==="channel"?"active":""}" onclick="switchTab('channel')">📺 القناة</button><button class="tab-btn ${activeTab==="messages2"?"active":""}" onclick="switchTab('messages2')">📨 رسائل المنصة</button><button class="tab-btn ${activeTab==="notify"?"active":""}" onclick="switchTab('notify')">🔔 الإشعارات${notifyFailedCount()?' <span style="color:#D9534F">●'+notifyFailedCount()+'</span>':''}</button>`;
   const aTab=document.getElementById("tab-admin");
   aTab.classList.toggle("hidden",activeTab!=="admin");
   aTab.innerHTML=`<div class="admin-grid">
@@ -3308,11 +3335,26 @@ function renderAdminDashboard(){
 
 // ══════════ LOGIN ══════════
 function openLogin(){document.getElementById("l-phone").value="";hideErr("login-err");document.getElementById("modal-login").classList.remove("hidden");}
-function doLogin(){
+async function doLogin(){
   const val=document.getElementById("l-phone").value.trim();
-  if(val===ADMIN_PASS){isAdmin=true;currentSeller=null;activeTab="admin";closeModal("modal-login");showView("dashboard");renderDashboard();return;}
+  if(!val) return showErr("login-err","أدخل رقم هاتفك أو كلمة مرور المالك");
   const found=sellers.find(s=>s.phone===val);
-  if(!found)return showErr("login-err","رقم الهاتف غير مسجل");
+  if(!found){
+    try{
+      await signInWithEmailAndPassword(auth, ADMIN_EMAIL, val);
+      isAdmin=true;currentSeller=null;activeTab="admin";
+      document.getElementById("l-phone").value="";
+      closeModal("modal-login");showView("dashboard");startAdminListeners();renderDashboard();
+    }catch(e){
+      var c=(e&&e.code)||"";
+      var m="رقم الهاتف غير مسجل أو كلمة المرور غير صحيحة";
+      if(c==="auth/too-many-requests") m="محاولات كثيرة، انتظر قليلاً ثم أعد المحاولة";
+      else if(c==="auth/network-request-failed") m="تحقق من الاتصال بالإنترنت";
+      else if(c==="auth/operation-not-allowed") m="دخول المالك غير مفعّل في Firebase (Email/Password)";
+      showErr("login-err",m);
+    }
+    return;
+  }
   currentSeller=found;isAdmin=false;activeTab="products";
   enableSellerPushNotifications(found.id);
   setTimeout(function(){
@@ -3324,7 +3366,7 @@ function doLogin(){
   closeModal("modal-login");showView("dashboard");renderDashboard();
 }
 document.getElementById("l-phone").addEventListener("keydown",e=>{if(e.key==="Enter")doLogin();});
-function doLogout(){currentSeller=null;isAdmin=false;showView("market");renderProducts("الكل");}
+function doLogout(){if(isAdmin){stopAdminListeners();signOut(auth).catch(function(){});}currentSeller=null;isAdmin=false;showView("market");renderProducts("الكل");}
 
 // ══════════ SHARE ══════════
 function openShare(){
@@ -5011,7 +5053,7 @@ async function submitProperty(){
     await setDoc(doc(db,"properties",id),{
       id:id,title:title,type:document.getElementById("pf-type").value,deal:document.getElementById("pf-deal").value,
       city:city,district:g("pf-district"),area:area,price:price,desc:g("pf-desc"),
-      images:propImgs.slice(),image:propImgs[0],role:propRole,ownerName:name,phone:phone,officeId:off?off.id:"",officeName:off?off.officeName:"",
+      images:propImgs.slice(),image:propImgs[0],role:propRole,ownerName:name,phone:off?off.phone:phone,officeId:off?off.id:"",officeName:off?off.officeName:"",
       status:"pending",createdAt:Date.now()
     });
     await setDoc(doc(db,"propDocs",id),{id:id,role:propRole,docs:propDocImgs.slice(),createdAt:Date.now()});
@@ -5232,6 +5274,55 @@ function waAskOwner(phone,msg){
   try{ if(confirm("تم الاعتماد ✓\nهل تريد إرسال رسالة للمعلن عبر واتساب؟")) window.open("https://wa.me/"+waNum(phone)+"?text="+encodeURIComponent(msg),"_blank"); }catch(e){}
 }
 
+
+
+// ══════════════ سجل إشعارات البوت (للمالك فقط) ══════════════
+var notifyLogs=[], _notifyUnsub=null;
+function startAdminListeners(){
+  if(_notifyUnsub) return;
+  try{
+    _notifyUnsub=onSnapshot(query(collection(db,"notifyLog"),orderBy("createdAt","desc"),limit(100)),function(snap){
+      notifyLogs=snap.docs.map(function(d){return d.data();});
+      if(isAdmin && (activeTab==="notify"||activeTab==="admin")) renderDashboard();
+    },function(err){ console.warn("notifyLog",err&&err.code); });
+  }catch(e){}
+}
+function stopAdminListeners(){ try{ if(_notifyUnsub) _notifyUnsub(); }catch(e){} _notifyUnsub=null; notifyLogs=[]; }
+function notifyFailedCount(){ return (notifyLogs||[]).filter(function(x){return x.status==="failed";}).length; }
+function renderNotifyTab(){
+  var el=document.getElementById("tab-notify"); if(!el) return;
+  el.classList.toggle("hidden",activeTab!=="notify");
+  if(activeTab!=="notify") return;
+  var L=notifyLogs||[];
+  var cnt=function(st){return L.filter(function(x){return x.status===st;}).length;};
+  var badge={sent:['✅ وصل','#E6F4EC','#2E7D5E'],failed:['❌ فشل','#FDECEC','#C62828'],pending:['⏳ غير مؤكد','#FFF4D6','#8A6410']};
+  var h='<div class="panel"><div class="panel-head"><span class="panel-title">🔔 سجل إشعارات البوت (آخر 100)</span></div>'
+    +'<div style="display:flex;gap:7px;flex-wrap:wrap;margin:6px 0 12px">'
+    +'<span class="pr-tag sale">✅ وصل '+cnt("sent")+'</span><span class="pr-tag" style="background:#FDECEC;color:#C62828">❌ فشل '+cnt("failed")+'</span><span class="pr-tag role">⏳ غير مؤكد '+cnt("pending")+'</span>'
+    +'<button type="button" onclick="testNotify()" style="margin-right:auto;font-family:Tajawal,sans-serif;background:#1A2744;color:#fff;border:none;border-radius:9px;padding:7px 12px;font-weight:800;cursor:pointer;font-size:0.76rem">📤 رسالة اختبار</button></div>'
+    +'<div style="color:#6B7280;font-size:0.74rem;line-height:1.7;margin-bottom:10px">كل حدث يُحفظ هنا حتى لو لم يصل واتساب. «غير مؤكد» يعني أن الزائر أغلق الصفحة قبل وصول الرد.</div>';
+  if(!L.length) h+='<div style="color:#9CA3AF;font-size:0.82rem;padding:10px 0">لا توجد إشعارات بعد</div>';
+  h+=L.map(function(n){
+    var b=badge[n.status]||badge.pending;
+    var t=new Date(n.createdAt||0).toLocaleString("ar");
+    return '<div style="border:1px solid #EEF0F4;border-radius:12px;padding:11px 12px;margin-bottom:8px;background:#fff">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px"><span style="background:'+b[1]+';color:'+b[2]+';font-size:0.7rem;font-weight:900;padding:3px 9px;border-radius:100px">'+b[0]+'</span><span style="color:#9CA3AF;font-size:0.7rem">'+pEsc(t)+'</span></div>'
+      +'<div style="color:#1A2744;font-size:0.8rem;line-height:1.7;white-space:pre-wrap">'+pEsc(n.text)+'</div>'
+      +(n.status==="failed"&&n.detail?'<div style="color:#C62828;font-size:0.72rem;margin-top:5px">السبب: '+pEsc(n.detail)+'</div>':'')
+      +(n.status!=="sent"?'<button type="button" data-id="'+pEsc(n.id)+'" onclick="resendNotify(this.dataset.id)" style="margin-top:8px;font-family:Tajawal,sans-serif;background:#FFF8E8;color:#8A6410;border:1.5px solid #F0D98A;border-radius:8px;padding:6px 12px;font-weight:800;cursor:pointer;font-size:0.74rem">🔁 إعادة الإرسال</button>':'')
+      +'</div>';
+  }).join("")+'</div>';
+  el.innerHTML=h;
+}
+async function resendNotify(id){
+  var n=(notifyLogs||[]).find(function(x){return x.id===id;}); if(!n) return;
+  showToast("جاري الإرسال...");
+  var r=await sendNotify(n.text);
+  try{ await updateDoc(doc(db,"notifyLog",id),{status:r.ok?"sent":"failed",sentAt:Date.now(),detail:String(r.detail||"").slice(0,180)}); }catch(e){}
+  showToast(r.ok?"تم الإرسال ✓":"فشل الإرسال");
+}
+function testNotify(){ notifyAdmin("✅ رسالة اختبار من لوحة المالك"); showToast("أُرسلت رسالة اختبار — تابع حالتها هنا"); }
+window.resendNotify=resendNotify; window.testNotify=testNotify;
 
 // ══════════════ طلبات الزبائن ══════════════
 var requestsList=[], rqKind="property", rqFilter="all";
