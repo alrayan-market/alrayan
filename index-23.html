@@ -1850,7 +1850,7 @@ window.waNum=waNum;
 function notifyAdmin(text){
   try{
     text="🔔 الريان\n"+String(text||"");
-    if(text.length>250) text=text.slice(0,247)+"...";
+    if(text.length>580) text=text.slice(0,577)+"...";
     var id="NL-"+Date.now()+"-"+Math.random().toString(36).slice(2,6);
     var ref=doc(db,"notifyLog",id);
     var created=setDoc(ref,{id:id,text:text,status:"pending",createdAt:Date.now()}).then(function(){return true;}).catch(function(){return false;});
@@ -5290,7 +5290,54 @@ function startAdminListeners(){
       if(isAdmin && (activeTab==="notify"||activeTab==="admin")) renderDashboard();
     },function(err){ console.warn("notifyLog",err&&err.code); });
   }catch(e){}
+  checkAdminPushHere();
 }
+var adminPushHere=false;
+function swReady(ms){
+  return Promise.race([navigator.serviceWorker.ready, new Promise(function(r){ setTimeout(function(){ r(null); }, ms||3000); })]);
+}
+async function readAdminSubsList(){
+  var snap=await getDoc(doc(db,"adminPush","owner"));
+  return (snap.exists() && Array.isArray(snap.data().subs)) ? snap.data().subs : [];
+}
+function subEndpoint(x){ try{ return JSON.parse(x).endpoint||""; }catch(e){ return ""; } }
+async function checkAdminPushHere(){
+  try{
+    if(!("serviceWorker" in navigator) || !("PushManager" in window)){ adminPushHere=false; return; }
+    var reg=await swReady(3000); if(!reg){ adminPushHere=false; return; }
+    var cur=await reg.pushManager.getSubscription();
+    if(!cur){ adminPushHere=false; }
+    else { var list=await readAdminSubsList(); adminPushHere=list.some(function(x){ return subEndpoint(x)===cur.endpoint; }); }
+  }catch(e){ adminPushHere=false; }
+  if(isAdmin && activeTab==="notify") renderNotifyTab();
+}
+async function enableAdminPush(){
+  if(!isAdmin) return;
+  if(!("serviceWorker" in navigator) || !("PushManager" in window)){ alert("هذا المتصفح لا يدعم الإشعارات. جرّب Chrome على أندرويد."); return; }
+  showToast("جاري التفعيل...");
+  var sub=await subscribeToPush();
+  if(!sub){ alert("لم يتم التفعيل.\nاسمح بالإشعارات لهذا الموقع من إعدادات المتصفح ثم اضغط الزر مرة أخرى."); return; }
+  try{
+    var list=(await readAdminSubsList()).filter(function(x){ return subEndpoint(x) && subEndpoint(x)!==sub.endpoint; });
+    list.push(JSON.stringify(sub));
+    if(list.length>5) list=list.slice(-5);
+    await setDoc(doc(db,"adminPush","owner"),{subs:list,updatedAt:Date.now()});
+    adminPushHere=true; renderNotifyTab();
+    showToast("تم التفعيل ✓ — جرّب «رسالة اختبار»");
+  }catch(e){ showToast("تعذّر حفظ الاشتراك"); }
+}
+async function disableAdminPush(){
+  try{
+    var reg=await swReady(3000);
+    var cur=reg?await reg.pushManager.getSubscription():null;
+    if(cur){
+      var list=(await readAdminSubsList()).filter(function(x){ return subEndpoint(x)!==cur.endpoint; });
+      await setDoc(doc(db,"adminPush","owner"),{subs:list,updatedAt:Date.now()});
+    }
+    adminPushHere=false; renderNotifyTab(); showToast("تم الإيقاف على هذا الجهاز");
+  }catch(e){ showToast("تعذّر الإيقاف"); }
+}
+window.enableAdminPush=enableAdminPush; window.disableAdminPush=disableAdminPush;
 function stopAdminListeners(){ try{ if(_notifyUnsub) _notifyUnsub(); }catch(e){} _notifyUnsub=null; notifyLogs=[]; }
 function notifyFailedCount(){ return (notifyLogs||[]).filter(function(x){return x.status==="failed";}).length; }
 function renderNotifyTab(){
@@ -5304,6 +5351,12 @@ function renderNotifyTab(){
     +'<div style="display:flex;gap:7px;flex-wrap:wrap;margin:6px 0 12px">'
     +'<span class="pr-tag sale">✅ وصل '+cnt("sent")+'</span><span class="pr-tag" style="background:#FDECEC;color:#C62828">❌ فشل '+cnt("failed")+'</span><span class="pr-tag role">⏳ غير مؤكد '+cnt("pending")+'</span>'
     +'<button type="button" onclick="testNotify()" style="margin-right:auto;font-family:Tajawal,sans-serif;background:#1A2744;color:#fff;border:none;border-radius:9px;padding:7px 12px;font-weight:800;cursor:pointer;font-size:0.76rem">📤 رسالة اختبار</button></div>'
+    +'<div style="background:#F4F6FA;border-radius:12px;padding:11px 12px;margin-bottom:10px">'
+    +'<div style="font-weight:800;color:#1A2744;font-size:0.84rem;margin-bottom:6px">📱 إشعارات هذا الجهاز</div>'
+    +(adminPushHere
+      ?'<div style="color:#2E7D5E;font-size:0.8rem;font-weight:800;margin-bottom:7px">✅ مفعّلة على هذا الجهاز</div><button type="button" onclick="disableAdminPush()" style="font-family:Tajawal,sans-serif;background:#fff;color:#C62828;border:1.5px solid #F3C4C4;border-radius:9px;padding:7px 12px;font-weight:800;cursor:pointer;font-size:0.76rem">إيقاف على هذا الجهاز</button>'
+      :'<div style="color:#6B7280;font-size:0.78rem;margin-bottom:7px">غير مفعّلة. اضغط الزر واسمح بالإشعارات لتصلك التنبيهات حتى والموقع مغلق.</div><button type="button" onclick="enableAdminPush()" style="font-family:Tajawal,sans-serif;background:#2E7D5E;color:#fff;border:none;border-radius:9px;padding:8px 14px;font-weight:800;cursor:pointer;font-size:0.8rem">🔔 تفعيل إشعارات هذا الجهاز</button>')
+    +'<div style="color:#9CA3AF;font-size:0.7rem;margin-top:8px;line-height:1.6">وتيليجرام يعمل تلقائياً بعد إضافة TELEGRAM_BOT_TOKEN و TELEGRAM_CHAT_ID في Netlify.</div></div>'
     +'<div style="color:#6B7280;font-size:0.74rem;line-height:1.7;margin-bottom:10px">كل حدث يُحفظ هنا حتى لو لم يصل واتساب. «غير مؤكد» يعني أن الزائر أغلق الصفحة قبل وصول الرد.</div>';
   if(!L.length) h+='<div style="color:#9CA3AF;font-size:0.82rem;padding:10px 0">لا توجد إشعارات بعد</div>';
   h+=L.map(function(n){
@@ -5312,7 +5365,7 @@ function renderNotifyTab(){
     return '<div style="border:1px solid #EEF0F4;border-radius:12px;padding:11px 12px;margin-bottom:8px;background:#fff">'
       +'<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px"><span style="background:'+b[1]+';color:'+b[2]+';font-size:0.7rem;font-weight:900;padding:3px 9px;border-radius:100px">'+b[0]+'</span><span style="color:#9CA3AF;font-size:0.7rem">'+pEsc(t)+'</span></div>'
       +'<div style="color:#1A2744;font-size:0.8rem;line-height:1.7;white-space:pre-wrap">'+pEsc(n.text)+'</div>'
-      +(n.status==="failed"&&n.detail?'<div style="color:#C62828;font-size:0.72rem;margin-top:5px">السبب: '+pEsc(n.detail)+'</div>':'')
+      +(n.detail&&n.detail!=="sent"?'<div style="color:'+(n.status==="failed"?'#C62828':'#6B7280')+';font-size:0.72rem;margin-top:5px;line-height:1.6">'+(n.status==="failed"?'السبب: ':'')+pEsc(n.detail)+'</div>':'')
       +(n.status!=="sent"?'<button type="button" data-id="'+pEsc(n.id)+'" onclick="resendNotify(this.dataset.id)" style="margin-top:8px;font-family:Tajawal,sans-serif;background:#FFF8E8;color:#8A6410;border:1.5px solid #F0D98A;border-radius:8px;padding:6px 12px;font-weight:800;cursor:pointer;font-size:0.74rem">🔁 إعادة الإرسال</button>':'')
       +'</div>';
   }).join("")+'</div>';
