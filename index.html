@@ -1094,6 +1094,18 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
   <button class="btn-navy" style="width:100%;margin-top:14px" onclick="closeModal('modal-requests');openRequestForm()">📝 اطلب ما تريد</button>
 </div></div>
 
+
+<!-- ═══ تسجيل من يتواصل (عقار / طلب) ═══ -->
+<div class="overlay hidden" id="modal-lead"><div class="modal modal-sm">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><h3 style="color:#1A2744;font-weight:900;font-size:1.05rem">📱 تواصل عبر واتساب</h3><button onclick="closeModal('modal-lead')" style="background:none;border:none;font-size:1.4rem;color:#9CA3AF;cursor:pointer">✕</button></div>
+  <p id="lead-sub" style="color:#6B7280;font-size:0.8rem;margin-bottom:12px;line-height:1.7"></p>
+  <div class="field"><label class="lbl">اسمك</label><input class="inp" id="lead-name" autocomplete="name"></div>
+  <div class="field"><label class="lbl">الدولة</label><select class="inp" id="lead-country"><option value="+249" selected>🇸🇩 السودان (+249)</option><option value="+966">🇸🇦 السعودية (+966)</option><option value="+20">🇪🇬 مصر (+20)</option><option value="+971">🇦🇪 الإمارات (+971)</option><option value="+974">🇶🇦 قطر (+974)</option><option value="+90">🇹🇷 تركيا (+90)</option><option value="+1">🇺🇸 أمريكا (+1)</option></select></div>
+  <div class="field"><label class="lbl">رقم واتساب</label><input class="inp" id="lead-phone" inputmode="numeric" placeholder="912345678"></div>
+  <div id="lead-err" style="color:#D9534F;font-size:0.8rem;margin-bottom:8px"></div>
+  <button class="btn-navy" id="lead-submit" style="width:100%;background:#2E7D5E" onclick="submitLead()">متابعة لواتساب 💬</button>
+</div></div>
+
 <div class="overlay hidden" id="modal-all-stores">
   <div class="modal modal-sm" style="max-height:85vh;overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
@@ -1702,6 +1714,7 @@ function listenAll(){
   onSnapshot(collection(db,"inquiries"), snap=>{
     inquiries=snap.docs.map(d=>d.data());
     if(isAdmin && activeTab==="messages2") renderPlatformMessages();
+    if(isAdmin && activeTab==="realestate") renderRealEstateTab();
   });
   onSnapshot(collection(db,"ads"), snap=>{
     adsList=snap.docs.map(d=>d.data());
@@ -1768,6 +1781,7 @@ window.onload=async function(){
   showAccountTooltipOnce();
   checkUrlAd();
   checkUrlProp();
+  checkUrlReq();
   checkUrlJoin();
   checkUrlContact();
 };
@@ -1776,7 +1790,7 @@ window.onload=async function(){
 const IMGBB_API_KEY = "16b4262b9ff85a10c0f3a4834a847184";
 
 // ══════════ PUSH NOTIFICATIONS (real, works even when app is closed) ══════════
-const VAPID_PUBLIC_KEY = "BLvYw7ZvvzUJ8YxX9v4pvPPZlR1IAcqrPiHGxjFZB97dYtM39xADAs852gLHB88lEricd68nVAzCcJwShz72IQk";
+const VAPID_PUBLIC_KEY = "BL2rkmS2ASoaWDVyUU-fLc_Dr0aJGgQCyTOvmddHnLdqdudX_V_24TOUBsWsHQ8VmS2FNEr-2OmwfyahbBFlMN0";
 
 function urlBase64ToUint8Array(base64String){
   const padding="=".repeat((4-base64String.length%4)%4);
@@ -1794,6 +1808,14 @@ async function subscribeToPush(){
     if(permission!=="granted")return null;
     const reg=await navigator.serviceWorker.ready;
     let sub=await reg.pushManager.getSubscription();
+    // إن كان الاشتراك القديم بمفتاح مختلف عن الحالي، نلغيه ونشترك من جديد
+    if(sub){
+      try{
+        var cur=sub.options&&sub.options.applicationServerKey;
+        var curB64=cur?btoa(String.fromCharCode.apply(null,new Uint8Array(cur))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""):"";
+        if(curB64!==VAPID_PUBLIC_KEY){ await sub.unsubscribe(); sub=null; }
+      }catch(e){}
+    }
     if(!sub){
       sub=await reg.pushManager.subscribe({
         userVisibleOnly:true,
@@ -4041,19 +4063,9 @@ function renderPlatformMessages(){
     }).join(""))+`</div>`+renderInquiriesPanel();
 }
 function renderInquiriesPanel(){
-  const list=inquiries.slice().sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
-  return `<div class="panel"><div class="panel-head"><span class="panel-title">💬 استفسارات الواتساب (${list.length})</span></div>`+
-    (list.length===0?'<div class="no-items"><div>لا توجد استفسارات</div></div>':list.map(q=>{
-      const d=new Date(q.createdAt||0);
-      return `<div style="background:#F4F6FA;border-radius:11px;padding:12px;margin-bottom:8px">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div style="font-weight:800;color:#1A2744">${q.name||""}</div>
-          <a href="https://wa.me/${(q.phone||'').replace(/\D/g,'')}" target="_blank" style="color:#2E7D5E;font-weight:700;text-decoration:none;font-size:0.8rem">${q.phone||''} 📱</a>
-        </div>
-        <div style="color:#374151;font-size:0.8rem;margin-top:4px">استفسر عن: <b>${q.productName||""}</b> · متجر: ${q.sellerName||""}</div>
-        <div style="color:#9CA3AF;font-size:0.7rem;margin-top:4px">${d.toLocaleDateString('ar')} ${d.toLocaleTimeString('ar',{hour:'2-digit',minute:'2-digit'})}</div>
-      </div>`;
-    }).join(""))+`</div>`;
+  var L=inqList(0);
+  return '<div class="panel"><div class="panel-head"><span class="panel-title">📞 سجل التواصل ('+L.length+')</span></div>'+inqChips()
+    +(L.length?L.map(inqRow).join(""):'<div class="no-items"><div>لا يوجد تواصل بعد</div></div>')+'</div>';
 }
 async function markMsgRead(id){ await dbUpdate("platformMessages",id,{read:true}); }
 async function delPlatformMsg(id){ if(confirm("حذف الرسالة؟")){ await dbDelete("platformMessages",id); showToast("تم الحذف"); } }
@@ -5126,12 +5138,7 @@ function showPropImg(i){
   var u=propViewImgs[parseInt(i)||0];
   box.innerHTML=u?'<img src="'+pEsc(u)+'" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.textContent=\'🏡\'">':'🏡';
 }
-function contactProperty(id){
-  var p=(propsList||[]).find(function(x){return x.id===id;}); if(!p) return;
-  var msg="السلام عليكم، أستفسر عن العقار: "+p.title+" (منصة الريان)\n"+baseUrl()+"/?prop="+p.id;
-  try{ notifyAdmin("📞 استفسار عن عقار\n"+p.title+"\nالمعلن: "+(p.officeName||p.ownerName)); }catch(e){}
-  window.open("https://wa.me/"+waNum(p.phone)+"?text="+encodeURIComponent(msg),"_blank");
-}
+function contactProperty(id){ openLead("property",id); }
 function shareProperty(id){
   var p=(propsList||[]).find(function(x){return x.id===id;}); if(!p) return;
   var url=baseUrl()+"/?prop="+id, txt="🏡 "+p.title+"\n📍 "+p.city+" · "+p.area+" م²\n💰 "+pPrice(p);
@@ -5178,7 +5185,7 @@ function propPendingHtml(){
       +'<div style="display:flex;gap:8px;margin-top:10px"><button data-id="'+pEsc(p.id)+'" onclick="approveProperty(this.dataset.id)" style="'+btn+'flex:1;background:#2E7D5E;color:#fff">✓ اعتماد ونشر</button><button data-id="'+pEsc(p.id)+'" onclick="rejectProperty(this.dataset.id)" style="'+btn+'flex:1;background:#FEE;color:#D9534F">✕ رفض</button></div></div>';
   }).join("");
   var mg='<div style="background:#F4F6FA;border-radius:12px;padding:13px;margin-bottom:12px"><div style="font-weight:800;color:#1A2744;font-size:0.88rem;margin-bottom:8px">🏡 العقارات المنشورة ('+live.length+')</div>'
-    +(live.length?live.map(function(p){return '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-top:1px solid #E5E7EB;font-size:0.8rem"><span style="color:#374151">'+pEsc(p.title)+'</span><button data-id="'+pEsc(p.id)+'" onclick="deleteProperty(this.dataset.id)" style="font-family:Tajawal,sans-serif;background:#FEE;color:#D9534F;border:none;border-radius:8px;padding:5px 10px;font-weight:800;cursor:pointer">حذف</button></div>';}).join(""):'<div style="color:#9CA3AF;font-size:0.78rem">لا توجد عقارات منشورة</div>')+'</div>';
+    +(live.length?live.map(function(p){return '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-top:1px solid #E5E7EB;font-size:0.8rem"><span style="color:#374151">'+pEsc(p.title)+' <b style="color:#2E7D5E;font-size:0.72rem">📞 '+leadCount(p.id)+'</b></span><button data-id="'+pEsc(p.id)+'" onclick="deleteProperty(this.dataset.id)" style="font-family:Tajawal,sans-serif;background:#FEE;color:#D9534F;border:none;border-radius:8px;padding:5px 10px;font-weight:800;cursor:pointer">حذف</button></div>';}).join(""):'<div style="color:#9CA3AF;font-size:0.78rem">لا توجد عقارات منشورة</div>')+'</div>';
   var o=officePendingHtml(); return {p:o.p+h,m:o.m+mg};
 }
 async function viewPropDocs(id){
@@ -5267,7 +5274,8 @@ function renderRealEstateTab(){
     +'<div style="padding:4px 2px">'
     +'<div style="font-weight:800;color:#1A2744;font-size:0.9rem;margin:6px 0 10px">⏳ بانتظار المراجعة ('+n+')</div>'
     +(n?(pp.p+rq.p):'<div style="color:#9CA3AF;font-size:0.82rem;padding:6px 0 14px">لا توجد طلبات معلّقة</div>')
-    +pp.m+rq.m+'</div></div>';
+    +pp.m+rq.m+'</div></div>'
+    +'<div class="panel"><div class="panel-head"><span class="panel-title">📞 آخر من تواصل</span></div>'+inqChips()+(inqList(40).length?inqList(40).map(inqRow).join(''):'<div style="color:#9CA3AF;font-size:0.82rem;padding:8px 0">لا يوجد تواصل بعد</div>')+'</div>';
 }
 function renderHeroCounts(){
   var el=document.getElementById("hero-counts"); if(!el) return;
@@ -5446,18 +5454,15 @@ function renderRequestsList(){
   box.innerHTML=list.map(function(r){
     var k=RQ_KINDS[r.kind]||RQ_KINDS.other;
     var d=new Date(r.approvedAt||r.createdAt||0).toLocaleDateString("ar");
-    return '<div class="rq-card"><div><span class="rq-tag '+pEsc(r.kind)+'">'+k.ico+' '+k.n+'</span>'+(r.deal?'<span class="pr-tag '+(r.deal==="rent"?'rent':'sale')+'">'+(RQ_DEALS[r.deal]||"")+'</span>':'')+(r.type&&PROP_TYPES[r.type]?'<span class="pr-tag role">'+PROP_TYPES[r.type]+'</span>':'')+'</div>'
+    return '<div class="rq-card" id="rqc-'+pEsc(r.id)+'"><div><span class="rq-tag '+pEsc(r.kind)+'">'+k.ico+' '+k.n+'</span>'+(r.deal?'<span class="pr-tag '+(r.deal==="rent"?'rent':'sale')+'">'+(RQ_DEALS[r.deal]||"")+'</span>':'')+(r.type&&PROP_TYPES[r.type]?'<span class="pr-tag role">'+PROP_TYPES[r.type]+'</span>':'')+'</div>'
       +'<div class="rq-t">'+pEsc(r.title)+'</div>'
       +(r.details?'<div class="rq-d">'+pEsc(r.details)+'</div>':'')
       +'<div class="rq-m">📍 '+pEsc(r.city)+' · 💰 '+(r.budget?pEsc(Number(r.budget).toLocaleString("ar"))+' ج.س':'ميزانية مفتوحة')+' · '+pEsc(d)+'</div>'
-      +'<button type="button" class="btn-navy" style="width:100%;margin-top:10px;background:#2E7D5E" data-id="'+pEsc(r.id)+'" onclick="contactRequester(this.dataset.id)">📱 عندي لك عرض — تواصل</button></div>';
+      +'<div style="display:flex;gap:8px;margin-top:10px"><button type="button" class="btn-navy" style="flex:2;background:#2E7D5E" data-id="'+pEsc(r.id)+'" onclick="contactRequester(this.dataset.id)">📱 عندي لك عرض</button>'
+      +'<button type="button" data-id="'+pEsc(r.id)+'" onclick="shareRequest(this.dataset.id)" style="flex:1;border:1.5px solid #E5E0D8;background:#fff;color:#4B5563;border-radius:12px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif">🔗 شارك</button></div></div>';
   }).join("");
 }
-function contactRequester(id){
-  var r=(requestsList||[]).find(function(x){return x.id===id;}); if(!r) return;
-  var msg="السلام عليكم، شفت طلبك «"+r.title+"» في منصة الريان السوق السوداني، وعندي ما قد يناسبك.";
-  window.open("https://wa.me/"+waNum(r.phone)+"?text="+encodeURIComponent(msg),"_blank");
-}
+function contactRequester(id){ openLead("request",id); }
 
 // ── مراجعة المالك ──
 function requestPendingHtml(){
@@ -5474,7 +5479,7 @@ function requestPendingHtml(){
       +'<div style="display:flex;gap:8px;margin-top:10px"><button data-id="'+pEsc(r.id)+'" onclick="approveRequest(this.dataset.id)" style="'+btn+'flex:1;background:#2E7D5E;color:#fff">✓ اعتماد ونشر</button><button data-id="'+pEsc(r.id)+'" onclick="rejectRequest(this.dataset.id)" style="'+btn+'flex:1;background:#FEE;color:#D9534F">✕ رفض</button></div></div>';
   }).join("");
   var mg='<div style="background:#F4F6FA;border-radius:12px;padding:13px;margin-bottom:12px"><div style="font-weight:800;color:#1A2744;font-size:0.88rem;margin-bottom:8px">📋 الطلبات المنشورة ('+live.length+')</div>'
-    +(live.length?live.map(function(r){var k=RQ_KINDS[r.kind]||RQ_KINDS.other;return '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-top:1px solid #E5E7EB;font-size:0.8rem"><span style="color:#374151">'+k.ico+' '+pEsc(r.title)+'</span><button data-id="'+pEsc(r.id)+'" onclick="deleteRequest(this.dataset.id)" style="font-family:Tajawal,sans-serif;background:#FEE;color:#D9534F;border:none;border-radius:8px;padding:5px 10px;font-weight:800;cursor:pointer">حذف</button></div>';}).join(""):'<div style="color:#9CA3AF;font-size:0.78rem">لا توجد طلبات منشورة</div>')+'</div>';
+    +(live.length?live.map(function(r){var k=RQ_KINDS[r.kind]||RQ_KINDS.other;return '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-top:1px solid #E5E7EB;font-size:0.8rem"><span style="color:#374151">'+k.ico+' '+pEsc(r.title)+' <b style="color:#2E7D5E;font-size:0.72rem">📞 '+leadCount(r.id)+'</b></span><button data-id="'+pEsc(r.id)+'" onclick="deleteRequest(this.dataset.id)" style="font-family:Tajawal,sans-serif;background:#FEE;color:#D9534F;border:none;border-radius:8px;padding:5px 10px;font-weight:800;cursor:pointer">حذف</button></div>';}).join(""):'<div style="color:#9CA3AF;font-size:0.78rem">لا توجد طلبات منشورة</div>')+'</div>';
   return {p:h,m:mg};
 }
 async function approveRequest(id){
@@ -5498,6 +5503,115 @@ async function deleteRequest(id){
 window.openRequestForm=openRequestForm; window.setRqKind=setRqKind; window.submitRequest=submitRequest;
 window.openRequests=openRequests; window.setRqFilter=setRqFilter; window.contactRequester=contactRequester;
 window.approveRequest=approveRequest; window.rejectRequest=rejectRequest; window.deleteRequest=deleteRequest;
+
+
+// ══════════════ التواصل مع صاحب العقار أو الطلب (يُسجَّل للمالك) ══════════════
+var leadTarget=null;
+function leadItem(kind,id){
+  if(kind==="property"){ var p=(propsList||[]).find(function(x){return x.id===id;}); return p?{title:p.title,owner:(p.officeName||p.ownerName||""),phone:p.phone,tag:"PROP",label:"عقار"}:null; }
+  var r=(requestsList||[]).find(function(x){return x.id===id;}); return r?{title:r.title,owner:(r.ownerName||""),phone:r.phone,tag:"REQ",label:"طلب"}:null;
+}
+function openLead(kind,id){
+  var it=leadItem(kind,id); if(!it) return;
+  leadTarget={kind:kind,id:id};
+  document.getElementById("lead-sub").textContent = kind==="property"
+    ? "سنفتح لك واتساب مع صاحب العقار «"+it.title+"». أدخل اسمك ورقمك ليعرف من يتواصل معه."
+    : "سنفتح لك واتساب مع صاحب الطلب «"+it.title+"». أدخل اسمك ورقمك ليعرف من يعرض عليه.";
+  var saved={}; try{ saved=JSON.parse(localStorage.getItem("rayan_lead")||"{}"); }catch(e){}
+  var nm=saved.name||(typeof currentCustomer!=="undefined"&&currentCustomer&&currentCustomer.name)||"";
+  document.getElementById("lead-name").value=nm;
+  if(saved.cc){ document.getElementById("lead-country").value=saved.cc; }
+  document.getElementById("lead-phone").value=saved.phone||"";
+  document.getElementById("lead-err").textContent="";
+  document.getElementById("modal-lead").classList.remove("hidden");
+}
+async function submitLead(){
+  if(!leadTarget) return;
+  var it=leadItem(leadTarget.kind,leadTarget.id); if(!it){ closeModal("modal-lead"); return; }
+  var e=document.getElementById("lead-err"), btn=document.getElementById("lead-submit");
+  var n=document.getElementById("lead-name").value.trim();
+  var cc=document.getElementById("lead-country").value;
+  var ph=document.getElementById("lead-phone").value.trim().replace(/^0+/,"");
+  var p=cc+ph;
+  if(!n){ e.textContent="أدخل اسمك"; return; }
+  if(!/^\d{6,15}$/.test(p.replace(/\D/g,""))){ e.textContent="رقم غير صحيح"; return; }
+  try{ localStorage.setItem("rayan_lead",JSON.stringify({name:n,cc:cc,phone:ph})); }catch(x){}
+  btn.disabled=true;
+  var iid="INQ-"+Date.now()+"-"+Math.random().toString(36).slice(2,6);
+  try{
+    await Promise.race([
+      setDoc(doc(db,"inquiries",iid),{id:iid,kind:leadTarget.kind,targetId:leadTarget.id,productId:"",productName:"("+it.label+") "+it.title,sellerId:it.tag,sellerName:it.owner,ownerPhone:it.phone,name:n,phone:p,createdAt:Date.now()}),
+      new Promise(function(r){ setTimeout(r,3000); })
+    ]);
+  }catch(x){}
+  try{ notifyAdmin((leadTarget.kind==="property"?"📞 تواصل بخصوص عقار":"📞 عرض على طلب زبون")+"\n"+it.title+"\nالمتواصل: "+n+" - "+p+"\nصاحب الإعلان: "+it.owner+" - "+it.phone); }catch(x){}
+  btn.disabled=false;
+  closeModal("modal-lead");
+  var link=baseUrl()+(leadTarget.kind==="property"?"/?prop=":"/?req=")+leadTarget.id;
+  var msg = leadTarget.kind==="property"
+    ? "السلام عليكم، أنا "+n+"، أستفسر عن العقار: "+it.title+" (منصة الريان السوق السوداني)\n"+link
+    : "السلام عليكم، أنا "+n+"، شفت طلبك «"+it.title+"» في منصة الريان السوق السوداني، وعندي ما قد يناسبك.\n"+link;
+  var url="https://wa.me/"+waNum(it.phone)+"?text="+encodeURIComponent(msg);
+  var w=window.open(url,"_blank"); if(!w) window.location.href=url;
+  leadTarget=null;
+}
+function leadCount(id){ return (inquiries||[]).filter(function(q){return q.targetId===id;}).length; }
+
+// ── مشاركة الطلب ──
+function shareRequest(id){
+  var r=(requestsList||[]).find(function(x){return x.id===id;}); if(!r) return;
+  var k=RQ_KINDS[r.kind]||RQ_KINDS.other;
+  var url=baseUrl()+"/?req="+id;
+  var txt=k.ico+" مطلوب: "+r.title+"\n📍 "+r.city+" · 💰 "+(r.budget?Number(r.budget).toLocaleString("ar")+" ج.س":"ميزانية مفتوحة")+"\nعندك ما يناسبه؟ تواصل عبر منصة الريان:";
+  if(navigator.share){ navigator.share({text:txt,url:url}).catch(function(){}); }
+  else { try{ navigator.clipboard.writeText(txt+"\n"+url); }catch(e){} showToast("تم نسخ رابط الطلب"); }
+}
+function checkUrlReq(){
+  var id=new URLSearchParams(window.location.search).get("req"); if(!id) return;
+  var tries=0;
+  var t=function(){
+    tries++;
+    var r=approvedRequests().find(function(x){return x.id===id;});
+    if(r){
+      openRequests();
+      setTimeout(function(){
+        var el=document.getElementById("rqc-"+id);
+        if(el){ el.scrollIntoView({behavior:"smooth",block:"center"}); el.style.outline="3px solid #C9933A"; el.style.outlineOffset="2px"; }
+      },250);
+    } else if(tries<25){ setTimeout(t,400); }
+    else { showToast("هذا الطلب لم يعد متاحاً"); }
+  };
+  setTimeout(t,1200);
+}
+
+// ── سجل التواصل للمالك ──
+var inqFilter="all";
+function inqType(q){
+  if(q.sellerId==="AD") return {k:"ad",l:"📢 إعلان",c:"#FFF4D6",t:"#8A6410"};
+  if(q.sellerId==="PROP") return {k:"property",l:"🏡 عقار",c:"#E6F4EC",t:"#2E7D5E"};
+  if(q.sellerId==="REQ") return {k:"request",l:"📝 طلب",c:"#F1E9FB",t:"#6B3FA0"};
+  return {k:"product",l:"🏪 منتج",c:"#E8F0FE",t:"#2F5BD3"};
+}
+function setInqFilter(v){ inqFilter=v; if(activeTab==="realestate") renderRealEstateTab(); else renderPlatformMessages(); }
+function inqRow(q){
+  var ty=inqType(q), d=new Date(q.createdAt||0);
+  return '<div style="background:#F4F6FA;border-radius:11px;padding:12px;margin-bottom:8px">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div style="font-weight:800;color:#1A2744">'+pEsc(q.name)+' <span style="background:'+ty.c+';color:'+ty.t+';font-size:0.66rem;font-weight:900;padding:2px 8px;border-radius:100px">'+ty.l+'</span></div>'
+    +'<a href="https://wa.me/'+waNum(q.phone)+'" target="_blank" style="color:#2E7D5E;font-weight:700;text-decoration:none;font-size:0.8rem;white-space:nowrap">'+pEsc(q.phone)+' 📱</a></div>'
+    +'<div style="color:#374151;font-size:0.8rem;margin-top:4px">تواصل بخصوص: <b>'+pEsc(q.productName)+'</b></div>'
+    +'<div style="color:#6B7280;font-size:0.76rem;margin-top:2px">صاحب الإعلان: '+pEsc(q.sellerName)+(q.ownerPhone?' · '+pEsc(q.ownerPhone):'')+'</div>'
+    +'<div style="color:#9CA3AF;font-size:0.7rem;margin-top:4px">'+pEsc(d.toLocaleDateString("ar")+" "+d.toLocaleTimeString("ar",{hour:"2-digit",minute:"2-digit"}))+'</div></div>';
+}
+function inqChips(){
+  var c=function(v,l){ return '<button type="button" class="pr-chip'+(inqFilter===v?' on':'')+'" data-v="'+v+'" onclick="setInqFilter(this.dataset.v)">'+l+'</button>'; };
+  return '<div class="pr-chips">'+c("all","الكل")+c("property","🏡 عقارات")+c("request","📝 طلبات")+c("ad","📢 إعلانات")+c("product","🏪 منتجات")+'</div>';
+}
+function inqList(limit){
+  var L=(inquiries||[]).slice().sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
+  if(inqFilter!=="all") L=L.filter(function(q){return inqType(q).k===inqFilter;});
+  return limit?L.slice(0,limit):L;
+}
+window.openLead=openLead; window.submitLead=submitLead; window.shareRequest=shareRequest; window.setInqFilter=setInqFilter;
 
 // ══════════════ المكاتب العقارية ══════════════
 async function uploadOfficeImage(input,kind){
