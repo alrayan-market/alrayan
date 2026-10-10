@@ -1131,6 +1131,16 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
   <div id="od-body"></div>
 </div></div>
 
+
+<!-- ═══ اختيار الحساب عند تطابق الرقم ═══ -->
+<div class="overlay hidden" id="modal-login-choice"><div class="modal modal-sm">
+  <h3 style="color:#1A2744;font-weight:900;font-size:1.05rem;margin-bottom:4px">أين تريد الدخول؟</h3>
+  <p style="color:#6B7280;font-size:0.8rem;margin-bottom:14px">هذا الرقم مرتبط بمتجر ومكتب عقاري معاً.</p>
+  <button type="button" class="btn-navy" id="lc-store" style="width:100%;margin-bottom:9px" onclick="chooseLoginStore()">🏪 متجر</button>
+  <button type="button" class="btn-navy" id="lc-office" style="width:100%;background:linear-gradient(100deg,#F2CE73,#D9A840);color:#12203A" onclick="chooseLoginOffice()">🏢 مكتب</button>
+  <button type="button" onclick="closeModal('modal-login-choice')" style="width:100%;margin-top:10px;background:none;border:none;color:#9CA3AF;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">إلغاء</button>
+</div></div>
+
 <div class="overlay hidden" id="modal-all-stores">
   <div class="modal modal-sm" style="max-height:85vh;overflow-y:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
@@ -3396,6 +3406,16 @@ async function doLogin(){
   const val=document.getElementById("l-phone").value.trim();
   if(!val) return showErr("login-err","أدخل رقم هاتفك أو كلمة مرور المالك");
   const found=sellers.find(s=>s.phone===val);
+  // رقم مسجّل كمكتب عقاري معتمد: نخيّره بين المتجر والمكتب، أو نوجّهه لدخول المكتب
+  const offMatch=/^[+\d\s-]{6,}$/.test(val) ? (officesList||[]).find(function(o){return o.status==="approved" && waNum(o.phone)===waNum(val);}) : null;
+  if(offMatch && !window._loginAsStore){
+    hideErr("login-err");
+    closeModal("modal-login");
+    if(found){ openLoginChoice(found,offMatch); }
+    else { goOfficeLoginFor(offMatch); }
+    return;
+  }
+  window._loginAsStore=false;
   if(!found){
     try{
       await signInWithEmailAndPassword(auth, ADMIN_EMAIL, val);
@@ -3423,6 +3443,21 @@ async function doLogin(){
   closeModal("modal-login");showView("dashboard");renderDashboard();
 }
 document.getElementById("l-phone").addEventListener("keydown",e=>{if(e.key==="Enter")doLogin();});
+function openLoginChoice(seller,office){
+  document.getElementById("lc-store").textContent="🏪 متجر: "+(seller.storeName||"");
+  document.getElementById("lc-office").textContent="🏢 مكتب: "+(office.officeName||"");
+  window._lcOffice=office;
+  document.getElementById("modal-login-choice").classList.remove("hidden");
+}
+function chooseLoginStore(){ closeModal("modal-login-choice"); window._loginAsStore=true; doLogin(); }
+function chooseLoginOffice(){ closeModal("modal-login-choice"); if(window._lcOffice) goOfficeLoginFor(window._lcOffice); }
+function goOfficeLoginFor(office){
+  openOfficeLogin();
+  fillPhoneFields("ol-country","ol-phone",office.phone);
+  document.getElementById("ol-note").textContent="أدخل كلمة مرور مكتب «"+(office.officeName||"")+"»."+(office.authUid?"":" (أول دخول: ستختار كلمة مرور جديدة)");
+  setTimeout(function(){ try{ document.getElementById("ol-pass").focus(); }catch(e){} },150);
+}
+window.chooseLoginStore=chooseLoginStore; window.chooseLoginOffice=chooseLoginOffice;
 function doLogout(){if(isAdmin){stopAdminListeners();signOut(auth).catch(function(){});}currentSeller=null;isAdmin=false;showView("market");renderProducts("الكل");}
 
 // ══════════ SHARE ══════════
