@@ -24,6 +24,11 @@ function firstImg(f, single, list) {
   }
   return u;
 }
+// واتساب يتجاهل الصور الكبيرة (عدة ميغابايت)، فنمرّرها مصغّرة 800×420 بصيغة JPG
+function ogImg(u) {
+  if (!u || u === SITE_LOGO || /ytimg\.com/.test(u)) return u;
+  return "https://wsrv.nl/?url=" + encodeURIComponent(u) + "&w=800&h=420&fit=cover&a=attention&output=jpg&q=65";
+}
 function money(n) { return n > 0 ? n.toLocaleString("en-US") + " ج.س" : ""; }
 
 async function fireGet(col, id) {
@@ -102,12 +107,16 @@ export default async (request, context) => {
 
   const res = await context.next();
   let html = await res.text();
-  const sT = esc(title), sD = esc(desc.slice(0, 200)), sI = esc(image), sU = esc(url.toString());
+  const big = image !== SITE_LOGO;
+  const finalImg = ogImg(image);
+  const sT = esc(title), sD = esc(desc.slice(0, 200)), sI = esc(finalImg), sU = esc(url.toString());
   html = html.replace(/<title>.*?<\/title>/, `<title>${sT}</title>`);
   html = html.replace(/<meta property="og:title" content=".*?">/, `<meta property="og:title" content="${sT}">`);
   html = html.replace(/<meta property="og:description" content=".*?">/, `<meta property="og:description" content="${sD}">`);
   html = html.replace(/<meta property="og:image" content=".*?">/,
-    `<meta property="og:image" content="${sI}"><meta property="og:url" content="${sU}"><meta name="twitter:image" content="${sI}">`);
+    `<meta property="og:image" content="${sI}"><meta property="og:image:secure_url" content="${sI}">` +
+    (big && !/ytimg\.com/.test(image) ? `<meta property="og:image:type" content="image/jpeg"><meta property="og:image:width" content="800"><meta property="og:image:height" content="420">` : "") +
+    `<meta property="og:url" content="${sU}"><meta name="twitter:image" content="${sI}">`);
   return new Response(html, { status: res.status, headers: res.headers });
 };
 
