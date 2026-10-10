@@ -2050,7 +2050,7 @@ function adCardHtml(a){
 function shareAd(id){
   var a=(adsList||[]).find(function(x){return x.id===id;}); if(!a)return;
   var txt="اعلان: "+(a.adTitle||"")+(a.adDesc?"\n"+a.adDesc:"")+"\nللتواصل: "+(a.phone||"");
-  var url=baseUrl()+"/?ad="+id;
+  var url=baseUrl()+"/?ad="+id+"&s="+Date.now().toString(36);
   if(navigator.share){ navigator.share({text:txt,url:url}).catch(function(){}); }
   else { navigator.clipboard.writeText(txt+"\n"+url).catch(function(){}); showToast("تم نسخ الاعلان"); }
 }
@@ -5259,7 +5259,7 @@ function showPropImg(i){
 function contactProperty(id){ openLead("property",id); }
 function shareProperty(id){
   var p=(propsList||[]).find(function(x){return x.id===id;}); if(!p) return;
-  var url=baseUrl()+"/?prop="+id, txt="🏡 "+p.title+"\n📍 "+p.city+" · "+p.area+" م²\n💰 "+pPrice(p);
+  var url=baseUrl()+"/?prop="+id+"&s="+Date.now().toString(36), txt="🏡 "+p.title+"\n📍 "+p.city+" · "+p.area+" م²\n💰 "+pPrice(p);
   if(navigator.share){ navigator.share({text:txt,url:url}).catch(function(){}); }
   else { navigator.clipboard.writeText(txt+"\n"+url).catch(function(){}); showToast("تم نسخ الإعلان"); }
 }
@@ -5679,7 +5679,7 @@ function leadCount(id){ return (inquiries||[]).filter(function(q){return q.targe
 function shareRequest(id){
   var r=(requestsList||[]).find(function(x){return x.id===id;}); if(!r) return;
   var k=RQ_KINDS[r.kind]||RQ_KINDS.other;
-  var url=baseUrl()+"/?req="+id;
+  var url=baseUrl()+"/?req="+id+"&s="+Date.now().toString(36);
   var txt=k.ico+" مطلوب: "+r.title+"\n📍 "+r.city+" · 💰 "+(r.budget?Number(r.budget).toLocaleString("ar")+" ج.س":"ميزانية مفتوحة")+"\nعندك ما يناسبه؟ تواصل عبر منصة الريان:";
   if(navigator.share){ navigator.share({text:txt,url:url}).catch(function(){}); }
   else { try{ navigator.clipboard.writeText(txt+"\n"+url); }catch(e){} showToast("تم نسخ رابط الطلب"); }
