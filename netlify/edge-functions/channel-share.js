@@ -46,6 +46,7 @@ export default async (request, context) => {
   const prop = p("prop"), req = p("req"), ad = p("ad"), vid = p("video"), poll = p("poll"), publish = p("publish");
   if ((!prop && !req && !ad && !vid && !poll && !publish) || !BOT.test(ua)) return context.next();
 
+  let ready = false; // صورة المعاينة جاهزة بالحجم المناسب (لا تحتاج تصغير)
   let title = SITE_NAME, desc = "عقارات موثّقة · مكاتب معتمدة · خزانات مياه · متاجر سودانية", image = SITE_LOGO;
   try {
     if (prop) {
@@ -60,8 +61,9 @@ export default async (request, context) => {
         desc = [type + (deal ? " " + deal : ""), price, where, area ? area + " م²" : ""].filter(Boolean).join(" · ");
         const office = str(f, "officeName");
         if (office) desc += " · مكتب " + office + " الموثّق";
+        const og = str(f, "ogImage");
         const img = firstImg(f, "image", "images");
-        if (img) image = img;
+        if (og) { image = og; ready = true; } else if (img) image = img;
       }
     } else if (req) {
       const f = await fireGet("requests", req);
@@ -108,7 +110,7 @@ export default async (request, context) => {
   const res = await context.next();
   let html = await res.text();
   const big = image !== SITE_LOGO;
-  const finalImg = ogImg(image);
+  const finalImg = ready ? image : ogImg(image);
   const sT = esc(title), sD = esc(desc.slice(0, 200)), sI = esc(finalImg), sU = esc(url.toString());
   html = html.replace(/<title>.*?<\/title>/, `<title>${sT}</title>`);
   html = html.replace(/<meta property="og:title" content=".*?">/, `<meta property="og:title" content="${sT}">`);
