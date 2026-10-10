@@ -5104,7 +5104,7 @@ function openPropForm(){
   document.getElementById("pf-type").selectedIndex=0; document.getElementById("pf-deal").selectedIndex=0;
   document.getElementById("pf-ack").checked=false;
   document.getElementById("pf-err").textContent="";
-  propImgs=[]; propDocImgs=[]; renderPropThumbs();
+  propImgs=[]; propDocImgs=[]; propOgImg=""; renderPropThumbs();
   setPropRole("owner");
   document.getElementById("pf-head").textContent="🏠 نشر عقار";
   document.getElementById("pf-doc-box").style.display="";
@@ -5126,8 +5126,36 @@ function renderPropThumbs(){
   draw("pf-imgs",propImgs,"img"); draw("pf-docs",propDocImgs,"doc");
 }
 function removePropImg(kind,i){
-  i=parseInt(i); if(kind==="doc") propDocImgs.splice(i,1); else propImgs.splice(i,1);
+  i=parseInt(i); if(kind==="doc") propDocImgs.splice(i,1); else { propImgs.splice(i,1); if(i===0) propOgImg=""; }
   renderPropThumbs();
+}
+// ── ضغط الصور قبل الرفع، وصورة معاينة صغيرة للمشاركة ──
+var propOgImg="";
+function loadImgFile(file){
+  return new Promise(function(res,rej){ var u=URL.createObjectURL(file), im=new Image(); im.onload=function(){ res({im:im,u:u}); }; im.onerror=function(){ URL.revokeObjectURL(u); rej(); }; im.src=u; });
+}
+function canvasBlob(c,q){ return new Promise(function(res){ c.toBlob(function(b){ res(b); },"image/jpeg",q); }); }
+async function compressImage(file,maxSide,q){
+  try{
+    var o=await loadImgFile(file), w=o.im.naturalWidth, h=o.im.naturalHeight, sc=Math.min(1,maxSide/Math.max(w,h));
+    var c=document.createElement("canvas"); c.width=Math.round(w*sc); c.height=Math.round(h*sc);
+    c.getContext("2d").drawImage(o.im,0,0,c.width,c.height); URL.revokeObjectURL(o.u);
+    var b=await canvasBlob(c,q); return (b && b.size<file.size) ? b : file;
+  }catch(e){ return file; }
+}
+async function coverImage(file,W,H,q){
+  try{
+    var o=await loadImgFile(file), w=o.im.naturalWidth, h=o.im.naturalHeight, sc=Math.max(W/w,H/h);
+    var c=document.createElement("canvas"); c.width=W; c.height=H;
+    var g=c.getContext("2d"); g.fillStyle="#fff"; g.fillRect(0,0,W,H);
+    g.drawImage(o.im,(W-w*sc)/2,(H-h*sc)/2,w*sc,h*sc); URL.revokeObjectURL(o.u);
+    return await canvasBlob(c,q);
+  }catch(e){ return null; }
+}
+async function imgbbUpload(blob){
+  var fd=new FormData(); fd.append("image",blob,"alrayan.jpg");
+  var r=await fetch("https://api.imgbb.com/1/upload?key=16b4262b9ff85a10c0f3a4834a847184",{method:"POST",body:fd});
+  var d=await r.json(); return (d&&d.data&&d.data.url)?d.data.url:"";
 }
 async function uploadPropImage(input,kind){
   var f=input.files[0]; if(!f) return;
@@ -5135,15 +5163,18 @@ async function uploadPropImage(input,kind){
   var err=document.getElementById("pf-err"), ph=document.getElementById(kind==="doc"?"pf-doc-ph":"pf-img-ph");
   err.textContent="";
   if(arr.length>=max){ err.textContent="الحد الأقصى "+max+" صور"; input.value=""; return; }
-  if(f.size>5*1024*1024){ err.textContent="حجم الصورة كبير (الحد 5MB)"; input.value=""; return; }
-  var orig=ph.innerHTML; ph.textContent="جاري الرفع والتحقق...";
+  if(f.size>20*1024*1024){ err.textContent="حجم الصورة كبير جداً (الحد 20MB)"; input.value=""; return; }
+  var orig=ph.innerHTML; ph.textContent="جاري تجهيز الصورة ورفعها...";
   try{
-    var fd=new FormData(); fd.append("image",f);
-    var r=await fetch("https://api.imgbb.com/1/upload?key=16b4262b9ff85a10c0f3a4834a847184",{method:"POST",body:fd});
-    var d=await r.json(); var url=(d&&d.data&&d.data.url)?d.data.url:"";
+    var up=await compressImage(f, kind==="doc"?2000:1400, kind==="doc"?0.85:0.78);
+    var url=await imgbbUpload(up);
     if(!url){ err.textContent="فشل رفع الصورة، جرّب مرة أخرى"; }
     else if(!(await verifyImageLoads(url))){ err.textContent="الصورة رُفعت لكن رابطها لا يعمل، أعد المحاولة"; }
-    else { arr.push(url); renderPropThumbs(); showToast("تمت إضافة الصورة ✓"); }
+    else {
+      var first=(kind!=="doc" && arr.length===0);
+      arr.push(url); renderPropThumbs(); showToast("تمت إضافة الصورة ✓");
+      if(first){ var cv=await coverImage(f,800,420,0.72); if(cv){ try{ propOgImg=await imgbbUpload(cv); }catch(x){} } }
+    }
   }catch(e){ err.textContent="فشل الرفع — تحقق من الاتصال"; }
   ph.innerHTML=orig; input.value="";
 }
@@ -5166,7 +5197,7 @@ async function submitProperty(){
     if(!ep){ e.textContent="العقار غير موجود"; return; }
     e.textContent=""; btn.disabled=true; btn.textContent="جاري الحفظ...";
     try{
-      await updateDoc(doc(db,"properties",propEditId),{title:title,type:document.getElementById("pf-type").value,deal:document.getElementById("pf-deal").value,city:city,district:g("pf-district"),area:area,price:price,desc:g("pf-desc"),images:propImgs.slice(),image:propImgs[0],updatedAt:Date.now()});
+      await updateDoc(doc(db,"properties",propEditId),{title:title,type:document.getElementById("pf-type").value,deal:document.getElementById("pf-deal").value,city:city,district:g("pf-district"),area:area,price:price,desc:g("pf-desc"),images:propImgs.slice(),image:propImgs[0],ogImage:propOgImg||"",updatedAt:Date.now()});
       closeModal("modal-prop-form");
       try{ notifyAdmin("✏️ تعديل عقار من مكتب\n"+(ep.officeName||"")+"\n"+title+" · "+pPrice({price:price})); }catch(x){}
       showToast("تم حفظ التعديلات ✓");
@@ -5186,7 +5217,7 @@ async function submitProperty(){
     await setDoc(doc(db,"properties",id),{
       id:id,title:title,type:document.getElementById("pf-type").value,deal:document.getElementById("pf-deal").value,
       city:city,district:g("pf-district"),area:area,price:price,desc:g("pf-desc"),
-      images:propImgs.slice(),image:propImgs[0],role:propRole,ownerName:name,phone:off?off.phone:phone,officeId:off?off.id:"",officeName:off?off.officeName:"",
+      images:propImgs.slice(),image:propImgs[0],ogImage:propOgImg||"",role:propRole,ownerName:name,phone:off?off.phone:phone,officeId:off?off.id:"",officeName:off?off.officeName:"",
       status:"pending",createdAt:Date.now()
     });
     await setDoc(doc(db,"propDocs",id),{id:id,role:propRole,docs:propDocImgs.slice(),createdAt:Date.now()});
@@ -5865,7 +5896,7 @@ function openPropEdit(id){
   document.getElementById("pf-desc").value=p.desc||"";
   if(p.type) document.getElementById("pf-type").value=p.type;
   if(p.deal) document.getElementById("pf-deal").value=p.deal;
-  propImgs=((p.images&&p.images.length)?p.images:(p.image?[p.image]:[])).slice(); renderPropThumbs();
+  propImgs=((p.images&&p.images.length)?p.images:(p.image?[p.image]:[])).slice(); propOgImg=p.ogImage||""; renderPropThumbs();
   document.getElementById("pf-head").textContent="✏️ تعديل العقار";
   document.getElementById("pf-doc-box").style.display="none";
   document.getElementById("pf-submit").textContent="حفظ التعديلات ✓";
