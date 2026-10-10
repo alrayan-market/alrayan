@@ -538,6 +538,23 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
 /* التبويبات: تلتف على الجوال حتى يظهر كل تبويب */
 .tabs{flex-wrap:wrap;overflow:visible}
 .tabs .tab-btn{flex:1 1 auto;white-space:nowrap;min-width:max-content}
+
+/* ═══ كل نافذة تُعرض كصفحة كاملة بهوية المنصة ═══ */
+@keyframes pageIn{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:none}}
+.overlay.as-page{display:block;padding:0;background:#F4F6FA;overflow-y:auto;-webkit-overflow-scrolling:touch;backdrop-filter:none;animation:pageIn .22s ease both}
+.overlay.as-page.hidden{display:none!important}
+.overlay.as-page>.modal{max-width:760px!important;width:100%;margin:0 auto!important;min-height:calc(100vh - 59px);max-height:none!important;overflow:visible!important;border-radius:0!important;box-shadow:none!important;animation:none!important;background:#fff}
+.overlay.as-page>.modal.modal-sm{max-width:560px!important}
+@media(min-width:780px){.overlay.as-page>.modal{border-radius:18px!important;margin:22px auto 40px!important;min-height:auto;box-shadow:0 8px 28px rgba(26,39,68,.08)!important}}
+.overlay.as-page .pg-x{display:none!important}
+.overlay.as-page .modal h3{font-size:1.18rem!important;color:#1A2744}
+.page-bar{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:10px;height:56px;padding:0 14px;background:linear-gradient(100deg,#1A2744,#2A3C63);border-bottom:3px solid #C9933A;color:#fff;box-shadow:0 4px 14px rgba(26,39,68,.18)}
+.page-bar .pb-back{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);color:#fff;border-radius:10px;padding:7px 14px;font-weight:800;font-size:0.86rem;font-family:Tajawal,sans-serif;cursor:pointer}
+.page-bar .pb-back:active{transform:scale(.96)}
+.page-bar .pb-brand{font-weight:900;font-size:1rem;letter-spacing:.2px}
+.page-bar .pb-brand span{color:#E8B660}
+body.page-open{overflow:hidden}
+body.page-open .float-btn,body.page-open #cart-count-badge{display:none!important}
 </style>
 </head>
 <body>
@@ -4933,7 +4950,7 @@ async function adminDeleteSeller(sellerId){
 let toastTimer;
 function showToast(msg){clearTimeout(toastTimer);document.getElementById("toast-msg").textContent=msg;document.getElementById("toast").classList.remove("hidden");toastTimer=setTimeout(()=>document.getElementById("toast").classList.add("hidden"),3000);}
 
-document.querySelectorAll(".overlay").forEach(o=>{o.addEventListener("click",e=>{if(e.target===o)o.classList.add("hidden");});});
+document.querySelectorAll(".overlay").forEach(o=>{o.addEventListener("click",e=>{if(e.target===o && !o.classList.contains("as-page"))o.classList.add("hidden");});});
 
 // expose functions globally for onclick handlers
 window.openRegister=openRegister;window.openLogin=openLogin;window.doLogin=doLogin;window.doLogout=doLogout;
@@ -5976,6 +5993,47 @@ window.openOfficeForm=openOfficeForm; window.submitOffice=submitOffice; window.u
 window.removeOfficeDoc=removeOfficeDoc; window.approveOffice=approveOffice; window.rejectOffice=rejectOffice;
 window.deleteOffice=deleteOffice; window.openOffices=openOffices; window.openOfficeProps=openOfficeProps;
 
+
+// ══════════════ كل نافذة = صفحة مخصصة ══════════════
+var _pageStack=[], _pageZ=2000;
+function pageXButton(ov){
+  return Array.prototype.find.call(ov.querySelectorAll("button"),function(b){
+    return b.textContent.trim()==="✕" && /close/i.test(b.getAttribute("onclick")||"");
+  })||null;
+}
+function pageClose(ov){ if(ov._xbtn){ ov._xbtn.click(); } else { ov.classList.add("hidden"); } }
+function initPages(){
+  document.querySelectorAll(".overlay").forEach(function(ov){
+    if(ov.classList.contains("as-page")) return;
+    ov.classList.add("as-page");
+    var x=pageXButton(ov); if(x){ x.classList.add("pg-x"); ov._xbtn=x; }
+    var bar=document.createElement("div"); bar.className="page-bar";
+    bar.innerHTML='<button type="button" class="pb-back">→ رجوع</button><div class="pb-brand">منصة الريـ<span>ان</span></div>';
+    bar.querySelector(".pb-back").addEventListener("click",function(){ pageClose(ov); });
+    ov.insertBefore(bar, ov.firstChild);
+    var wasOpen=!ov.classList.contains("hidden");
+    new MutationObserver(function(){
+      var open=!ov.classList.contains("hidden");
+      if(open===wasOpen) return;
+      wasOpen=open;
+      if(open){
+        ov.style.zIndex=String(++_pageZ);
+        ov.scrollTop=0;
+        _pageStack.push(ov);
+        try{ history.pushState({rp:ov.id||"page"},""); }catch(e){}
+        document.body.classList.add("page-open");
+      } else {
+        _pageStack=_pageStack.filter(function(o){return o!==ov;});
+        if(!_pageStack.length) document.body.classList.remove("page-open");
+      }
+    }).observe(ov,{attributes:true,attributeFilter:["class"]});
+  });
+  window.addEventListener("popstate",function(){
+    var top=_pageStack[_pageStack.length-1];
+    if(top) pageClose(top);
+  });
+}
+initPages();
 </script>
 </body>
 </html>
