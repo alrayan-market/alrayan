@@ -43,13 +43,22 @@ export default async (request, context) => {
   const ua = request.headers.get("user-agent") || "";
   const url = new URL(request.url);
   const p = (k) => url.searchParams.get(k);
-  const prop = p("prop"), req = p("req"), ad = p("ad"), vid = p("video"), poll = p("poll"), publish = p("publish");
-  if ((!prop && !req && !ad && !vid && !poll && !publish) || !BOT.test(ua)) return context.next();
+  const auc = p("auc"), prop = p("prop"), req = p("req"), ad = p("ad"), vid = p("video"), poll = p("poll"), publish = p("publish");
+  if ((!auc && !prop && !req && !ad && !vid && !poll && !publish) || !BOT.test(ua)) return context.next();
 
   let ready = false; // صورة المعاينة جاهزة بالحجم المناسب (لا تحتاج تصغير)
   let title = SITE_NAME, desc = "عقارات موثّقة · مكاتب معتمدة · خزانات مياه · متاجر سودانية", image = SITE_LOGO;
   try {
-    if (prop) {
+    if (auc) {
+      const f = await fireGet("auctions", auc);
+      if (f) {
+        const hb = num(f, "highestBid");
+        title = "🔨 مزاد: " + (str(f, "title") || "");
+        desc = [str(f, "city"), hb ? "أعلى مزايدة " + money(hb) : "بلا سعر افتتاحي", "زايد الآن على منصة الريان"].filter(Boolean).join(" · ");
+        const og = str(f, "ogImage"), img = firstImg(f, "image", "images");
+        if (og) { image = og; ready = true; } else if (img) image = img;
+      }
+    } else if (prop) {
       const f = await fireGet("properties", prop);
       if (f) {
         const price = money(num(f, "price")) || "السعر عند التواصل";
@@ -101,6 +110,7 @@ export default async (request, context) => {
       const T = {
         property: ["🏠 انشر عقارك مجاناً", "أرض أو بيت أو شقة للبيع أو الإيجار؟ انشرها على منصة الريان ويصلك المشتري على واتساب"],
         office: ["🏢 سجّل مكتبك العقاري", "احصل على شارة «مكتب موثّق» وانشر عقاراتك على منصة الريان"],
+        auction: ["🔨 اعرض للمزاد على منصة الريان", "عقارك أو سيارتك تصل لأعلى سعر عبر مزاد موثّق بإشراف المنصة"],
         request: ["🔎 اطلب ما تبحث عنه", "تدوّر على عقار أو عربية؟ اكتب طلبك ويجيك أصحاب العروض على واتساب"]
       }[publish];
       if (T) { title = T[0]; desc = T[1]; }
