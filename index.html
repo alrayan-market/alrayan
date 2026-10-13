@@ -555,6 +555,26 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
 .page-bar .pb-brand span{color:#E8B660}
 body.page-open{overflow:hidden}
 body.page-open .float-btn,body.page-open #cart-count-badge{display:none!important}
+
+/* ═══ المزادات ═══ */
+.auc-strip{margin:10px 16px 4px;border-radius:18px;padding:16px;cursor:pointer;display:flex;align-items:center;gap:13px;background:linear-gradient(120deg,#12203A 0%,#2A3C63 55%,#B8862B 135%);box-shadow:0 10px 26px rgba(26,39,68,.25);position:relative;overflow:hidden}
+.auc-strip:active{transform:scale(.98)}
+.auc-strip .a-ico{font-size:2.4rem;flex-shrink:0}
+.auc-strip .a-t{color:#fff;font-weight:900;font-size:1.08rem}
+.auc-strip .a-s{color:#E8D9B0;font-size:0.74rem;margin-top:3px;line-height:1.6}
+.auc-strip .a-go{margin-right:auto;background:linear-gradient(100deg,#F2CE73,#D9A840);color:#12203A;font-weight:900;font-size:0.76rem;padding:8px 13px;border-radius:100px;white-space:nowrap}
+.auc-live{display:inline-flex;align-items:center;gap:5px;background:#C62828;color:#fff;font-size:0.66rem;font-weight:900;padding:3px 9px;border-radius:100px}
+.auc-live::before{content:"";width:7px;height:7px;border-radius:50%;background:#fff;animation:aucPulse 1s infinite}
+@keyframes aucPulse{50%{opacity:.25}}
+.auc-ended{display:inline-block;background:#6B7280;color:#fff;font-size:0.66rem;font-weight:900;padding:3px 9px;border-radius:100px}
+.auc-timer{font-variant-numeric:tabular-nums;font-weight:900;color:#1A2744}
+.auc-box{background:linear-gradient(160deg,#1A2744,#2A3C63);border-radius:16px;padding:16px;color:#fff;margin:12px 0}
+.auc-box .ab-l{color:#C6CFDF;font-size:0.74rem}
+.auc-box .ab-v{font-weight:900;font-size:1.5rem;color:#F2CE73}
+.auc-quick{display:flex;gap:6px;margin:8px 0}
+.auc-quick button{flex:1;border:1.5px solid #E5E0D8;background:#fff;color:#1A2744;border-radius:10px;padding:7px 4px;font-weight:800;font-size:0.74rem;cursor:pointer;font-family:Tajawal,sans-serif}
+.bid-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid #EEF0F4;font-size:0.82rem}
+.bid-row b{color:#B8862B}
 </style>
 </head>
 <body>
@@ -701,6 +721,7 @@ body.page-open .float-btn,body.page-open #cart-count-badge{display:none!importan
     <div><div class="rh-t">سوق العقارات</div><div class="rh-s">أراضي · منازل · شقق · محلات · مزارع<br>كل إعلان موثّق (مالك / وكيل / وسيط)</div></div>
     <div class="rh-go">تصفّح ←</div>
   </div>
+  <div class="auc-strip" onclick="openAuctions()"><div class="a-ico">🔨</div><div><div class="a-t">مزادات الريان <span class="auc-live" id="auc-live-badge" style="display:none">مباشر</span></div><div class="a-s">زايد على عقارات وسيارات موثّقة · بدون سعر افتتاحي</div></div><div class="a-go">ادخل المزاد ←</div></div>
   <div class="re-two">
     <div class="re-mini" onclick="openTanks()" style="background:linear-gradient(160deg,#0E5A8A,#1C86C6);color:#fff"><div class="m-ico">💧</div><div class="m-t">خزانات المياه</div><div class="m-s">منصة الريان لخزانات المياه</div></div>
     <div class="re-mini" onclick="openPropForm()" style="background:linear-gradient(160deg,#F2CE73,#D9A840);color:#12203A"><div class="m-ico">🏠</div><div class="m-t">انشر عقارك</div><div class="m-s">مالك · وكيل · وسيط</div></div>
@@ -722,9 +743,11 @@ body.page-open .float-btn,body.page-open #cart-count-badge{display:none!importan
   <div class="biz-strip">
     <div class="biz-track">
       <button class="biz-item gold" onclick="openPropForm()"><span class="bi-q">عندك عقار للبيع أو الإيجار؟</span><span class="bi-a">🏠 انشر عقارك</span></button>
+      <button class="biz-item" onclick="openAuctionForm()"><span class="bi-q">عايز أعلى سعر؟</span><span class="bi-a">🔨 اعرض للمزاد</span></button>
       <button class="biz-item" onclick="startJoin('store')"><span class="bi-q">عندك بضاعة تبيعها؟</span><span class="bi-a">🏪 افتح متجرك</span></button>
       <button class="biz-item gold" onclick="startJoin('ad')"><span class="bi-q">عايز تعمل إعلان؟</span><span class="bi-a">📢 انشر إعلانك</span></button>
       <button class="biz-item gold" onclick="openPropForm()"><span class="bi-q">عندك عقار للبيع أو الإيجار؟</span><span class="bi-a">🏠 انشر عقارك</span></button>
+      <button class="biz-item" onclick="openAuctionForm()"><span class="bi-q">عايز أعلى سعر؟</span><span class="bi-a">🔨 اعرض للمزاد</span></button>
       <button class="biz-item" onclick="startJoin('store')"><span class="bi-q">عندك بضاعة تبيعها؟</span><span class="bi-a">🏪 افتح متجرك</span></button>
       <button class="biz-item gold" onclick="startJoin('ad')"><span class="bi-q">عايز تعمل إعلان؟</span><span class="bi-a">📢 انشر إعلانك</span></button>
     </div>
@@ -855,6 +878,7 @@ body.page-open .float-btn,body.page-open #cart-count-badge{display:none!importan
     </div>
       <div id="tab-realestate" class="hidden"></div>
       <div id="tab-notify" class="hidden"></div>
+      <div id="tab-auctions" class="hidden"></div>
       <div id="tab-manage" class="hidden"></div>
     </div>
   </div>
@@ -1156,6 +1180,79 @@ body.page-open .float-btn,body.page-open #cart-count-badge{display:none!importan
   <button type="button" class="btn-navy" id="lc-store" style="width:100%;margin-bottom:9px" onclick="chooseLoginStore()">🏪 متجر</button>
   <button type="button" class="btn-navy" id="lc-office" style="width:100%;background:linear-gradient(100deg,#F2CE73,#D9A840);color:#12203A" onclick="chooseLoginOffice()">🏢 مكتب</button>
   <button type="button" onclick="closeModal('modal-login-choice')" style="width:100%;margin-top:10px;background:none;border:none;color:#9CA3AF;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">إلغاء</button>
+</div></div>
+
+
+<!-- ═══ المزادات: القائمة ═══ -->
+<div class="overlay hidden" id="modal-auctions"><div class="modal" style="max-width:560px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><h3 style="color:#1A2744;font-weight:900;font-size:1.1rem">🔨 مزادات الريان</h3><button onclick="closeModal('modal-auctions')" style="background:none;border:none;font-size:1.4rem;color:#9CA3AF;cursor:pointer">✕</button></div>
+  <p style="color:#6B7280;font-size:0.8rem;line-height:1.7;margin-bottom:10px">مزادات بلا سعر افتتاحي. للمشاركة تدفع تأميناً يُرد كاملاً إن لم تفز. المعاينة بالفيديو والصور عبر واتساب المنصة.</p>
+  <div class="pr-chips" id="auc-chips"></div>
+  <div class="pr-grid" id="auc-list"></div>
+  <button class="btn-navy" style="width:100%;margin-top:14px" onclick="openAuctionForm()">🔨 اعرض عقارك أو سيارتك للمزاد</button>
+</div></div>
+
+<!-- ═══ المزادات: صفحة المزاد ═══ -->
+<div class="overlay hidden" id="modal-auction-view"><div class="modal" style="max-width:560px;padding:0">
+  <div style="display:flex;justify-content:flex-end;padding:10px 12px 0"><button onclick="closeModal('modal-auction-view')" style="background:none;border:none;font-size:1.4rem;color:#9CA3AF;cursor:pointer">✕</button></div>
+  <div id="auv-body" style="padding:0 16px 20px"></div>
+</div></div>
+
+<!-- ═══ المزادات: عرض للمزاد ═══ -->
+<div class="overlay hidden" id="modal-auction-form"><div class="modal modal-sm">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><h3 style="color:#1A2744;font-weight:900;font-size:1.05rem">🔨 اعرض للمزاد</h3><button onclick="closeModal('modal-auction-form')" style="background:none;border:none;font-size:1.4rem;color:#9CA3AF;cursor:pointer">✕</button></div>
+  <p style="color:#6B7280;font-size:0.78rem;margin-bottom:12px;line-height:1.7">يُراجَع طلبك وأوراقك قبل النشر. بياناتك ورقمك لا تظهر للمزايدين، والتواصل يتم عبر المنصة.</p>
+  <div class="field"><label class="lbl">نوع المعروض</label><select class="inp" id="af-kind"><option value="property">🏡 عقار</option><option value="car">🚗 سيارة</option><option value="other">📦 أخرى</option></select></div>
+  <div class="field"><label class="lbl">العنوان</label><input class="inp" id="af-title" maxlength="90" placeholder="مثال: أرض سكنية 500م بالفاتح"></div>
+  <div class="field"><label class="lbl">الوصف والمواصفات</label><textarea class="inp" id="af-desc" rows="4" maxlength="1500"></textarea></div>
+  <div class="field"><label class="lbl">المدينة / المنطقة</label><input class="inp" id="af-city"></div>
+  <div class="field"><label class="lbl">صور (حتى 6)</label>
+    <div id="af-img-ph" onclick="document.getElementById('af-img-input').click()" style="background:#F4F6FA;border:2px dashed #D8D3C6;border-radius:12px;padding:16px;text-align:center;cursor:pointer;color:#6B7280;font-size:0.8rem">📷 اضغط لإضافة صورة</div>
+    <div id="af-imgs" style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:8px"></div>
+    <input type="file" id="af-img-input" accept="image/*" style="display:none" onchange="uploadAucImage(this,'img')"></div>
+  <div class="field" style="background:#FFF8E8;border:1px solid #F0D98A;border-radius:12px;padding:11px"><label class="lbl">📄 أوراق الملكية (سند / شهادة بحث / ترخيص العربة)</label>
+    <div style="color:#6B7280;font-size:0.72rem;margin-bottom:7px">تُراجَع من الإدارة فقط (حتى 3 صور).</div>
+    <div id="af-doc-ph" onclick="document.getElementById('af-doc-input').click()" style="background:#fff;border:2px dashed #D8B66A;border-radius:12px;padding:14px;text-align:center;cursor:pointer;color:#8A6410;font-size:0.8rem;font-weight:800">📎 اضغط لرفع صورة الأوراق</div>
+    <div id="af-docs" style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:8px"></div>
+    <input type="file" id="af-doc-input" accept="image/*" style="display:none" onchange="uploadAucImage(this,'doc')"></div>
+  <div class="field"><label class="lbl">صفتك</label><select class="inp" id="af-role"><option value="owner">مالك</option><option value="agent">وكيل عن المالك</option><option value="broker">وسيط</option><option value="office">مكتب عقاري</option></select></div>
+  <div class="field"><label class="lbl">مدة المزاد المقترحة</label><select class="inp" id="af-days"><option value="3">3 أيام</option><option value="5" selected>5 أيام</option><option value="7">7 أيام</option><option value="10">10 أيام</option></select></div>
+  <div class="field"><label class="lbl">اسمك</label><input class="inp" id="af-name"></div>
+  <div class="field"><label class="lbl">الدولة</label><select class="inp" id="af-country"><option value="+249" selected>🇸🇩 السودان (+249)</option><option value="+966">🇸🇦 السعودية (+966)</option><option value="+20">🇪🇬 مصر (+20)</option><option value="+971">🇦🇪 الإمارات (+971)</option><option value="+974">🇶🇦 قطر (+974)</option><option value="+90">🇹🇷 تركيا (+90)</option></select></div>
+  <div class="field"><label class="lbl">رقم واتساب</label><input class="inp" id="af-phone" inputmode="numeric" placeholder="912345678"></div>
+  <label style="display:flex;gap:8px;align-items:flex-start;font-size:0.76rem;color:#4B5563;line-height:1.6;margin-bottom:10px"><input type="checkbox" id="af-ack" style="margin-top:3px"> أقرّ بصحة البيانات والأوراق، وألتزم بالبيع لصاحب أعلى مزايدة عند انتهاء المزاد.</label>
+  <div id="af-err" style="color:#D9534F;font-size:0.8rem;margin-bottom:8px"></div>
+  <button class="btn-navy" id="af-submit" style="width:100%" onclick="submitAuction()">إرسال للمراجعة ✓</button>
+</div></div>
+
+<!-- ═══ المزادات: التسجيل للمشاركة ═══ -->
+<div class="overlay hidden" id="modal-auc-join"><div class="modal modal-sm">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><h3 style="color:#1A2744;font-weight:900;font-size:1.05rem">📝 التسجيل في المزاد</h3><button onclick="closeModal('modal-auc-join')" style="background:none;border:none;font-size:1.4rem;color:#9CA3AF;cursor:pointer">✕</button></div>
+  <div id="aj-head" style="margin-bottom:8px"></div>
+  <div style="background:#E9F6EF;border:1px solid #BFE3CE;border-radius:12px;padding:10px 12px;color:#1F6B4C;font-size:0.8rem;font-weight:700;line-height:1.7">💳 حوّل مبلغ التأمين ثم ارفع صورة الإشعار. <b>يُرد التأمين كاملاً إن لم تفز.</b> وإن فزت وتراجعت عن الشراء لا يُرد.</div>
+  <div style="background:#F4F6FA;border-radius:12px;padding:12px 14px;margin:10px 0;line-height:2;font-size:0.84rem;color:#374151">🏦 البنك: <b>بنك الخرطوم</b> · فرع السوق المركزي / بحري<br>👤 الاسم: <b>عبد الرؤوف خالد محمد</b><br>🔢 رقم الحساب: <b>1978584</b> <button type="button" onclick="copyAccount()" style="margin-right:6px;background:#1A2744;color:#fff;border:none;border-radius:8px;padding:4px 10px;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif;font-size:0.74rem">نسخ</button></div>
+  <div class="field"><label class="lbl">صورة إشعار التحويل</label>
+    <div id="aj-rc-ph" onclick="document.getElementById('aj-rc-input').click()" style="background:#F4F6FA;border:2px dashed #D8D3C6;border-radius:12px;padding:16px;text-align:center;cursor:pointer;color:#6B7280;font-size:0.8rem">📸 اضغط لرفع الإشعار</div>
+    <div id="aj-rc-prev"></div><input type="file" id="aj-rc-input" accept="image/*" style="display:none" onchange="uploadAucReceipt(this)"></div>
+  <div class="field"><label class="lbl">اسمك الكامل</label><input class="inp" id="aj-name"></div>
+  <div class="field"><label class="lbl">الدولة</label><select class="inp" id="aj-country"><option value="+249" selected>🇸🇩 السودان (+249)</option><option value="+966">🇸🇦 السعودية (+966)</option><option value="+20">🇪🇬 مصر (+20)</option><option value="+971">🇦🇪 الإمارات (+971)</option><option value="+974">🇶🇦 قطر (+974)</option><option value="+90">🇹🇷 تركيا (+90)</option></select></div>
+  <div class="field"><label class="lbl">رقم واتساب</label><input class="inp" id="aj-phone" inputmode="numeric" placeholder="912345678"></div>
+  <div class="field"><label class="lbl">رمز المزايدة (6 أحرف أو أرقام على الأقل)</label><input class="inp" id="aj-pin" type="password" autocomplete="new-password"><div style="color:#9CA3AF;font-size:0.7rem;margin-top:4px">تحتاجه للدخول والمزايدة. إن كنت شاركت في مزاد سابق فاكتب رمزك نفسه.</div></div>
+  <label style="display:flex;gap:8px;align-items:flex-start;font-size:0.76rem;color:#4B5563;line-height:1.6;margin-bottom:10px"><input type="checkbox" id="aj-ack" style="margin-top:3px"> أوافق على شروط المزاد: مزايدتي ملزمة، وألتزم بالشراء إن فزت.</label>
+  <div id="aj-err" style="color:#D9534F;font-size:0.8rem;margin-bottom:8px"></div>
+  <button class="btn-navy" id="aj-submit" style="width:100%" onclick="submitAucJoin()">إرسال طلب المشاركة ✓</button>
+</div></div>
+
+<!-- ═══ المزادات: دخول المشارك ═══ -->
+<div class="overlay hidden" id="modal-auc-login"><div class="modal modal-sm">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><h3 style="color:#1A2744;font-weight:900;font-size:1.05rem">🔑 دخول المزايدين</h3><button onclick="closeModal('modal-auc-login')" style="background:none;border:none;font-size:1.4rem;color:#9CA3AF;cursor:pointer">✕</button></div>
+  <p style="color:#6B7280;font-size:0.8rem;margin-bottom:12px">ادخل برقمك ورمز المزايدة الذي اخترته عند التسجيل.</p>
+  <div class="field"><label class="lbl">الدولة</label><select class="inp" id="al-country"><option value="+249" selected>🇸🇩 السودان (+249)</option><option value="+966">🇸🇦 السعودية (+966)</option><option value="+20">🇪🇬 مصر (+20)</option><option value="+971">🇦🇪 الإمارات (+971)</option><option value="+974">🇶🇦 قطر (+974)</option><option value="+90">🇹🇷 تركيا (+90)</option></select></div>
+  <div class="field"><label class="lbl">رقم واتساب</label><input class="inp" id="al-phone" inputmode="numeric" placeholder="912345678"></div>
+  <div class="field"><label class="lbl">رمز المزايدة</label><input class="inp" id="al-pin" type="password" autocomplete="current-password"></div>
+  <div id="al-err" style="color:#D9534F;font-size:0.8rem;margin-bottom:8px"></div>
+  <button class="btn-navy" id="al-submit" style="width:100%" onclick="submitAucLogin()">دخول</button>
+  <div style="text-align:center;margin-top:12px;font-size:0.76rem"><a href="javascript:void(0)" onclick="openPlatformWhatsApp()" style="color:#6B7280;font-weight:700">نسيت الرمز؟ تواصل معنا</a></div>
 </div></div>
 
 <div class="overlay hidden" id="modal-all-stores">
@@ -1496,7 +1593,7 @@ body.page-open .float-btn,body.page-open #cart-count-badge{display:none!importan
 <script type="module">
 // ══════════ FIREBASE ══════════
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, doc, setDoc, getDoc, getDocs, onSnapshot, updateDoc, deleteDoc, query, orderBy, limit, deleteField } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, doc, setDoc, getDoc, getDocs, onSnapshot, updateDoc, deleteDoc, query, orderBy, limit, deleteField, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, setPersistence, browserSessionPersistence, inMemoryPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getStorage, ref as storageRef, uploadBytes, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
@@ -1781,6 +1878,7 @@ function listenAll(){
     if(isAdmin && activeTab==="manage") renderPendingRequests();
   });
   startPropsListener();
+  startAuctionListeners();
   onSnapshot(collection(db,"upgradeRequests"), snap=>{
     upgradeReqs=snap.docs.map(d=>d.data());
     if(isAdmin && activeTab==="manage") renderPendingRequests();
@@ -1840,6 +1938,7 @@ window.onload=async function(){
   checkUrlAd();
   checkUrlProp();
   checkUrlReq();
+  checkUrlAuc();
   checkUrlJoin();
   checkUrlContact();
 };
@@ -3198,16 +3297,17 @@ function switchTab(tab){
   activeTab=tab;
   document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
   event.target.classList.add("active");
-  ["tab-products","tab-orders","tab-admin","tab-messages","tab-manage","tab-realestate","tab-notify","tab-channel","tab-messages2","tab-mymessages"].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.add("hidden");});
+  ["tab-products","tab-orders","tab-admin","tab-messages","tab-manage","tab-realestate","tab-notify","tab-auctions","tab-channel","tab-messages2","tab-mymessages"].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.add("hidden");});
   const cur=document.getElementById("tab-"+tab); if(cur)cur.classList.remove("hidden");
   if(tab==="channel") renderChannelAdmin();
   if(tab==="notify") renderNotifyTab();
+  if(tab==="auctions") renderAuctionsAdmin();
   if(tab==="messages2") renderPlatformMessages();
   if(tab==="mymessages") renderMyPlatformMessages();
 }
 
 function renderDashboard(){
-  if(!isAdmin){ ["tab-realestate","tab-notify"].forEach(function(t){ var _e=document.getElementById(t); if(_e) _e.classList.add("hidden"); }); }
+  if(!isAdmin){ ["tab-realestate","tab-notify","tab-auctions"].forEach(function(t){ var _e=document.getElementById(t); if(_e) _e.classList.add("hidden"); }); }
   if(isAdmin){renderAdminDashboard();return;}
   if(!currentSeller)return;
   const plan=PLANS.find(p=>p.id===currentSeller.plan)||PLANS[0];
@@ -3306,6 +3406,7 @@ function renderAdminDashboard(){
   document.getElementById("dash-store-name").textContent="منصة الريان السوق السوداني";
   renderRealEstateTab();
   renderNotifyTab();
+  renderAuctionsAdmin();
   document.getElementById("dash-plan-badge").textContent="مالك المنصة";
   document.getElementById("dash-joined").textContent="";
   document.getElementById("dash-main-btn").textContent="";
@@ -3322,6 +3423,7 @@ function renderAdminDashboard(){
     <div class="stat-card"><div class="stat-icon">👁</div><div class="stat-val">${visits.total||0}</div><div class="stat-lbl">الزيارات</div></div>`;
   document.getElementById("dash-tabs").innerHTML=`
     <button class="tab-btn ${activeTab==="admin"?"active":""}" onclick="switchTab('admin')">📊 الإحصائيات</button>
+    <button class="tab-btn ${activeTab==="auctions"?"active":""}" onclick="switchTab('auctions')">🔨 المزادات${aucPendingCount()?' <span style="color:#D9534F">●'+aucPendingCount()+'</span>':''}</button>
     <button class="tab-btn ${activeTab==="realestate"?"active":""}" onclick="switchTab('realestate')">🏡 العقارات والطلبات${rePendingCount()?' <span style="color:#D9534F">●'+rePendingCount()+'</span>':''}</button>
     <button class="tab-btn ${activeTab==="orders"?"active":""}" onclick="switchTab('orders')">📋 الطلبات</button>
     
@@ -3436,7 +3538,7 @@ async function doLogin(){
   if(!found){
     try{
       await signInWithEmailAndPassword(auth, ADMIN_EMAIL, val);
-      isAdmin=true;currentSeller=null;activeTab="admin";
+      isAdmin=true;currentSeller=null;activeTab="admin";aucSession=null;
       document.getElementById("l-phone").value="";
       closeModal("modal-login");showView("dashboard");startAdminListeners();renderDashboard();
     }catch(e){
@@ -5410,7 +5512,7 @@ window.waAskOwner=waAskOwner; window.openTanks=openTanks; window.openTankProduct
 // ══════════════ لوحة المالك: العقارات والبوت ══════════════
 function checkUrlJoin(){
   var v=new URLSearchParams(window.location.search).get("publish"); if(!v) return;
-  setTimeout(function(){ if(v==="property") openPropForm(); else if(v==="office") openOfficeForm(); else if(v==="request") openRequestForm(); },1200);
+  setTimeout(function(){ if(v==="property") openPropForm(); else if(v==="office") openOfficeForm(); else if(v==="request") openRequestForm(); else if(v==="auction") openAuctionForm(); },1200);
 }
 function rePendingCount(){
   return (propsList||[]).filter(function(x){return x.status==="pending";}).length+(officesList||[]).filter(function(x){return x.status==="pending";}).length+(requestsList||[]).filter(function(x){return x.status==="pending";}).length;
@@ -5447,6 +5549,7 @@ function startAdminListeners(){
       if(isAdmin && (activeTab==="notify"||activeTab==="admin")) renderDashboard();
     },function(err){ console.warn("notifyLog",err&&err.code); });
   }catch(e){}
+  startAucAdmin();
   checkAdminPushHere();
 }
 var adminPushHere=false;
@@ -5495,7 +5598,7 @@ async function disableAdminPush(){
   }catch(e){ showToast("تعذّر الإيقاف"); }
 }
 window.enableAdminPush=enableAdminPush; window.disableAdminPush=disableAdminPush;
-function stopAdminListeners(){ try{ if(_notifyUnsub) _notifyUnsub(); }catch(e){} _notifyUnsub=null; notifyLogs=[]; }
+function stopAdminListeners(){ stopAucAdmin(); try{ if(_notifyUnsub) _notifyUnsub(); }catch(e){} _notifyUnsub=null; notifyLogs=[]; }
 function notifyFailedCount(){ return (notifyLogs||[]).filter(function(x){return x.status==="failed";}).length; }
 function renderNotifyTab(){
   var el=document.getElementById("tab-notify"); if(!el) return;
@@ -5763,6 +5866,424 @@ function inqList(limit){
 window.openLead=openLead; window.submitLead=submitLead; window.shareRequest=shareRequest; window.setInqFilter=setInqFilter;
 
 
+
+// ══════════════ المزادات ══════════════
+var auctionsList=[], aucBids=[], aucParts=[], aucFilter="live", aucViewId=null;
+var aucImgs=[], aucDocImgs=[], aucOgImg="", aucReceipt="", aucJoinId=null;
+var aucSession=null; // {uid, digits}
+var aucMyPart={};   // auctionId -> participant doc
+const AUC_KINDS={property:"🏡 عقار",car:"🚗 سيارة",other:"📦 أخرى"};
+const PLATFORM_WA="249128781247";
+function aucNow(){ return Date.now(); }
+function aucIsLive(a){ return a.status==="live" && a.endsAt && aucNow()<a.endsAt; }
+function aucIsEnded(a){ return a.status==="ended" || (a.status==="live" && a.endsAt && aucNow()>=a.endsAt); }
+function aucPublic(){ return (auctionsList||[]).filter(function(a){return a.status==="live"||a.status==="ended";}); }
+function bidderEmail(phone){ return "bidder-"+waNum(phone)+"@alrayan-market.app"; }
+function aucPartId(aid,phone){ return aid+"_"+waNum(phone); }
+function shortName(n){ var p=String(n||"").trim().split(/\s+/); return p.length>1 ? p[0]+" "+p[1].charAt(0)+"." : (p[0]||"مزايد"); }
+function fmtLeft(ms){
+  if(ms<=0) return "انتهى";
+  var s=Math.floor(ms/1000), d=Math.floor(s/86400), h=Math.floor(s%86400/3600), m=Math.floor(s%3600/60), x=s%60;
+  var p=function(n){return (n<10?"0":"")+n;};
+  return (d?d+" يوم ":"")+p(h)+":"+p(m)+":"+p(x);
+}
+function aucMinNext(a){ var hb=Number(a.highestBid)||0; return hb>0 ? hb+(Number(a.minIncrement)||1) : 1; }
+function startAuctionListeners(){
+  onSnapshot(collection(db,"auctions"),function(snap){
+    auctionsList=snap.docs.map(function(d){return d.data();});
+    try{ var u=auth.currentUser; if(!aucSession && u && /^bidder-/.test(u.email||"")) aucSession={uid:u.uid,digits:(u.email.match(/^bidder-(\d+)@/)||[])[1]||""}; }catch(x){}
+    aucRefresh();
+  });
+  onSnapshot(collection(db,"auctionBids"),function(snap){
+    aucBids=snap.docs.map(function(d){return d.data();});
+    aucRefresh();
+  });
+}
+function aucRefresh(){
+  var live=aucPublic().filter(aucIsLive).length, b=document.getElementById("auc-live-badge");
+  if(b){ b.style.display=live?"inline-flex":"none"; b.textContent="مباشر · "+live; }
+  var m=document.getElementById("modal-auctions"); if(m && !m.classList.contains("hidden")) renderAuctionsList();
+  var v=document.getElementById("modal-auction-view"); if(v && !v.classList.contains("hidden") && aucViewId) renderAuctionView();
+  if(isAdmin && activeTab==="auctions") renderAuctionsAdmin();
+}
+setInterval(function(){
+  document.querySelectorAll("[data-auc-ends]").forEach(function(el){
+    var left=Number(el.getAttribute("data-auc-ends"))-aucNow();
+    el.textContent=fmtLeft(left);
+    if(left<=0 && !el._done){ el._done=true; aucRefresh(); }
+  });
+},1000);
+
+// ── القائمة ──
+function openAuctions(){ document.getElementById("modal-auctions").classList.remove("hidden"); renderAuctionsList(); }
+function setAucFilter(v){ aucFilter=v; renderAuctionsList(); }
+function renderAuctionsList(){
+  var c=function(v,l){ return '<button type="button" class="pr-chip'+(aucFilter===v?' on':'')+'" data-v="'+v+'" onclick="setAucFilter(this.dataset.v)">'+l+'</button>'; };
+  document.getElementById("auc-chips").innerHTML=c("live","🔴 جارية")+c("ended","منتهية")+c("all","الكل");
+  var L=aucPublic().filter(function(a){ return aucFilter==="all" || (aucFilter==="live"?aucIsLive(a):aucIsEnded(a)); })
+    .sort(function(a,b){ return aucIsLive(b)-aucIsLive(a) || (a.endsAt||0)-(b.endsAt||0); });
+  var box=document.getElementById("auc-list");
+  if(!L.length){ box.innerHTML='<div style="text-align:center;padding:34px 10px;color:#9CA3AF"><div style="font-size:2.4rem">🔨</div><div style="font-weight:800;margin-top:6px">'+(aucFilter==="live"?"لا توجد مزادات جارية الآن":"لا توجد مزادات")+'</div></div>'; return; }
+  box.innerHTML=L.map(function(a){
+    var live=aucIsLive(a), hb=Number(a.highestBid)||0;
+    return '<div class="pr-card" data-id="'+pEsc(a.id)+'" onclick="openAuctionView(this.dataset.id)">'
+      +'<div class="pc-img">🔨'+(a.image?'<img src="'+pEsc(a.image)+'" onerror="this.style.display=\'none\'">':'')
+      +'<span style="position:absolute;top:8px;right:8px;z-index:2">'+(live?'<span class="auc-live">مباشر</span>':'<span class="auc-ended">انتهى</span>')+'</span></div>'
+      +'<div class="pc-body"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div class="pc-price">'+(hb?pEsc(SDG(hb)):"لا مزايدات بعد")+'</div>'
+      +(live?'<span class="auc-timer" style="font-size:0.8rem" data-auc-ends="'+a.endsAt+'">'+fmtLeft(a.endsAt-aucNow())+'</span>':'')+'</div>'
+      +'<div class="pc-title">'+pEsc(a.title)+'</div>'
+      +'<div class="pc-loc">'+(AUC_KINDS[a.kind]||"")+' · 📍 '+pEsc(a.city)+' · '+(a.bidCount||0)+' مزايدة · تأمين '+pEsc(SDG(a.deposit||0))+'</div></div></div>';
+  }).join("");
+}
+
+// ── صفحة المزاد ──
+var aucViewImgs=[];
+function openAuctionView(id){
+  var a=(auctionsList||[]).find(function(x){return x.id===id;}); if(!a) return;
+  aucViewId=id;
+  document.getElementById("modal-auction-view").classList.remove("hidden");
+  renderAuctionView();
+  aucLoadMyPart(id);
+}
+function renderAuctionView(){
+  var a=(auctionsList||[]).find(function(x){return x.id===aucViewId;}), box=document.getElementById("auv-body"); if(!a||!box) return;
+  var live=aucIsLive(a), ended=aucIsEnded(a), hb=Number(a.highestBid)||0;
+  aucViewImgs=(a.images&&a.images.length)?a.images.slice():(a.image?[a.image]:[]);
+  var bids=(aucBids||[]).filter(function(b){return b.auctionId===a.id;}).sort(function(x,y){return (y.amount||0)-(x.amount||0);});
+  var role=PROP_ROLES[a.role]||PROP_ROLES.owner;
+  var h='<div id="auv-media" style="width:100%;height:240px;background:#F4F6FA;border-radius:14px;overflow:hidden;display:grid;place-items:center;font-size:3rem">🔨</div>'
+    +(aucViewImgs.length>1?'<div style="display:flex;gap:6px;overflow-x:auto;margin-top:8px">'+aucViewImgs.map(function(u,i){return '<img src="'+pEsc(u)+'" data-i="'+i+'" onclick="showAucImg(this.dataset.i)" style="width:54px;height:54px;object-fit:cover;border-radius:8px;cursor:pointer;flex-shrink:0;border:2px solid #E5E0D8">';}).join("")+'</div>':'')
+    +'<div style="margin-top:12px">'+(live?'<span class="auc-live">مزاد مباشر</span>':'<span class="auc-ended">انتهى المزاد</span>')+' <span class="pr-tag role">'+(AUC_KINDS[a.kind]||"")+'</span></div>'
+    +'<h2 style="color:#1A2744;font-weight:900;font-size:1.12rem;margin:8px 0 4px">'+pEsc(a.title)+'</h2>'
+    +'<div style="color:#6B7280;font-size:0.8rem">📍 '+pEsc(a.city)+'</div>'
+    +'<div class="auc-box"><div style="display:flex;justify-content:space-between;gap:10px">'
+    +'<div><div class="ab-l">'+(ended?"السعر النهائي":"أعلى مزايدة")+'</div><div class="ab-v">'+(hb?pEsc(SDG(hb)):"—")+'</div><div class="ab-l">'+(hb?("بواسطة "+pEsc(a.highestBidderName||"")):"لا مزايدات بعد · بلا سعر افتتاحي")+'</div></div>'
+    +'<div style="text-align:left"><div class="ab-l">'+(live?"ينتهي خلال":"الحالة")+'</div><div class="auc-timer" style="color:#fff;font-size:1.05rem" '+(live?'data-auc-ends="'+a.endsAt+'"':'')+'>'+(live?fmtLeft(a.endsAt-aucNow()):"انتهى")+'</div><div class="ab-l">'+(a.bidCount||0)+' مزايدة</div></div></div>'
+    +'<div class="ab-l" style="margin-top:8px">التأمين للمشاركة: <b style="color:#fff">'+pEsc(SDG(a.deposit||0))+'</b> (يُرد إن لم تفز) · أقل زيادة: <b style="color:#fff">'+pEsc(SDG(a.minIncrement||0))+'</b></div></div>'
+    +(ended && hb ? '<div class="ver-box" style="background:#FFF8E8;border-color:#F0D98A;color:#8A6410">🏆 رسا المزاد على '+pEsc(a.highestBidderName||"")+' بمبلغ '+pEsc(SDG(hb))+'</div>' : '')
+    +'<div id="auv-action"></div>'
+    +'<button type="button" onclick="requestAucInspection()" style="width:100%;margin-top:10px;border:2px solid #25D366;background:#F0FFF5;color:#1A7F43;border-radius:12px;padding:11px;font-weight:900;cursor:pointer;font-family:Tajawal,sans-serif">📹 اطلب معاينة (فيديو وصور) عبر واتساب المنصة</button>'
+    +(a.desc?'<div style="background:#FAFAF7;border:1px solid #EEF0F4;border-radius:11px;padding:12px;color:#4B5563;font-size:0.86rem;line-height:1.8;white-space:pre-wrap;margin-top:12px">'+pEsc(a.desc)+'</div>':'')
+    +'<div class="ver-box" style="margin-top:12px">'+role.ico+' راجعت المنصة أوراق البائع بصفته: '+role.n+'. البيع والدفع يتمّان بإشراف المنصة بعد انتهاء المزاد.</div>'
+    +'<div style="font-weight:900;color:#1A2744;margin:16px 0 4px">📜 سجل المزايدات ('+bids.length+')</div>'
+    +(bids.length?bids.slice(0,30).map(function(b,i){ var d=new Date(b.createdAt||0); return '<div class="bid-row"><span>'+(i===0?'🥇 ':'')+pEsc(b.shortName||"مزايد")+' <small style="color:#9CA3AF">'+pEsc(d.toLocaleDateString("ar")+" "+d.toLocaleTimeString("ar",{hour:"2-digit",minute:"2-digit"}))+'</small></span><b>'+pEsc(SDG(b.amount))+'</b></div>'; }).join(""):'<div style="color:#9CA3AF;font-size:0.82rem;padding:6px 0">كن أول من يزايد</div>')
+    +'<button type="button" onclick="shareAuction()" style="width:100%;margin-top:14px;border:1.5px solid #E5E0D8;background:#fff;color:#4B5563;border-radius:12px;padding:10px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif">🔗 شارك المزاد</button>';
+  box.innerHTML=h;
+  showAucImg(0);
+  renderAucAction();
+}
+function showAucImg(i){ var box=document.getElementById("auv-media"); if(!box) return; var u=aucViewImgs[parseInt(i)||0]; box.innerHTML=u?'<img src="'+pEsc(u)+'" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.textContent=\'🔨\'">':'🔨'; }
+function renderAucAction(){
+  var el=document.getElementById("auv-action"), a=(auctionsList||[]).find(function(x){return x.id===aucViewId;}); if(!el||!a) return;
+  if(!aucIsLive(a)){ el.innerHTML=''; return; }
+  var btn='font-family:Tajawal,sans-serif;font-weight:900;cursor:pointer;border-radius:12px;padding:11px;';
+  var part=aucMyPart[a.id];
+  if(!aucSession){
+    el.innerHTML='<div style="display:flex;gap:8px"><button type="button" class="btn-navy" style="flex:2" onclick="openAucJoin()">📝 سجّل للمشاركة</button><button type="button" onclick="openAucLogin()" style="'+btn+'flex:1;border:1.5px solid #1A2744;background:#fff;color:#1A2744">🔑 دخول</button></div>';
+    return;
+  }
+  if(!part){ el.innerHTML='<div style="color:#6B7280;font-size:0.8rem;margin-bottom:6px">لم تسجّل في هذا المزاد بعد.</div><button type="button" class="btn-navy" style="width:100%" onclick="openAucJoin()">📝 سجّل للمشاركة (تأمين '+pEsc(SDG(a.deposit||0))+')</button>'; return; }
+  if(part.status==="pending"){ el.innerHTML='<div class="ver-box" style="background:#FFF8E8;border-color:#F0D98A;color:#8A6410">⏳ طلب مشاركتك قيد التحقق من التأمين. ستتمكن من المزايدة فور اعتماده.</div>'; return; }
+  if(part.status==="rejected"){ el.innerHTML='<div class="ver-box" style="background:#FDECEC;border-color:#F3C4C4;color:#C62828">لم يُقبل طلب مشاركتك. تواصل مع المنصة للاستفسار.</div>'; return; }
+  var mn=aucMinNext(a), inc=Number(a.minIncrement)||1;
+  var mine=a.highestBidderPid===part.id;
+  el.innerHTML=(mine?'<div class="ver-box" style="margin-bottom:8px">✅ أنت صاحب أعلى مزايدة حالياً</div>':'')
+    +'<label class="lbl">مبلغ مزايدتك (لا يقل عن '+pEsc(SDG(mn))+')</label>'
+    +'<input class="inp" id="auv-amount" type="number" inputmode="numeric" value="'+mn+'">'
+    +'<div class="auc-quick"><button type="button" data-v="'+mn+'" onclick="setAucAmount(this.dataset.v)">'+pEsc(SDG(mn))+'</button><button type="button" data-v="'+(mn+inc)+'" onclick="setAucAmount(this.dataset.v)">+'+pEsc(SDG(inc*2))+'</button><button type="button" data-v="'+(mn+inc*4)+'" onclick="setAucAmount(this.dataset.v)">+'+pEsc(SDG(inc*5))+'</button></div>'
+    +'<div id="auv-err" style="color:#D9534F;font-size:0.8rem;margin-bottom:6px"></div>'
+    +'<button type="button" class="btn-navy" id="auv-bid" style="width:100%;background:linear-gradient(100deg,#F2CE73,#D9A840);color:#12203A" onclick="placeBid()">🔨 زايد الآن</button>'
+    +'<div style="color:#9CA3AF;font-size:0.7rem;margin-top:6px;text-align:center">المزايدة ملزمة · أي مزايدة في آخر دقيقتين تمدد المزاد دقيقتين</div>';
+}
+function setAucAmount(v){ var i=document.getElementById("auv-amount"); if(i) i.value=v; }
+async function aucLoadMyPart(aid){
+  if(!aucSession) return;
+  try{
+    var snap=await getDoc(doc(db,"auctionParticipants",aid+"_"+aucSession.digits));
+    if(snap.exists()) aucMyPart[aid]=snap.data(); else delete aucMyPart[aid];
+  }catch(e){}
+  if(aucViewId===aid) renderAucAction();
+}
+async function placeBid(){
+  var a=(auctionsList||[]).find(function(x){return x.id===aucViewId;}), part=a&&aucMyPart[a.id];
+  var e=document.getElementById("auv-err"), btn=document.getElementById("auv-bid");
+  if(!a||!part||part.status!=="approved"){ return; }
+  var amount=Math.floor(Number(document.getElementById("auv-amount").value)||0);
+  if(amount<aucMinNext(a)){ e.textContent="المبلغ أقل من الحد الأدنى "+SDG(aucMinNext(a)); return; }
+  if(!confirm("تأكيد مزايدتك بمبلغ "+SDG(amount)+"؟\nالمزايدة ملزمة.")) return;
+  btn.disabled=true; btn.textContent="جاري تسجيل المزايدة..."; e.textContent="";
+  var bidId="BID-"+Date.now()+"-"+Math.random().toString(36).slice(2,6);
+  try{
+    await runTransaction(db, async function(tx){
+      var ref=doc(db,"auctions",a.id), snap=await tx.get(ref);
+      if(!snap.exists()) throw new Error("gone");
+      var cur=snap.data(), now=Date.now();
+      if(cur.status!=="live" || now>=cur.endsAt) throw new Error("ended");
+      var min=(Number(cur.highestBid)||0)>0 ? Number(cur.highestBid)+(Number(cur.minIncrement)||1) : 1;
+      if(amount<min) throw new Error("low:"+min);
+      var ends=cur.endsAt; if(cur.endsAt-now<120000) ends=now+120000;
+      tx.update(ref,{highestBid:amount,highestBidderPid:part.id,highestBidderName:part.shortName,bidCount:(Number(cur.bidCount)||0)+1,lastBidAt:now,endsAt:ends});
+      tx.set(doc(db,"auctionBids",bidId),{id:bidId,auctionId:a.id,pid:part.id,shortName:part.shortName,amount:amount,createdAt:now});
+    });
+    showToast("تم تسجيل مزايدتك ✓");
+    try{ notifyAdmin("🔨 مزايدة جديدة\n"+a.title+"\n"+SDG(amount)+"\nالمزايد: "+part.name+" - "+part.phone); }catch(x){}
+  }catch(err){
+    var m=String((err&&err.message)||"");
+    e.textContent = m.indexOf("low:")===0 ? ("سبقك مزايد آخر. الحد الأدنى الآن "+SDG(Number(m.slice(4)))) : m==="ended" ? "انتهى المزاد" : "تعذر تسجيل المزايدة، أعد المحاولة";
+  }
+  if(btn){ btn.disabled=false; btn.textContent="🔨 زايد الآن"; }
+}
+function requestAucInspection(){
+  var a=(auctionsList||[]).find(function(x){return x.id===aucViewId;}); if(!a) return;
+  try{ notifyAdmin("📹 طلب معاينة مزاد\n"+a.title+"\n"+(aucSession?("مشارك: "+aucSession.digits):"زائر")); }catch(x){}
+  var msg="السلام عليكم، أطلب معاينة (فيديو وصور) للمزاد: "+a.title+"\nرقم المزاد: "+a.id+"\n"+baseUrl()+"/?auc="+a.id;
+  var url="https://wa.me/"+PLATFORM_WA+"?text="+encodeURIComponent(msg);
+  var w=null; try{ w=window.open(url,"_blank"); }catch(x){} if(!w) window.location.href=url;
+}
+function shareAuction(){
+  var a=(auctionsList||[]).find(function(x){return x.id===aucViewId;}); if(!a) return;
+  var url=baseUrl()+"/?auc="+a.id+"&s="+Date.now().toString(36);
+  var txt="🔨 مزاد: "+a.title+"\n📍 "+a.city+"\n💰 "+(Number(a.highestBid)?"أعلى مزايدة "+SDG(a.highestBid):"بلا سعر افتتاحي")+"\nزايد الآن على منصة الريان:";
+  if(navigator.share){ navigator.share({text:txt,url:url}).catch(function(){}); }
+  else { try{ navigator.clipboard.writeText(txt+"\n"+url); }catch(e){} showToast("تم نسخ رابط المزاد"); }
+}
+function checkUrlAuc(){
+  var id=new URLSearchParams(window.location.search).get("auc"); if(!id) return;
+  var tries=0, t=function(){ tries++; if((auctionsList||[]).find(function(x){return x.id===id && (x.status==="live"||x.status==="ended");})) openAuctionView(id); else if(tries<25) setTimeout(t,400); };
+  setTimeout(t,1200);
+}
+
+// ── التسجيل والدخول ──
+function openAucJoin(){
+  var a=(auctionsList||[]).find(function(x){return x.id===aucViewId;}); if(!a) return;
+  aucJoinId=a.id; aucReceipt="";
+  ["aj-name","aj-phone","aj-pin"].forEach(function(id){document.getElementById(id).value="";});
+  document.getElementById("aj-ack").checked=false; document.getElementById("aj-err").textContent=""; document.getElementById("aj-rc-prev").innerHTML="";
+  var saved={}; try{ saved=JSON.parse(localStorage.getItem("rayan_lead")||"{}"); }catch(e){}
+  if(saved.name) document.getElementById("aj-name").value=saved.name;
+  if(saved.cc) document.getElementById("aj-country").value=saved.cc;
+  if(saved.phone) document.getElementById("aj-phone").value=saved.phone;
+  document.getElementById("aj-head").innerHTML='<div style="font-weight:900;color:#1A2744">'+pEsc(a.title)+'</div><div style="color:#2E7D5E;font-weight:900;font-size:1.2rem;margin-top:4px">التأمين: '+pEsc(SDG(a.deposit||0))+'</div>';
+  document.getElementById("modal-auc-join").classList.remove("hidden");
+}
+async function uploadAucReceipt(input){
+  var f=input.files[0]; if(!f) return;
+  var ph=document.getElementById("aj-rc-ph"), err=document.getElementById("aj-err"), orig=ph.innerHTML;
+  ph.textContent="جاري رفع الإشعار..."; err.textContent="";
+  try{
+    var url=await imgbbUpload(await compressImage(f,1800,0.82));
+    if(url){ aucReceipt=url; document.getElementById("aj-rc-prev").innerHTML='<img src="'+pEsc(url)+'" style="width:100%;max-height:200px;object-fit:contain;border-radius:10px;margin-top:8px;border:1px solid #E5E0D8">'; }
+    else err.textContent="فشل رفع الإشعار، أعد المحاولة";
+  }catch(e){ err.textContent="فشل الرفع — تحقق من الاتصال"; }
+  ph.innerHTML=orig; input.value="";
+}
+async function aucAuth(phone,pin,allowCreate){
+  var email=bidderEmail(phone), cred;
+  if(allowCreate){
+    try{ cred=await createUserWithEmailAndPassword(auth,email,pin); }
+    catch(e){ if(e&&e.code==="auth/email-already-in-use"){ cred=await signInWithEmailAndPassword(auth,email,pin); } else throw e; }
+  } else { cred=await signInWithEmailAndPassword(auth,email,pin); }
+  if(isAdmin){ stopAdminListeners(); isAdmin=false; }
+  currentOfficeId=null; try{ updateOfficeStrip(); }catch(x){}
+  aucSession={uid:cred.user.uid,digits:waNum(phone)};
+  return cred;
+}
+function aucAuthMsg(err){
+  var c=(err&&err.code)||"";
+  return (c==="auth/invalid-credential"||c==="auth/wrong-password"||c==="auth/invalid-login-credentials") ? "الرمز غير صحيح (إن شاركت سابقاً فاكتب رمزك القديم)"
+    : c==="auth/too-many-requests" ? "محاولات كثيرة، انتظر قليلاً" : c==="auth/network-request-failed" ? "تحقق من الاتصال" : c==="auth/weak-password" ? "الرمز ضعيف، 6 أحرف أو أرقام على الأقل" : "تعذر الإرسال، أعد المحاولة";
+}
+async function submitAucJoin(){
+  var a=(auctionsList||[]).find(function(x){return x.id===aucJoinId;}); if(!a) return;
+  var e=document.getElementById("aj-err"), btn=document.getElementById("aj-submit");
+  var name=document.getElementById("aj-name").value.trim(), cc=document.getElementById("aj-country").value, ph=document.getElementById("aj-phone").value.trim().replace(/^0+/,""), phone=cc+ph, pin=document.getElementById("aj-pin").value;
+  if(!aucReceipt){ e.textContent="ارفع صورة إشعار تحويل التأمين"; return; }
+  if(!name){ e.textContent="أدخل اسمك"; return; }
+  if(!/^\d{6,15}$/.test(phone.replace(/\D/g,""))){ e.textContent="رقم غير صحيح"; return; }
+  if(pin.length<6){ e.textContent="رمز المزايدة 6 أحرف أو أرقام على الأقل"; return; }
+  if(!document.getElementById("aj-ack").checked){ e.textContent="يجب الموافقة على شروط المزاد"; return; }
+  btn.disabled=true; btn.textContent="جاري الإرسال..."; e.textContent="";
+  try{
+    var cred=await aucAuth(phone,pin,true);
+    var pid=aucPartId(a.id,phone);
+    var ex=await getDoc(doc(db,"auctionParticipants",pid));
+    if(ex.exists()){ aucMyPart[a.id]=ex.data(); closeModal("modal-auc-join"); renderAucAction(); showToast("أنت مسجّل في هذا المزاد بالفعل"); btn.disabled=false; btn.textContent="إرسال طلب المشاركة ✓"; return; }
+    var rec={id:pid,auctionId:a.id,auctionTitle:a.title,name:name,shortName:shortName(name),phone:phone,authUid:cred.user.uid,receipt:aucReceipt,deposit:Number(a.deposit)||0,status:"pending",createdAt:Date.now()};
+    await setDoc(doc(db,"auctionParticipants",pid),rec);
+    aucMyPart[a.id]=rec;
+    try{ localStorage.setItem("rayan_lead",JSON.stringify({name:name,cc:cc,phone:ph})); }catch(x){}
+    try{ notifyAdmin("💳 طلب مشاركة في مزاد\n"+a.title+"\n"+name+" - "+phone+"\nالتأمين: "+SDG(a.deposit||0)+"\nالإشعار: "+aucReceipt); }catch(x){}
+    closeModal("modal-auc-join"); renderAucAction();
+    alert("تم إرسال طلب مشاركتك ✓\nسنتحقق من تحويل التأمين ونفعّل مشاركتك، ثم تستطيع المزايدة.\nاحفظ رمز المزايدة، ستحتاجه للدخول.");
+  }catch(err){ e.textContent=aucAuthMsg(err); }
+  btn.disabled=false; btn.textContent="إرسال طلب المشاركة ✓";
+}
+function openAucLogin(){
+  ["al-phone","al-pin"].forEach(function(id){document.getElementById(id).value="";});
+  var saved={}; try{ saved=JSON.parse(localStorage.getItem("rayan_lead")||"{}"); }catch(e){}
+  if(saved.cc) document.getElementById("al-country").value=saved.cc;
+  if(saved.phone) document.getElementById("al-phone").value=saved.phone;
+  document.getElementById("al-err").textContent="";
+  document.getElementById("modal-auc-login").classList.remove("hidden");
+}
+async function submitAucLogin(){
+  var e=document.getElementById("al-err"), btn=document.getElementById("al-submit");
+  var phone=document.getElementById("al-country").value+document.getElementById("al-phone").value.trim().replace(/^0+/,""), pin=document.getElementById("al-pin").value;
+  if(!/^\d{6,15}$/.test(phone.replace(/\D/g,""))){ e.textContent="رقم غير صحيح"; return; }
+  if(pin.length<6){ e.textContent="أدخل رمز المزايدة"; return; }
+  btn.disabled=true; btn.textContent="جاري الدخول..."; e.textContent="";
+  try{
+    await aucAuth(phone,pin,false);
+    closeModal("modal-auc-login"); showToast("تم الدخول ✓");
+    if(aucViewId) await aucLoadMyPart(aucViewId);
+  }catch(err){ e.textContent = ((err&&err.code)==="auth/invalid-credential"||(err&&err.code)==="auth/user-not-found") ? "الرقم أو الرمز غير صحيح" : aucAuthMsg(err); }
+  btn.disabled=false; btn.textContent="دخول";
+}
+
+// ── عرض للمزاد ──
+function openAuctionForm(){
+  ["af-title","af-desc","af-city","af-name","af-phone"].forEach(function(id){document.getElementById(id).value="";});
+  document.getElementById("af-ack").checked=false; document.getElementById("af-err").textContent="";
+  aucImgs=[]; aucDocImgs=[]; aucOgImg=""; renderAucThumbs();
+  var o=(typeof currentOffice==="function")?currentOffice():null;
+  if(o){ document.getElementById("af-role").value="office"; document.getElementById("af-name").value=o.officeName||""; fillPhoneFields("af-country","af-phone",o.phone); }
+  document.getElementById("modal-auction-form").classList.remove("hidden");
+}
+function renderAucThumbs(){
+  var draw=function(id,arr,kind){ document.getElementById(id).innerHTML=arr.map(function(u,i){ return '<div style="position:relative"><img src="'+pEsc(u)+'" style="width:100%;height:78px;object-fit:cover;border-radius:9px;border:1px solid #E5E0D8"><button type="button" data-k="'+kind+'" data-i="'+i+'" onclick="removeAucImg(this.dataset.k,this.dataset.i)" style="position:absolute;top:3px;left:3px;background:#D9534F;color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:0.7rem;cursor:pointer">×</button></div>'; }).join(""); };
+  draw("af-imgs",aucImgs,"img"); draw("af-docs",aucDocImgs,"doc");
+}
+function removeAucImg(k,i){ i=parseInt(i); if(k==="doc") aucDocImgs.splice(i,1); else { aucImgs.splice(i,1); if(i===0) aucOgImg=""; } renderAucThumbs(); }
+async function uploadAucImage(input,kind){
+  var f=input.files[0]; if(!f) return;
+  var arr=kind==="doc"?aucDocImgs:aucImgs, max=kind==="doc"?3:6, err=document.getElementById("af-err"), ph=document.getElementById(kind==="doc"?"af-doc-ph":"af-img-ph");
+  err.textContent="";
+  if(arr.length>=max){ err.textContent="الحد الأقصى "+max+" صور"; input.value=""; return; }
+  var orig=ph.innerHTML; ph.textContent="جاري تجهيز الصورة ورفعها...";
+  try{
+    var url=await imgbbUpload(await compressImage(f, kind==="doc"?2000:1400, kind==="doc"?0.85:0.78));
+    if(!url) err.textContent="فشل رفع الصورة، أعد المحاولة";
+    else { var first=(kind!=="doc"&&arr.length===0); arr.push(url); renderAucThumbs(); if(first){ var cv=await coverImage(f,800,420,0.72); if(cv){ try{ aucOgImg=await imgbbUpload(cv); }catch(x){} } } }
+  }catch(e){ err.textContent="فشل الرفع — تحقق من الاتصال"; }
+  ph.innerHTML=orig; input.value="";
+}
+async function submitAuction(){
+  var g=function(id){return document.getElementById(id).value.trim();};
+  var e=document.getElementById("af-err"), btn=document.getElementById("af-submit");
+  var title=g("af-title"), city=g("af-city"), name=g("af-name"), phone=document.getElementById("af-country").value+g("af-phone").replace(/^0+/,"");
+  if(title.length<5){ e.textContent="اكتب عنواناً واضحاً"; return; }
+  if(!city){ e.textContent="أدخل المدينة"; return; }
+  if(!aucImgs.length){ e.textContent="ارفع صورة واحدة على الأقل"; return; }
+  if(!aucDocImgs.length){ e.textContent="ارفع صورة أوراق الملكية"; return; }
+  if(!name){ e.textContent="أدخل اسمك"; return; }
+  if(!/^\d{6,15}$/.test(phone.replace(/\D/g,""))){ e.textContent="رقم غير صحيح"; return; }
+  if(!document.getElementById("af-ack").checked){ e.textContent="يجب الإقرار والالتزام بالبيع"; return; }
+  btn.disabled=true; btn.textContent="جاري الإرسال..."; e.textContent="";
+  var id="AUC-"+Date.now()+"-"+Math.random().toString(36).slice(2,6);
+  var kind=document.getElementById("af-kind").value, role=document.getElementById("af-role").value, days=Number(document.getElementById("af-days").value)||5;
+  try{
+    await setDoc(doc(db,"auctions",id),{id:id,kind:kind,title:title,desc:g("af-desc"),city:city,images:aucImgs.slice(),image:aucImgs[0],ogImage:aucOgImg||"",role:role,requestedDays:days,status:"pending",highestBid:0,bidCount:0,createdAt:Date.now()});
+    await setDoc(doc(db,"propDocs",id),{id:id,role:role,docs:aucDocImgs.slice(),sellerName:name,sellerPhone:phone,createdAt:Date.now()});
+    closeModal("modal-auction-form");
+    try{ notifyAdmin("🔨 طلب مزاد جديد\n"+(AUC_KINDS[kind]||"")+" · "+title+"\n"+city+" · "+days+" أيام\nالبائع: "+name+" - "+phone); }catch(x){}
+    alert("تم إرسال طلب المزاد ✓\nسنراجع الأوراق ونحدد التأمين ومدة المزاد، ثم نتواصل معك قبل النشر.");
+  }catch(err){ e.textContent="تعذر الإرسال، أعد المحاولة"; }
+  btn.disabled=false; btn.textContent="إرسال للمراجعة ✓";
+}
+
+// ── لوحة المالك ──
+var _aucPartUnsub=null;
+function startAucAdmin(){
+  if(_aucPartUnsub) return;
+  try{ _aucPartUnsub=onSnapshot(collection(db,"auctionParticipants"),function(snap){ aucParts=snap.docs.map(function(d){return d.data();}); if(isAdmin && (activeTab==="auctions"||activeTab==="admin")) renderDashboard(); },function(){}); }catch(e){}
+}
+function stopAucAdmin(){ try{ if(_aucPartUnsub) _aucPartUnsub(); }catch(e){} _aucPartUnsub=null; aucParts=[]; }
+function aucPendingCount(){ return (auctionsList||[]).filter(function(a){return a.status==="pending";}).length + (aucParts||[]).filter(function(p){return p.status==="pending";}).length; }
+function renderAuctionsAdmin(){
+  var el=document.getElementById("tab-auctions"); if(!el) return;
+  el.classList.toggle("hidden",activeTab!=="auctions"); if(activeTab!=="auctions") return;
+  var B='font-family:Tajawal,sans-serif;font-weight:800;cursor:pointer;border:none;border-radius:9px;padding:8px 10px;font-size:0.78rem;';
+  var pend=(auctionsList||[]).filter(function(a){return a.status==="pending";});
+  var live=(auctionsList||[]).filter(function(a){return a.status==="live";});
+  var done=(auctionsList||[]).filter(function(a){return a.status==="ended";}).sort(function(a,b){return (b.endsAt||0)-(a.endsAt||0);});
+  var pp=(aucParts||[]).filter(function(p){return p.status==="pending";});
+  var h='<div class="panel"><div class="panel-head"><span class="panel-title">🔨 طلبات مزاد جديدة ('+pend.length+')</span></div>';
+  h+=pend.length?pend.map(function(a){
+    return '<div style="background:#FFF8E8;border:1px solid #F0D98A;border-radius:12px;padding:12px;margin-bottom:10px">'
+      +'<div style="font-weight:800;color:#1A2744">'+(AUC_KINDS[a.kind]||"")+' · '+pEsc(a.title)+'</div><div style="font-size:0.78rem;color:#6B7280;margin:3px 0">📍 '+pEsc(a.city)+' · مدة مقترحة '+(a.requestedDays||5)+' أيام · '+(PROP_ROLES[a.role]||PROP_ROLES.owner).n+'</div>'
+      +(a.image?'<img src="'+pEsc(a.image)+'" style="width:100%;max-height:150px;object-fit:cover;border-radius:9px;margin:6px 0">':'')
+      +'<button type="button" data-id="'+pEsc(a.id)+'" onclick="viewAucPrivate(this.dataset.id)" style="'+B+'background:#1A2744;color:#fff;width:100%">📄 الأوراق وبيانات البائع</button><div id="ap-'+pEsc(a.id)+'" style="font-size:0.8rem;margin-top:6px"></div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px">'
+      +'<div><label style="font-size:0.68rem;color:#6B7280">التأمين (ج.س)</label><input class="inp" id="aa-dep-'+pEsc(a.id)+'" type="number" value="500000" style="padding:6px"></div>'
+      +'<div><label style="font-size:0.68rem;color:#6B7280">أقل زيادة</label><input class="inp" id="aa-inc-'+pEsc(a.id)+'" type="number" value="100000" style="padding:6px"></div>'
+      +'<div><label style="font-size:0.68rem;color:#6B7280">المدة (أيام)</label><input class="inp" id="aa-days-'+pEsc(a.id)+'" type="number" value="'+(a.requestedDays||5)+'" style="padding:6px"></div></div>'
+      +'<div style="display:flex;gap:8px;margin-top:8px"><button type="button" data-id="'+pEsc(a.id)+'" onclick="approveAuction(this.dataset.id)" style="'+B+'flex:1;background:#2E7D5E;color:#fff">✓ نشر المزاد الآن</button><button type="button" data-id="'+pEsc(a.id)+'" onclick="rejectAuction(this.dataset.id)" style="'+B+'flex:1;background:#FEE;color:#D9534F">✕ رفض</button></div></div>';
+  }).join(""):'<div style="color:#9CA3AF;font-size:0.82rem;padding:6px 0">لا توجد طلبات</div>';
+  h+='</div><div class="panel"><div class="panel-head"><span class="panel-title">💳 طلبات المشاركة (التحقق من التأمين) ('+pp.length+')</span></div>';
+  h+=pp.length?pp.map(function(p){
+    return '<div style="background:#F4F6FA;border-radius:12px;padding:12px;margin-bottom:10px"><div style="font-weight:800;color:#1A2744">'+pEsc(p.name)+' · <a href="https://wa.me/'+waNum(p.phone)+'" target="_blank" style="color:#2E7D5E">'+pEsc(p.phone)+' 📱</a></div>'
+      +'<div style="font-size:0.78rem;color:#6B7280;margin:3px 0">المزاد: '+pEsc(p.auctionTitle||p.auctionId)+' · التأمين '+pEsc(SDG(p.deposit||0))+'</div>'
+      +(p.receipt?'<a href="'+pEsc(p.receipt)+'" target="_blank"><img src="'+pEsc(p.receipt)+'" style="width:100%;max-height:180px;object-fit:contain;border-radius:9px;border:1px solid #E5E0D8;background:#fff"></a>':'')
+      +'<div style="display:flex;gap:8px;margin-top:8px"><button type="button" data-id="'+pEsc(p.id)+'" onclick="setAucPart(this.dataset.id,\'approved\')" style="'+B+'flex:1;background:#2E7D5E;color:#fff">✓ التأمين وصل — فعّل</button><button type="button" data-id="'+pEsc(p.id)+'" onclick="setAucPart(this.dataset.id,\'rejected\')" style="'+B+'flex:1;background:#FEE;color:#D9534F">✕ رفض</button></div></div>';
+  }).join(""):'<div style="color:#9CA3AF;font-size:0.82rem;padding:6px 0">لا توجد طلبات</div>';
+  h+='</div><div class="panel"><div class="panel-head"><span class="panel-title">🔴 مزادات جارية ('+live.length+')</span></div>';
+  h+=live.length?live.map(function(a){
+    var n=(aucParts||[]).filter(function(p){return p.auctionId===a.id&&p.status==="approved";}).length, over=aucNow()>=a.endsAt;
+    return '<div style="border:1px solid #EEF0F4;border-radius:12px;padding:12px;margin-bottom:8px"><div style="font-weight:800;color:#1A2744">'+pEsc(a.title)+'</div>'
+      +'<div style="font-size:0.78rem;color:#6B7280;margin:3px 0">أعلى مزايدة: <b style="color:#B8862B">'+(a.highestBid?pEsc(SDG(a.highestBid)):"—")+'</b> · '+(a.bidCount||0)+' مزايدة · '+n+' مشارك معتمد · '+(over?'<b style="color:#C62828">انتهى الوقت</b>':'ينتهي خلال <span class="auc-timer" data-auc-ends="'+a.endsAt+'">'+fmtLeft(a.endsAt-aucNow())+'</span>')+'</div>'
+      +'<div style="display:flex;gap:8px;margin-top:6px"><button type="button" data-id="'+pEsc(a.id)+'" onclick="closeAuction(this.dataset.id)" style="'+B+'flex:2;background:#1A2744;color:#fff">🏁 إغلاق وإعلان الفائز</button><button type="button" data-id="'+pEsc(a.id)+'" onclick="deleteAuction(this.dataset.id)" style="'+B+'flex:1;background:#FEE;color:#D9534F">حذف</button></div></div>';
+  }).join(""):'<div style="color:#9CA3AF;font-size:0.82rem;padding:6px 0">لا توجد مزادات جارية</div>';
+  h+='</div><div class="panel"><div class="panel-head"><span class="panel-title">🏁 مزادات منتهية — الفائز ورد التأمين</span></div>';
+  h+=done.length?done.slice(0,20).map(function(a){
+    var parts=(aucParts||[]).filter(function(p){return p.auctionId===a.id&&p.status==="approved";});
+    var win=parts.find(function(p){return p.id===a.highestBidderPid;});
+    return '<div style="border:1px solid #EEF0F4;border-radius:12px;padding:12px;margin-bottom:8px"><div style="font-weight:800;color:#1A2744">'+pEsc(a.title)+'</div>'
+      +(a.highestBid?'<div style="font-size:0.82rem;margin:4px 0">🏆 الفائز: <b>'+pEsc(win?win.name:a.highestBidderName)+'</b> '+(win?'· <a href="https://wa.me/'+waNum(win.phone)+'" target="_blank" style="color:#2E7D5E">'+pEsc(win.phone)+' 📱</a>':'')+' · <b style="color:#B8862B">'+pEsc(SDG(a.highestBid))+'</b></div>':'<div style="font-size:0.8rem;color:#9CA3AF">انتهى بلا مزايدات</div>')
+      +'<button type="button" data-id="'+pEsc(a.id)+'" onclick="viewAucPrivate(this.dataset.id)" style="'+B+'background:#F4F6FA;color:#1A2744;margin:4px 0">📄 بيانات البائع</button><div id="ap-'+pEsc(a.id)+'" style="font-size:0.8rem"></div>'
+      +parts.filter(function(p){return p.id!==a.highestBidderPid;}).map(function(p){ return '<div style="display:flex;justify-content:space-between;align-items:center;gap:6px;padding:6px 0;border-top:1px solid #EEF0F4;font-size:0.78rem"><span>'+pEsc(p.name)+' · '+pEsc(p.phone)+' · '+pEsc(SDG(p.deposit||0))+'</span>'+(p.refund==="refunded"?'<b style="color:#2E7D5E">✓ رُد التأمين</b>':'<button type="button" data-id="'+pEsc(p.id)+'" onclick="markRefunded(this.dataset.id)" style="'+B+'background:#E6F4EC;color:#2E7D5E;padding:5px 8px">تم رد التأمين</button>')+'</div>'; }).join("")+'</div>';
+  }).join(""):'<div style="color:#9CA3AF;font-size:0.82rem;padding:6px 0">لا توجد مزادات منتهية</div>';
+  el.innerHTML=h+'</div>';
+}
+async function viewAucPrivate(id){
+  var box=document.getElementById("ap-"+id); if(!box) return; box.textContent="جاري التحميل...";
+  try{ var d=await getDoc(doc(db,"propDocs",id)); if(!d.exists()){ box.textContent="لا توجد بيانات"; return; } var x=d.data();
+    box.innerHTML='البائع: <b>'+pEsc(x.sellerName||"")+'</b> · <a href="https://wa.me/'+waNum(x.sellerPhone||"")+'" target="_blank" style="color:#2E7D5E">'+pEsc(x.sellerPhone||"")+' 📱</a><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">'+(x.docs||[]).map(function(u){return '<a href="'+pEsc(u)+'" target="_blank"><img src="'+pEsc(u)+'" style="width:80px;height:80px;object-fit:cover;border-radius:9px;border:2px solid #C9933A"></a>';}).join("")+'</div>';
+  }catch(e){ box.textContent="تعذر التحميل"; }
+}
+async function approveAuction(id){
+  var dep=Number(document.getElementById("aa-dep-"+id).value)||0, inc=Number(document.getElementById("aa-inc-"+id).value)||0, days=Number(document.getElementById("aa-days-"+id).value)||5;
+  if(dep<=0||inc<=0){ showToast("حدد التأمين وأقل زيادة"); return; }
+  var now=Date.now();
+  try{ await updateDoc(doc(db,"auctions",id),{status:"live",deposit:dep,minIncrement:inc,startsAt:now,endsAt:now+days*86400000,approvedAt:now}); showToast("تم نشر المزاد ✓"); }
+  catch(e){ showToast("تعذر النشر"); }
+}
+async function rejectAuction(id){ if(!confirm("رفض طلب المزاد؟")) return; try{ await updateDoc(doc(db,"auctions",id),{status:"rejected"}); showToast("تم الرفض"); }catch(e){ showToast("تعذر الرفض"); } }
+async function deleteAuction(id){ if(!confirm("حذف المزاد نهائياً؟")) return; try{ await deleteDoc(doc(db,"auctions",id)); showToast("تم الحذف"); }catch(e){ showToast("تعذر الحذف"); } }
+async function setAucPart(id,st){
+  var p=(aucParts||[]).find(function(x){return x.id===id;});
+  try{ await updateDoc(doc(db,"auctionParticipants",id),{status:st,reviewedAt:Date.now()}); showToast(st==="approved"?"تم تفعيل المشارك ✓":"تم الرفض");
+    if(p && st==="approved") waAskOwner(p.phone,"مرحباً "+p.name+"،\nتم التحقق من التأمين وتفعيل مشاركتك في مزاد «"+(p.auctionTitle||"")+"» على منصة الريان ✓\nادخل برقمك ورمز المزايدة وزايد الآن:\n"+baseUrl()+"/?auc="+p.auctionId);
+  }catch(e){ showToast("تعذر التحديث"); }
+}
+async function closeAuction(id){
+  var a=(auctionsList||[]).find(function(x){return x.id===id;}); if(!a) return;
+  if(!confirm("إغلاق المزاد وإعلان الفائز؟")) return;
+  try{
+    await updateDoc(doc(db,"auctions",id),{status:"ended",closedAt:Date.now(),endsAt:Math.min(a.endsAt||Date.now(),Date.now())});
+    var win=(aucParts||[]).find(function(p){return p.id===a.highestBidderPid;});
+    showToast("تم إغلاق المزاد ✓");
+    if(win) waAskOwner(win.phone,"مبروك "+win.name+" 🎉\nرسا عليك مزاد «"+a.title+"» على منصة الريان بمبلغ "+SDG(a.highestBid)+".\nسنتواصل معك لإكمال إجراءات الشراء.");
+  }catch(e){ showToast("تعذر الإغلاق"); }
+}
+async function markRefunded(id){ if(!confirm("تأكيد أن التأمين رُد لهذا المشارك؟")) return; try{ await updateDoc(doc(db,"auctionParticipants",id),{refund:"refunded",refundedAt:Date.now()}); showToast("تم التسجيل ✓"); }catch(e){ showToast("تعذر التسجيل"); } }
+
+window.openAuctions=openAuctions; window.setAucFilter=setAucFilter; window.openAuctionView=openAuctionView; window.showAucImg=showAucImg;
+window.setAucAmount=setAucAmount; window.placeBid=placeBid; window.requestAucInspection=requestAucInspection; window.shareAuction=shareAuction;
+window.openAucJoin=openAucJoin; window.uploadAucReceipt=uploadAucReceipt; window.submitAucJoin=submitAucJoin; window.openAucLogin=openAucLogin; window.submitAucLogin=submitAucLogin;
+window.openAuctionForm=openAuctionForm; window.removeAucImg=removeAucImg; window.uploadAucImage=uploadAucImage; window.submitAuction=submitAuction;
+window.viewAucPrivate=viewAucPrivate; window.approveAuction=approveAuction; window.rejectAuction=rejectAuction; window.deleteAuction=deleteAuction;
+window.setAucPart=setAucPart; window.closeAuction=closeAuction; window.markRefunded=markRefunded;
+
 // ══════════════ دخول ولوحة المكتب العقاري ══════════════
 var currentOfficeId=null, propEditId=null;
 const SALE_ST={available:"متاح",reserved:"محجوز",sold:"تم البيع",rented:"تم الإيجار"};
@@ -5826,7 +6347,7 @@ async function submitOfficeLogin(){
       await signInWithEmailAndPassword(auth,email,pass);
     }
     if(isAdmin){ stopAdminListeners(); isAdmin=false; }
-    currentOfficeId=o.id;
+    currentOfficeId=o.id; aucSession=null;
     closeModal("modal-office-login");
     updateOfficeStrip();
     openOfficeDash();
