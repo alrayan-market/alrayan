@@ -534,6 +534,17 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
 .rq-card .rq-t{color:#1A2744;font-weight:900;font-size:0.95rem;margin:7px 0 4px;line-height:1.5}
 .rq-card .rq-d{color:#4B5563;font-size:0.82rem;line-height:1.7;white-space:pre-wrap}
 .rq-card .rq-m{color:#6B7280;font-size:0.74rem;margin-top:6px}
+.rq-card{cursor:pointer;transition:transform .15s}.rq-card:active{transform:scale(.99)}
+.rq-card .rq-more{color:#C9933A;font-size:0.74rem;font-weight:800;margin-top:6px}
+.rqv-hero{background:linear-gradient(135deg,#1A2744,#2B3D66);color:#fff;border-radius:18px;padding:20px 18px;margin-bottom:14px}
+.rqv-hero .rqv-t{font-size:1.2rem;font-weight:900;line-height:1.6;margin-top:10px}
+.rqv-hero .rq-tag{background:rgba(255,255,255,.15);color:#fff}
+.rqv-hero .pr-tag{background:#C9933A;color:#fff}
+.rqv-box{background:#fff;border:1px solid #EEF0F4;border-radius:14px;padding:14px;margin-bottom:12px}
+.rqv-row{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid #F1F2F5;font-size:0.86rem}
+.rqv-row:last-child{border-bottom:none}.rqv-row span{color:#6B7280}.rqv-row b{color:#1A2744;font-weight:800;text-align:left}
+.rqv-lbl{color:#1A2744;font-weight:900;font-size:0.9rem;margin-bottom:8px}
+.rqv-d{color:#374151;font-size:0.9rem;line-height:1.9;white-space:pre-wrap}
 
 /* التبويبات: تلتف على الجوال حتى يظهر كل تبويب */
 .tabs{flex-wrap:wrap;overflow:visible}
@@ -1135,6 +1146,12 @@ body.page-open .float-btn,body.page-open #cart-count-badge{display:none!importan
   <div id="rq-count" style="color:#9CA3AF;font-size:0.74rem;margin:2px 0 8px"></div>
   <div class="pr-grid" id="rq-list"></div>
   <button class="btn-navy" style="width:100%;margin-top:14px" onclick="closeModal('modal-requests');openRequestForm()">📝 اطلب ما تريد</button>
+</div></div>
+
+<!-- ═══ صفحة الطلب المنفصلة ═══ -->
+<div class="overlay hidden" id="modal-req-view"><div class="modal" style="max-width:520px;max-height:93vh;overflow-y:auto">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h3 style="color:#1A2744;font-weight:900;font-size:1.1rem">📋 تفاصيل الطلب</h3><button onclick="closeModal('modal-req-view')" style="background:none;border:none;font-size:1.4rem;color:#9CA3AF;cursor:pointer">✕</button></div>
+  <div id="rqv-body"></div>
 </div></div>
 
 
@@ -5175,6 +5192,8 @@ function startPropsListener(){
     if(isAdmin && (activeTab==="realestate"||activeTab==="admin")) renderDashboard();
     var m=document.getElementById("modal-requests");
     if(m && !m.classList.contains("hidden")) renderRequestsList();
+    var rv=document.getElementById("modal-req-view");
+    if(rv && !rv.classList.contains("hidden")) renderRequestView();
   });
   onSnapshot(collection(db,"offices"), function(snap){
     officesList=snap.docs.map(function(d){return d.data();});
@@ -5706,15 +5725,60 @@ function renderRequestsList(){
   box.innerHTML=list.map(function(r){
     var k=RQ_KINDS[r.kind]||RQ_KINDS.other;
     var d=new Date(r.approvedAt||r.createdAt||0).toLocaleDateString("ar");
-    return '<div class="rq-card" id="rqc-'+pEsc(r.id)+'"><div><span class="rq-tag '+pEsc(r.kind)+'">'+k.ico+' '+k.n+'</span>'+(r.deal?'<span class="pr-tag '+(r.deal==="rent"?'rent':'sale')+'">'+(RQ_DEALS[r.deal]||"")+'</span>':'')+(r.type&&PROP_TYPES[r.type]?'<span class="pr-tag role">'+PROP_TYPES[r.type]+'</span>':'')+'</div>'
+    return '<div class="rq-card" id="rqc-'+pEsc(r.id)+'" data-id="'+pEsc(r.id)+'" onclick="openRequestView(this.dataset.id)"><div><span class="rq-tag '+pEsc(r.kind)+'">'+k.ico+' '+k.n+'</span>'+(r.deal?'<span class="pr-tag '+(r.deal==="rent"?'rent':'sale')+'">'+(RQ_DEALS[r.deal]||"")+'</span>':'')+(r.type&&PROP_TYPES[r.type]?'<span class="pr-tag role">'+PROP_TYPES[r.type]+'</span>':'')+'</div>'
       +'<div class="rq-t">'+pEsc(r.title)+'</div>'
-      +(r.details?'<div class="rq-d">'+pEsc(r.details)+'</div>':'')
+      +(r.details?'<div class="rq-d">'+pEsc(r.details.length>110?r.details.slice(0,110)+'…':r.details)+'</div>':'')
       +'<div class="rq-m">📍 '+pEsc(r.city)+' · 💰 '+(r.budget?pEsc(Number(r.budget).toLocaleString("ar"))+' ج.س':'ميزانية مفتوحة')+' · '+pEsc(d)+'</div>'
-      +'<div style="display:flex;gap:8px;margin-top:10px"><button type="button" class="btn-navy" style="flex:2;background:#2E7D5E" data-id="'+pEsc(r.id)+'" onclick="contactRequester(this.dataset.id)">📱 عندي لك عرض</button>'
-      +'<button type="button" data-id="'+pEsc(r.id)+'" onclick="shareRequest(this.dataset.id)" style="flex:1;border:1.5px solid #E5E0D8;background:#fff;color:#4B5563;border-radius:12px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif">🔗 شارك</button></div></div>';
+      +'<div class="rq-more">عرض التفاصيل ←</div>'
+      +'<div style="display:flex;gap:8px;margin-top:10px"><button type="button" class="btn-navy" style="flex:2;background:#2E7D5E" data-id="'+pEsc(r.id)+'" onclick="event.stopPropagation();contactRequester(this.dataset.id)">📱 عندي لك عرض</button>'
+      +'<button type="button" data-id="'+pEsc(r.id)+'" onclick="event.stopPropagation();shareRequest(this.dataset.id)" style="flex:1;border:1.5px solid #E5E0D8;background:#fff;color:#4B5563;border-radius:12px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif">🔗 شارك</button></div></div>';
   }).join("");
 }
 function contactRequester(id){ openLead("request",id); }
+
+// ── صفحة الطلب المنفصلة ──
+var rqViewId=null;
+function openRequestView(id){
+  var r=approvedRequests().find(function(x){return x.id===id;});
+  if(!r){ showToast("هذا الطلب لم يعد متاحاً"); return; }
+  rqViewId=id;
+  renderRequestView();
+  document.getElementById("modal-req-view").classList.remove("hidden");
+}
+function renderRequestView(){
+  var box=document.getElementById("rqv-body"); if(!box||!rqViewId) return;
+  var r=approvedRequests().find(function(x){return x.id===rqViewId;});
+  if(!r){ box.innerHTML='<div style="text-align:center;padding:40px 10px;color:#9CA3AF"><div style="font-size:2.4rem">📋</div><div style="font-weight:800;margin-top:6px">هذا الطلب لم يعد متاحاً</div></div>'
+    +'<button type="button" class="btn-navy" style="width:100%" onclick="closeModal(\'modal-req-view\');openRequests()">📋 تصفّح الطلبات الأخرى</button>'; return; }
+  var k=RQ_KINDS[r.kind]||RQ_KINDS.other;
+  var d=new Date(r.approvedAt||r.createdAt||0).toLocaleDateString("ar");
+  var left=r.expiresAt?Math.max(0,Math.ceil((r.expiresAt-Date.now())/86400000)):0;
+  var row=function(a,b){ return '<div class="rqv-row"><span>'+a+'</span><b>'+b+'</b></div>'; };
+  box.innerHTML='<div class="rqv-hero"><div><span class="rq-tag '+pEsc(r.kind)+'">'+k.ico+' '+k.n+'</span>'
+      +(r.deal?' <span class="pr-tag">'+pEsc(RQ_DEALS[r.deal]||"")+'</span>':'')
+      +(r.type&&PROP_TYPES[r.type]?' <span class="pr-tag">'+pEsc(PROP_TYPES[r.type])+'</span>':'')+'</div>'
+      +'<div class="rqv-t">'+pEsc(r.title)+'</div></div>'
+    +'<div class="rqv-box">'
+      +row("📍 المدينة / المنطقة",pEsc(r.city||"—"))
+      +row("💰 الميزانية",r.budget?pEsc(Number(r.budget).toLocaleString("ar"))+' ج.س':'ميزانية مفتوحة')
+      +row("📅 تاريخ النشر",pEsc(d))
+      +(left?row("⏳ متاح لمدة",left+' يوم'):'')
+      +row("👤 صاحب الطلب",pEsc((r.ownerName||"").split(" ")[0]||"زبون"))
+    +'</div>'
+    +(r.details?'<div class="rqv-box"><div class="rqv-lbl">📝 تفاصيل الطلب</div><div class="rqv-d">'+pEsc(r.details)+'</div></div>':'')
+    +'<div style="background:#FFF8EC;border:1px solid #F1DDB5;border-radius:12px;padding:11px 13px;font-size:0.8rem;color:#7A5A1E;line-height:1.8;margin-bottom:12px">💡 عندك ما يناسب هذا الطلب؟ اضغط «عندي لك عرض» وسيفتح لك واتساب مع صاحب الطلب مباشرة.</div>'
+    +'<button type="button" class="btn-navy" style="width:100%;background:#2E7D5E;margin-bottom:8px" data-id="'+pEsc(r.id)+'" onclick="contactRequester(this.dataset.id)">📱 عندي لك عرض</button>'
+    +'<div style="display:flex;gap:8px">'
+      +'<button type="button" data-id="'+pEsc(r.id)+'" onclick="shareRequest(this.dataset.id)" style="flex:1;border:1.5px solid #E5E0D8;background:#fff;color:#1A2744;border-radius:12px;padding:11px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif">🔗 شارك الطلب</button>'
+      +'<button type="button" onclick="reqViewToList()" style="flex:1;border:1.5px solid #E5E0D8;background:#fff;color:#1A2744;border-radius:12px;padding:11px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif">📋 كل الطلبات</button>'
+    +'</div>'
+    +'<button type="button" onclick="closeModal(\'modal-req-view\');openRequestForm()" style="width:100%;margin-top:8px;border:none;background:none;color:#C9933A;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif;padding:8px">📝 تبحث عن شيء؟ اكتب طلبك أنت أيضاً</button>';
+}
+function reqViewToList(){
+  var lst=document.getElementById("modal-requests");
+  closeModal("modal-req-view");
+  if(lst.classList.contains("hidden")) openRequests();
+}
 
 // ── مراجعة المالك ──
 function requestPendingHtml(){
@@ -5754,6 +5818,7 @@ async function deleteRequest(id){
 }
 window.openRequestForm=openRequestForm; window.setRqKind=setRqKind; window.submitRequest=submitRequest;
 window.openRequests=openRequests; window.setRqFilter=setRqFilter; window.contactRequester=contactRequester;
+window.openRequestView=openRequestView; window.reqViewToList=reqViewToList;
 window.approveRequest=approveRequest; window.rejectRequest=rejectRequest; window.deleteRequest=deleteRequest;
 
 
@@ -5825,11 +5890,7 @@ function checkUrlReq(){
     tries++;
     var r=approvedRequests().find(function(x){return x.id===id;});
     if(r){
-      openRequests();
-      setTimeout(function(){
-        var el=document.getElementById("rqc-"+id);
-        if(el){ el.scrollIntoView({behavior:"smooth",block:"center"}); el.style.outline="3px solid #C9933A"; el.style.outlineOffset="2px"; }
-      },250);
+      openRequestView(id);
     } else if(tries<25){ setTimeout(t,400); }
     else { showToast("هذا الطلب لم يعد متاحاً"); }
   };
