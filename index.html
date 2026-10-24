@@ -5876,7 +5876,7 @@ function openLead(kind,id){
   var isProp=(kind==="property"), lt=document.getElementById("lead-terms");
   lt.style.display=isProp?"":"none"; document.getElementById("lead-ack-row").style.display=isProp?"":"none";
   document.getElementById("lead-ack").checked=false;
-  if(isProp){ var pp=(propsList||[]).find(function(x){return x.id===id;})||{}; lt.innerHTML=commTermsHtml("buyer",pp.deal,id); lt.scrollTop=0;
+  if(isProp){ var pp=(propsList||[]).find(function(x){return x.id===id;})||{}; lt.innerHTML=commTermsHtml("buyer",pp.deal,pp.title||""); lt.scrollTop=0;
     document.getElementById("lead-sub").textContent="لحماية حق الطرفين، اقرأ الإقرار ووافق عليه، ثم يُفتح لك رقم صاحب العقار «"+it.title+"»."; }
   document.getElementById("lead-submit").textContent=isProp?"أُقرّ وأتابع ✓":"متابعة لواتساب 💬";
   document.getElementById("modal-lead").classList.remove("hidden");
@@ -5961,7 +5961,7 @@ function commTermsHtml(who,deal,pid){
       +li("لا تُستحق العمولة إذا أثبتُّ بدليل مكتوب أن الطرف الآخر كان على تواصل معي بشأن العقار قبل تعريف المنصة به.")
       +li("في حال إخفاء الصفقة أو إنقاص قيمتها، يحق للمنصة المطالبة بكامل العمولة بالطرق القانونية، وإيقاف حسابي.");
   } else {
-    items=li("أنني تعرّفت على العقار رقم <b>"+pEsc(pid||"")+"</b> وصاحبه عن طريق منصة الريان السوق السوداني.")
+    items=li("أنني تعرّفت على هذا العقار المنشور"+(pid?" «<b>"+pEsc(pid)+"</b>»":"")+" وصاحبه عن طريق منصة الريان السوق السوداني.")
       +li("أن تستحق المنصة عمولة قدرها "+amt+" إذا "+(rent?"استأجرت":"اشتريت")+" هذا العقار، أو "+(rent?"استأجره":"اشتراه")+" أحد أقاربي من الدرجة الأولى أو من ينوب عني، سواء تمت الصفقة داخل المنصة أو خارجها.")
       +li("يسري هذا الالتزام مدة <b>12 شهراً</b> من تاريخ هذا الإقرار.")
       +li("تُستحق العمولة وتُدفع عند توقيع العقد أو دفع العربون، أيهما أسبق.")
@@ -5978,7 +5978,7 @@ var commCtx=null;
 function openCommOk(who,o){
   var rent=(o.deal==="rent"), dt=new Date().toLocaleDateString("ar");
   var act=who==="seller"?(rent?"تأجير":"بيع"):(rent?"استئجار":"شراء");
-  var msg="أنا "+o.name+"، أقرّ بأنني اطّلعت على شروط منصة الريان السوق السوداني ووافقت على عمولة "+commAmountText(o.deal,who)+" عند "+act+" العقار رقم "+o.id+" («"+o.title+"»)"+(o.ref?"، رقم الإقرار "+o.ref:"")+"، وفق الإقرار المسجّل بتاريخ "+dt+".\nوالله على ما أقول شهيد.";
+  var msg="أنا "+o.name+"، أقرّ بأنني اطّلعت على شروط منصة الريان السوق السوداني ووافقت على عمولة "+commAmountText(o.deal,who)+" عند "+act+" العقار المنشور في المنصة «"+o.title+"»"+(o.ref?"، رقم الإقرار "+o.ref:"")+"، وفق الإقرار المسجّل بتاريخ "+dt+".\nوالله على ما أقول شهيد.";
   commCtx={who:who,ref:o.ref||"",confirmUrl:"https://wa.me/"+PLATFORM_WA+"?text="+encodeURIComponent(msg),ownerUrl:o.ownerUrl||"",sent:false};
   document.getElementById("cok-title").textContent=who==="seller"?"✅ تم إرسال عقارك للمراجعة":"✅ تم تسجيل إقرارك";
   document.getElementById("cok-sub").textContent=who==="seller"
@@ -6023,7 +6023,7 @@ function dealRemind(id,who){
   var q=(inquiries||[]).find(function(x){return x.id===id;}); if(!q) return;
   var p=dealProp(q)||{}, d=new Date((q.terms&&q.terms.at)||q.createdAt||0).toLocaleDateString("ar");
   var phone=who==="buyer"?q.phone:(q.ownerPhone||p.phone), nm=who==="buyer"?q.name:(p.ownerName||q.sellerName||"");
-  var msg="السلام عليكم "+(nm||"")+"،\nمعكم منصة الريان السوق السوداني.\nبخصوص العقار رقم "+(q.targetId||"")+" («"+(p.title||q.productName||"")+"»)، نودّ متابعة سير التواصل: هل تمت الصفقة أو ما زالت قيد التفاوض؟\n"
+  var msg="السلام عليكم "+(nm||"")+"،\nمعكم منصة الريان السوق السوداني.\nبخصوص العقار «"+(p.title||q.productName||"")+"» المنشور في المنصة، نودّ متابعة سير التواصل: هل تمت الصفقة أو ما زالت قيد التفاوض؟\n"
     +"نذكّركم بالإقرار المسجّل بتاريخ "+d+(who==="buyer"?" (رقم "+q.id+")":"")+" بعمولة المنصة عند إتمام الصفقة.\nشكراً لتعاملكم معنا.";
   window.open("https://wa.me/"+waNum(phone)+"?text="+encodeURIComponent(msg),"_blank");
 }
