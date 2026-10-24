@@ -524,6 +524,21 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
 .pv-cell{background:#F4F6FA;border-radius:11px;padding:9px 11px}
 .pv-cell span{display:block;color:#9CA3AF;font-size:0.68rem;font-weight:700}
 .pv-cell b{color:#1A2744;font-size:0.88rem}
+.comm-box{background:#FFFDF7;border:1.5px solid #E2C27A;border-radius:12px;padding:12px 13px;margin:6px 0 10px;max-height:230px;overflow-y:auto}
+.comm-box .cb-h{color:#1A2744;font-weight:900;font-size:0.88rem;margin-bottom:4px}
+.comm-box .cb-s{color:#6B7280;font-size:0.74rem;margin-bottom:6px}
+.comm-box ol{margin:0;padding-inline-start:18px;color:#374151;font-size:0.76rem;line-height:1.85}
+.comm-box ol li{margin-bottom:3px}
+.comm-box .cb-f{color:#8A6410;font-size:0.78rem;font-weight:800;margin-top:8px;font-style:italic}
+.comm-ack{display:flex;gap:8px;align-items:flex-start;font-size:0.8rem;color:#1A2744;line-height:1.6;margin-bottom:10px;background:#F4F6FA;border-radius:10px;padding:9px 10px}
+.comm-ack input{margin-top:3px;width:18px;height:18px;flex-shrink:0}
+.comm-note{background:#FFF8EC;border:1px solid #F1DDB5;border-radius:11px;padding:9px 12px;color:#7A5A1E;font-size:0.76rem;font-weight:700;line-height:1.7;margin-top:10px}
+.cok-step{background:#F4F6FA;border-radius:12px;padding:12px;margin-bottom:10px}
+.cok-step .n{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#1A2744;color:#fff;font-size:0.72rem;font-weight:900;margin-left:6px}
+.cok-step .t{color:#1A2744;font-weight:900;font-size:0.86rem}
+.cok-step .d{color:#6B7280;font-size:0.74rem;line-height:1.7;margin:4px 0 9px}
+.deal-row{background:#F4F6FA;border-radius:11px;padding:12px;margin-bottom:8px}
+.deal-row select,.deal-row input{font-family:Tajawal,sans-serif;border:1px solid #D8DCE5;border-radius:8px;padding:6px 8px;font-size:0.78rem;background:#fff}
 .ver-box{background:#E9F6EF;border:1px solid #BFE3CE;border-radius:12px;padding:10px 12px;color:#1F6B4C;font-size:0.8rem;font-weight:800;line-height:1.7}
 
 .rq-tag{display:inline-block;font-size:0.68rem;font-weight:900;padding:3px 10px;border-radius:100px;margin-left:5px}
@@ -1025,7 +1040,7 @@ body.page-open .float-btn,body.page-open #cart-count-badge{display:none!importan
       <button type="button" class="role-btn" data-role="office" onclick="setPropRole('office')"><span class="r-i">🏢</span>مكتب عقاري مسجّل</button>
     </div></div>
   <div class="field"><label class="lbl">نوع العقار</label><select class="inp" id="pf-type"><option value="land">🌍 أرض</option><option value="house">🏠 منزل</option><option value="apartment">🏢 شقة</option><option value="shop">🏪 محل</option><option value="farm">🌾 مزرعة</option><option value="office">🏛️ مكتب / مبنى</option></select></div>
-  <div class="field"><label class="lbl">نوع العرض</label><select class="inp" id="pf-deal"><option value="sale">للبيع</option><option value="rent">للإيجار</option></select></div>
+  <div class="field"><label class="lbl">نوع العرض</label><select class="inp" id="pf-deal" onchange="renderPfTerms()"><option value="sale">للبيع</option><option value="rent">للإيجار</option></select></div>
   <div class="field"><label class="lbl">عنوان الإعلان</label><input class="inp" id="pf-title" placeholder="مثال: قطعة أرض سكنية بالفاتح"></div>
   <div class="field"><label class="lbl">المدينة</label><input class="inp" id="pf-city" placeholder="مثال: أم درمان"></div>
   <div class="field"><label class="lbl">الحي / المربع</label><input class="inp" id="pf-district"></div>
@@ -1044,7 +1059,8 @@ body.page-open .float-btn,body.page-open #cart-count-badge{display:none!importan
   <div class="field"><label class="lbl">اسمك</label><input class="inp" id="pf-name"></div>
   <div class="field"><label class="lbl">الدولة</label><select class="inp" id="pf-country"><option value="+249" selected>🇸🇩 السودان (+249)</option><option value="+966">🇸🇦 السعودية (+966)</option><option value="+20">🇪🇬 مصر (+20)</option><option value="+971">🇦🇪 الإمارات (+971)</option><option value="+90">🇹🇷 تركيا (+90)</option></select></div>
   <div class="field"><label class="lbl">رقم التواصل (واتساب)</label><input class="inp" id="pf-phone" inputmode="numeric" placeholder="912345678"></div>
-  <label style="display:flex;gap:8px;align-items:flex-start;font-size:0.76rem;color:#4B5563;line-height:1.6;margin-bottom:10px"><input type="checkbox" id="pf-ack" style="margin-top:3px"> أقرّ بصحة البيانات والأوراق المرفقة، وأتحمل مسؤولية أي معلومات غير صحيحة.</label>
+  <div class="comm-box" id="pf-terms"></div>
+  <label class="comm-ack"><input type="checkbox" id="pf-ack"><span><b>أُقرّ وأوافق</b> على الشروط أعلاه، وبصحة البيانات والأوراق المرفقة.</span></label>
   <div id="pf-err" style="color:#D9534F;font-size:0.8rem;margin-bottom:8px"></div>
   <button class="btn-navy" id="pf-submit" style="width:100%" onclick="submitProperty()">إرسال للمراجعة ✓</button>
 </div></div>
@@ -1162,10 +1178,23 @@ body.page-open .float-btn,body.page-open #cart-count-badge{display:none!importan
   <div class="field"><label class="lbl">اسمك</label><input class="inp" id="lead-name" autocomplete="name"></div>
   <div class="field"><label class="lbl">الدولة</label><select class="inp" id="lead-country"><option value="+249" selected>🇸🇩 السودان (+249)</option><option value="+966">🇸🇦 السعودية (+966)</option><option value="+20">🇪🇬 مصر (+20)</option><option value="+971">🇦🇪 الإمارات (+971)</option><option value="+974">🇶🇦 قطر (+974)</option><option value="+90">🇹🇷 تركيا (+90)</option><option value="+1">🇺🇸 أمريكا (+1)</option></select></div>
   <div class="field"><label class="lbl">رقم واتساب</label><input class="inp" id="lead-phone" inputmode="numeric" placeholder="912345678"></div>
+  <div class="comm-box" id="lead-terms" style="display:none"></div>
+  <label class="comm-ack" id="lead-ack-row" style="display:none"><input type="checkbox" id="lead-ack"><span><b>أُقرّ وأوافق</b> على الشروط أعلاه.</span></label>
   <div id="lead-err" style="color:#D9534F;font-size:0.8rem;margin-bottom:8px"></div>
   <button class="btn-navy" id="lead-submit" style="width:100%;background:#2E7D5E" onclick="submitLead()">متابعة لواتساب 💬</button>
 </div></div>
 
+
+<!-- ═══ تأكيد الإقرار بالعمولة ═══ -->
+<div class="overlay hidden" id="modal-comm-ok"><div class="modal modal-sm">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><h3 id="cok-title" style="color:#1A2744;font-weight:900;font-size:1.05rem">✅ تم تسجيل إقرارك</h3><button onclick="closeModal('modal-comm-ok')" style="background:none;border:none;font-size:1.4rem;color:#9CA3AF;cursor:pointer">✕</button></div>
+  <p id="cok-sub" style="color:#6B7280;font-size:0.8rem;margin-bottom:12px;line-height:1.7"></p>
+  <div class="cok-step"><div><span class="n">1</span><span class="t">أرسل تأكيد الإقرار للمنصة</span></div><div class="d">تفتح رسالة واتساب جاهزة لرقم المنصة، اضغط إرسال فقط.</div>
+    <button type="button" class="btn-navy" id="cok-confirm" style="width:100%;background:#25D366" onclick="commConfirmSend()">📩 إرسال التأكيد للمنصة</button></div>
+  <div class="cok-step" id="cok-step2"><div><span class="n">2</span><span class="t">تواصل مع صاحب العقار</span></div><div class="d">يُفتح بعد إرسال التأكيد.</div>
+    <button type="button" class="btn-navy" id="cok-owner" style="width:100%;background:#2E7D5E;opacity:.45" onclick="commOpenOwner()">📱 تواصل مع صاحب العقار</button></div>
+  <button type="button" id="cok-done" onclick="closeModal('modal-comm-ok')" style="width:100%;border:1.5px solid #E5E0D8;background:#fff;color:#1A2744;border-radius:12px;padding:11px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif">تم ✓</button>
+</div></div>
 
 <!-- ═══ دخول المكتب العقاري ═══ -->
 <div class="overlay hidden" id="modal-office-login"><div class="modal modal-sm">
@@ -5225,6 +5254,7 @@ function openPropForm(){
   document.getElementById("pf-type").selectedIndex=0; document.getElementById("pf-deal").selectedIndex=0;
   document.getElementById("pf-ack").checked=false;
   document.getElementById("pf-err").textContent="";
+  setTimeout(renderPfTerms,0);
   propImgs=[]; propDocImgs=[]; propOgImg=""; renderPropThumbs();
   setPropRole("owner");
   document.getElementById("pf-head").textContent="🏠 نشر عقار";
@@ -5312,7 +5342,7 @@ async function submitProperty(){
   if(!propEditId && !propDocImgs.length){e.textContent="ارفع صورة الأوراق المطلوبة للتوثيق";return;}
   if(!name){e.textContent="أدخل اسمك";return;}
   if(!/^\d{6,15}$/.test(phone.replace(/\D/g,""))){e.textContent="رقم غير صحيح";return;}
-  if(!document.getElementById("pf-ack").checked){e.textContent="يجب الإقرار بصحة البيانات";return;}
+  if(!document.getElementById("pf-ack").checked){e.textContent="يجب الإقرار والموافقة على الشروط";return;}
   if(propEditId){
     var ep=(propsList||[]).find(function(x){return x.id===propEditId;});
     if(!ep){ e.textContent="العقار غير موجود"; return; }
@@ -5339,12 +5369,13 @@ async function submitProperty(){
       id:id,title:title,type:document.getElementById("pf-type").value,deal:document.getElementById("pf-deal").value,
       city:city,district:g("pf-district"),area:area,price:price,desc:g("pf-desc"),
       images:propImgs.slice(),image:propImgs[0],ogImage:propOgImg||"",role:propRole,ownerName:name,phone:off?off.phone:phone,officeId:off?off.id:"",officeName:off?off.officeName:"",
+      terms:{v:COMM_TERMS_V,at:Date.now(),name:name,phone:phone,amount:commAmountText(document.getElementById("pf-deal").value,"seller")},
       status:"pending",createdAt:Date.now()
     });
     await setDoc(doc(db,"propDocs",id),{id:id,role:propRole,docs:propDocImgs.slice(),createdAt:Date.now()});
     closeModal("modal-prop-form");
-    try{ notifyAdmin("🏠 عقار جديد للمراجعة\n"+title+"\n"+(PROP_TYPES[document.getElementById("pf-type").value]||"")+" · "+(PROP_DEALS[document.getElementById("pf-deal").value]||"")+" · "+city+"\n"+pPrice({price:price})+"\nالصفة: "+PROP_ROLES[propRole].n+(off?" ("+off.officeName+")":"")+"\n"+name+" - "+phone); }catch(x){}
-    alert("تم إرسال عقارك للمراجعة ✓\nسيُنشر بعد التحقق من أوراقك، وسنتواصل معك عند الاعتماد.");
+    try{ notifyAdmin("🏠 عقار جديد للمراجعة\n"+title+"\n"+(PROP_TYPES[document.getElementById("pf-type").value]||"")+" · "+(PROP_DEALS[document.getElementById("pf-deal").value]||"")+" · "+city+"\n"+pPrice({price:price})+"\nالصفة: "+PROP_ROLES[propRole].n+(off?" ("+off.officeName+")":"")+"\n"+name+" - "+phone+"\n✅ أقرّ بعمولة المنصة"); }catch(x){}
+    openCommOk("seller",{id:id,title:title,name:name,deal:document.getElementById("pf-deal").value});
   }catch(err){
     e.textContent="تعذر الإرسال، تحقق من الاتصال وأعد المحاولة";
   }
@@ -5398,6 +5429,7 @@ function openPropView(id){
     +'<div class="pv-grid"><div class="pv-cell"><span>المساحة</span><b>'+pEsc(p.area)+' م²</b></div><div class="pv-cell"><span>المدينة</span><b>'+pEsc(p.city)+'</b></div>'+(p.district?'<div class="pv-cell"><span>الحي</span><b>'+pEsc(p.district)+'</b></div>':'')+'<div class="pv-cell"><span>المعلن</span><b>'+(p.officeName?pEsc(p.officeName):role.n)+'</b></div></div>'
     +(p.desc?'<div style="background:#FAFAF7;border:1px solid #EEF0F4;border-radius:11px;padding:12px;color:#4B5563;font-size:0.86rem;line-height:1.8;white-space:pre-wrap;margin-bottom:12px">'+pEsc(p.desc)+'</div>':'')
     +'<div class="ver-box">'+role.ico+' تم التحقق من أوراق المعلن بصفته: '+role.n+'<br><span style="font-weight:600;font-size:0.74rem">راجعت المنصة المستند المرفق قبل النشر. ننصح دائماً بمعاينة العقار والتأكد من الأوراق قبل أي دفع.</span></div>'
+    +'<div class="comm-note">🤝 عمولة المنصة: '+(p.deal==="rent"?'نصف إيجار شهر':'1%')+' من البائع و'+(p.deal==="rent"?'نصف إيجار شهر':'1%')+' من المشتري، تُدفع عند إتمام الصفقة فقط.</div>'
     +'<div style="display:flex;gap:8px;margin-top:14px"><button class="btn-navy" style="flex:2" data-id="'+pEsc(p.id)+'" onclick="contactProperty(this.dataset.id)">📱 تواصل واتساب</button><button type="button" data-id="'+pEsc(p.id)+'" onclick="shareProperty(this.dataset.id)" style="flex:1;border:1.5px solid #E5E0D8;background:#fff;color:#4B5563;border-radius:12px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif">🔗 شارك</button></div>';
   document.getElementById("pv-body").innerHTML=h;
   showPropImg(0);
@@ -5447,7 +5479,7 @@ function propPendingHtml(){
   var h=pend.map(function(p){
     var role=PROP_ROLES[p.role]||PROP_ROLES.owner;
     return '<div style="background:#EEF7F1;border:1px solid #BFE3CE;border-radius:12px;padding:13px;margin-bottom:10px">'
-      +'<div style="font-weight:800;color:#1A2744;margin-bottom:5px">🏠 '+pEsc(p.title)+' <span style="background:#2E7D5E;color:#fff;font-size:0.68rem;padding:2px 8px;border-radius:100px">'+role.n+'</span></div>'
+      +'<div style="font-weight:800;color:#1A2744;margin-bottom:5px">🏠 '+pEsc(p.title)+' <span style="background:#2E7D5E;color:#fff;font-size:0.68rem;padding:2px 8px;border-radius:100px">'+role.n+'</span> '+(p.terms?'<span style="background:#FFF8E8;color:#8A6410;font-size:0.66rem;padding:2px 8px;border-radius:100px">✅ أقرّ بالعمولة</span>':'')+'</div>'
       +'<div style="font-size:0.8rem;color:#374151;line-height:1.8">'+(PROP_TYPES[p.type]||"")+' · '+(PROP_DEALS[p.deal]||"")+' · '+pEsc(p.city)+(p.district?' / '+pEsc(p.district):'')+' · '+pEsc(p.area)+' م² · '+pEsc(pPrice(p))+'<br>'+pEsc(p.ownerName)+' · <a href="https://wa.me/'+waNum(p.phone)+'" target="_blank" style="color:#2E7D5E;font-weight:700">'+pEsc(p.phone)+' 📱</a></div>'
       +(p.image?'<img src="'+pEsc(p.image)+'" style="width:100%;max-height:150px;object-fit:cover;border-radius:9px;margin-top:8px">':'')
       +'<button type="button" data-id="'+pEsc(p.id)+'" onclick="viewPropDocs(this.dataset.id)" style="'+btn+'background:#1A2744;color:#fff;width:100%;margin-top:8px">📄 عرض الأوراق ('+role.n+')</button>'
@@ -5545,6 +5577,7 @@ function renderRealEstateTab(){
     +'<div style="font-weight:800;color:#1A2744;font-size:0.9rem;margin:6px 0 10px">⏳ بانتظار المراجعة ('+n+')</div>'
     +(n?(pp.p+rq.p):'<div style="color:#9CA3AF;font-size:0.82rem;padding:6px 0 14px">لا توجد طلبات معلّقة</div>')
     +pp.m+rq.m+'</div></div>'
+    +dealsPanelHtml()
     +'<div class="panel"><div class="panel-head"><span class="panel-title">📞 آخر من تواصل</span></div>'+inqChips()+(inqList(40).length?inqList(40).map(inqRow).join(''):'<div style="color:#9CA3AF;font-size:0.82rem;padding:8px 0">لا يوجد تواصل بعد</div>')+'</div>';
 }
 function renderHeroCounts(){
@@ -5840,6 +5873,12 @@ function openLead(kind,id){
   if(saved.cc){ document.getElementById("lead-country").value=saved.cc; }
   document.getElementById("lead-phone").value=saved.phone||"";
   document.getElementById("lead-err").textContent="";
+  var isProp=(kind==="property"), lt=document.getElementById("lead-terms");
+  lt.style.display=isProp?"":"none"; document.getElementById("lead-ack-row").style.display=isProp?"":"none";
+  document.getElementById("lead-ack").checked=false;
+  if(isProp){ var pp=(propsList||[]).find(function(x){return x.id===id;})||{}; lt.innerHTML=commTermsHtml("buyer",pp.deal,id); lt.scrollTop=0;
+    document.getElementById("lead-sub").textContent="لحماية حق الطرفين، اقرأ الإقرار ووافق عليه، ثم يُفتح لك رقم صاحب العقار «"+it.title+"»."; }
+  document.getElementById("lead-submit").textContent=isProp?"أُقرّ وأتابع ✓":"متابعة لواتساب 💬";
   document.getElementById("modal-lead").classList.remove("hidden");
 }
 async function submitLead(){
@@ -5852,16 +5891,19 @@ async function submitLead(){
   var p=cc+ph;
   if(!n){ e.textContent="أدخل اسمك"; return; }
   if(!/^\d{6,15}$/.test(p.replace(/\D/g,""))){ e.textContent="رقم غير صحيح"; return; }
+  var isPropLead=(leadTarget.kind==="property");
+  if(isPropLead && !document.getElementById("lead-ack").checked){ e.textContent="يجب الإقرار والموافقة على الشروط"; return; }
+  var lpDeal=isPropLead?(((propsList||[]).find(function(x){return x.id===leadTarget.id;})||{}).deal||"sale"):"";
   try{ localStorage.setItem("rayan_lead",JSON.stringify({name:n,cc:cc,phone:ph})); }catch(x){}
   btn.disabled=true;
   var iid="INQ-"+Date.now()+"-"+Math.random().toString(36).slice(2,6);
   try{
     await Promise.race([
-      setDoc(doc(db,"inquiries",iid),{id:iid,kind:leadTarget.kind,targetId:leadTarget.id,productId:"",productName:"("+it.label+") "+it.title,sellerId:it.tag,sellerName:it.owner,ownerPhone:it.phone,name:n,phone:p,createdAt:Date.now()}),
+      setDoc(doc(db,"inquiries",iid),{id:iid,kind:leadTarget.kind,targetId:leadTarget.id,productId:"",productName:"("+it.label+") "+it.title,sellerId:it.tag,sellerName:it.owner,ownerPhone:it.phone,name:n,phone:p,createdAt:Date.now(),terms:isPropLead?{v:COMM_TERMS_V,at:Date.now(),amount:commAmountText(lpDeal,"buyer")}:null,dealStatus:isPropLead?"new":""}),
       new Promise(function(r){ setTimeout(r,3000); })
     ]);
   }catch(x){}
-  try{ notifyAdmin((leadTarget.kind==="property"?"📞 تواصل بخصوص عقار":"📞 عرض على طلب زبون")+"\n"+it.title+"\nالمتواصل: "+n+" - "+p+"\nصاحب الإعلان: "+it.owner+" - "+it.phone); }catch(x){}
+  try{ notifyAdmin((leadTarget.kind==="property"?"📞 تواصل بخصوص عقار":"📞 عرض على طلب زبون")+"\n"+it.title+"\nالمتواصل: "+n+" - "+p+"\nصاحب الإعلان: "+it.owner+" - "+it.phone+(isPropLead?"\n✅ أقرّ بعمولة المنصة":"")); }catch(x){}
   btn.disabled=false;
   closeModal("modal-lead");
   var link=baseUrl()+(leadTarget.kind==="property"?"/?prop=":"/?req=")+leadTarget.id;
@@ -5869,6 +5911,10 @@ async function submitLead(){
     ? "السلام عليكم، أنا "+n+"، أستفسر عن العقار: "+it.title+" (منصة الريان السوق السوداني)\n"+link
     : "السلام عليكم، أنا "+n+"، شفت طلبك «"+it.title+"» في منصة الريان السوق السوداني، وعندي ما قد يناسبك.\n"+link;
   var url="https://wa.me/"+waNum(it.phone)+"?text="+encodeURIComponent(msg);
+  if(isPropLead){
+    openCommOk("buyer",{id:leadTarget.id,title:it.title,name:n,deal:lpDeal,ref:iid,ownerUrl:url});
+    leadTarget=null; return;
+  }
   var w=window.open(url,"_blank"); if(!w) window.location.href=url;
   leadTarget=null;
 }
@@ -5896,6 +5942,121 @@ function checkUrlReq(){
   };
   setTimeout(t,1200);
 }
+
+// ══════════════ إقرار العمولة (1% من كل طرف) ══════════════
+const COMM_TERMS_V="1";
+function commAmountText(deal,who){
+  if(deal==="rent") return "نصف إيجار شهر واحد";
+  return "1% من قيمة "+(who==="buyer"?"الشراء":"البيع")+" النهائية";
+}
+function commTermsHtml(who,deal,pid){
+  var rent=(deal==="rent"), amt='<b>'+commAmountText(deal,who)+'</b>', li=function(t){return '<li>'+t+'</li>';};
+  var items;
+  if(who==="seller"){
+    items=li("أنني مالك العقار المعلن عنه أو مفوَّض قانونياً بالتصرف فيه، وأن البيانات والمستندات المقدَّمة صحيحة.")
+      +li("أن تستحق منصة الريان السوق السوداني عمولة قدرها "+amt+" إذا تم "+(rent?"تأجير":"بيع")+" العقار لأي شخص تعرّفت عليه عن طريق المنصة، سواء تمت الصفقة داخل المنصة أو خارجها.")
+      +li("يسري هذا الالتزام مدة <b>12 شهراً</b> من تاريخ التعريف، ويشمل "+(rent?"التأجير":"البيع")+" للطرف الآخر أو لأحد أقاربه من الدرجة الأولى أو لمن ينوب عنه.")
+      +li("تُستحق العمولة وتُدفع عند توقيع العقد أو دفع العربون، أيهما أسبق.")
+      +li("يُعتمد سجل المنصة ورسائل التواصل المحفوظة دليلاً على التعريف بين الطرفين.")
+      +li("لا تُستحق العمولة إذا أثبتُّ بدليل مكتوب أن الطرف الآخر كان على تواصل معي بشأن العقار قبل تعريف المنصة به.")
+      +li("في حال إخفاء الصفقة أو إنقاص قيمتها، يحق للمنصة المطالبة بكامل العمولة بالطرق القانونية، وإيقاف حسابي.");
+  } else {
+    items=li("أنني تعرّفت على العقار رقم <b>"+pEsc(pid||"")+"</b> وصاحبه عن طريق منصة الريان السوق السوداني.")
+      +li("أن تستحق المنصة عمولة قدرها "+amt+" إذا "+(rent?"استأجرت":"اشتريت")+" هذا العقار، أو "+(rent?"استأجره":"اشتراه")+" أحد أقاربي من الدرجة الأولى أو من ينوب عني، سواء تمت الصفقة داخل المنصة أو خارجها.")
+      +li("يسري هذا الالتزام مدة <b>12 شهراً</b> من تاريخ هذا الإقرار.")
+      +li("تُستحق العمولة وتُدفع عند توقيع العقد أو دفع العربون، أيهما أسبق.")
+      +li("يُعتمد سجل المنصة ورسائل التواصل المحفوظة دليلاً على هذا الإقرار.")
+      +li("في حال إخفاء الصفقة أو إنقاص قيمتها، يحق للمنصة المطالبة بكامل العمولة بالطرق القانونية.");
+  }
+  return '<div class="cb-h">📜 إقرار والتزام بعمولة المنصة</div><div class="cb-s">أقرّ أنا الموقّع أدناه بما يلي:</div><ol>'+items+'</ol><div class="cb-f">وأُشهد الله على ما أقررت به.</div>';
+}
+function renderPfTerms(){
+  var b=document.getElementById("pf-terms"); if(!b) return;
+  b.innerHTML=commTermsHtml("seller",document.getElementById("pf-deal").value,""); b.scrollTop=0;
+}
+var commCtx=null;
+function openCommOk(who,o){
+  var rent=(o.deal==="rent"), dt=new Date().toLocaleDateString("ar");
+  var act=who==="seller"?(rent?"تأجير":"بيع"):(rent?"استئجار":"شراء");
+  var msg="أنا "+o.name+"، أقرّ بأنني اطّلعت على شروط منصة الريان السوق السوداني ووافقت على عمولة "+commAmountText(o.deal,who)+" عند "+act+" العقار رقم "+o.id+" («"+o.title+"»)"+(o.ref?"، رقم الإقرار "+o.ref:"")+"، وفق الإقرار المسجّل بتاريخ "+dt+".\nوالله على ما أقول شهيد.";
+  commCtx={who:who,ref:o.ref||"",confirmUrl:"https://wa.me/"+PLATFORM_WA+"?text="+encodeURIComponent(msg),ownerUrl:o.ownerUrl||"",sent:false};
+  document.getElementById("cok-title").textContent=who==="seller"?"✅ تم إرسال عقارك للمراجعة":"✅ تم تسجيل إقرارك";
+  document.getElementById("cok-sub").textContent=who==="seller"
+    ? "سيُنشر عقارك بعد التحقق من أوراقك. خطوة أخيرة: أرسل تأكيد الإقرار للمنصة من رقمك."
+    : "رقم الإقرار: "+(o.ref||"")+". أرسل التأكيد للمنصة، ثم تواصل مع صاحب العقار مباشرة.";
+  document.getElementById("cok-step2").style.display=who==="seller"?"none":"";
+  document.getElementById("cok-owner").style.opacity=".45";
+  document.getElementById("modal-comm-ok").classList.remove("hidden");
+}
+function commConfirmSend(){
+  if(!commCtx) return;
+  var w=window.open(commCtx.confirmUrl,"_blank"); if(!w) window.location.href=commCtx.confirmUrl;
+  commCtx.sent=true;
+  document.getElementById("cok-owner").style.opacity="1";
+  if(commCtx.ref){ try{ updateDoc(doc(db,"inquiries",commCtx.ref),{confirmSentAt:Date.now()}).catch(function(){}); }catch(e){} }
+}
+function commOpenOwner(){
+  if(!commCtx||!commCtx.ownerUrl) return;
+  if(!commCtx.sent){ showToast("أرسل تأكيد الإقرار للمنصة أولاً"); return; }
+  var w=window.open(commCtx.ownerUrl,"_blank"); if(!w) window.location.href=commCtx.ownerUrl;
+}
+
+// ── متابعة الصفقات والعمولات (للمالك) ──
+const DEAL_ST={new:"🆕 مهتم",viewing:"👀 معاينة",negotiating:"💬 تفاوض",sold:"✅ تمت الصفقة",paid:"💰 تم التحصيل",lost:"✕ لم تتم"};
+var dealShowAll=false;
+function dealProp(q){ return (propsList||[]).find(function(x){return x.id===q.targetId;})||null; }
+function dealComm(q){
+  var p=dealProp(q), price=Number(q.dealPrice)||0; if(!price) return 0;
+  var one=(p&&p.deal==="rent")?price*0.5:price*0.01;
+  return Math.round(one*2);
+}
+function propDeals(){
+  return (inquiries||[]).filter(function(q){return q.kind==="property"||q.sellerId==="PROP";})
+    .sort(function(a,b){return (b.dealUpdatedAt||b.createdAt||0)-(a.dealUpdatedAt||a.createdAt||0);});
+}
+function toggleDealsAll(){ dealShowAll=!dealShowAll; renderRealEstateTab(); }
+async function setDealField(id,k,v){
+  var up={dealUpdatedAt:Date.now()}; up[k]=(k==="dealPrice")?(Number(String(v).replace(/[^\d.]/g,""))||0):v;
+  try{ await updateDoc(doc(db,"inquiries",id),up); showToast("تم الحفظ ✓"); }catch(e){ showToast("تعذر الحفظ"); }
+}
+function dealRemind(id,who){
+  var q=(inquiries||[]).find(function(x){return x.id===id;}); if(!q) return;
+  var p=dealProp(q)||{}, d=new Date((q.terms&&q.terms.at)||q.createdAt||0).toLocaleDateString("ar");
+  var phone=who==="buyer"?q.phone:(q.ownerPhone||p.phone), nm=who==="buyer"?q.name:(p.ownerName||q.sellerName||"");
+  var msg="السلام عليكم "+(nm||"")+"،\nمعكم منصة الريان السوق السوداني.\nبخصوص العقار رقم "+(q.targetId||"")+" («"+(p.title||q.productName||"")+"»)، نودّ متابعة سير التواصل: هل تمت الصفقة أو ما زالت قيد التفاوض؟\n"
+    +"نذكّركم بالإقرار المسجّل بتاريخ "+d+(who==="buyer"?" (رقم "+q.id+")":"")+" بعمولة المنصة عند إتمام الصفقة.\nشكراً لتعاملكم معنا.";
+  window.open("https://wa.me/"+waNum(phone)+"?text="+encodeURIComponent(msg),"_blank");
+}
+function dealsPanelHtml(){
+  var all=propDeals(), L=dealShowAll?all:all.filter(function(q){return q.dealStatus!=="lost"&&q.dealStatus!=="paid";});
+  var exp=0, got=0;
+  all.forEach(function(q){ if(q.dealStatus==="sold") exp+=dealComm(q); if(q.dealStatus==="paid") got+=dealComm(q); });
+  var opts=function(cur){ return Object.keys(DEAL_ST).map(function(k){return '<option value="'+k+'"'+((cur||"new")===k?' selected':'')+'>'+DEAL_ST[k]+'</option>';}).join(""); };
+  var rows=L.slice(0,60).map(function(q){
+    var p=dealProp(q)||{}, rent=p.deal==="rent", c=dealComm(q), d=new Date(q.createdAt||0).toLocaleDateString("ar");
+    return '<div class="deal-row">'
+      +'<div style="font-weight:800;color:#1A2744;font-size:0.84rem">🏡 '+pEsc(p.title||q.productName||"")+' <small style="color:#9CA3AF">'+pEsc(q.targetId||"")+'</small></div>'
+      +'<div style="font-size:0.76rem;color:#374151;line-height:1.8;margin-top:3px">👤 المشتري: <b>'+pEsc(q.name)+'</b> · <a href="https://wa.me/'+waNum(q.phone)+'" target="_blank" dir="ltr" style="color:#2E7D5E;font-weight:700">'+pEsc(q.phone)+'</a>'
+      +'<br>🏠 البائع: '+pEsc(p.officeName||p.ownerName||q.sellerName||"")+' · <a href="https://wa.me/'+waNum(q.ownerPhone||p.phone)+'" target="_blank" dir="ltr" style="color:#2E7D5E;font-weight:700">'+pEsc(q.ownerPhone||p.phone||"")+'</a>'
+      +'<br><span style="color:'+(q.terms?'#2E7D5E':'#B45309')+';font-weight:800">'+(q.terms?'✅ أقرّ بالعمولة':'⚠️ بلا إقرار (قبل التفعيل)')+'</span>'+(q.confirmSentAt?' · <span style="color:#2E7D5E">📩 فتح رسالة التأكيد</span>':'')+' · '+pEsc(d)+'</div>'
+      +'<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:8px">'
+      +'<select data-id="'+pEsc(q.id)+'" onchange="setDealField(this.dataset.id,\'dealStatus\',this.value)">'+opts(q.dealStatus)+'</select>'
+      +'<input data-id="'+pEsc(q.id)+'" inputmode="numeric" placeholder="'+(rent?'الإيجار الشهري':'سعر الصفقة')+'" value="'+(q.dealPrice?pEsc(q.dealPrice):'')+'" onchange="setDealField(this.dataset.id,\'dealPrice\',this.value)" style="width:120px">'
+      +(c?'<b style="color:#B8862B;font-size:0.8rem">العمولة: '+pEsc(c.toLocaleString("ar"))+' ج.س</b>':'')
+      +'</div>'
+      +'<div style="display:flex;gap:6px;margin-top:8px"><button type="button" data-id="'+pEsc(q.id)+'" onclick="dealRemind(this.dataset.id,\'buyer\')" style="flex:1;font-family:Tajawal,sans-serif;background:#E8F0FE;color:#2F5BD3;border:none;border-radius:8px;padding:7px;font-weight:800;cursor:pointer;font-size:0.74rem">📩 تذكير المشتري</button>'
+      +'<button type="button" data-id="'+pEsc(q.id)+'" onclick="dealRemind(this.dataset.id,\'seller\')" style="flex:1;font-family:Tajawal,sans-serif;background:#FFF8E8;color:#8A6410;border:none;border-radius:8px;padding:7px;font-weight:800;cursor:pointer;font-size:0.74rem">📩 تذكير البائع</button></div>'
+      +'</div>';
+  }).join("");
+  return '<div class="panel"><div class="panel-head"><span class="panel-title">🤝 الصفقات والعمولات</span></div>'
+    +'<div style="display:flex;gap:8px;margin-bottom:10px"><div style="flex:1;background:#FFF8E8;border-radius:11px;padding:10px;text-align:center"><div style="font-size:0.7rem;color:#8A6410">عمولات مستحقة</div><b style="color:#1A2744">'+exp.toLocaleString("ar")+' ج.س</b></div>'
+    +'<div style="flex:1;background:#E9F6EF;border-radius:11px;padding:10px;text-align:center"><div style="font-size:0.7rem;color:#2E7D5E">تم تحصيله</div><b style="color:#1A2744">'+got.toLocaleString("ar")+' ج.س</b></div></div>'
+    +'<div style="color:#6B7280;font-size:0.72rem;line-height:1.7;margin-bottom:8px">العمولة المحسوبة = نصيب البائع + نصيب المشتري (1% + 1% للبيع، نصف إيجار شهر من كل طرف للإيجار). اختر الحالة وأدخل السعر عند إتمام الصفقة.</div>'
+    +(rows||'<div style="color:#9CA3AF;font-size:0.82rem;padding:8px 0">لا توجد صفقات '+(dealShowAll?'':'نشطة ')+'بعد</div>')
+    +'<button type="button" onclick="toggleDealsAll()" style="width:100%;margin-top:4px;font-family:Tajawal,sans-serif;background:none;border:1px dashed #C9933A;color:#8A6410;border-radius:10px;padding:8px;font-weight:800;cursor:pointer;font-size:0.76rem">'+(dealShowAll?'إخفاء المكتملة والملغاة':'عرض الكل ('+all.length+')')+'</button></div>';
+}
+window.renderPfTerms=renderPfTerms; window.commConfirmSend=commConfirmSend; window.commOpenOwner=commOpenOwner;
+window.setDealField=setDealField; window.dealRemind=dealRemind; window.toggleDealsAll=toggleDealsAll;
 
 // ── سجل التواصل للمالك ──
 var inqFilter="all";
@@ -6478,6 +6639,7 @@ function openPropEdit(id){
   document.getElementById("pf-desc").value=p.desc||"";
   if(p.type) document.getElementById("pf-type").value=p.type;
   if(p.deal) document.getElementById("pf-deal").value=p.deal;
+  renderPfTerms();
   propImgs=((p.images&&p.images.length)?p.images:(p.image?[p.image]:[])).slice(); propOgImg=p.ogImage||""; renderPropThumbs();
   document.getElementById("pf-head").textContent="✏️ تعديل العقار";
   document.getElementById("pf-doc-box").style.display="none";
@@ -6488,7 +6650,7 @@ async function setSaleStatus(id,v){
   try{
     await updateDoc(doc(db,"properties",id),{saleStatus:v,saleUpdatedAt:Date.now()});
     showToast("تم تحديث الحالة: "+SALE_ST[v]);
-    if(v!=="available"){ try{ notifyAdmin("🏷️ تحديث حالة عقار\n"+(p.officeName||"")+"\n«"+p.title+"» ← "+SALE_ST[v]); }catch(x){} }
+    if(v!=="available"){ try{ notifyAdmin("🏷️ تحديث حالة عقار\n"+(p.officeName||"")+"\n«"+p.title+"» ← "+SALE_ST[v]+((v==="sold"||v==="rented")?"\n💰 تابع العمولة من «الصفقات والعمولات»":"")); }catch(x){} }
   }catch(e){ showToast("تعذر التحديث، أعد الدخول لحساب مكتبك"); }
 }
 async function resetOfficeLogin(id){
