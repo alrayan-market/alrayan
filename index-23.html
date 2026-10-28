@@ -524,6 +524,13 @@ nav{box-shadow:0 4px 24px rgba(10,20,40,.28)}
 .pv-cell{background:#F4F6FA;border-radius:11px;padding:9px 11px}
 .pv-cell span{display:block;color:#9CA3AF;font-size:0.68rem;font-weight:700}
 .pv-cell b{color:#1A2744;font-size:0.88rem}
+.brand-hold{position:relative;cursor:default;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.brand-hold .hold-bar{position:absolute;bottom:-7px;right:0;height:3px;width:0;background:linear-gradient(90deg,#F2CE73,#C9933A);border-radius:3px;opacity:0}
+.brand-hold.holding .hold-bar{opacity:1;width:100%;transition:width 3s linear}
+.ow-wrap{max-width:420px;margin:0 auto;text-align:center}
+.ow-lock{width:74px;height:74px;border-radius:50%;background:linear-gradient(135deg,#1A2744,#2B3D66);display:grid;place-items:center;font-size:2rem;margin:6px auto 12px;box-shadow:0 6px 18px rgba(26,39,68,.25);border:3px solid #C9933A}
+.ow-pass{position:relative}
+.ow-pass button{position:absolute;left:8px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:1.05rem;cursor:pointer;color:#6B7280}
 .comm-box{background:#FFFDF7;border:1.5px solid #E2C27A;border-radius:12px;padding:12px 13px;margin:6px 0 10px;max-height:230px;overflow-y:auto}
 .comm-box .cb-h{color:#1A2744;font-weight:900;font-size:0.88rem;margin-bottom:4px}
 .comm-box .cb-s{color:#6B7280;font-size:0.74rem;margin-bottom:6px}
@@ -1441,8 +1448,8 @@ body.page-open .float-btn,body.page-open #cart-count-badge{display:none!importan
 <div class="overlay hidden" id="modal-login">
   <div class="modal modal-sm">
     <h3 style="color:#1A2744;font-weight:900;font-size:1.05rem;margin-bottom:4px">🔑 دخول</h3>
-    <p style="color:#6B7280;font-size:0.82rem;margin-bottom:16px">أدخل رقم هاتفك أو كلمة مرور المالك</p>
-    <input class="inp" id="l-phone" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="رقم الهاتف أو كلمة مرور المالك" style="margin-bottom:10px">
+    <p style="color:#6B7280;font-size:0.82rem;margin-bottom:16px">أدخل رقم هاتف متجرك</p>
+    <input class="inp" id="l-phone" type="text" inputmode="tel" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="رقم الهاتف" style="margin-bottom:10px">
     <div id="login-err" class="err-box hidden"></div>
     <div style="text-align:center;margin:4px 0 10px;font-size:0.8rem;color:#6B7280">صاحب مكتب عقاري؟ <a href="javascript:void(0)" onclick="closeModal('modal-login');openOfficeLogin()" style="color:#B8862B;font-weight:800">دخول المكاتب</a></div>
     <div class="modal-btns">
@@ -1451,6 +1458,20 @@ body.page-open .float-btn,body.page-open #cart-count-badge{display:none!importan
     </div>
   </div>
 </div>
+
+<!-- ═══ دخول المالك (صفحة مخفية) ═══ -->
+<div class="overlay hidden" id="modal-owner-login"><div class="modal modal-sm">
+  <div style="display:flex;justify-content:flex-end"><button onclick="closeModal('modal-owner-login')" style="background:none;border:none;font-size:1.4rem;color:#9CA3AF;cursor:pointer">✕</button></div>
+  <div class="ow-wrap">
+    <div class="ow-lock">🔐</div>
+    <h3 style="color:#1A2744;font-weight:900;font-size:1.15rem;margin-bottom:4px">دخول مالك المنصة</h3>
+    <p style="color:#6B7280;font-size:0.8rem;margin-bottom:16px;line-height:1.7">صفحة خاصة. كل دخول ناجح أو محاولات خاطئة تصل تنبيهاً على تيليجرام.</p>
+  </div>
+  <div class="field"><label class="lbl">البريد</label><input class="inp" id="ow-email" type="email" autocomplete="username" autocapitalize="off" spellcheck="false" dir="ltr" style="text-align:left"></div>
+  <div class="field"><label class="lbl">كلمة المرور</label><div class="ow-pass"><input class="inp" id="ow-pass" type="password" autocomplete="current-password" dir="ltr" style="text-align:left;padding-left:40px"><button type="button" onclick="toggleOwnerPass()" aria-label="إظهار كلمة المرور">👁</button></div></div>
+  <div id="ow-err" style="color:#D9534F;font-size:0.8rem;margin-bottom:8px;min-height:1em"></div>
+  <button class="btn-navy" id="ow-submit" style="width:100%" onclick="doOwnerLogin()">دخول 🔐</button>
+</div></div>
 
 <!-- SHARE -->
 <div class="overlay hidden" id="modal-share">
@@ -1659,7 +1680,6 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 // حساب المالك في Firebase Authentication (كلمة المرور تُحدَّد في Firebase وليست في الصفحة)
-const ADMIN_EMAIL = "owner@alrayan-market.app";
 setPersistence(auth, browserSessionPersistence).catch(function(){});
 // تطبيق ثانوي لإنشاء حساب المكتب عند التسجيل دون التأثير على جلسة من يستخدم الجهاز
 const regApp = initializeApp(firebaseConfig, "reg");
@@ -3572,7 +3592,7 @@ function renderAdminDashboard(){
 function openLogin(){document.getElementById("l-phone").value="";hideErr("login-err");document.getElementById("modal-login").classList.remove("hidden");}
 async function doLogin(){
   const val=document.getElementById("l-phone").value.trim();
-  if(!val) return showErr("login-err","أدخل رقم هاتفك أو كلمة مرور المالك");
+  if(!val) return showErr("login-err","أدخل رقم هاتفك");
   const found=sellers.find(s=>s.phone===val);
   // رقم مسجّل كمكتب عقاري معتمد: نخيّره بين المتجر والمكتب، أو نوجّهه لدخول المكتب
   const offMatch=/^[+\d\s-]{6,}$/.test(val) ? (officesList||[]).find(function(o){return o.status==="approved" && waNum(o.phone)===waNum(val);}) : null;
@@ -3584,22 +3604,7 @@ async function doLogin(){
     return;
   }
   window._loginAsStore=false;
-  if(!found){
-    try{
-      await signInWithEmailAndPassword(auth, ADMIN_EMAIL, val);
-      isAdmin=true;currentSeller=null;activeTab="admin";aucSession=null;
-      document.getElementById("l-phone").value="";
-      closeModal("modal-login");showView("dashboard");startAdminListeners();renderDashboard();
-    }catch(e){
-      var c=(e&&e.code)||"";
-      var m="رقم الهاتف غير مسجل أو كلمة المرور غير صحيحة";
-      if(c==="auth/too-many-requests") m="محاولات كثيرة، انتظر قليلاً ثم أعد المحاولة";
-      else if(c==="auth/network-request-failed") m="تحقق من الاتصال بالإنترنت";
-      else if(c==="auth/operation-not-allowed") m="دخول المالك غير مفعّل في Firebase (Email/Password)";
-      showErr("login-err",m);
-    }
-    return;
-  }
+  if(!found){ showErr("login-err","رقم الهاتف غير مسجل"); return; }
   currentSeller=found;isAdmin=false;activeTab="products";
   enableSellerPushNotifications(found.id);
   setTimeout(function(){
@@ -6894,6 +6899,88 @@ function initPages(){
   });
 }
 initPages();
+
+// ══════════════ دخول المالك: ضغط مطوّل على الشعار + رابط سري ══════════════
+const OWNER_KEY_HASH="9b2c1da9bccdaea24085989c43de016ac0d70d2214d8bbc78a6803d73669e8f6"; // بصمة الرابط السري فقط، لا الرابط نفسه
+const OW_LOCK_KEY="rayan_ow_f", OW_MAIL_KEY="rayan_ow_e";
+function owDevice(){
+  var u=navigator.userAgent||"", os=/Android/i.test(u)?"أندرويد":/iPhone|iPad/i.test(u)?"آيفون":/Windows/i.test(u)?"ويندوز":/Mac/i.test(u)?"ماك":"جهاز آخر";
+  var br=/wv\)|; wv/i.test(u)?"تطبيق المنصة":/SamsungBrowser/i.test(u)?"متصفح سامسونج":/Edg\//i.test(u)?"Edge":/Chrome\//i.test(u)?"Chrome":/Safari\//i.test(u)?"Safari":/Firefox/i.test(u)?"Firefox":"متصفح";
+  return os+" · "+br;
+}
+function owNow(){ var d=new Date(); return d.toLocaleDateString("ar")+" "+d.toLocaleTimeString("ar",{hour:"2-digit",minute:"2-digit"}); }
+function owLock(){ try{ return JSON.parse(localStorage.getItem(OW_LOCK_KEY)||"{}")||{}; }catch(e){ return {}; } }
+function owSaveLock(o){ try{ localStorage.setItem(OW_LOCK_KEY,JSON.stringify(o)); }catch(e){} }
+function openOwnerLogin(){
+  var em=""; try{ em=localStorage.getItem(OW_MAIL_KEY)||""; }catch(e){}
+  document.getElementById("ow-email").value=em;
+  document.getElementById("ow-pass").value=""; document.getElementById("ow-pass").type="password";
+  document.getElementById("ow-err").textContent="";
+  document.getElementById("modal-owner-login").classList.remove("hidden");
+  setTimeout(function(){ try{ document.getElementById(em?"ow-pass":"ow-email").focus(); }catch(e){} },300);
+}
+function toggleOwnerPass(){ var i=document.getElementById("ow-pass"); i.type=(i.type==="password")?"text":"password"; }
+async function doOwnerLogin(){
+  var err=document.getElementById("ow-err"), btn=document.getElementById("ow-submit");
+  var em=document.getElementById("ow-email").value.trim().toLowerCase(), pw=document.getElementById("ow-pass").value;
+  var L=owLock(), now=Date.now();
+  if(L.until && L.until>now){ err.textContent="الدخول موقوف مؤقتاً من هذا الجهاز. حاول بعد "+Math.ceil((L.until-now)/60000)+" دقيقة."; return; }
+  if(!em||!pw){ err.textContent="أدخل البريد وكلمة المرور"; return; }
+  err.textContent=""; btn.disabled=true; btn.textContent="جاري التحقق...";
+  try{
+    await signInWithEmailAndPassword(auth, em, pw);
+    owSaveLock({});
+    try{ localStorage.setItem(OW_MAIL_KEY,em); }catch(e){}
+    try{ notifyAdmin("🔐 تم الدخول للوحة المالك\nالجهاز: "+owDevice()+"\nالوقت: "+owNow()+"\nإن لم تكن أنت، غيّر كلمة المرور فوراً من Firebase."); }catch(x){}
+    isAdmin=true; currentSeller=null; activeTab="admin"; aucSession=null;
+    document.getElementById("ow-pass").value="";
+    closeModal("modal-owner-login"); showView("dashboard"); startAdminListeners(); renderDashboard();
+  }catch(e){
+    var c=(e&&e.code)||"";
+    if(c==="auth/network-request-failed"){ err.textContent="تحقق من الاتصال بالإنترنت"; }
+    else {
+      var n=(L.n||0)+1;
+      if(n>=3){
+        owSaveLock({n:0,until:now+15*60000});
+        err.textContent="3 محاولات خاطئة. توقف الدخول من هذا الجهاز 15 دقيقة.";
+        try{ notifyAdmin("⚠️ محاولات دخول فاشلة للوحة المالك\n3 محاولات خاطئة متتالية\nالجهاز: "+owDevice()+"\nالوقت: "+owNow()); }catch(x){}
+      } else {
+        owSaveLock({n:n});
+        err.textContent=(c==="auth/too-many-requests")?"محاولات كثيرة، انتظر قليلاً ثم أعد المحاولة":"البريد أو كلمة المرور غير صحيحة ("+((3-n)===1?"بقيت محاولة واحدة":"بقيت محاولتان")+")";
+      }
+    }
+  }
+  btn.disabled=false; btn.textContent="دخول 🔐";
+}
+document.getElementById("ow-pass").addEventListener("keydown",function(e){ if(e.key==="Enter") doOwnerLogin(); });
+// ضغط مطوّل 3 ثوانٍ على شعار المنصة
+(function(){
+  var el=document.querySelector("#view-market nav > div"); if(!el) return;
+  el.classList.add("brand-hold");
+  var bar=document.createElement("div"); bar.className="hold-bar"; el.appendChild(bar);
+  var t=null;
+  function stop(){ if(t){ clearTimeout(t); t=null; } el.classList.remove("holding"); }
+  function start(e){
+    if(e.button!==undefined && e.button>0) return;
+    stop(); void el.offsetWidth; el.classList.add("holding");
+    t=setTimeout(function(){ t=null; el.classList.remove("holding"); try{ navigator.vibrate&&navigator.vibrate(40); }catch(x){} openOwnerLogin(); },3000);
+  }
+  el.addEventListener("pointerdown",start);
+  ["pointerup","pointerleave","pointercancel"].forEach(function(ev){ el.addEventListener(ev,stop); });
+  el.addEventListener("contextmenu",function(e){ e.preventDefault(); });
+})();
+// الرابط السري: ?k=...
+(async function(){
+  try{
+    var sp=new URLSearchParams(location.search), k=sp.get("k"); if(!k) return;
+    sp.delete("k"); var q=sp.toString();
+    history.replaceState(null,"",location.pathname+(q?"?"+q:"")+location.hash);
+    var buf=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(k));
+    var hex=Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,"0");}).join("");
+    if(hex===OWNER_KEY_HASH) setTimeout(openOwnerLogin,600);
+  }catch(e){}
+})();
+window.openOwnerLogin=openOwnerLogin; window.doOwnerLogin=doOwnerLogin; window.toggleOwnerPass=toggleOwnerPass;
 </script>
 </body>
 </html>
