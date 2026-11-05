@@ -43,9 +43,9 @@ export default async (request, context) => {
   const ua = request.headers.get("user-agent") || "";
   const url = new URL(request.url);
   const p = (k) => url.searchParams.get(k);
-  const tk = p("p"), calc = p("calc"), quote = p("quote");
+  const tk = p("p"), calc = p("calc"), quote = p("quote"), join = p("join");
   const auc = p("auc"), prop = p("prop"), req = p("req"), ad = p("ad"), vid = p("video"), poll = p("poll"), publish = p("publish");
-  if ((!tk && !calc && !quote && !auc && !prop && !req && !ad && !vid && !poll && !publish) || !BOT.test(ua)) return context.next();
+  if ((!tk && !calc && !quote && !join && !auc && !prop && !req && !ad && !vid && !poll && !publish) || !BOT.test(ua)) return context.next();
 
   let ready = false; // صورة المعاينة جاهزة بالحجم المناسب (لا تحتاج تصغير)
   let title = SITE_NAME, desc = "أطلب من هنا واستلم في موقعك · خزانات أصلية بكل السعات · الدفع عند الاستلام", image = SITE_LOGO;
@@ -65,6 +65,9 @@ export default async (request, context) => {
     } else if (calc) {
       title = "🧮 أي خزان يناسب بيتك؟";
       desc = "اكتب عدد أفراد البيت وأيام انقطاع المياه، ونقترح لك السعة المناسبة · منصة الريان لخزانات المياه";
+    } else if (join) {
+      title = "🤝 اكسب معنا · منصة الريان لخزانات المياه";
+      desc = "شارك روابط خزاناتنا واكسب 5% من قيمة كل خزان يُطلب عن طريقك، تُصرف أسبوعياً على بنكك";
     } else if (quote) {
       title = "🏗️ عرض سعر خاص للكميات";
       desc = "للمقاولين والمشاريع والتجار · خزانات مياه بكل السعات · منصة الريان لخزانات المياه";
