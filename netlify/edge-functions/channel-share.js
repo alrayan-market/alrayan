@@ -1,12 +1,12 @@
 // netlify/edge-functions/channel-share.js
 // معاينة الروابط عند المشاركة (واتساب، فيسبوك، تيليجرام...)
 // تعمل لبوتات المعاينة فقط، ولا تغيّر شيئاً للزائر العادي.
-// الروابط المدعومة: ?prop= عقار · ?req= طلب · ?ad= إعلان · ?video= · ?poll= · ?publish=
+// الروابط المدعومة: ?p= خزان · ?calc= حاسبة · ?quote= عرض سعر · (القديمة: ?prop= ?req= ?ad= ?auc=)
 
 const FIREBASE_PROJECT_ID = "alrayan-15db4";
 const FIREBASE_API_KEY = "AIzaSyC7-MKB7Ix3k0gA7tGxCXNFaty5IQ-U3Xg";
 const SITE_LOGO = "https://alrayanmarket.netlify.app/icon-512.png";
-const SITE_NAME = "منصة الريان السوق السوداني";
+const SITE_NAME = "💧 منصة الريان لخزانات المياه";
 const BOT = /facebookexternalhit|Facebot|Twitterbot|WhatsApp|TelegramBot|LinkedInBot|Slackbot|Discordbot|Pinterest|redditbot|vkShare|Skype|Viber|Googlebot/i;
 
 const PROP_TYPES = { land: "أرض", house: "منزل", apartment: "شقة", shop: "محل", farm: "مزرعة", office: "مكتب / مبنى" };
@@ -43,13 +43,32 @@ export default async (request, context) => {
   const ua = request.headers.get("user-agent") || "";
   const url = new URL(request.url);
   const p = (k) => url.searchParams.get(k);
+  const tk = p("p"), calc = p("calc"), quote = p("quote");
   const auc = p("auc"), prop = p("prop"), req = p("req"), ad = p("ad"), vid = p("video"), poll = p("poll"), publish = p("publish");
-  if ((!auc && !prop && !req && !ad && !vid && !poll && !publish) || !BOT.test(ua)) return context.next();
+  if ((!tk && !calc && !quote && !auc && !prop && !req && !ad && !vid && !poll && !publish) || !BOT.test(ua)) return context.next();
 
   let ready = false; // صورة المعاينة جاهزة بالحجم المناسب (لا تحتاج تصغير)
-  let title = SITE_NAME, desc = "عقارات موثّقة · مكاتب معتمدة · خزانات مياه · متاجر سودانية", image = SITE_LOGO;
+  let title = SITE_NAME, desc = "أطلب من هنا واستلم في موقعك · خزانات أصلية بكل السعات · الدفع عند الاستلام", image = SITE_LOGO;
   try {
-    if (auc) {
+    if (tk) {
+      const f = await fireGet("products", tk);
+      if (f) {
+        const name = str(f, "name");
+        let cap = num(f, "capacity");
+        if (!cap) { const m = name.replace(/[,٬]/g, "").match(/(\d{3,6})\s*(?:لتر|ليتر)/); if (m) cap = Number(m[1]); }
+        const price = (f.priceOnRequest && f.priceOnRequest.booleanValue) ? "السعر عند الطلب" : (money(num(f, "price")) || "السعر عند الطلب");
+        title = "💧 " + (name || "خزان مياه");
+        desc = [cap ? "السعة " + cap.toLocaleString("en-US") + " لتر" : "", price, "أطلب من هنا واستلم في موقعك"].filter(Boolean).join(" · ");
+        const og = str(f, "ogImage"), img = firstImg(f, "image", "images");
+        if (og) { image = og; ready = true; } else if (img) image = img;
+      }
+    } else if (calc) {
+      title = "🧮 أي خزان يناسب بيتك؟";
+      desc = "اكتب عدد أفراد البيت وأيام انقطاع المياه، ونقترح لك السعة المناسبة · منصة الريان لخزانات المياه";
+    } else if (quote) {
+      title = "🏗️ عرض سعر خاص للكميات";
+      desc = "للمقاولين والمشاريع والتجار · خزانات مياه بكل السعات · منصة الريان لخزانات المياه";
+    } else if (auc) {
       const f = await fireGet("auctions", auc);
       if (f) {
         const hb = num(f, "highestBid");
