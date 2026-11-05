@@ -677,6 +677,68 @@ textarea.inp{height:auto;min-height:84px;padding:11px 13px;resize:vertical;line-
   </div>
 </div>
 
+
+<!-- ═══ انضمام المسوّقين ═══ -->
+<div class="page hidden" id="pg-join">
+  <div class="pbar"><div class="wrap"><button class="back" onclick="history.back()">→ رجوع</button><div class="pt">اكسب معنا</div><div class="pa"></div></div></div>
+  <div class="pbody">
+    <div class="card" style="background:linear-gradient(120deg,var(--navy3),var(--navy));color:#fff">
+      <h3 style="font-size:1.2rem">🤝 كن مسوّقاً لمنصة الريان لخزانات المياه</h3>
+      <p style="font-size:0.88rem;opacity:.9;line-height:1.9">شارك روابط خزاناتنا مع معارفك وفي قروبات واتساب وفيسبوك، واكسب <b style="color:var(--gold2)">5%</b> من قيمة كل خزان يُطلب عن طريقك، تُصرف لك أسبوعياً على بنكك.</p>
+    </div>
+    <div class="card">
+      <h3>👤 بياناتك</h3>
+      <div class="fld"><label>الاسم الكامل</label><input class="inp" id="mj-name" autocomplete="name"></div>
+      <div class="fld"><label>رقم الواتساب</label><div class="phone-row"><select class="inp" id="mj-cc"><option value="+249">🇸🇩 +249</option><option value="+966">🇸🇦 +966</option><option value="+971">🇦🇪 +971</option><option value="+20">🇪🇬 +20</option></select><input class="inp" id="mj-phone" inputmode="tel" placeholder="912345678"></div></div>
+      <div class="fld"><label>المدينة</label><input class="inp" id="mj-city"></div>
+      <div class="fld"><label>كيف ستسوّق؟</label><select class="inp" id="mj-method"><option value="whatsapp">قروبات وحالات واتساب</option><option value="facebook">فيسبوك وتيك توك</option><option value="shop">عندي محل / معرض</option><option value="contractor">مقاول أو سمسار</option><option value="friends">معارف وجيران</option><option value="other">أخرى</option></select></div>
+      <div class="fld"><label>رقم حساب بنكك لاستلام العمولة</label><input class="inp" id="mj-bank" inputmode="numeric" dir="ltr" style="text-align:left"></div>
+      <div class="fld"><label>اسم صاحب الحساب</label><input class="inp" id="mj-bankname"></div>
+    </div>
+    <div class="card">
+      <h3>🔐 رمز الدخول لصفحتك</h3>
+      <div class="grid2"><div class="fld"><label>رمز سري (6 أرقام أو أكثر)</label><input class="inp" id="mj-pin" type="password" inputmode="numeric" dir="ltr" style="text-align:left"></div><div class="fld"><label>تأكيد الرمز</label><input class="inp" id="mj-pin2" type="password" inputmode="numeric" dir="ltr" style="text-align:left"></div></div>
+    </div>
+    <div class="card">
+      <h3>📜 شروط المسوّق</h3>
+      <ol style="padding-inline-start:18px;font-size:0.82rem;line-height:1.95;color:#344054">
+        <li>العمولة 5% من قيمة الخزانات بدون التوصيل، للطلبات التي تأتي عن طريق روابطك فقط.</li>
+        <li>تُستحق العمولة بعد تسليم الطلب بـ 3 أيام، وتُلغى إذا أُلغي الطلب.</li>
+        <li>الصرف أسبوعي عبر بنكك عند بلوغ رصيدك 10,000 ج.س، والمتبقي يُرحَّل للأسبوع التالي.</li>
+        <li>لا تقدّم نفسك موظفاً في المنصة، ولا تَعِد الزبائن بأسعار أو خصومات غير المعلنة.</li>
+        <li>لا تطلب لنفسك عن طريق رابطك، ولا تنشر بطرق مزعجة أو مضللة.</li>
+        <li>للمنصة حق تعديل العمولة بإشعار مسبق، وحق إيقاف الحساب عند المخالفة.</li>
+      </ol>
+      <label style="display:flex;gap:8px;align-items:flex-start;margin-top:10px;font-weight:800;font-size:0.86rem;background:var(--bg);border-radius:10px;padding:10px"><input type="checkbox" id="mj-ack" style="width:18px;height:18px;margin-top:3px;flex-shrink:0"> أوافق على شروط المسوّق</label>
+    </div>
+    <div class="err" id="mj-err"></div>
+    <button class="btn btn-gold btn-block" id="mj-submit" onclick="submitJoin()">📩 أرسل طلب الانضمام</button>
+    <p style="text-align:center;margin-top:12px;font-size:0.86rem">مسجّل من قبل؟ <a href="javascript:void(0)" onclick="openMLogin()" style="color:var(--water);font-weight:900">ادخل لصفحتك</a></p>
+  </div>
+</div>
+
+<!-- ═══ دخول المسوّق ═══ -->
+<div class="page hidden" id="pg-mlogin">
+  <div class="pbar"><div class="wrap"><button class="back" onclick="history.back()">→ رجوع</button><div class="pt">دخول المسوّق</div><div class="pa"></div></div></div>
+  <div class="pbody" style="max-width:440px">
+    <div class="ow-lock" style="border-color:var(--water)">🤝</div>
+    <h2 style="text-align:center;font-weight:900;font-size:1.2rem;margin-bottom:14px">صفحة المسوّق</h2>
+    <div class="card">
+      <div class="fld"><label>رقم الواتساب المسجّل</label><div class="phone-row"><select class="inp" id="ml-cc"><option value="+249">🇸🇩 +249</option><option value="+966">🇸🇦 +966</option><option value="+971">🇦🇪 +971</option><option value="+20">🇪🇬 +20</option></select><input class="inp" id="ml-phone" inputmode="tel" placeholder="912345678"></div></div>
+      <div class="fld"><label>الرمز السري</label><input class="inp" id="ml-pin" type="password" inputmode="numeric" dir="ltr" style="text-align:left"></div>
+      <div class="err" id="ml-err"></div>
+      <button class="btn btn-navy btn-block" id="ml-submit" onclick="mLogin()">دخول</button>
+    </div>
+    <p style="text-align:center;font-size:0.86rem">لست مسجّلاً؟ <a href="javascript:void(0)" onclick="openJoin()" style="color:var(--water);font-weight:900">انضم الآن</a> · نسيت الرمز؟ <a href="javascript:void(0)" onclick="openWA('السلام عليكم، أنا مسوّق ونسيت رمز الدخول لصفحتي')" style="color:var(--water);font-weight:900">راسلنا</a></p>
+  </div>
+</div>
+
+<!-- ═══ صفحة المسوّق ═══ -->
+<div class="page hidden" id="pg-mdash">
+  <div class="pbar"><div class="wrap"><button class="back" onclick="history.back()">→ المتجر</button><div class="pt">صفحة المسوّق</div><div class="pa"><button class="back" onclick="mLogout()">خروج</button></div></div></div>
+  <div class="pbody" id="md-body"></div>
+</div>
+
 <!-- ═══ دخول المالك ═══ -->
 <div class="page hidden" id="pg-owner">
   <div class="pbar"><div class="wrap"><button class="back" onclick="history.back()">→ رجوع</button><div class="pt">دخول المالك</div><div class="pa"></div></div></div>
@@ -737,8 +799,8 @@ textarea.inp{height:auto;min-height:84px;padding:11px 13px;resize:vertical;line-
 </div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, getDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getAuth, signInWithEmailAndPassword, signOut, setPersistence, browserSessionPersistence, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, getDoc, onSnapshot, query, orderBy, limit, where, increment } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, setPersistence, browserSessionPersistence, inMemoryPersistence, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC7-MKB7Ix3k0gA7tGxCXNFaty5IQ-U3Xg",
@@ -1128,15 +1190,17 @@ async function submitOrder(){
     buyerName:name,buyerPhone:phone,city:zone,area:area,landmark:landmark,mapUrl:map,notes:notes,
     buyerAddress:[zone,area,landmark].filter(Boolean).join(" - "),
     payment:payMode,items:items,subtotal:t.sub,deliveryFee:fee,deliveryState:d.state,total:total,priceOnRequest:t.onReq};
+  var ref=await resolveRef(); if(ref) order.refCode=ref.code;
   try{
     await Promise.race([setDoc(doc(db,"orders",id),order),new Promise(function(_,rej){ setTimeout(function(){rej(new Error("timeout"));},12000); })]);
   }catch(err){
     submitting=false; btn.disabled=false; btn.textContent="✓ تأكيد الطلب";
     e.textContent="تعذر إرسال الطلب، تحقق من الإنترنت وأعد المحاولة، أو اطلب على واتساب."; return;
   }
+  createReferral(id,ref,t,items);
   lsSet("rayan_buyer",{name:name,cc:cc,phone:ph,zone:zone,area:area,landmark:landmark});
   lastOrder={id:id,phone:ph,order:order}; lsSet("rayan_last_order",{id:id,phone:ph});
-  try{ notifyAdmin("🛒 طلب جديد "+id+"\n"+items.map(function(i){return "• "+i.name+" × "+i.qty;}).join("\n")+"\nالإجمالي: "+(t.onReq?"يُحدد":money(total))+(d.state==="later"?" + التوصيل":"")+"\nالزبون: "+name+" - "+phone+"\nالموقع: "+order.buyerAddress+(map?"\n"+map:"")+"\nالدفع: "+(payMode==="cod"?"عند الاستلام":"بنكك")); }catch(x){}
+  try{ notifyAdmin("🛒 طلب جديد "+id+"\n"+items.map(function(i){return "• "+i.name+" × "+i.qty;}).join("\n")+"\nالإجمالي: "+(t.onReq?"يُحدد":money(total))+(d.state==="later"?" + التوصيل":"")+"\nالزبون: "+name+" - "+phone+"\nالموقع: "+order.buyerAddress+(map?"\n"+map:"")+"\nالدفع: "+(payMode==="cod"?"عند الاستلام":"بنكك")+(ref?"\n🤝 عن طريق مسوّق":"")); }catch(x){}
   try{ gtag("event","purchase",{transaction_id:id,value:total,currency:"SDG"}); }catch(x){}
   cart=[]; saveCart(); renderGrid();
   submitting=false; btn.disabled=false; btn.textContent="✓ تأكيد الطلب";
@@ -1254,6 +1318,8 @@ function handleDeepLinks(){
   else if(tr){ openTrack(tr.toUpperCase()); }
   else if(sp.get("calc")) openCalc();
   else if(sp.get("quote")) openQuote();
+  else if(sp.get("join")) openJoin();
+  else if(sp.get("m")) openMLogin();
 }
 
 document.getElementById("yr").textContent=new Date().getFullYear();
@@ -1284,6 +1350,7 @@ async function ownerLogin(){
   var L=lsGet(OW_LOCK,{})||{}, now=Date.now();
   if(L.until && L.until>now){ err.textContent="الدخول موقوف مؤقتاً من هذا الجهاز. حاول بعد "+Math.ceil((L.until-now)/60000)+" دقيقة."; return; }
   if(!em||!pw){ err.textContent="اكتب البريد وكلمة المرور"; return; }
+  if(/^(mkt|office|bidder)-/i.test(em)){ err.textContent="هذا ليس حساب المالك"; return; }
   err.textContent=""; btn.disabled=true; btn.textContent="جاري التحقق…";
   try{
     await signInWithEmailAndPassword(auth,em,pw);
@@ -1310,7 +1377,9 @@ function ownerLogout(){
 }
 function adminExit(){ history.back(); }
 onAuthStateChanged(auth,function(u){
-  var ok=!!(u && u.email && !/^(office|bidder)-/i.test(u.email));
+  if(u && /^mkt-/i.test(u.email||"")){ startMk(u.uid); if(mkWant || new URLSearchParams(location.search).get("m") || isOpen("pg-mlogin")){ mkWant=false; openMDash(); } return; }
+  if(!u && mkUnsub.length){ stopMk(); }
+  var ok=!!(u && u.email && !/^(office|bidder|mkt)-/i.test(u.email));
   if(ok && !isAdmin){ isAdmin=true; startAdmin(); }
   if(!u && isAdmin){ isAdmin=false; }
 });
@@ -1321,6 +1390,7 @@ function startAdmin(){
     orders=snap.docs.map(function(d){return d.data();}).filter(isTankOrder);
     renderAdminIfOpen();
   },function(){ toast("لا صلاحية لعرض الطلبات، أعد الدخول"); }));
+  startAdminRef();
   admUnsub.push(onSnapshot(collection(db,"tankQuotes"),function(snap){ quotes=snap.docs.map(function(d){return d.data();}).sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);}); renderAdminIfOpen(); },function(){}));
 }
 function isTankOrder(o){ return o.source==="tanks" || (storeId && (o.items||[]).some(function(i){return i.sellerId===storeId;})); }
@@ -1330,7 +1400,7 @@ window.__admRender=renderAdminIfOpen;
 function setAdmTab(t){ admTab=t; renderAdmin(); document.getElementById("pg-admin").scrollTop=0; }
 function renderAdmin(){
   var nNew=orders.filter(function(o){return o.status==="new";}).length, nQ=quotes.filter(function(q){return q.status!=="done";}).length;
-  var tabs=[["orders","📦 الطلبات",nNew],["products","💧 الخزانات",0],["delivery","🚚 التوصيل",0],["settings","⚙️ الإعدادات",0],["reviews","⭐ الآراء",0],["quotes","🏗️ عروض الأسعار",nQ],["stats","📊 الإحصائيات",0]];
+  var tabs=[["orders","📦 الطلبات",nNew],["products","💧 الخزانات",0],["delivery","🚚 التوصيل",0],["settings","⚙️ الإعدادات",0],["reviews","⭐ الآراء",0],["quotes","🏗️ عروض الأسعار",nQ],["marketers","🤝 المسوّقون",mks.filter(function(m){return m.status==="pending";}).length],["stats","📊 الإحصائيات",0]];
   document.getElementById("atabs").innerHTML=tabs.map(function(t){return '<button class="atab'+(admTab===t[0]?' on':'')+'" data-t="'+t[0]+'" onclick="setAdmTab(this.dataset.t)">'+t[1]+(t[2]?'<span class="dot">'+t[2]+'</span>':'')+'</button>';}).join("");
   var b=document.getElementById("adm-body");
   if(admTab==="orders") b.innerHTML=admOrders();
@@ -1339,6 +1409,7 @@ function renderAdmin(){
   else if(admTab==="settings") b.innerHTML=admSettings();
   else if(admTab==="reviews") b.innerHTML=admReviews();
   else if(admTab==="quotes") b.innerHTML=admQuotes();
+  else if(admTab==="marketers") b.innerHTML=admMarketers();
   else b.innerHTML=admStats();
 }
 
@@ -1360,6 +1431,7 @@ function ordCard(o){
     +'<div class="od">🕒 '+esc(fmtDate(o.createdAt))+'<br>👤 <b>'+esc(o.buyerName)+'</b> · <a href="tel:+'+waNum(o.buyerPhone)+'" dir="ltr" style="color:var(--water);font-weight:800">'+esc(o.buyerPhone)+'</a>'
     +'<br>📍 '+esc(o.buyerAddress||"")+(o.mapUrl?' · <a href="'+esc(o.mapUrl)+'" target="_blank" rel="noopener" style="color:var(--water);font-weight:800">الخريطة ↗</a>':'')
     +(o.notes?'<br>📝 '+esc(o.notes):'')
+    +refLineHtml(o)
     +'<div style="background:var(--bg);border-radius:10px;padding:8px 10px;margin-top:7px">'+items
     +'<br>🚚 التوصيل: '+(o.deliveryState==="later"?'<b style="color:var(--gold)">يُحدد</b>':o.deliveryFee?money(o.deliveryFee):'مجاني')
     +'<br><b>الإجمالي: '+(o.priceOnRequest?'يُحدد':money(o.total))+'</b> · '+(o.payment==="bank"?'🏦 بنكك':'💵 عند الاستلام')+'</div></div>'
@@ -1370,7 +1442,7 @@ function ordCard(o){
     +'</div></div>';
 }
 async function setOrderStatus(id,s){
-  try{ await updateDoc(doc(db,"orders",id),{status:s,statusAt:Date.now()}); toast("تم: "+ST_L[s]); }
+  try{ await updateDoc(doc(db,"orders",id),{status:s,statusAt:Date.now()}); toast("تم: "+ST_L[s]); syncRefStatus(id,s); }
   catch(e){ toast("تعذر التحديث، تأكد من الدخول"); }
 }
 function cancelOrder(id){ if(confirm("إلغاء هذا الطلب؟")) setOrderStatus(id,"cancelled"); }
@@ -1570,7 +1642,222 @@ function admStats(){
 })();
 document.getElementById("ow-pass").addEventListener("keydown",function(e){ if(e.key==="Enter") ownerLogin(); });
 
-Object.assign(window,{togglePw,ownerLogin,ownerLogout,adminExit,setAdmTab,setOrdFilter,setOrderStatus,cancelOrder,waCustomer,openPForm,pfRemoveImg,pfUpload,pfSave,pfDelete,zEdit,zAdd,zDel,zSave,sSave,testNotify,rvUpload,rvSave,rvDel,waQuote,quoteDone});
+
+// ══════════════════════════ نظام الإحالة (المسوّقون) ══════════════════════════
+const REF_RATE=0.05, REF_DAYS=30, REF_HOLD_DAYS=3, REF_MIN_PAY=10000;
+const MK_ALPHA="abcdefghjkmnpqrstuvwxyz23456789";
+const MK_METHOD={whatsapp:"واتساب",facebook:"فيسبوك وتيك توك",shop:"محل / معرض",contractor:"مقاول / سمسار",friends:"معارف وجيران",other:"أخرى"};
+const regApp=initializeApp(firebaseConfig,"reg"), regAuth=getAuth(regApp), regDb=getFirestore(regApp);
+setPersistence(regAuth,inMemoryPersistence).catch(function(){});
+function mkEmail(phone){ return "mkt-"+waNum(phone)+"@alrayan-market.app"; }
+function genCode(){ var u=new Uint8Array(6), r=""; try{ crypto.getRandomValues(u); }catch(e){ for(var i=0;i<6;i++) u[i]=Math.floor(Math.random()*256); } for(var j=0;j<6;j++) r+=MK_ALPHA.charAt(u[j]%MK_ALPHA.length); return r; }
+function isCode(c){ return /^[a-hj-km-np-z2-9]{6}$/.test(String(c||"")); }
+function copyText(t){
+  try{ navigator.clipboard.writeText(t).then(function(){ toast("✓ تم النسخ"); },function(){ fallback(); }); }catch(e){ fallback(); }
+  function fallback(){ var a=document.createElement("textarea"); a.value=t; a.style.position="fixed"; a.style.opacity="0"; document.body.appendChild(a); a.select(); try{ document.execCommand("copy"); toast("✓ تم النسخ"); }catch(x){ toast("انسخ يدوياً"); } a.remove(); }
+}
+
+// ── التقاط الإحالة بصمت: أول مسوّق خلال 30 يوماً ──
+(function captureRef(){
+  try{
+    var sp=new URLSearchParams(location.search), c=sp.get("s");
+    if(sp.has("s")){ sp.delete("s"); var q=sp.toString(); history.replaceState(history.state,"",location.pathname+(q?"?"+q:"")+location.hash); }
+    if(!isCode(c)) return;
+    var cur=lsGet("rayan_rf",null), now=Date.now();
+    if(!cur || !cur.c || now-(cur.at||0)>REF_DAYS*864e5) lsSet("rayan_rf",{c:c,at:now});
+    var seen=lsGet("rayan_rf_seen",{}); if(seen[c] && now-seen[c]<6*3600e3) return;
+    seen[c]=now; lsSet("rayan_rf_seen",seen);
+    setDoc(doc(db,"refStats",c),{clicks:increment(1)},{merge:true}).catch(function(){});
+  }catch(e){}
+})();
+function activeRef(){ var cur=lsGet("rayan_rf",null); return (cur&&isCode(cur.c)&&Date.now()-(cur.at||0)<=REF_DAYS*864e5)?cur.c:""; }
+async function resolveRef(){
+  var c=activeRef(); if(!c) return null;
+  try{
+    var s=await Promise.race([getDoc(doc(db,"refCodes",c)),new Promise(function(_,rej){ setTimeout(function(){rej(0);},3500); })]);
+    return (s&&s.exists())?{code:c,mid:(s.data()||{}).mid||""}:null;
+  }catch(e){ return null; }
+}
+function createReferral(orderId,ref,t,items){
+  if(!ref||!ref.mid) return;
+  setDoc(doc(db,"referrals",orderId),{id:orderId,code:ref.code,mid:ref.mid,subtotal:t.sub,commission:Math.round(t.sub*REF_RATE),
+    items:items.map(function(i){return {name:i.name,qty:i.qty};}),priceOnRequest:!!t.onReq,status:"pending",createdAt:Date.now()}).catch(function(){});
+}
+
+// ── الانضمام ──
+function openJoin(){ document.getElementById("mj-err").textContent=""; if(isOpen("pg-mlogin")) swapPage("pg-mlogin","pg-join"); else openPage("pg-join"); }
+async function submitJoin(){
+  var g=function(id){return document.getElementById(id).value.trim();};
+  var e=document.getElementById("mj-err"), btn=document.getElementById("mj-submit");
+  var name=g("mj-name"), ph=toEn(g("mj-phone")).replace(/\D/g,"").replace(/^0+/,""), phone=document.getElementById("mj-cc").value+ph;
+  var city=g("mj-city"), bank=toEn(g("mj-bank")).replace(/\s/g,""), bankName=g("mj-bankname"), pin=toEn(document.getElementById("mj-pin").value), pin2=toEn(document.getElementById("mj-pin2").value);
+  if(name.length<3){ e.textContent="اكتب اسمك الكامل"; return; }
+  if(!/^\d{7,13}$/.test(ph)){ e.textContent="اكتب رقم واتساب صحيح"; return; }
+  if(!city){ e.textContent="اكتب مدينتك"; return; }
+  if(bank.length<4){ e.textContent="اكتب رقم حساب بنكك"; return; }
+  if(!/^\d{6,12}$/.test(pin)){ e.textContent="الرمز السري 6 أرقام على الأقل"; return; }
+  if(pin!==pin2){ e.textContent="الرمزان غير متطابقين"; return; }
+  if(!document.getElementById("mj-ack").checked){ e.textContent="يجب الموافقة على شروط المسوّق"; return; }
+  e.textContent=""; btn.disabled=true; btn.textContent="جاري الإرسال…";
+  try{
+    var cred=await createUserWithEmailAndPassword(regAuth,mkEmail(phone),pin), uid=cred.user.uid, code=genCode();
+    await setDoc(doc(regDb,"refCodes",code),{code:code,mid:uid,createdAt:Date.now()});
+    await setDoc(doc(regDb,"marketers",uid),{id:uid,authUid:uid,name:name,phone:phone,city:city,method:document.getElementById("mj-method").value,bank:bank,bankName:bankName,code:code,status:"pending",termsAt:Date.now(),createdAt:Date.now()});
+    signOut(regAuth).catch(function(){});
+    notifyAdmin("🤝 طلب انضمام مسوّق جديد\n"+name+" - "+phone+"\n📍 "+city+" · "+(MK_METHOD[document.getElementById("mj-method").value]||""));
+    document.querySelector("#pg-join .pbody").innerHTML='<div style="text-align:center;padding-top:20px"><div class="ok-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#1E8E5A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><h2 style="font-weight:900">وصلنا طلبك ✓</h2><p style="color:var(--muted);margin:8px 0 18px;line-height:1.9">نراجع طلب انضمامك ونرسل لك على واتساب عند القبول.<br>بعدها ادخل لصفحتك برقمك والرمز السري.</p><button class="btn btn-navy btn-block" onclick="history.back()">حسناً</button></div>';
+  }catch(err){
+    signOut(regAuth).catch(function(){});
+    var c=(err&&err.code)||"";
+    e.textContent=c==="auth/email-already-in-use"?"هذا الرقم مسجّل كمسوّق بالفعل. ادخل لصفحتك، أو راسلنا إن نسيت الرمز.":c==="auth/operation-not-allowed"?"التسجيل غير مفعّل حالياً، راسلنا على واتساب":"تعذر الإرسال، تحقق من الإنترنت وأعد المحاولة";
+    btn.disabled=false; btn.textContent="📩 أرسل طلب الانضمام";
+  }
+}
+
+// ── دخول المسوّق وصفحته ──
+var meMk=null, myRefs=[], myStats={clicks:0}, myPays=[], mkUnsub=[], mkWant=false;
+function openMLogin(){ document.getElementById("ml-err").textContent=""; if(auth.currentUser && /^mkt-/i.test(auth.currentUser.email||"")){ openMDash(); return; } if(isOpen("pg-join")) swapPage("pg-join","pg-mlogin"); else openPage("pg-mlogin"); }
+async function mLogin(){
+  var e=document.getElementById("ml-err"), btn=document.getElementById("ml-submit");
+  var ph=toEn(document.getElementById("ml-phone").value).replace(/\D/g,"").replace(/^0+/,""), phone=document.getElementById("ml-cc").value+ph, pin=toEn(document.getElementById("ml-pin").value);
+  if(!/^\d{7,13}$/.test(ph)||!pin){ e.textContent="اكتب رقمك والرمز السري"; return; }
+  e.textContent=""; btn.disabled=true; btn.textContent="جاري الدخول…";
+  try{ mkWant=true; await signInWithEmailAndPassword(auth,mkEmail(phone),pin); document.getElementById("ml-pin").value=""; }
+  catch(err){ mkWant=false; var c=(err&&err.code)||""; e.textContent=c==="auth/too-many-requests"?"محاولات كثيرة، انتظر قليلاً":c==="auth/network-request-failed"?"تحقق من الإنترنت":"الرقم أو الرمز السري غير صحيح"; }
+  btn.disabled=false; btn.textContent="دخول";
+}
+function startMk(uid){
+  if(mkUnsub.length) return;
+  mkUnsub.push(onSnapshot(doc(db,"marketers",uid),function(s){
+    meMk=s.exists()?s.data():null;
+    if(meMk && meMk.code && mkUnsub.length<3){
+      mkUnsub.push(onSnapshot(query(collection(db,"referrals"),where("mid","==",uid)),function(sn){ myRefs=sn.docs.map(function(d){return d.data();}).sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);}); renderMDash(); },function(){}));
+      mkUnsub.push(onSnapshot(doc(db,"refStats",meMk.code),function(sn){ myStats=sn.exists()?(sn.data()||{}):{clicks:0}; renderMDash(); },function(){}));
+      mkUnsub.push(onSnapshot(query(collection(db,"payouts"),where("mid","==",uid)),function(sn){ myPays=sn.docs.map(function(d){return d.data();}).sort(function(a,b){return (b.paidAt||0)-(a.paidAt||0);}); renderMDash(); },function(){}));
+    }
+    renderMDash();
+  },function(){ meMk=null; renderMDash(); }));
+}
+function stopMk(){ mkUnsub.forEach(function(f){try{f();}catch(e){}}); mkUnsub=[]; meMk=null; myRefs=[]; myPays=[]; myStats={clicks:0}; }
+function openMDash(){ if(isOpen("pg-mlogin")) swapPage("pg-mlogin","pg-mdash"); else if(!isOpen("pg-mdash")) openPage("pg-mdash"); renderMDash(); }
+function mLogout(){ stopMk(); signOut(auth).catch(function(){}); history.back(); toast("تم تسجيل الخروج"); }
+function refState(r){
+  if(r.status==="void") return {k:"void",l:"ملغاة",c:"st-cancelled"};
+  if(r.status==="paid") return {k:"paid",l:"تم الصرف",c:"st-delivered"};
+  if(r.status==="delivered"){ var left=REF_HOLD_DAYS*864e5-(Date.now()-(r.deliveredAt||0)); return left<=0?{k:"due",l:"مستحقة",c:"st-delivered"}:{k:"review",l:"قيد المراجعة · "+Math.ceil(left/864e5)+" يوم",c:"st-confirmed"}; }
+  return {k:"pending",l:"معلّقة · لم يُسلَّم بعد",c:"st-shipping"};
+}
+function mkLink(extra){ return baseUrl()+"/?"+(extra?extra+"&":"")+"s="+meMk.code; }
+function shareMk(url,txt){ if(navigator.share){ navigator.share({text:txt,url:url}).catch(function(){}); } else copyText(txt+"\n"+url); }
+function mkShareProduct(id){ var p=prodById(id); if(!p||!meMk) return; var cap=capOf(p); shareMk(mkLink("p="+encodeURIComponent(id)),"💧 "+p.name+(cap?"\nالسعة: "+cap.toLocaleString("en-US")+" لتر":"")+"\n💰 "+(p.priceOnRequest?"السعر عند الطلب":money(priceOf(p)))+"\nأطلب من هنا واستلم في موقعك 👇"); }
+function mkShareMain(){ if(meMk) shareMk(mkLink(""),"💧 منصة الريان لخزانات المياه\nخزانات أصلية بكل السعات · توصيل لحد موقعك · الدفع عند الاستلام\nأطلب من هنا واستلم في موقعك 👇"); }
+function mkCopy(kind,id){ if(!meMk) return; if(kind==="main") copyText(mkLink("")); else if(kind==="calc") copyText(mkLink("calc=1")); else if(kind==="p") copyText(mkLink("p="+encodeURIComponent(id))); else if(kind==="tpl") copyText(MK_TPL[Number(id)].replace("{link}",mkLink(""))); }
+const MK_TPL=[
+  "💧 محتاج خزان مياه؟\nخزانات أصلية بكل السعات من 500 لتر إلى 5000 لتر وأكثر 💪\n🚚 نوصلها لحد موقعك\n💵 والدفع عند الاستلام\nاطلب من هنا 👇\n{link}",
+  "🏠 بتبني أو بتجدد بيتك؟\nلا تنسى الخزان 😉\nاختار السعة المناسبة لأسرتك، وفي حاسبة تساعدك تعرف الحجم الصحيح\n👇\n{link}",
+  "🔥 خزانات مياه بأسعار ممتازة\n✅ أصلية وبضمان\n✅ توصيل لكل الأحياء\n✅ ادفع لما تستلم\nشوف كل السعات والأسعار من هنا 👇\n{link}"
+];
+function renderMDash(){
+  var b=document.getElementById("md-body"); if(!b||!isOpen("pg-mdash")) return;
+  if(!meMk){ b.innerHTML='<div class="card" style="text-align:center;color:var(--muted)">جاري التحميل…</div>'; return; }
+  if(meMk.status==="pending"){ b.innerHTML='<div class="card" style="text-align:center"><div style="font-size:2.6rem">⏳</div><h3 style="margin:6px 0">أهلاً '+esc(meMk.name)+'، طلبك قيد المراجعة</h3><p style="color:var(--muted);font-size:0.88rem;line-height:1.9">نرسل لك على واتساب فور قبول طلبك، وبعدها تظهر لك روابطك هنا.</p></div>'; return; }
+  if(meMk.status!=="approved"){ b.innerHTML='<div class="card" style="text-align:center"><div style="font-size:2.6rem">⛔</div><h3 style="margin:6px 0">حسابك موقوف حالياً</h3><p style="color:var(--muted);font-size:0.88rem">للاستفسار راسلنا على واتساب.</p><button class="btn btn-ok btn-block" style="margin-top:10px" onclick="openWA(\'السلام عليكم، أنا مسوّق وأستفسر عن حسابي\')">واتساب</button></div>'; return; }
+  var sum={pending:0,review:0,due:0,paid:0}, cnt=0, delivered=0;
+  myRefs.forEach(function(r){ var s=refState(r); if(s.k!=="void"){ cnt++; sum[s.k]=(sum[s.k]||0)+numIn(r.commission); } if(s.k==="due"||s.k==="paid"||s.k==="review") delivered++; });
+  var clicks=numIn(myStats.clicks), conv=clicks?Math.round(cnt/clicks*1000)/10:0;
+  var list=sortList(tanks().filter(function(p){return !p.outOfStock;}),"cap-asc");
+  b.innerHTML='<div class="card" style="background:linear-gradient(120deg,var(--navy3),var(--navy));color:#fff"><div style="font-size:0.84rem;opacity:.85">أهلاً</div><h3 style="font-size:1.2rem;margin:0">'+esc(meMk.name)+' 👋</h3><div style="font-size:0.78rem;opacity:.8;margin-top:4px">عمولتك 5% من قيمة الخزانات · الصرف أسبوعي عبر بنكك</div></div>'
+    +'<div class="kpis"><div class="kpi"><span>زيارات روابطك</span><b class="num">'+clicks+'</b></div><div class="kpi"><span>الطلبات</span><b class="num">'+cnt+'</b></div><div class="kpi"><span>نسبة التحويل</span><b class="num">'+conv+'%</b></div><div class="kpi"><span>طلبات مسلّمة</span><b class="num">'+delivered+'</b></div></div>'
+    +'<div class="card"><h3>💰 رصيدك</h3>'
+      +'<div class="sum-row"><span>⏳ معلّقة <small style="color:var(--muted)">(لم تُسلَّم بعد)</small></span><b class="num">'+money(sum.pending)+'</b></div>'
+      +'<div class="sum-row"><span>🔎 قيد المراجعة <small style="color:var(--muted)">(3 أيام بعد التسليم)</small></span><b class="num">'+money(sum.review)+'</b></div>'
+      +'<div class="sum-row t" style="color:var(--ok)"><span>✅ مستحقة للصرف</span><span class="num">'+money(sum.due)+'</span></div>'
+      +'<div class="sum-row"><span>💸 صُرف لك حتى الآن</span><b class="num">'+money(sum.paid)+'</b></div>'
+      +'<div style="color:var(--muted);font-size:0.76rem;margin-top:6px">يُصرف المستحق أسبوعياً عند بلوغه '+money(REF_MIN_PAY)+'، على حساب بنكك المسجّل.</div></div>'
+    +'<div class="card"><h3>🔗 رابطك الرئيسي</h3><div style="background:var(--bg);border-radius:10px;padding:10px;font-size:0.82rem;direction:ltr;text-align:left;word-break:break-all">'+esc(mkLink(""))+'</div>'
+      +'<div style="display:flex;gap:8px;margin-top:9px"><button class="btn btn-gold" style="flex:1;height:44px" onclick="mkShareMain()">📤 شارك</button><button class="btn btn-line" style="flex:1;height:44px" onclick="mkCopy(\'main\')">📋 نسخ</button></div>'
+      +'<div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-line" style="flex:1;height:40px;font-size:0.82rem" onclick="mkCopy(\'calc\')">🧮 نسخ رابط حاسبة السعة</button></div></div>'
+    +'<div class="card"><h3>💧 شارك خزاناً محدداً</h3>'+(list.length?list.map(function(p){ var im=imgsOf(p)[0], cap=capOf(p); return '<div class="cl"><div class="ci">'+(im?'<img src="'+esc(im)+'" alt="">':'💧')+'</div><div class="cx"><b>'+esc(p.name)+'</b><span class="num">'+(cap?cap.toLocaleString("en-US")+' لتر · ':'')+(p.priceOnRequest?'السعر عند الطلب':money(priceOf(p)))+'</span></div><div style="display:flex;flex-direction:column;gap:5px"><button class="sbtn gold" data-id="'+esc(p.id)+'" onclick="mkShareProduct(this.dataset.id)">📤 شارك</button><button class="sbtn" data-id="'+esc(p.id)+'" onclick="mkCopy(\'p\',this.dataset.id)">📋 نسخ</button></div></div>'; }).join(""):'<div style="color:var(--muted)">لا توجد خزانات متاحة الآن</div>')+'</div>'
+    +'<div class="card"><h3>✍️ منشورات جاهزة</h3>'+MK_TPL.map(function(t,i){ return '<div style="background:var(--bg);border-radius:12px;padding:11px;margin-bottom:8px;white-space:pre-wrap;font-size:0.84rem;line-height:1.85">'+esc(t.replace("{link}","🔗 (رابطك)"))+'<div style="margin-top:6px"><button class="sbtn blue" data-i="'+i+'" onclick="mkCopy(\'tpl\',this.dataset.i)">📋 نسخ المنشور مع رابطك</button></div></div>'; }).join("")+'</div>'
+    +'<div class="card"><h3>🧾 طلباتك</h3>'+(myRefs.length?myRefs.map(function(r){ var s=refState(r); return '<div class="cl" style="align-items:flex-start"><div class="cx"><b>'+esc((r.items||[]).map(function(i){return i.name+" × "+i.qty;}).join("، "))+'</b><span>'+esc(fmtDate(r.createdAt))+'</span><div style="margin-top:4px"><span class="st '+s.c+'">'+esc(s.l)+'</span></div></div><b class="num" style="white-space:nowrap">'+(r.priceOnRequest&&!numIn(r.commission)?'تُحدد':money(r.commission))+'</b></div>'; }).join(""):'<div style="color:var(--muted);font-size:0.86rem">لا توجد طلبات بعد. شارك رابطك وابدأ 🚀</div>')+'</div>'
+    +'<div class="card"><h3>💸 سجل الدفعات</h3>'+(myPays.length?myPays.map(function(p){ return '<div class="sum-row"><span>'+esc(fmtDate(p.paidAt))+' · '+(p.refIds||[]).length+' طلب</span><b class="num">'+money(p.amount)+'</b></div>'; }).join(""):'<div style="color:var(--muted);font-size:0.86rem">لا توجد دفعات بعد</div>')+'</div>'
+    +'<details class="card"><summary style="font-weight:900;cursor:pointer">📜 شروط المسوّق</summary><ol style="padding-inline-start:18px;font-size:0.82rem;line-height:1.95;color:#344054;margin-top:8px"><li>العمولة 5% من قيمة الخزانات بدون التوصيل، للطلبات التي تأتي عن طريق روابطك فقط.</li><li>تُستحق بعد تسليم الطلب بـ 3 أيام، وتُلغى إذا أُلغي الطلب.</li><li>الصرف أسبوعي عند بلوغ '+money(REF_MIN_PAY)+'.</li><li>لا تقدّم نفسك موظفاً في المنصة، ولا تَعِد بأسعار أو خصومات غير المعلنة.</li><li>لا تطلب لنفسك عن طريق رابطك.</li><li>للمنصة حق تعديل العمولة بإشعار مسبق، وإيقاف الحساب عند المخالفة.</li></ol></details>';
+}
+
+// ── لوحة المالك: المسوّقون ──
+var mks=[], refs=[], rstats={}, pays=[];
+function startAdminRef(){
+  admUnsub.push(onSnapshot(collection(db,"marketers"),function(s){ mks=s.docs.map(function(d){return d.data();}); renderAdminIfOpen(); },function(){}));
+  admUnsub.push(onSnapshot(collection(db,"referrals"),function(s){ refs=s.docs.map(function(d){return d.data();}); renderAdminIfOpen(); },function(){}));
+  admUnsub.push(onSnapshot(collection(db,"refStats"),function(s){ rstats={}; s.docs.forEach(function(d){ rstats[d.id]=numIn((d.data()||{}).clicks); }); renderAdminIfOpen(); },function(){}));
+  admUnsub.push(onSnapshot(collection(db,"payouts"),function(s){ pays=s.docs.map(function(d){return d.data();}); renderAdminIfOpen(); },function(){}));
+}
+function mkById(id){ return mks.find(function(m){return m.id===id;}); }
+function mkByCode(c){ return mks.find(function(m){return m.code===c;}); }
+function isSelfRef(r){ var o=orders.find(function(x){return x.id===r.id;}), m=mkById(r.mid); return !!(o&&m&&waNum(o.buyerPhone).slice(-9)===waNum(m.phone).slice(-9)); }
+function mkDue(m){ return refs.filter(function(r){ return r.mid===m.id && refState(r).k==="due" && !isSelfRef(r); }); }
+function refLineHtml(o){
+  if(!o.refCode) return "";
+  var r=refs.find(function(x){return x.id===o.id;}), m=r?mkById(r.mid):mkByCode(o.refCode);
+  if(!m) return '<br><span style="color:var(--muted)">🤝 رابط إحالة غير معروف</span>';
+  if(r && isSelfRef(r)) return '<br><span style="color:var(--bad);font-weight:800">⚠️ إحالة ذاتية (رقم المسوّق نفسه) · لا عمولة</span>';
+  return '<br><span style="color:#6B3FA0;font-weight:800">🤝 عن طريق: '+esc(m.name)+(r?' · عمولة '+(r.priceOnRequest&&!numIn(r.commission)?'تُحدد':money(r.commission)):'')+'</span>'
+    +(r&&r.status!=="paid"?' <button class="sbtn" style="height:26px;padding:0 8px;font-size:0.7rem" data-id="'+esc(o.id)+'" onclick="editRefComm(this.dataset.id)">تعديل</button>':'');
+}
+async function editRefComm(id){
+  var r=refs.find(function(x){return x.id===id;}); if(!r) return;
+  var v=prompt("عمولة المسوّق لهذا الطلب (ج.س):",String(numIn(r.commission)||"")); if(v===null) return;
+  try{ await updateDoc(doc(db,"referrals",id),{commission:numIn(v),commissionEditedAt:Date.now()}); toast("✓ تم تعديل العمولة"); }catch(e){ toast("تعذر التعديل"); }
+}
+async function syncRefStatus(orderId,s){
+  var r=refs.find(function(x){return x.id===orderId;}); if(!r||r.status==="paid") return;
+  var up=s==="delivered"?{status:isSelfRef(r)?"void":"delivered",deliveredAt:Date.now()}:s==="cancelled"?{status:"void"}:{status:"pending"};
+  try{ await updateDoc(doc(db,"referrals",orderId),up); }catch(e){}
+}
+function admMarketers(){
+  var pend=mks.filter(function(m){return m.status==="pending";}).sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
+  var act=mks.filter(function(m){return m.status==="approved"||m.status==="suspended";});
+  var m0=new Date(new Date().getFullYear(),new Date().getMonth(),1).getTime();
+  var st=function(m){ var R=refs.filter(function(r){return r.mid===m.id && r.status!=="void" && !isSelfRef(r);}); var mon=R.filter(function(r){return (r.createdAt||0)>=m0;});
+    return {orders:R.length,month:mon.length,monthSales:mon.reduce(function(s,r){return s+numIn(r.subtotal);},0),comm:R.reduce(function(s,r){return s+numIn(r.commission);},0),paid:R.filter(function(r){return r.status==="paid";}).reduce(function(s,r){return s+numIn(r.commission);},0),clicks:rstats[m.code]||0}; };
+  var payList=act.filter(function(m){return m.status==="approved";}).map(function(m){ var d=mkDue(m); return {m:m,refs:d,amount:d.reduce(function(s,r){return s+numIn(r.commission);},0)}; }).filter(function(x){return x.amount>0;});
+  var ready=payList.filter(function(x){return x.amount>=REF_MIN_PAY;}), below=payList.filter(function(x){return x.amount<REF_MIN_PAY;});
+  var h='<div class="card" style="background:var(--sky)"><b>🔗 رابط انضمام المسوّقين</b><div style="font-size:0.82rem;direction:ltr;text-align:left;margin:6px 0;word-break:break-all">'+esc(baseUrl())+'/?join=1</div><div style="display:flex;gap:7px"><button class="sbtn blue" onclick="copyText(\''+esc(baseUrl())+'/?join=1\')">📋 نسخ رابط الانضمام</button><button class="sbtn" onclick="copyText(\''+esc(baseUrl())+'/?m=1\')">📋 رابط دخول المسوّقين</button></div></div>';
+  h+='<h3 style="font-weight:900;margin:16px 0 8px">⏳ طلبات الانضمام ('+pend.length+')</h3>'+(pend.length?pend.map(function(m){ return '<div class="ord s-new"><div class="oh"><b>'+esc(m.name)+'</b><span class="st st-new">جديد</span></div><div class="od">📞 <a href="https://wa.me/'+waNum(m.phone)+'" target="_blank" dir="ltr" style="color:var(--water);font-weight:800">'+esc(m.phone)+'</a><br>📍 '+esc(m.city)+' · '+esc(MK_METHOD[m.method]||m.method||"")+'<br>🏦 بنكك: <span dir="ltr">'+esc(m.bank)+'</span>'+(m.bankName?' · '+esc(m.bankName):'')+'<br>🕒 '+esc(fmtDate(m.createdAt))+'</div><div class="oa"><button class="sbtn ok" data-id="'+esc(m.id)+'" onclick="approveMk(this.dataset.id)">✓ اعتماد</button><button class="sbtn bad" data-id="'+esc(m.id)+'" onclick="setMkStatus(this.dataset.id,\'rejected\')">رفض</button></div></div>'; }).join(""):'<div style="color:var(--muted);font-size:0.86rem">لا توجد طلبات جديدة</div>');
+  h+='<h3 style="font-weight:900;margin:18px 0 8px">💸 الصرف هذا الأسبوع ('+ready.length+')</h3>'+(ready.length?ready.map(function(x){ return '<div class="ord s-confirmed"><div class="oh"><b>'+esc(x.m.name)+'</b><b class="num" style="color:var(--ok)">'+money(x.amount)+'</b></div><div class="od">🏦 بنكك: <b dir="ltr">'+esc(x.m.bank)+'</b>'+(x.m.bankName?' · '+esc(x.m.bankName):'')+'<br>'+x.refs.length+' طلب مستحق</div><div class="oa"><button class="sbtn ok" data-id="'+esc(x.m.id)+'" onclick="payMk(this.dataset.id)">✓ تم الدفع</button><button class="sbtn" onclick="copyText(\''+esc(x.m.bank)+'\')">📋 نسخ رقم الحساب</button></div></div>'; }).join(""):'<div style="color:var(--muted);font-size:0.86rem">لا يوجد مسوّق بلغ الحد الأدنى ('+money(REF_MIN_PAY)+') هذا الأسبوع</div>')
+    +(below.length?'<div style="color:var(--muted);font-size:0.78rem;margin-top:6px">'+below.length+' مسوّق لديهم مستحقات أقل من الحد الأدنى (تُرحَّل)</div>':'');
+  var ranked=act.map(function(m){return {m:m,s:st(m)};}).sort(function(a,b){return b.s.monthSales-a.s.monthSales||b.s.orders-a.s.orders;});
+  h+='<h3 style="font-weight:900;margin:18px 0 8px">🏆 المسوّقون ('+act.length+') · ترتيب هذا الشهر</h3>'+(ranked.length?ranked.map(function(x,i){ var m=x.m, s=x.s, medal=["🥇","🥈","🥉"][i]||""; return '<div class="ord '+(m.status==="suspended"?'s-cancelled':'s-delivered')+'"><div class="oh"><b>'+medal+' '+esc(m.name)+'</b><span class="st '+(m.status==="suspended"?'st-cancelled':'st-delivered')+'">'+(m.status==="suspended"?'موقوف':'نشط')+'</span></div>'
+      +'<div class="od">📍 '+esc(m.city||"")+' · 👁 '+s.clicks+' زيارة · 🧾 '+s.orders+' طلب ('+s.month+' هذا الشهر)<br>💧 مبيعات الشهر: <b>'+money(s.monthSales)+'</b><br>💰 العمولات: '+money(s.comm)+' · صُرف: '+money(s.paid)+'</div>'
+      +'<div class="oa"><a class="sbtn wa" href="https://wa.me/'+waNum(m.phone)+'" target="_blank">💬 واتساب</a>'+(m.status==="suspended"?'<button class="sbtn ok" data-id="'+esc(m.id)+'" onclick="setMkStatus(this.dataset.id,\'approved\')">تفعيل</button>':'<button class="sbtn bad" data-id="'+esc(m.id)+'" onclick="setMkStatus(this.dataset.id,\'suspended\')">إيقاف</button>')+'</div></div>'; }).join(""):'<div style="color:var(--muted);font-size:0.86rem">لا يوجد مسوّقون معتمدون بعد</div>');
+  return h;
+}
+function approveMk(id){
+  var m=mkById(id); if(!m) return;
+  var msg="مرحباً "+m.name+" 👋\nتم قبولك مسوّقاً في منصة الريان لخزانات المياه ✓\n\n🔗 رابطك للمشاركة:\n"+baseUrl()+"/?s="+m.code+"\n\n📊 صفحتك (الرصيد والطلبات وروابط كل الخزانات):\n"+baseUrl()+"/?m=1\nادخل برقمك والرمز السري الذي اخترته.\n\nعمولتك 5% من قيمة الخزانات، تُصرف أسبوعياً. بالتوفيق 🤝";
+  var w=window.open("https://wa.me/"+waNum(m.phone)+"?text="+encodeURIComponent(msg),"_blank");
+  updateDoc(doc(db,"marketers",id),{status:"approved",approvedAt:Date.now()}).then(function(){ toast("✓ تم اعتماد المسوّق"); }).catch(function(){ toast("تعذر الاعتماد، تأكد من نشر القواعد"); });
+}
+async function setMkStatus(id,s){
+  if(s==="rejected"&&!confirm("رفض طلب هذا المسوّق؟")) return;
+  if(s==="suspended"&&!confirm("إيقاف هذا المسوّق؟ لن تُصرف له عمولات حتى تعيد تفعيله.")) return;
+  try{ await updateDoc(doc(db,"marketers",id),{status:s,statusAt:Date.now()}); toast("تم"); }catch(e){ toast("تعذر التحديث"); }
+}
+async function payMk(id){
+  var m=mkById(id); if(!m) return; var d=mkDue(m), amount=d.reduce(function(s,r){return s+numIn(r.commission);},0);
+  if(!d.length||!confirm("تأكيد أنك حوّلت "+money(amount)+" إلى "+m.name+" (بنكك "+m.bank+")؟")) return;
+  var msg="مرحباً "+m.name+" 👋\nتم تحويل عمولتك الأسبوعية "+money(amount)+" إلى حساب بنكك ("+m.bank+") عن "+d.length+" طلب ✓\nشكراً لجهودك مع منصة الريان لخزانات المياه 💧";
+  window.open("https://wa.me/"+waNum(m.phone)+"?text="+encodeURIComponent(msg),"_blank");
+  var pid="PO-"+Date.now(), now=Date.now();
+  try{
+    await setDoc(doc(db,"payouts",pid),{id:pid,mid:id,code:m.code,amount:amount,refIds:d.map(function(r){return r.id;}),paidAt:now});
+    for(var i=0;i<d.length;i++){ await updateDoc(doc(db,"referrals",d[i].id),{status:"paid",paidAt:now,payoutId:pid}); }
+    toast("✓ تم تسجيل الدفعة");
+  }catch(e){ toast("تعذر تسجيل الدفعة كاملة، أعد المحاولة"); }
+}
+Object.assign(window,{openJoin,submitJoin,openMLogin,mLogin,mLogout,mkShareProduct,mkShareMain,mkCopy,copyText,editRefComm,approveMk,setMkStatus,payMk});
+
+Object.assign(window,{openOwner,togglePw,ownerLogin,ownerLogout,adminExit,setAdmTab,setOrdFilter,setOrderStatus,cancelOrder,waCustomer,openPForm,pfRemoveImg,pfUpload,pfSave,pfDelete,zEdit,zAdd,zDel,zSave,sSave,testNotify,rvUpload,rvSave,rvDel,waQuote,quoteDone});
 startListeners();
 </script>
 </body>
