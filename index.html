@@ -745,7 +745,7 @@ textarea.inp{height:auto;min-height:84px;padding:11px 13px;resize:vertical;line-
   <div class="pbody" style="max-width:440px">
     <div class="ow-lock">🔐</div>
     <h2 style="text-align:center;font-weight:900;font-size:1.2rem">دخول مالك المنصة</h2>
-    <p style="text-align:center;color:var(--muted);font-size:0.82rem;margin:4px 0 16px">صفحة خاصة. كل دخول ناجح أو محاولات خاطئة يصل تنبيهاً على تيليجرام.</p>
+    <p style="text-align:center;color:var(--muted);font-size:0.82rem;margin:4px 0 16px">صفحة خاصة. المحاولات الخاطئة المتكررة تصل تنبيهاً على تيليجرام.</p>
     <div class="card">
       <div class="fld"><label>البريد</label><input class="inp" id="ow-email" type="email" autocomplete="username" autocapitalize="off" spellcheck="false" dir="ltr" style="text-align:left"></div>
       <div class="fld"><label>كلمة المرور</label><div class="pw"><input class="inp" id="ow-pass" type="password" autocomplete="current-password"><button type="button" onclick="togglePw()" aria-label="إظهار">👁</button></div></div>
@@ -1355,7 +1355,6 @@ async function ownerLogin(){
   try{
     await signInWithEmailAndPassword(auth,em,pw);
     lsSet(OW_LOCK,{}); lsSet(OW_MAIL,em);
-    notifyAdmin("🔐 تم الدخول للوحة المالك\nالجهاز: "+owDevice()+"\nالوقت: "+owNow()+"\nإن لم تكن أنت، غيّر كلمة المرور فوراً من Firebase.");
     isAdmin=true; startAdmin();
     document.getElementById("ow-pass").value="";
     swapPage("pg-owner","pg-admin"); renderAdmin();
