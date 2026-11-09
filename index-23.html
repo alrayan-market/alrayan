@@ -703,7 +703,7 @@ textarea.inp{height:auto;min-height:84px;padding:11px 13px;resize:vertical;line-
       <h3>📜 شروط المسوّق</h3>
       <ol style="padding-inline-start:18px;font-size:0.82rem;line-height:1.95;color:#344054">
         <li>العمولة 5% من قيمة الخزانات بدون التوصيل، للطلبات التي تأتي عن طريق روابطك فقط.</li>
-        <li>تُستحق العمولة بعد تسليم الطلب بـ 3 أيام، وتُلغى إذا أُلغي الطلب.</li>
+        <li>تُستحق العمولة فور تسليم الطلب، وتُلغى إذا أُلغي الطلب.</li>
         <li>تطلب صرف رصيدك المستحق على بنكك متى شئت، دون حد أدنى، وقد تصرفه المنصة لك دورياً دون طلب.</li>
         <li>لا تقدّم نفسك موظفاً في المنصة، ولا تَعِد الزبائن بأسعار أو خصومات غير المعلنة.</li>
         <li>لا تطلب لنفسك عن طريق رابطك، ولا تنشر بطرق مزعجة أو مضللة.</li>
@@ -1684,7 +1684,7 @@ document.getElementById("ow-pass").addEventListener("keydown",function(e){ if(e.
 
 
 // ══════════════════════════ نظام الإحالة (المسوّقون) ══════════════════════════
-const REF_RATE=0.05, REF_DAYS=30, REF_HOLD_DAYS=3, REF_MIN_PAY=0;
+const REF_RATE=0.05, REF_DAYS=30, REF_HOLD_DAYS=0, REF_MIN_PAY=0;
 const MK_ALPHA="abcdefghjkmnpqrstuvwxyz23456789";
 const MK_METHOD={whatsapp:"واتساب",facebook:"فيسبوك وتيك توك",shop:"محل / معرض",contractor:"مقاول / سمسار",friends:"معارف وجيران",other:"أخرى"};
 const regApp=initializeApp(firebaseConfig,"reg"), regAuth=getAuth(regApp), regDb=getFirestore(regApp);
@@ -1826,7 +1826,6 @@ function renderMDash(){
     +'<div class="kpis"><div class="kpi"><span>زيارات روابطك</span><b class="num">'+clicks+'</b></div><div class="kpi"><span>الطلبات</span><b class="num">'+cnt+'</b></div><div class="kpi"><span>تواصلوا عبر واتساب</span><b class="num">'+myContacts+'</b></div><div class="kpi"><span>نسبة التحويل</span><b class="num">'+conv+'%</b></div></div>'
     +'<div class="card"><h3>💰 رصيدك</h3>'
       +'<div class="sum-row"><span>⏳ معلّقة <small style="color:var(--muted)">(لم تُسلَّم بعد)</small></span><b class="num">'+money(sum.pending)+'</b></div>'
-      +'<div class="sum-row"><span>🔎 قيد المراجعة <small style="color:var(--muted)">(3 أيام بعد التسليم)</small></span><b class="num">'+money(sum.review)+'</b></div>'
       +'<div class="sum-row t" style="color:var(--ok)"><span>✅ مستحقة للصرف</span><span class="num">'+money(sum.due)+'</span></div>'
       +'<div class="sum-row"><span>💸 صُرف لك حتى الآن</span><b class="num">'+money(sum.paid)+'</b></div>'
       +mkPayBox(sum.due)+'</div>'
@@ -1837,7 +1836,7 @@ function renderMDash(){
     +'<div class="card"><h3>✍️ منشورات جاهزة</h3>'+MK_TPL.map(function(t,i){ return '<div style="background:var(--bg);border-radius:12px;padding:11px;margin-bottom:8px;white-space:pre-wrap;font-size:0.84rem;line-height:1.85">'+esc(t.replace("{link}","🔗 (رابطك)"))+'<div style="margin-top:6px"><button class="sbtn blue" data-i="'+i+'" onclick="mkCopy(\'tpl\',this.dataset.i)">📋 نسخ المنشور مع رابطك</button></div></div>'; }).join("")+'</div>'
     +'<div class="card"><h3>🧾 طلباتك</h3>'+(myRefs.length?myRefs.map(function(r){ var s=refState(r); return '<div class="cl" style="align-items:flex-start"><div class="cx"><b>'+esc((r.items||[]).map(function(i){return i.name+" × "+i.qty;}).join("، "))+'</b><span>'+esc(fmtDate(r.createdAt))+(r.manual?' · 💬 عن طريق واتساب':'')+'</span><div style="font-size:0.78rem;font-weight:800;color:var(--navy2);margin-top:3px">مرحلة الطلب: '+esc(ORD_STAGE[r.orderStatus||"new"]||"")+'</div><div style="margin-top:4px"><span class="st '+s.c+'">العمولة: '+esc(s.l)+'</span></div></div><b class="num" style="white-space:nowrap">'+(r.priceOnRequest&&!numIn(r.commission)?'تُحدد':money(r.commission))+'</b></div>'; }).join(""):'<div style="color:var(--muted);font-size:0.86rem">لا توجد طلبات بعد. شارك رابطك وابدأ 🚀</div>')+'</div>'
     +'<div class="card"><h3>💸 سجل الدفعات</h3>'+(myPays.length?myPays.map(function(p){ return '<div class="sum-row"><span>'+esc(fmtDate(p.paidAt))+' · '+(p.refIds||[]).length+' طلب</span><b class="num">'+money(p.amount)+'</b></div>'; }).join(""):'<div style="color:var(--muted);font-size:0.86rem">لا توجد دفعات بعد</div>')+'</div>'
-    +'<details class="card"><summary style="font-weight:900;cursor:pointer">📜 شروط المسوّق</summary><ol style="padding-inline-start:18px;font-size:0.82rem;line-height:1.95;color:#344054;margin-top:8px"><li>العمولة 5% من قيمة الخزانات بدون التوصيل، للطلبات التي تأتي عن طريق روابطك فقط.</li><li>تُستحق بعد تسليم الطلب بـ 3 أيام، وتُلغى إذا أُلغي الطلب.</li><li>تطلب صرف رصيدك المستحق متى شئت، دون حد أدنى.</li><li>لا تقدّم نفسك موظفاً في المنصة، ولا تَعِد بأسعار أو خصومات غير المعلنة.</li><li>لا تطلب لنفسك عن طريق رابطك.</li><li>للمنصة حق تعديل العمولة بإشعار مسبق، وإيقاف الحساب عند المخالفة.</li></ol></details>';
+    +'<details class="card"><summary style="font-weight:900;cursor:pointer">📜 شروط المسوّق</summary><ol style="padding-inline-start:18px;font-size:0.82rem;line-height:1.95;color:#344054;margin-top:8px"><li>العمولة 5% من قيمة الخزانات بدون التوصيل، للطلبات التي تأتي عن طريق روابطك فقط.</li><li>تُستحق فور تسليم الطلب، وتُلغى إذا أُلغي الطلب.</li><li>تطلب صرف رصيدك المستحق متى شئت، دون حد أدنى.</li><li>لا تقدّم نفسك موظفاً في المنصة، ولا تَعِد بأسعار أو خصومات غير المعلنة.</li><li>لا تطلب لنفسك عن طريق رابطك.</li><li>للمنصة حق تعديل العمولة بإشعار مسبق، وإيقاف الحساب عند المخالفة.</li></ol></details>';
 }
 
 // ── لوحة المالك: المسوّقون ──
