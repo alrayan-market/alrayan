@@ -684,7 +684,7 @@ textarea.inp{height:auto;min-height:84px;padding:11px 13px;resize:vertical;line-
   <div class="pbody">
     <div class="card" style="background:linear-gradient(120deg,var(--navy3),var(--navy));color:#fff">
       <h3 style="font-size:1.2rem">🤝 كن مسوّقاً لمنصة الريان لخزانات المياه</h3>
-      <p style="font-size:0.88rem;opacity:.9;line-height:1.9">شارك روابط خزاناتنا مع معارفك وفي قروبات واتساب وفيسبوك، واكسب <b style="color:var(--gold2)">5%</b> من قيمة كل خزان يُطلب عن طريقك، تُصرف لك أسبوعياً على بنكك.</p>
+      <p style="font-size:0.88rem;opacity:.9;line-height:1.9">شارك روابط خزاناتنا مع معارفك وفي قروبات واتساب وفيسبوك، واكسب <b style="color:var(--gold2)">5%</b> من قيمة كل خزان يُطلب عن طريقك، وتطلب صرفها على بنكك متى شئت.</p>
     </div>
     <div class="card">
       <h3>👤 بياناتك</h3>
@@ -704,7 +704,7 @@ textarea.inp{height:auto;min-height:84px;padding:11px 13px;resize:vertical;line-
       <ol style="padding-inline-start:18px;font-size:0.82rem;line-height:1.95;color:#344054">
         <li>العمولة 5% من قيمة الخزانات بدون التوصيل، للطلبات التي تأتي عن طريق روابطك فقط.</li>
         <li>تُستحق العمولة بعد تسليم الطلب بـ 3 أيام، وتُلغى إذا أُلغي الطلب.</li>
-        <li>الصرف أسبوعي عبر بنكك عند بلوغ رصيدك 10,000 ج.س، والمتبقي يُرحَّل للأسبوع التالي.</li>
+        <li>تطلب صرف رصيدك المستحق على بنكك متى شئت، دون حد أدنى، وقد تصرفه المنصة لك دورياً دون طلب.</li>
         <li>لا تقدّم نفسك موظفاً في المنصة، ولا تَعِد الزبائن بأسعار أو خصومات غير المعلنة.</li>
         <li>لا تطلب لنفسك عن طريق رابطك، ولا تنشر بطرق مزعجة أو مضللة.</li>
         <li>للمنصة حق تعديل العمولة بإشعار مسبق، وحق إيقاف الحساب عند المخالفة.</li>
@@ -1439,7 +1439,7 @@ window.__admRender=renderAdminIfOpen;
 function setAdmTab(t){ admTab=t; renderAdmin(); document.getElementById("pg-admin").scrollTop=0; }
 function renderAdmin(){
   var nNew=orders.filter(function(o){return o.status==="new";}).length, nQ=quotes.filter(function(q){return q.status!=="done";}).length;
-  var tabs=[["orders","📦 الطلبات",nNew],["products","💧 الخزانات",0],["delivery","🚚 التوصيل",0],["settings","⚙️ الإعدادات",0],["reviews","⭐ الآراء",0],["quotes","🏗️ عروض الأسعار",nQ],["marketers","🤝 المسوّقون",mks.filter(function(m){return m.status==="pending";}).length],["stats","📊 الإحصائيات",0]];
+  var tabs=[["orders","📦 الطلبات",nNew],["products","💧 الخزانات",0],["delivery","🚚 التوصيل",0],["settings","⚙️ الإعدادات",0],["reviews","⭐ الآراء",0],["quotes","🏗️ عروض الأسعار",nQ],["marketers","🤝 المسوّقون",mks.filter(function(m){return m.status==="pending"||(m.status==="approved"&&isPayReq(m));}).length],["stats","📊 الإحصائيات",0]];
   document.getElementById("atabs").innerHTML=tabs.map(function(t){return '<button class="atab'+(admTab===t[0]?' on':'')+'" data-t="'+t[0]+'" onclick="setAdmTab(this.dataset.t)">'+t[1]+(t[2]?'<span class="dot">'+t[2]+'</span>':'')+'</button>';}).join("");
   var b=document.getElementById("adm-body");
   if(admTab==="orders") b.innerHTML=admOrders();
@@ -1684,7 +1684,7 @@ document.getElementById("ow-pass").addEventListener("keydown",function(e){ if(e.
 
 
 // ══════════════════════════ نظام الإحالة (المسوّقون) ══════════════════════════
-const REF_RATE=0.05, REF_DAYS=30, REF_HOLD_DAYS=3, REF_MIN_PAY=10000;
+const REF_RATE=0.05, REF_DAYS=30, REF_HOLD_DAYS=3, REF_MIN_PAY=0;
 const MK_ALPHA="abcdefghjkmnpqrstuvwxyz23456789";
 const MK_METHOD={whatsapp:"واتساب",facebook:"فيسبوك وتيك توك",shop:"محل / معرض",contractor:"مقاول / سمسار",friends:"معارف وجيران",other:"أخرى"};
 const regApp=initializeApp(firebaseConfig,"reg"), regAuth=getAuth(regApp), regDb=getFirestore(regApp);
@@ -1822,14 +1822,14 @@ function renderMDash(){
   myRefs.forEach(function(r){ var s=refState(r); if(s.k!=="void"){ cnt++; sum[s.k]=(sum[s.k]||0)+numIn(r.commission); } if(s.k==="due"||s.k==="paid"||s.k==="review") delivered++; });
   var clicks=numIn(myStats.clicks), conv=clicks?Math.round(cnt/clicks*1000)/10:0;
   var list=sortList(tanks().filter(function(p){return !p.outOfStock;}),"cap-asc");
-  b.innerHTML='<div class="card" style="background:linear-gradient(120deg,var(--navy3),var(--navy));color:#fff"><div style="font-size:0.84rem;opacity:.85">أهلاً</div><h3 style="font-size:1.2rem;margin:0">'+esc(meMk.name)+' 👋</h3><div style="font-size:0.78rem;opacity:.8;margin-top:4px">عمولتك 5% من قيمة الخزانات · الصرف أسبوعي عبر بنكك</div></div>'
+  b.innerHTML='<div class="card" style="background:linear-gradient(120deg,var(--navy3),var(--navy));color:#fff"><div style="font-size:0.84rem;opacity:.85">أهلاً</div><h3 style="font-size:1.2rem;margin:0">'+esc(meMk.name)+' 👋</h3><div style="font-size:0.78rem;opacity:.8;margin-top:4px">عمولتك 5% من قيمة الخزانات · تطلب صرفها متى شئت</div></div>'
     +'<div class="kpis"><div class="kpi"><span>زيارات روابطك</span><b class="num">'+clicks+'</b></div><div class="kpi"><span>الطلبات</span><b class="num">'+cnt+'</b></div><div class="kpi"><span>تواصلوا عبر واتساب</span><b class="num">'+myContacts+'</b></div><div class="kpi"><span>نسبة التحويل</span><b class="num">'+conv+'%</b></div></div>'
     +'<div class="card"><h3>💰 رصيدك</h3>'
       +'<div class="sum-row"><span>⏳ معلّقة <small style="color:var(--muted)">(لم تُسلَّم بعد)</small></span><b class="num">'+money(sum.pending)+'</b></div>'
       +'<div class="sum-row"><span>🔎 قيد المراجعة <small style="color:var(--muted)">(3 أيام بعد التسليم)</small></span><b class="num">'+money(sum.review)+'</b></div>'
       +'<div class="sum-row t" style="color:var(--ok)"><span>✅ مستحقة للصرف</span><span class="num">'+money(sum.due)+'</span></div>'
       +'<div class="sum-row"><span>💸 صُرف لك حتى الآن</span><b class="num">'+money(sum.paid)+'</b></div>'
-      +'<div style="color:var(--muted);font-size:0.76rem;margin-top:6px">يُصرف المستحق أسبوعياً عند بلوغه '+money(REF_MIN_PAY)+'، على حساب بنكك المسجّل.</div></div>'
+      +mkPayBox(sum.due)+'</div>'
     +'<div class="card"><h3>🔗 رابطك الرئيسي</h3><div style="background:var(--bg);border-radius:10px;padding:10px;font-size:0.82rem;direction:ltr;text-align:left;word-break:break-all">'+esc(mkLink(""))+'</div>'
       +'<div style="display:flex;gap:8px;margin-top:9px"><button class="btn btn-gold" style="flex:1;height:44px" onclick="mkShareMain()">📤 شارك</button><button class="btn btn-line" style="flex:1;height:44px" onclick="mkCopy(\'main\')">📋 نسخ</button></div>'
       +'<div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-line" style="flex:1;height:40px;font-size:0.82rem" onclick="mkCopy(\'calc\')">🧮 نسخ رابط حاسبة السعة</button></div></div>'
@@ -1837,7 +1837,7 @@ function renderMDash(){
     +'<div class="card"><h3>✍️ منشورات جاهزة</h3>'+MK_TPL.map(function(t,i){ return '<div style="background:var(--bg);border-radius:12px;padding:11px;margin-bottom:8px;white-space:pre-wrap;font-size:0.84rem;line-height:1.85">'+esc(t.replace("{link}","🔗 (رابطك)"))+'<div style="margin-top:6px"><button class="sbtn blue" data-i="'+i+'" onclick="mkCopy(\'tpl\',this.dataset.i)">📋 نسخ المنشور مع رابطك</button></div></div>'; }).join("")+'</div>'
     +'<div class="card"><h3>🧾 طلباتك</h3>'+(myRefs.length?myRefs.map(function(r){ var s=refState(r); return '<div class="cl" style="align-items:flex-start"><div class="cx"><b>'+esc((r.items||[]).map(function(i){return i.name+" × "+i.qty;}).join("، "))+'</b><span>'+esc(fmtDate(r.createdAt))+(r.manual?' · 💬 عن طريق واتساب':'')+'</span><div style="font-size:0.78rem;font-weight:800;color:var(--navy2);margin-top:3px">مرحلة الطلب: '+esc(ORD_STAGE[r.orderStatus||"new"]||"")+'</div><div style="margin-top:4px"><span class="st '+s.c+'">العمولة: '+esc(s.l)+'</span></div></div><b class="num" style="white-space:nowrap">'+(r.priceOnRequest&&!numIn(r.commission)?'تُحدد':money(r.commission))+'</b></div>'; }).join(""):'<div style="color:var(--muted);font-size:0.86rem">لا توجد طلبات بعد. شارك رابطك وابدأ 🚀</div>')+'</div>'
     +'<div class="card"><h3>💸 سجل الدفعات</h3>'+(myPays.length?myPays.map(function(p){ return '<div class="sum-row"><span>'+esc(fmtDate(p.paidAt))+' · '+(p.refIds||[]).length+' طلب</span><b class="num">'+money(p.amount)+'</b></div>'; }).join(""):'<div style="color:var(--muted);font-size:0.86rem">لا توجد دفعات بعد</div>')+'</div>'
-    +'<details class="card"><summary style="font-weight:900;cursor:pointer">📜 شروط المسوّق</summary><ol style="padding-inline-start:18px;font-size:0.82rem;line-height:1.95;color:#344054;margin-top:8px"><li>العمولة 5% من قيمة الخزانات بدون التوصيل، للطلبات التي تأتي عن طريق روابطك فقط.</li><li>تُستحق بعد تسليم الطلب بـ 3 أيام، وتُلغى إذا أُلغي الطلب.</li><li>الصرف أسبوعي عند بلوغ '+money(REF_MIN_PAY)+'.</li><li>لا تقدّم نفسك موظفاً في المنصة، ولا تَعِد بأسعار أو خصومات غير المعلنة.</li><li>لا تطلب لنفسك عن طريق رابطك.</li><li>للمنصة حق تعديل العمولة بإشعار مسبق، وإيقاف الحساب عند المخالفة.</li></ol></details>';
+    +'<details class="card"><summary style="font-weight:900;cursor:pointer">📜 شروط المسوّق</summary><ol style="padding-inline-start:18px;font-size:0.82rem;line-height:1.95;color:#344054;margin-top:8px"><li>العمولة 5% من قيمة الخزانات بدون التوصيل، للطلبات التي تأتي عن طريق روابطك فقط.</li><li>تُستحق بعد تسليم الطلب بـ 3 أيام، وتُلغى إذا أُلغي الطلب.</li><li>تطلب صرف رصيدك المستحق متى شئت، دون حد أدنى.</li><li>لا تقدّم نفسك موظفاً في المنصة، ولا تَعِد بأسعار أو خصومات غير المعلنة.</li><li>لا تطلب لنفسك عن طريق رابطك.</li><li>للمنصة حق تعديل العمولة بإشعار مسبق، وإيقاف الحساب عند المخالفة.</li></ol></details>';
 }
 
 // ── لوحة المالك: المسوّقون ──
@@ -1879,10 +1879,10 @@ function admMarketers(){
   var st=function(m){ var R=refs.filter(function(r){return r.mid===m.id && r.status!=="void" && !isSelfRef(r);}); var mon=R.filter(function(r){return (r.createdAt||0)>=m0;});
     return {orders:R.length,month:mon.length,monthSales:mon.reduce(function(s,r){return s+numIn(r.subtotal);},0),comm:R.reduce(function(s,r){return s+numIn(r.commission);},0),paid:R.filter(function(r){return r.status==="paid";}).reduce(function(s,r){return s+numIn(r.commission);},0),clicks:rstats[m.code]||0,contacts:rcontacts.filter(function(c){return c.mid===m.id;}).length}; };
   var payList=act.filter(function(m){return m.status==="approved";}).map(function(m){ var d=mkDue(m); return {m:m,refs:d,amount:d.reduce(function(s,r){return s+numIn(r.commission);},0)}; }).filter(function(x){return x.amount>0;});
-  var ready=payList.filter(function(x){return x.amount>=REF_MIN_PAY;}), below=payList.filter(function(x){return x.amount<REF_MIN_PAY;});
+  var ready=payList.filter(function(x){return x.amount>=REF_MIN_PAY;}).sort(function(a,b){return (isPayReq(b.m)?1:0)-(isPayReq(a.m)?1:0)||(b.amount-a.amount);}), below=payList.filter(function(x){return x.amount<REF_MIN_PAY;});
   var h='<div class="card" style="background:var(--sky)"><b>🔗 رابط انضمام المسوّقين</b><div style="font-size:0.82rem;direction:ltr;text-align:left;margin:6px 0;word-break:break-all">'+esc(baseUrl())+'/?join=1</div><div style="display:flex;gap:7px"><button class="sbtn blue" onclick="copyText(\''+esc(baseUrl())+'/?join=1\')">📋 نسخ رابط الانضمام</button><button class="sbtn" onclick="copyText(\''+esc(baseUrl())+'/?m=1\')">📋 رابط دخول المسوّقين</button></div></div>';
   h+='<h3 style="font-weight:900;margin:16px 0 8px">⏳ طلبات الانضمام ('+pend.length+')</h3>'+(pend.length?pend.map(function(m){ return '<div class="ord s-new"><div class="oh"><b>'+esc(m.name)+'</b><span class="st st-new">جديد</span></div><div class="od">📞 <a href="https://wa.me/'+waNum(m.phone)+'" target="_blank" dir="ltr" style="color:var(--water);font-weight:800">'+esc(m.phone)+'</a><br>📍 '+esc(m.city)+' · '+esc(MK_METHOD[m.method]||m.method||"")+'<br>🏦 بنكك: <span dir="ltr">'+esc(m.bank)+'</span>'+(m.bankName?' · '+esc(m.bankName):'')+'<br>🕒 '+esc(fmtDate(m.createdAt))+'</div><div class="oa"><button class="sbtn ok" data-id="'+esc(m.id)+'" onclick="approveMk(this.dataset.id)">✓ اعتماد</button><button class="sbtn bad" data-id="'+esc(m.id)+'" onclick="setMkStatus(this.dataset.id,\'rejected\')">رفض</button></div></div>'; }).join(""):'<div style="color:var(--muted);font-size:0.86rem">لا توجد طلبات جديدة</div>');
-  h+='<h3 style="font-weight:900;margin:18px 0 8px">💸 الصرف هذا الأسبوع ('+ready.length+')</h3>'+(ready.length?ready.map(function(x){ return '<div class="ord s-confirmed"><div class="oh"><b>'+esc(x.m.name)+'</b><b class="num" style="color:var(--ok)">'+money(x.amount)+'</b></div><div class="od">🏦 بنكك: <b dir="ltr">'+esc(x.m.bank)+'</b>'+(x.m.bankName?' · '+esc(x.m.bankName):'')+'<br>'+x.refs.length+' طلب مستحق</div><div class="oa"><button class="sbtn ok" data-id="'+esc(x.m.id)+'" onclick="payMk(this.dataset.id)">✓ تم الدفع</button><button class="sbtn" onclick="copyText(\''+esc(x.m.bank)+'\')">📋 نسخ رقم الحساب</button></div></div>'; }).join(""):'<div style="color:var(--muted);font-size:0.86rem">لا يوجد مسوّق بلغ الحد الأدنى ('+money(REF_MIN_PAY)+') هذا الأسبوع</div>')
+  h+='<h3 style="font-weight:900;margin:18px 0 8px">💸 جاهز للصرف ('+ready.length+')</h3>'+(ready.length?ready.map(function(x){ return '<div class="ord '+(isPayReq(x.m)?'s-new':'s-confirmed')+'"><div class="oh"><b>'+esc(x.m.name)+(isPayReq(x.m)?' <span class="st st-new">🙋 طلب الصرف · '+esc(fmtDate(x.m.payoutRequestAt))+'</span>':'')+'</b><b class="num" style="color:var(--ok)">'+money(x.amount)+'</b></div><div class="od">🏦 بنكك: <b dir="ltr">'+esc(x.m.bank)+'</b>'+(x.m.bankName?' · '+esc(x.m.bankName):'')+'<br>'+x.refs.length+' طلب مستحق</div><div class="oa"><button class="sbtn ok" data-id="'+esc(x.m.id)+'" onclick="payMk(this.dataset.id)">✓ تم الدفع</button><button class="sbtn" onclick="copyText(\''+esc(x.m.bank)+'\')">📋 نسخ رقم الحساب</button></div></div>'; }).join(""):'<div style="color:var(--muted);font-size:0.86rem">لا توجد عمولات مستحقة حالياً</div>')
     +(below.length?'<div style="color:var(--muted);font-size:0.78rem;margin-top:6px">'+below.length+' مسوّق لديهم مستحقات أقل من الحد الأدنى (تُرحَّل)</div>':'');
   var ranked=act.map(function(m){return {m:m,s:st(m)};}).sort(function(a,b){return b.s.monthSales-a.s.monthSales||b.s.orders-a.s.orders;});
   h+='<h3 style="font-weight:900;margin:18px 0 8px">🏆 المسوّقون ('+act.length+') · ترتيب هذا الشهر</h3>'+(ranked.length?ranked.map(function(x,i){ var m=x.m, s=x.s, medal=["🥇","🥈","🥉"][i]||""; return '<div class="ord '+(m.status==="suspended"?'s-cancelled':'s-delivered')+'"><div class="oh"><b>'+medal+' '+esc(m.name)+'</b><span class="st '+(m.status==="suspended"?'st-cancelled':'st-delivered')+'">'+(m.status==="suspended"?'موقوف':'نشط')+'</span></div>'
@@ -1892,7 +1892,7 @@ function admMarketers(){
 }
 function approveMk(id){
   var m=mkById(id); if(!m) return;
-  var msg="مرحباً "+m.name+" 👋\nتم قبولك مسوّقاً في منصة الريان لخزانات المياه ✓\n\n🔗 رابطك للمشاركة:\n"+baseUrl()+"/?s="+m.code+"\n\n📊 صفحتك (الرصيد والطلبات وروابط كل الخزانات):\n"+baseUrl()+"/?m=1\nادخل برقمك والرمز السري الذي اخترته.\n\nعمولتك 5% من قيمة الخزانات، تُصرف أسبوعياً. بالتوفيق 🤝";
+  var msg="مرحباً "+m.name+" 👋\nتم قبولك مسوّقاً في منصة الريان لخزانات المياه ✓\n\n🔗 رابطك للمشاركة:\n"+baseUrl()+"/?s="+m.code+"\n\n📊 صفحتك (الرصيد والطلبات وروابط كل الخزانات):\n"+baseUrl()+"/?m=1\nادخل برقمك والرمز السري الذي اخترته.\n\nعمولتك 5% من قيمة الخزانات، وتطلب صرفها من صفحتك متى شئت. بالتوفيق 🤝";
   var w=window.open("https://wa.me/"+waNum(m.phone)+"?text="+encodeURIComponent(msg),"_blank");
   updateDoc(doc(db,"marketers",id),{status:"approved",approvedAt:Date.now()}).then(function(){ toast("✓ تم اعتماد المسوّق"); }).catch(function(){ toast("تعذر الاعتماد، تأكد من نشر القواعد"); });
 }
@@ -1904,15 +1904,35 @@ async function setMkStatus(id,s){
 async function payMk(id){
   var m=mkById(id); if(!m) return; var d=mkDue(m), amount=d.reduce(function(s,r){return s+numIn(r.commission);},0);
   if(!d.length||!confirm("تأكيد أنك حوّلت "+money(amount)+" إلى "+m.name+" (بنكك "+m.bank+")؟")) return;
-  var msg="مرحباً "+m.name+" 👋\nتم تحويل عمولتك الأسبوعية "+money(amount)+" إلى حساب بنكك ("+m.bank+") عن "+d.length+" طلب ✓\nشكراً لجهودك مع منصة الريان لخزانات المياه 💧";
+  var msg="مرحباً "+m.name+" 👋\nتم تحويل عمولتك "+money(amount)+" إلى حساب بنكك ("+m.bank+") عن "+d.length+" طلب ✓\nشكراً لجهودك مع منصة الريان لخزانات المياه 💧";
   window.open("https://wa.me/"+waNum(m.phone)+"?text="+encodeURIComponent(msg),"_blank");
   var pid="PO-"+Date.now(), now=Date.now();
   try{
     await setDoc(doc(db,"payouts",pid),{id:pid,mid:id,code:m.code,amount:amount,refIds:d.map(function(r){return r.id;}),paidAt:now});
     for(var i=0;i<d.length;i++){ await updateDoc(doc(db,"referrals",d[i].id),{status:"paid",paidAt:now,payoutId:pid}); }
+    if(m.payoutRequestAt) await updateDoc(doc(db,"marketers",id),{payoutRequestAt:0,payoutRequestAmount:0}).catch(function(){});
     toast("✓ تم تسجيل الدفعة");
   }catch(e){ toast("تعذر تسجيل الدفعة كاملة، أعد المحاولة"); }
 }
+// ══════════════ طلب صرف العمولة من المسوّق ══════════════
+function isPayReq(m){ return !!(m && numIn(m.payoutRequestAt)); }
+function mkPayBox(due){
+  if(isPayReq(meMk)) return '<div style="background:var(--warn-soft);color:var(--warn);border-radius:12px;padding:10px 12px;font-size:0.84rem;font-weight:800;margin-top:10px">⏳ طلبت صرف '+money(meMk.payoutRequestAmount||due)+' بتاريخ '+esc(fmtDate(meMk.payoutRequestAt))+'. نحوّله لك على بنكك قريباً.</div>';
+  if(due>0) return '<button class="btn btn-ok btn-block" onclick="mkRequestPay()" style="margin-top:10px">💸 اطلب صرف رصيدك ('+money(due)+')</button><div style="color:var(--muted);font-size:0.74rem;margin-top:6px;text-align:center">يُحوَّل على بنكك المسجّل: <span dir="ltr">'+esc(meMk.bank||"")+'</span></div>';
+  return '<div style="color:var(--muted);font-size:0.76rem;margin-top:6px">عندما يصير لديك رصيد مستحق، يظهر لك زر «اطلب صرف رصيدك» لتطلبه متى شئت.</div>';
+}
+async function mkRequestPay(){
+  if(!meMk||isPayReq(meMk)) return;
+  var due=myRefs.filter(function(r){return refState(r).k==="due";}).reduce(function(s,r){return s+numIn(r.commission);},0);
+  if(due<=0){ toast("لا يوجد رصيد مستحق حالياً"); return; }
+  if(!confirm("طلب صرف "+money(due)+" على حساب بنكك ("+(meMk.bank||"")+")؟")) return;
+  try{
+    await updateDoc(doc(db,"marketers",meMk.id),{payoutRequestAt:Date.now(),payoutRequestAmount:due});
+    notifyAdmin("💸 طلب صرف عمولة\n"+meMk.name+" - "+meMk.phone+"\nالمبلغ: "+money(due)+"\nبنكك: "+(meMk.bank||"")+(meMk.bankName?" ("+meMk.bankName+")":""));
+    toast("✓ وصل طلبك، نحوّل لك قريباً");
+  }catch(e){ toast("تعذر إرسال الطلب، أعد المحاولة"); }
+}
+Object.assign(window,{mkRequestPay});
 // ══════════════ الطلب اليدوي ══════════════
 var moItems=[], moContactId="";
 function openMOrder(){
