@@ -409,6 +409,26 @@ textarea.inp{height:auto;min-height:84px;padding:11px 13px;resize:vertical;line-
 /* toast */
 .toast{position:fixed;top:72px;left:50%;transform:translateX(-50%) translateY(-20px);z-index:300;background:var(--navy2);color:#fff;font-weight:800;font-size:0.88rem;padding:11px 18px;border-radius:13px;box-shadow:var(--shadow2);opacity:0;pointer-events:none;transition:.25s;max-width:90vw;text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* إيصال صرف العمولة */
+.rc{background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 10px 30px rgba(18,32,58,.12);position:relative}
+.rc-hd{background:radial-gradient(120% 120% at 85% 0%,#2B4A80 0%,var(--navy2) 50%,var(--navy) 100%);color:#fff;padding:20px 18px 18px;text-align:center;border-bottom:3px solid var(--gold)}
+.rc-hd img{width:62px;height:62px;border-radius:16px;object-fit:cover;background:#fff;display:block;margin:0 auto 8px}
+.rc-hd b{display:block;font-size:1.06rem;font-weight:900}
+.rc-hd small{display:block;color:var(--gold2);font-size:0.8rem;font-weight:800;margin-top:3px}
+.rc-bd{padding:16px 18px 6px}
+.rc-amt{text-align:center;padding:6px 0 12px;border-bottom:1.5px dashed var(--line);margin-bottom:8px}
+.rc-amt .v{font-size:2rem;font-weight:900;color:var(--ok);line-height:1.2}
+.rc-amt .w{color:var(--muted);font-size:0.8rem;font-weight:700;line-height:1.7;margin-top:2px}
+.rc-row{display:flex;justify-content:space-between;gap:10px;padding:7px 0;font-size:0.88rem;border-bottom:1px solid #F1F3F7}
+.rc-row span{color:var(--muted)}
+.rc-row b{font-weight:800;text-align:left}
+.rc-ords{margin:10px 0 4px;font-size:0.8rem}
+.rc-ords div{display:flex;justify-content:space-between;gap:8px;padding:5px 0;color:#3A465C}
+.rc-stamp{position:absolute;top:16px;left:12px;transform:rotate(-12deg);border:3px solid var(--ok);color:var(--ok);border-radius:12px;padding:2px 10px;font-weight:900;font-size:0.95rem;background:#fff}
+.rc-ft{background:var(--gold-soft);text-align:center;padding:12px;font-size:0.84rem;font-weight:800;color:var(--navy2)}
+.rc-ft a{color:var(--gold);text-decoration:none}
+.rc-proof{width:100%;border-radius:12px;margin-top:10px;border:1px solid var(--line)}
+.pay-prev{width:100%;max-height:260px;object-fit:contain;border-radius:12px;margin-top:8px;border:1px solid var(--line)}
 </style>
 </head>
 <body>
@@ -760,6 +780,27 @@ textarea.inp{height:auto;min-height:84px;padding:11px 13px;resize:vertical;line-
   <div class="pbar"><div class="wrap"><button class="back" onclick="adminExit()">→ المتجر</button><div class="pt">لوحة المالك</div><div class="pa"><button class="back" onclick="ownerLogout()">خروج</button></div></div></div>
   <div class="atabs" id="atabs"></div>
   <div class="pbody" id="adm-body" style="max-width:860px"></div>
+</div>
+
+<!-- ═══ تسجيل دفع عمولة (للمالك) ═══ -->
+<div class="page hidden" id="pg-pay">
+  <div class="pbar"><div class="wrap"><button class="back" onclick="history.back()">→ رجوع</button><div class="pt">صرف عمولة</div><div class="pa"></div></div></div>
+  <div class="pbody" style="max-width:520px">
+    <div class="card" id="pay-sum"></div>
+    <div class="card">
+      <h3>🏦 بيانات التحويل</h3>
+      <div class="fld"><label>رقم العملية في بنكك <small>(اختياري)</small></label><input class="inp" id="pay-ref" dir="ltr" inputmode="numeric" style="text-align:left"></div>
+      <div class="fld"><label>صورة إشعار التحويل <small>(اختيارية)</small></label><input class="inp" id="pay-img" type="file" accept="image/*" onchange="payImgPick(this)" style="padding-top:9px"><img id="pay-prev" class="pay-prev hidden" alt=""></div>
+    </div>
+    <div class="err" id="pay-err"></div>
+    <button class="btn btn-ok btn-block" id="pay-go" onclick="confirmPay()">✓ تأكيد وإصدار الإيصال</button>
+  </div>
+</div>
+
+<!-- ═══ إيصال صرف عمولة (رابط عام) ═══ -->
+<div class="page hidden" id="pg-rc">
+  <div class="pbar"><div class="wrap"><button class="back" onclick="history.back()">→ رجوع</button><div class="pt">إيصال صرف عمولة</div><div class="pa"></div></div></div>
+  <div class="pbody" style="max-width:520px" id="rc-body"></div>
 </div>
 
 <!-- ═══ طلب يدوي (للمالك) ═══ -->
@@ -1360,6 +1401,7 @@ function handleDeepLinks(){
   else if(sp.get("quote")) openQuote();
   else if(sp.get("join")) openJoin();
   else if(sp.get("m")) openMLogin();
+  else if(sp.get("rc")) openReceipt(sp.get("rc"));
 }
 
 document.getElementById("yr").textContent=new Date().getFullYear();
@@ -1835,7 +1877,7 @@ function renderMDash(){
     +'<div class="card"><h3>💧 شارك خزاناً محدداً</h3>'+(list.length?list.map(function(p){ var im=imgsOf(p)[0], cap=capOf(p); return '<div class="cl"><div class="ci">'+(im?'<img src="'+esc(im)+'" alt="">':'💧')+'</div><div class="cx"><b>'+esc(p.name)+'</b><span class="num">'+(cap?cap.toLocaleString("en-US")+' لتر · ':'')+(p.priceOnRequest?'السعر عند الطلب':money(priceOf(p)))+'</span></div><div style="display:flex;flex-direction:column;gap:5px"><button class="sbtn gold" data-id="'+esc(p.id)+'" onclick="mkShareProduct(this.dataset.id)">📤 شارك</button><button class="sbtn" data-id="'+esc(p.id)+'" onclick="mkCopy(\'p\',this.dataset.id)">📋 نسخ</button></div></div>'; }).join(""):'<div style="color:var(--muted)">لا توجد خزانات متاحة الآن</div>')+'</div>'
     +'<div class="card"><h3>✍️ منشورات جاهزة</h3>'+MK_TPL.map(function(t,i){ return '<div style="background:var(--bg);border-radius:12px;padding:11px;margin-bottom:8px;white-space:pre-wrap;font-size:0.84rem;line-height:1.85">'+esc(t.replace("{link}","🔗 (رابطك)"))+'<div style="margin-top:6px"><button class="sbtn blue" data-i="'+i+'" onclick="mkCopy(\'tpl\',this.dataset.i)">📋 نسخ المنشور مع رابطك</button></div></div>'; }).join("")+'</div>'
     +'<div class="card"><h3>🧾 طلباتك</h3>'+(myRefs.length?myRefs.map(function(r){ var s=refState(r); return '<div class="cl" style="align-items:flex-start"><div class="cx"><b>'+esc((r.items||[]).map(function(i){return i.name+" × "+i.qty;}).join("، "))+'</b><span>'+esc(fmtDate(r.createdAt))+(r.manual?' · 💬 عن طريق واتساب':'')+'</span><div style="font-size:0.78rem;font-weight:800;color:var(--navy2);margin-top:3px">مرحلة الطلب: '+esc(ORD_STAGE[r.orderStatus||"new"]||"")+'</div><div style="margin-top:4px"><span class="st '+s.c+'">العمولة: '+esc(s.l)+'</span></div></div><b class="num" style="white-space:nowrap">'+(r.priceOnRequest&&!numIn(r.commission)?'تُحدد':money(r.commission))+'</b></div>'; }).join(""):'<div style="color:var(--muted);font-size:0.86rem">لا توجد طلبات بعد. شارك رابطك وابدأ 🚀</div>')+'</div>'
-    +'<div class="card"><h3>💸 سجل الدفعات</h3>'+(myPays.length?myPays.map(function(p){ return '<div class="sum-row"><span>'+esc(fmtDate(p.paidAt))+' · '+(p.refIds||[]).length+' طلب</span><b class="num">'+money(p.amount)+'</b></div>'; }).join(""):'<div style="color:var(--muted);font-size:0.86rem">لا توجد دفعات بعد</div>')+'</div>'
+    +'<div class="card"><h3>💸 سجل الدفعات</h3>'+(myPays.length?myPays.map(function(p){ return '<div class="sum-row" style="align-items:center"><span>'+esc(fmtDate(p.paidAt))+' · '+(p.refIds||[]).length+' طلب<br><b class="num">'+money(p.amount)+'</b></span>'+(p.rid?'<button class="sbtn" data-id="'+esc(p.rid)+'" onclick="openReceipt(this.dataset.id)">🧾 الإيصال</button>':'')+'</div>'; }).join(""):'<div style="color:var(--muted);font-size:0.86rem">لا توجد دفعات بعد</div>')+'</div>'
     +'<details class="card"><summary style="font-weight:900;cursor:pointer">📜 شروط المسوّق</summary><ol style="padding-inline-start:18px;font-size:0.82rem;line-height:1.95;color:#344054;margin-top:8px"><li>العمولة 5% من قيمة الخزانات بدون التوصيل، للطلبات التي تأتي عن طريق روابطك فقط.</li><li>تُستحق فور تسليم الطلب، وتُلغى إذا أُلغي الطلب.</li><li>تطلب صرف رصيدك المستحق متى شئت، دون حد أدنى.</li><li>لا تقدّم نفسك موظفاً في المنصة، ولا تَعِد بأسعار أو خصومات غير المعلنة.</li><li>لا تطلب لنفسك عن طريق رابطك.</li><li>للمنصة حق تعديل العمولة بإشعار مسبق، وإيقاف الحساب عند المخالفة.</li></ol></details>';
 }
 
@@ -1881,7 +1923,9 @@ function admMarketers(){
   var ready=payList.filter(function(x){return x.amount>=REF_MIN_PAY;}).sort(function(a,b){return (isPayReq(b.m)?1:0)-(isPayReq(a.m)?1:0)||(b.amount-a.amount);}), below=payList.filter(function(x){return x.amount<REF_MIN_PAY;});
   var h='<div class="card" style="background:var(--sky)"><b>🔗 رابط انضمام المسوّقين</b><div style="font-size:0.82rem;direction:ltr;text-align:left;margin:6px 0;word-break:break-all">'+esc(baseUrl())+'/?join=1</div><div style="display:flex;gap:7px"><button class="sbtn blue" onclick="copyText(\''+esc(baseUrl())+'/?join=1\')">📋 نسخ رابط الانضمام</button><button class="sbtn" onclick="copyText(\''+esc(baseUrl())+'/?m=1\')">📋 رابط دخول المسوّقين</button></div></div>';
   h+='<h3 style="font-weight:900;margin:16px 0 8px">⏳ طلبات الانضمام ('+pend.length+')</h3>'+(pend.length?pend.map(function(m){ return '<div class="ord s-new"><div class="oh"><b>'+esc(m.name)+'</b><span class="st st-new">جديد</span></div><div class="od">📞 <a href="https://wa.me/'+waNum(m.phone)+'" target="_blank" dir="ltr" style="color:var(--water);font-weight:800">'+esc(m.phone)+'</a><br>📍 '+esc(m.city)+' · '+esc(MK_METHOD[m.method]||m.method||"")+'<br>🏦 بنكك: <span dir="ltr">'+esc(m.bank)+'</span>'+(m.bankName?' · '+esc(m.bankName):'')+'<br>🕒 '+esc(fmtDate(m.createdAt))+'</div><div class="oa"><button class="sbtn ok" data-id="'+esc(m.id)+'" onclick="approveMk(this.dataset.id)">✓ اعتماد</button><button class="sbtn bad" data-id="'+esc(m.id)+'" onclick="setMkStatus(this.dataset.id,\'rejected\')">رفض</button></div></div>'; }).join(""):'<div style="color:var(--muted);font-size:0.86rem">لا توجد طلبات جديدة</div>');
-  h+='<h3 style="font-weight:900;margin:18px 0 8px">💸 جاهز للصرف ('+ready.length+')</h3>'+(ready.length?ready.map(function(x){ return '<div class="ord '+(isPayReq(x.m)?'s-new':'s-confirmed')+'"><div class="oh"><b>'+esc(x.m.name)+(isPayReq(x.m)?' <span class="st st-new">🙋 طلب الصرف · '+esc(fmtDate(x.m.payoutRequestAt))+'</span>':'')+'</b><b class="num" style="color:var(--ok)">'+money(x.amount)+'</b></div><div class="od">🏦 بنكك: <b dir="ltr">'+esc(x.m.bank)+'</b>'+(x.m.bankName?' · '+esc(x.m.bankName):'')+'<br>'+x.refs.length+' طلب مستحق</div><div class="oa"><button class="sbtn ok" data-id="'+esc(x.m.id)+'" onclick="payMk(this.dataset.id)">✓ تم الدفع</button><button class="sbtn" onclick="copyText(\''+esc(x.m.bank)+'\')">📋 نسخ رقم الحساب</button></div></div>'; }).join(""):'<div style="color:var(--muted);font-size:0.86rem">لا توجد عمولات مستحقة حالياً</div>')
+  var lastPays=pays.slice().sort(function(a,b){return (b.paidAt||0)-(a.paidAt||0);}).slice(0,8);
+  var paysH=lastPays.length?'<h3 style="font-weight:900;margin:18px 0 8px">🧾 آخر الدفعات</h3><div class="card" style="padding:6px 14px">'+lastPays.map(function(p){ var pm=mkById(p.mid); return '<div class="sum-row" style="align-items:center"><span>'+esc(pm?pm.name:"مسوّق")+' · '+esc(fmtDate(p.paidAt))+'<br><b class="num" style="color:var(--ok)">'+money(p.amount)+'</b></span><button class="sbtn" data-id="'+esc(p.id)+'" onclick="openPayReceipt(this.dataset.id)">🧾 الإيصال</button></div>'; }).join("")+'</div>':'';
+  h+='<h3 style="font-weight:900;margin:18px 0 8px">💸 جاهز للصرف ('+ready.length+')</h3>'+(ready.length?ready.map(function(x){ return '<div class="ord '+(isPayReq(x.m)?'s-new':'s-confirmed')+'"><div class="oh"><b>'+esc(x.m.name)+(isPayReq(x.m)?' <span class="st st-new">🙋 طلب الصرف · '+esc(fmtDate(x.m.payoutRequestAt))+'</span>':'')+'</b><b class="num" style="color:var(--ok)">'+money(x.amount)+'</b></div><div class="od">🏦 بنكك: <b dir="ltr">'+esc(x.m.bank)+'</b>'+(x.m.bankName?' · '+esc(x.m.bankName):'')+'<br>'+x.refs.length+' طلب مستحق</div><div class="oa"><button class="sbtn ok" data-id="'+esc(x.m.id)+'" onclick="openPay(this.dataset.id)">✓ تم الدفع</button><button class="sbtn" onclick="copyText(\''+esc(x.m.bank)+'\')">📋 نسخ رقم الحساب</button></div></div>'; }).join(""):'<div style="color:var(--muted);font-size:0.86rem">لا توجد عمولات مستحقة حالياً</div>')+paysH
     +(below.length?'<div style="color:var(--muted);font-size:0.78rem;margin-top:6px">'+below.length+' مسوّق لديهم مستحقات أقل من الحد الأدنى (تُرحَّل)</div>':'');
   var ranked=act.map(function(m){return {m:m,s:st(m)};}).sort(function(a,b){return b.s.monthSales-a.s.monthSales||b.s.orders-a.s.orders;});
   h+='<h3 style="font-weight:900;margin:18px 0 8px">🏆 المسوّقون ('+act.length+') · ترتيب هذا الشهر</h3>'+(ranked.length?ranked.map(function(x,i){ var m=x.m, s=x.s, medal=["🥇","🥈","🥉"][i]||""; return '<div class="ord '+(m.status==="suspended"?'s-cancelled':'s-delivered')+'"><div class="oh"><b>'+medal+' '+esc(m.name)+'</b><span class="st '+(m.status==="suspended"?'st-cancelled':'st-delivered')+'">'+(m.status==="suspended"?'موقوف':'نشط')+'</span></div>'
@@ -1913,6 +1957,152 @@ async function payMk(id){
     toast("✓ تم تسجيل الدفعة");
   }catch(e){ toast("تعذر تسجيل الدفعة كاملة، أعد المحاولة"); }
 }
+// ══════════════ صرف العمولة بإيصال ══════════════
+var payMid="", payFile=null, rcCur=null;
+function arWords(n){
+  n=Math.floor(Math.abs(Number(n)||0)); if(!n) return "صفر";
+  var O=["","واحد","اثنان","ثلاثة","أربعة","خمسة","ستة","سبعة","ثمانية","تسعة","عشرة","أحد عشر","اثنا عشر","ثلاثة عشر","أربعة عشر","خمسة عشر","ستة عشر","سبعة عشر","ثمانية عشر","تسعة عشر"];
+  var T=["","","عشرون","ثلاثون","أربعون","خمسون","ستون","سبعون","ثمانون","تسعون"];
+  var H=["","مائة","مائتان","ثلاثمائة","أربعمائة","خمسمائة","ستمائة","سبعمائة","ثمانمائة","تسعمائة"];
+  function w99(x){ if(x<20) return O[x]; var u=x%10,t=Math.floor(x/10); return u?O[u]+" و"+T[t]:T[t]; }
+  function w999(x,construct){ var h=Math.floor(x/100), r=x%100, a=[]; if(h) a.push(h===2&&!r&&construct?"مائتا":H[h]); if(r) a.push(w99(r)); return a.join(" و"); }
+  function grp(c,one,two,few,many,acc){
+    if(c===1) return one; if(c===2) return two;
+    var r=c%100;
+    if(c<=10) return O[c]+" "+few;
+    if(r>=3&&r<=10&&c>100) return w999(c-r)+" و"+O[r]+" "+few;
+    return w999(c,true)+" "+(r>=11&&r<=99?acc:many);
+  }
+  var parts=[], m=Math.floor(n/1e6), k=Math.floor(n/1000)%1000, r=n%1000;
+  if(m) parts.push(grp(m,"مليون","مليونان","ملايين","مليون","مليوناً"));
+  if(k) parts.push(grp(k,"ألف","ألفان","آلاف","ألف","ألفاً"));
+  if(r) parts.push(w999(r));
+  return parts.join(" و");
+}
+function maskBank(b){ var d=toEn(b||"").replace(/\D/g,""); return d.length>4?"•••• "+d.slice(-4):(d||"—"); }
+function rid20(){ var a="abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789", s="", r=new Uint32Array(20); try{ crypto.getRandomValues(r); }catch(e){ for(var i=0;i<20;i++) r[i]=Math.floor(Math.random()*1e9); } for(var j=0;j<20;j++) s+=a[r[j]%a.length]; return s; }
+function rcItemsFrom(list){ return list.map(function(r){ return {d:r.deliveredAt||r.createdAt||0, t:(r.items||[]).map(function(i){return i.name+(i.qty>1?" × "+i.qty:"");}).join("، ").slice(0,90), c:numIn(r.commission)}; }).sort(function(a,b){return a.d-b.d;}); }
+function rcLink(id){ return baseUrl()+"/?rc="+id; }
+
+function openPay(id){
+  var m=mkById(id); if(!m) return; var d=mkDue(m); if(!d.length){ toast("لا توجد عمولات مستحقة"); return; }
+  payMid=id; payFile=null;
+  var amount=d.reduce(function(s,r){return s+numIn(r.commission);},0);
+  document.getElementById("pay-sum").innerHTML='<h3>🤝 '+esc(m.name)+'</h3><div class="sum-row"><span>عدد الطلبات</span><b>'+d.length+'</b></div><div class="sum-row"><span>🏦 بنكك</span><b dir="ltr">'+esc(m.bank||"")+'</b></div>'+(m.bankName?'<div class="sum-row"><span>اسم الحساب</span><b>'+esc(m.bankName)+'</b></div>':'')+'<div class="sum-row t"><span>المبلغ</span><span class="num" style="color:var(--ok)">'+money(amount)+'</span></div><button class="sbtn" style="margin-top:8px" onclick="copyText(\''+esc(m.bank||"")+'\')">📋 نسخ رقم الحساب</button>';
+  document.getElementById("pay-ref").value=""; document.getElementById("pay-img").value=""; document.getElementById("pay-err").textContent="";
+  var pv=document.getElementById("pay-prev"); pv.classList.add("hidden"); pv.removeAttribute("src");
+  var b=document.getElementById("pay-go"); b.disabled=false; b.textContent="✓ تأكيد وإصدار الإيصال";
+  openPage("pg-pay");
+}
+function payImgPick(inp){
+  payFile=(inp.files&&inp.files[0])||null; var pv=document.getElementById("pay-prev");
+  if(payFile){ pv.src=URL.createObjectURL(payFile); pv.classList.remove("hidden"); } else pv.classList.add("hidden");
+}
+async function confirmPay(){
+  var m=mkById(payMid), err=document.getElementById("pay-err"), b=document.getElementById("pay-go"); if(!m) return;
+  var d=mkDue(m); if(!d.length){ err.textContent="لا توجد عمولات مستحقة"; return; }
+  var amount=d.reduce(function(s,r){return s+numIn(r.commission);},0);
+  b.disabled=true; b.textContent="⏳ جارٍ التسجيل...";
+  var img="";
+  if(payFile){ try{ img=await uploadImage(payFile,1400); }catch(e){} if(!img) toast("تعذر رفع الصورة، يُصدر الإيصال بدونها"); }
+  var now=Date.now(), pid="PO-"+now, rid=rid20(), bankRef=toEn(document.getElementById("pay-ref").value||"").trim().slice(0,40);
+  var rc={id:rid,payoutId:pid,mid:m.id,name:String(m.name||""),amount:amount,count:d.length,items:rcItemsFrom(d),bankRef:bankRef,bankMask:maskBank(m.bank),img:img,paidAt:now};
+  try{
+    await setDoc(doc(db,"receipts",rid),rc);
+    await setDoc(doc(db,"payouts",pid),{id:pid,mid:m.id,code:m.code,amount:amount,refIds:d.map(function(r){return r.id;}),paidAt:now,rid:rid,bankRef:bankRef,img:img});
+    for(var i=0;i<d.length;i++){ await updateDoc(doc(db,"referrals",d[i].id),{status:"paid",paidAt:now,payoutId:pid}); }
+    if(m.payoutRequestAt) await updateDoc(doc(db,"marketers",m.id),{payoutRequestAt:0,payoutRequestAmount:0}).catch(function(){});
+  }catch(e){ b.disabled=false; b.textContent="✓ تأكيد وإصدار الإيصال"; err.textContent="تعذر التسجيل، تأكد من الإنترنت وأعد المحاولة"; return; }
+  toast("✓ تم تسجيل الدفعة وإصدار الإيصال");
+  rcCur=rc; renderReceipt(rc,m); swapPage("pg-pay","pg-rc");
+}
+async function openPayReceipt(pid){
+  var p=pays.filter(function(x){return x.id===pid;})[0]; if(!p) return;
+  if(p.rid){ openReceipt(p.rid); return; }
+  var m=mkById(p.mid), list=refs.filter(function(r){return r.payoutId===pid || (p.refIds||[]).indexOf(r.id)>-1;});
+  var rid=rid20(), rc={id:rid,payoutId:pid,mid:p.mid,name:m?String(m.name||""):"",amount:numIn(p.amount),count:(p.refIds||[]).length||list.length,items:rcItemsFrom(list),bankRef:p.bankRef||"",bankMask:maskBank(m&&m.bank),img:p.img||"",paidAt:p.paidAt||Date.now()};
+  try{ await setDoc(doc(db,"receipts",rid),rc); await updateDoc(doc(db,"payouts",pid),{rid:rid}); }catch(e){ toast("تعذر إصدار الإيصال"); return; }
+  rcCur=rc; renderReceipt(rc,m); openPage("pg-rc");
+}
+async function openReceipt(id){
+  var body=document.getElementById("rc-body"); body.innerHTML='<div class="card" style="text-align:center;color:var(--muted)">⏳ جارٍ فتح الإيصال...</div>'; openPage("pg-rc");
+  try{ var s=await getDoc(doc(db,"receipts",String(id))); if(!s.exists()){ body.innerHTML='<div class="card" style="text-align:center">لم نجد هذا الإيصال</div>'; return; } rcCur=s.data(); renderReceipt(rcCur, isAdmin?mkById(rcCur.mid):null); }
+  catch(e){ body.innerHTML='<div class="card" style="text-align:center">تعذر فتح الإيصال، تأكد من الإنترنت</div>'; }
+}
+function rcNo(rc){ return "R-"+String(rc.payoutId||"").replace(/\D/g,"").slice(-8); }
+function renderReceipt(rc,m){
+  var logo=(document.querySelector("#brand img")||{}).src||"";
+  var h='<div class="rc" id="rc-card"><div class="rc-hd">'+(logo?'<img src="'+logo+'" alt="">':'')+'<b>منصة الريان لخزانات المياه</b><small>إيصال صرف عمولة تسويق</small></div>'
+    +'<div class="rc-stamp">✓ مدفوع</div>'
+    +'<div class="rc-bd"><div class="rc-amt"><div class="v num">'+money(rc.amount)+'</div><div class="w">فقط '+esc(arWords(rc.amount))+' جنيه سوداني لا غير</div></div>'
+    +'<div class="rc-row"><span>رقم الإيصال</span><b dir="ltr">'+esc(rcNo(rc))+'</b></div>'
+    +'<div class="rc-row"><span>التاريخ</span><b>'+esc(fmtDate(rc.paidAt))+'</b></div>'
+    +'<div class="rc-row"><span>المستفيد</span><b>'+esc(rc.name)+'</b></div>'
+    +'<div class="rc-row"><span>حساب بنكك</span><b dir="ltr">'+esc(rc.bankMask||"—")+'</b></div>'
+    +(rc.bankRef?'<div class="rc-row"><span>رقم العملية</span><b dir="ltr">'+esc(rc.bankRef)+'</b></div>':'')
+    +'<div class="rc-row"><span>عدد الطلبات</span><b>'+(rc.count||0)+'</b></div>'
+    +((rc.items||[]).length?'<div class="rc-ords">'+rc.items.map(function(i,k){ return '<div><span>'+(k+1)+'. '+esc(i.d?new Date(i.d).toLocaleDateString("ar-EG",{day:"numeric",month:"short"}):"")+(i.t?' · '+esc(i.t):'')+'</span><b class="num">'+money(i.c)+'</b></div>'; }).join("")+'</div>':'')
+    +(rc.img?'<a href="'+esc(rc.img)+'" target="_blank" rel="noopener"><img class="rc-proof" src="'+esc(rc.img)+'" alt="إشعار التحويل"></a>':'')
+    +'</div><div class="rc-ft">💧 تسوّق معنا واكسب 5% · <a href="'+esc(baseUrl()+"/?join=1")+'">انضم وسوّق معنا ←</a></div></div>';
+  h+='<div class="grid2" style="margin-top:14px"><button class="btn btn-gold" onclick="rcShare()">📤 مشاركة</button><button class="btn btn-line" onclick="rcSaveImg()">🖼️ حفظ كصورة</button></div>';
+  if(isAdmin){ var ph=m&&m.phone; h+='<button class="btn btn-ok btn-block" style="margin-top:10px" '+(ph?'':'disabled')+' onclick="rcSendMk()">💬 أرسل الإيصال للمسوّق على واتساب</button>'; }
+  document.getElementById("rc-body").innerHTML=h;
+}
+function rcText(rc){ return "🧾 إيصال صرف عمولة من منصة الريان لخزانات المياه\nتم صرف "+money(rc.amount)+" لـ "+rc.name+" ✓\nسوّق معنا واكسب 5%: "+baseUrl()+"/?join=1"; }
+function rcSendMk(){
+  var rc=rcCur; if(!rc) return; var m=mkById(rc.mid); if(!m||!m.phone) return;
+  var msg="مرحباً "+m.name+" 👋\nتم تحويل عمولتك "+money(rc.amount)+" إلى حساب بنكك عن "+rc.count+" طلب ✓\nإيصالك:\n"+rcLink(rc.id)+"\nشكراً لجهودك مع منصة الريان لخزانات المياه 💧";
+  window.open("https://wa.me/"+waNum(m.phone)+"?text="+encodeURIComponent(msg),"_blank");
+}
+async function rcShare(){
+  var rc=rcCur; if(!rc) return; var url=rcLink(rc.id), txt=rcText(rc);
+  try{
+    var blob=await rcBlob(rc);
+    if(blob && navigator.canShare){ var f=new File([blob],"rayan-receipt-"+rcNo(rc)+".png",{type:"image/png"}); if(navigator.canShare({files:[f]})){ await navigator.share({files:[f],text:txt+"\n"+url}); return; } }
+  }catch(e){ if(e&&e.name==="AbortError") return; }
+  if(navigator.share){ navigator.share({text:txt,url:url}).catch(function(){}); return; }
+  window.open("https://wa.me/?text="+encodeURIComponent(txt+"\n"+url),"_blank");
+}
+async function rcSaveImg(){
+  var rc=rcCur; if(!rc) return;
+  var blob=await rcBlob(rc); if(!blob){ toast("تعذر إنشاء الصورة"); return; }
+  var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="rayan-receipt-"+rcNo(rc)+".png"; document.body.appendChild(a); a.click(); setTimeout(function(){ a.remove(); },500);
+  toast("✓ حُفظت صورة الإيصال");
+}
+function rcBlob(rc){ return new Promise(function(res){
+  try{
+    var W=1080, items=(rc.items||[]).slice(0,12), H=1180+items.length*58+(rc.bankRef?70:0);
+    var cv=document.createElement("canvas"); cv.width=W; cv.height=H; var x=cv.getContext("2d");
+    var F='"Tajawal","Cairo","Noto Kufi Arabic","Segoe UI",sans-serif';
+    x.fillStyle="#EEF2F8"; x.fillRect(0,0,W,H);
+    function rr(px,py,w,h,r){ x.beginPath(); x.moveTo(px+r,py); x.arcTo(px+w,py,px+w,py+h,r); x.arcTo(px+w,py+h,px,py+h,r); x.arcTo(px,py+h,px,py,r); x.arcTo(px,py,px+w,py,r); x.closePath(); }
+    rr(40,40,W-80,H-80,40); x.fillStyle="#fff"; x.fill(); x.save(); rr(40,40,W-80,H-80,40); x.clip();
+    var g=x.createLinearGradient(0,40,W,360); g.addColorStop(0,"#2B4A80"); g.addColorStop(1,"#12203A"); x.fillStyle=g; x.fillRect(40,40,W-80,330);
+    x.fillStyle="#C9933A"; x.fillRect(40,366,W-80,8);
+    x.direction="rtl"; x.textAlign="center"; x.fillStyle="#fff"; x.font="900 50px "+F; x.fillText("منصة الريان لخزانات المياه",W/2,270);
+    x.fillStyle="#F2CE73"; x.font="800 34px "+F; x.fillText("إيصال صرف عمولة تسويق",W/2,325);
+    var y=470; x.fillStyle="#1E8E5A"; x.font="900 92px "+F; x.fillText(money(rc.amount),W/2,y);
+    x.fillStyle="#6B7488"; x.font="700 30px "+F; var wd="فقط "+arWords(rc.amount)+" جنيه سوداني لا غير";
+    var lines=[], cur=""; wd.split(" ").forEach(function(t){ var tt=cur?cur+" "+t:t; if(x.measureText(tt).width>W-200){ lines.push(cur); cur=t; } else cur=tt; }); if(cur) lines.push(cur);
+    lines.slice(0,2).forEach(function(l,i){ x.fillText(l,W/2,y+60+i*42); });
+    y+=60+Math.min(lines.length,2)*42+20;
+    x.strokeStyle="#DDE3EC"; x.setLineDash([12,10]); x.lineWidth=3; x.beginPath(); x.moveTo(90,y); x.lineTo(W-90,y); x.stroke(); x.setLineDash([]);
+    y+=70;
+    var rows=[["رقم الإيصال",rcNo(rc)],["التاريخ",fmtDate(rc.paidAt)],["المستفيد",rc.name],["حساب بنكك",rc.bankMask||"—"]];
+    if(rc.bankRef) rows.push(["رقم العملية",rc.bankRef]); rows.push(["عدد الطلبات",String(rc.count||0)]);
+    rows.forEach(function(r){ x.textAlign="right"; x.fillStyle="#6B7488"; x.font="700 32px "+F; x.fillText(r[0],W-100,y); x.textAlign="left"; x.fillStyle="#12203A"; x.font="800 34px "+F; x.fillText(r[1],100,y); x.strokeStyle="#F1F3F7"; x.lineWidth=2; x.beginPath(); x.moveTo(90,y+24); x.lineTo(W-90,y+24); x.stroke(); y+=70; });
+    y+=6;
+    items.forEach(function(it,k){ var lbl=(k+1)+". "+(it.d?new Date(it.d).toLocaleDateString("ar-EG",{day:"numeric",month:"short"}):"")+(it.t?" · "+it.t:""); x.textAlign="right"; x.fillStyle="#3A465C"; x.font="600 27px "+F; while(x.measureText(lbl).width>W-460&&lbl.length>8) lbl=lbl.slice(0,-2); x.fillText(lbl,W-100,y); x.textAlign="left"; x.font="800 28px "+F; x.fillText(money(it.c),100,y); y+=58; });
+    x.save(); x.translate(175,145); x.rotate(-0.22); rr(-118,-46,236,86,20); x.fillStyle="#fff"; x.fill(); x.strokeStyle="#1E8E5A"; x.lineWidth=6; x.stroke(); x.fillStyle="#1E8E5A"; x.textAlign="center"; x.font="900 46px "+F; x.fillText("✓ مدفوع",0,14); x.restore();
+    x.fillStyle="#FFF6E3"; x.fillRect(40,H-170,W-80,130); x.textAlign="center"; x.fillStyle="#1A2744"; x.font="800 32px "+F; x.fillText("💧 سوّق معنا واكسب 5% · انضم الآن",W/2,H-112); x.fillStyle="#C9933A"; x.font="800 30px "+F; x.direction="ltr"; x.fillText(baseUrl().replace(/^https?:\/\//,"")+"/?join=1",W/2,H-66);
+    x.restore();
+    var lg=document.querySelector("#brand img");
+    function done(){ cv.toBlob(function(b){ res(b); },"image/png"); }
+    if(lg&&lg.complete&&lg.naturalWidth){ x.save(); rr(W/2-70,82,140,140,30); x.clip(); x.drawImage(lg,W/2-70,82,140,140); x.restore(); }
+    done();
+  }catch(e){ res(null); }
+}); }
+Object.assign(window,{openPay,payImgPick,confirmPay,openPayReceipt,openReceipt,rcShare,rcSaveImg,rcSendMk});
 // ══════════════ طلب صرف العمولة من المسوّق ══════════════
 function isPayReq(m){ return !!(m && numIn(m.payoutRequestAt)); }
 function mkPayBox(due){
