@@ -704,7 +704,7 @@ textarea.inp{height:auto;min-height:84px;padding:11px 13px;resize:vertical;line-
   <div class="pbody">
     <div class="card" style="background:linear-gradient(120deg,var(--navy3),var(--navy));color:#fff">
       <h3 style="font-size:1.2rem">🤝 كن مسوّقاً لمنصة الريان لخزانات المياه</h3>
-      <p style="font-size:0.88rem;opacity:.9;line-height:1.9">شارك روابط خزاناتنا مع معارفك وفي قروبات واتساب وفيسبوك، واكسب <b style="color:var(--gold2)">5%</b> من قيمة كل خزان يُطلب عن طريقك، وتطلب صرفها على بنكك متى شئت.</p>
+      <p style="font-size:0.88rem;opacity:.9;line-height:1.9">شارك روابط خزاناتنا مع معارفك وفي قروبات واتساب وفيسبوك، واكسب <b style="color:var(--gold2)">عمولة</b> على كل خزان يُطلب عن طريقك، وتطلب صرفها على بنكك متى شئت.</p>
     </div>
     <div class="card">
       <h3>👤 بياناتك</h3>
@@ -722,7 +722,7 @@ textarea.inp{height:auto;min-height:84px;padding:11px 13px;resize:vertical;line-
     <div class="card">
       <h3>📜 شروط المسوّق</h3>
       <ol style="padding-inline-start:18px;font-size:0.82rem;line-height:1.95;color:#344054">
-        <li>العمولة 5% من قيمة الخزانات بدون التوصيل، للطلبات التي تأتي عن طريق روابطك فقط.</li>
+        <li>تُحسب العمولة على قيمة الخزانات بدون التوصيل، للطلبات التي تأتي عن طريق روابطك أو تسجّلها أنت.</li>
         <li>تُستحق العمولة فور تسليم الطلب، وتُلغى إذا أُلغي الطلب.</li>
         <li>تطلب صرف رصيدك المستحق على بنكك متى شئت، دون حد أدنى، وقد تصرفه المنصة لك دورياً دون طلب.</li>
         <li>لا تقدّم نفسك موظفاً في المنصة، ولا تَعِد الزبائن بأسعار أو خصومات غير المعلنة.</li>
@@ -1909,7 +1909,7 @@ function renderMDash(){
   myRefs.forEach(function(r){ var s=refState(r); if(s.k!=="void"){ cnt++; sum[s.k]=(sum[s.k]||0)+numIn(r.commission); } if(s.k==="due"||s.k==="paid"||s.k==="review") delivered++; });
   var clicks=numIn(myStats.clicks), conv=clicks?Math.round(cnt/clicks*1000)/10:0;
   var list=sortList(tanks().filter(function(p){return !p.outOfStock;}),"cap-asc");
-  b.innerHTML='<div class="card" style="background:linear-gradient(120deg,var(--navy3),var(--navy));color:#fff"><div style="font-size:0.84rem;opacity:.85">أهلاً</div><h3 style="font-size:1.2rem;margin:0">'+esc(meMk.name)+' 👋</h3><div style="font-size:0.78rem;opacity:.8;margin-top:4px">عمولتك 5% من قيمة الخزانات · تطلب صرفها متى شئت</div></div>'
+  b.innerHTML='<div class="card" style="background:linear-gradient(120deg,var(--navy3),var(--navy));color:#fff"><div style="font-size:0.84rem;opacity:.85">أهلاً</div><h3 style="font-size:1.2rem;margin:0">'+esc(meMk.name)+' 👋</h3><div style="font-size:0.78rem;opacity:.8;margin-top:4px">عمولة على كل خزان يُباع عن طريقك · تطلب صرفها متى شئت</div></div>'
     +'<div class="kpis"><div class="kpi"><span>زيارات روابطك</span><b class="num">'+clicks+'</b></div><div class="kpi"><span>الطلبات</span><b class="num">'+cnt+'</b></div><div class="kpi"><span>تواصلوا عبر واتساب</span><b class="num">'+myContacts+'</b></div><div class="kpi"><span>نسبة التحويل</span><b class="num">'+conv+'%</b></div></div>'
     +'<button class="btn btn-gold btn-block" style="margin-bottom:14px" onclick="openMkOrder()">➕ سجّل طلب زبون</button>'
     +'<div class="card"><h3>💰 رصيدك</h3>'
@@ -1924,7 +1924,7 @@ function renderMDash(){
     +'<div class="card"><h3>✍️ منشورات جاهزة</h3>'+MK_TPL.map(function(t,i){ return '<div style="background:var(--bg);border-radius:12px;padding:11px;margin-bottom:8px;white-space:pre-wrap;font-size:0.84rem;line-height:1.85">'+esc(t.replace("{link}","🔗 (رابطك)"))+'<div style="margin-top:6px"><button class="sbtn blue" data-i="'+i+'" onclick="mkCopy(\'tpl\',this.dataset.i)">📋 نسخ المنشور مع رابطك</button></div></div>'; }).join("")+'</div>'
     +'<div class="card"><h3>🧾 طلباتك</h3>'+(myRefs.length?myRefs.map(function(r){ var s=refState(r); return '<div class="cl" style="align-items:flex-start"><div class="cx"><b>'+esc((r.items||[]).map(function(i){return i.name+" × "+i.qty;}).join("، "))+'</b><span>'+esc(fmtDate(r.createdAt))+(r.byMk?' · 📝 سجّلته أنت'+(r.cust?' ('+esc(r.cust)+')':''):r.manual?' · 💬 عن طريق واتساب':'')+'</span><div style="font-size:0.78rem;font-weight:800;color:var(--navy2);margin-top:3px">مرحلة الطلب: '+esc(ORD_STAGE[r.orderStatus||"new"]||"")+'</div><div style="margin-top:4px"><span class="st '+s.c+'">العمولة: '+esc(s.l)+'</span></div></div><b class="num" style="white-space:nowrap">'+(r.priceOnRequest&&!numIn(r.commission)?'تُحدد':money(r.commission))+'</b></div>'; }).join(""):'<div style="color:var(--muted);font-size:0.86rem">لا توجد طلبات بعد. شارك رابطك وابدأ 🚀</div>')+'</div>'
     +'<div class="card"><h3>💸 سجل الدفعات</h3>'+(myPays.length?myPays.map(function(p){ return '<div class="sum-row" style="align-items:center"><span>'+esc(fmtDate(p.paidAt))+' · '+(p.refIds||[]).length+' طلب<br><b class="num">'+money(p.amount)+'</b></span>'+(p.rid?'<button class="sbtn" data-id="'+esc(p.rid)+'" onclick="openReceipt(this.dataset.id)">🧾 الإيصال</button>':'')+'</div>'; }).join(""):'<div style="color:var(--muted);font-size:0.86rem">لا توجد دفعات بعد</div>')+'</div>'
-    +'<details class="card"><summary style="font-weight:900;cursor:pointer">📜 شروط المسوّق</summary><ol style="padding-inline-start:18px;font-size:0.82rem;line-height:1.95;color:#344054;margin-top:8px"><li>العمولة 5% من قيمة الخزانات بدون التوصيل، للطلبات التي تأتي عن طريق روابطك فقط.</li><li>تُستحق فور تسليم الطلب، وتُلغى إذا أُلغي الطلب.</li><li>تطلب صرف رصيدك المستحق متى شئت، دون حد أدنى.</li><li>تستطيع تسجيل طلب زبون اتفقت معه مباشرة (حتى '+MKO_DAY_MAX+' طلبات يومياً) وتكتب عمولتك فيه، وتُعتمد بعد تأكيد الزبون والتسليم. للمنصة تعديلها أو إلغاؤها إن تبيّن أن الزبون جاء من غيرك.</li><li>لا تقدّم نفسك موظفاً في المنصة، ولا تَعِد بأسعار أو خصومات غير المعلنة.</li><li>لا تطلب لنفسك عن طريق رابطك.</li><li>للمنصة حق تعديل العمولة بإشعار مسبق، وإيقاف الحساب عند المخالفة.</li></ol></details>';
+    +'<details class="card"><summary style="font-weight:900;cursor:pointer">📜 شروط المسوّق</summary><ol style="padding-inline-start:18px;font-size:0.82rem;line-height:1.95;color:#344054;margin-top:8px"><li>تُحسب العمولة على قيمة الخزانات بدون التوصيل، للطلبات التي تأتي عن طريق روابطك أو تسجّلها أنت.</li><li>تُستحق فور تسليم الطلب، وتُلغى إذا أُلغي الطلب.</li><li>تطلب صرف رصيدك المستحق متى شئت، دون حد أدنى.</li><li>تستطيع تسجيل طلب زبون اتفقت معه مباشرة (حتى '+MKO_DAY_MAX+' طلبات يومياً) وتكتب عمولتك فيه، وتُعتمد بعد تأكيد الزبون والتسليم. للمنصة تعديلها أو إلغاؤها إن تبيّن أن الزبون جاء من غيرك.</li><li>لا تقدّم نفسك موظفاً في المنصة، ولا تَعِد بأسعار أو خصومات غير المعلنة.</li><li>لا تطلب لنفسك عن طريق رابطك.</li><li>للمنصة حق تعديل العمولة بإشعار مسبق، وإيقاف الحساب عند المخالفة.</li></ol></details>';
 }
 
 // ── لوحة المالك: المسوّقون ──
@@ -1982,7 +1982,7 @@ function admMarketers(){
 }
 function approveMk(id){
   var m=mkById(id); if(!m) return;
-  var msg="مرحباً "+m.name+" 👋\nتم قبولك مسوّقاً في منصة الريان لخزانات المياه ✓\n\n🔗 رابطك للمشاركة:\n"+baseUrl()+"/?s="+m.code+"\n\n📊 صفحتك (الرصيد والطلبات وروابط كل الخزانات):\n"+baseUrl()+"/?m=1\nادخل برقمك والرمز السري الذي اخترته.\n\nعمولتك 5% من قيمة الخزانات، وتطلب صرفها من صفحتك متى شئت. بالتوفيق 🤝";
+  var msg="مرحباً "+m.name+" 👋\nتم قبولك مسوّقاً في منصة الريان لخزانات المياه ✓\n\n🔗 رابطك للمشاركة:\n"+baseUrl()+"/?s="+m.code+"\n\n📊 صفحتك (الرصيد والطلبات وروابط كل الخزانات):\n"+baseUrl()+"/?m=1\nادخل برقمك والرمز السري الذي اخترته.\n\nلك عمولة على كل خزان يُباع عن طريقك، وتطلب صرفها من صفحتك متى شئت. بالتوفيق 🤝";
   var w=window.open("https://wa.me/"+waNum(m.phone)+"?text="+encodeURIComponent(msg),"_blank");
   updateDoc(doc(db,"marketers",id),{status:"approved",approvedAt:Date.now()}).then(function(){ toast("✓ تم اعتماد المسوّق"); }).catch(function(){ toast("تعذر الاعتماد، تأكد من نشر القواعد"); });
 }
@@ -2169,12 +2169,12 @@ function renderReceipt(rc,m){
     +'<div class="rc-row"><span>عدد الطلبات</span><b>'+(rc.count||0)+'</b></div>'
     +((rc.items||[]).length?'<div class="rc-ords">'+rc.items.map(function(i,k){ return '<div><span>'+(k+1)+'. '+esc(i.d?new Date(i.d).toLocaleDateString("ar-EG",{day:"numeric",month:"short"}):"")+(i.t?' · '+esc(i.t):'')+'</span><b class="num">'+money(i.c)+'</b></div>'; }).join("")+'</div>':'')
     +(rc.img?'<a href="'+esc(rc.img)+'" target="_blank" rel="noopener"><img class="rc-proof" src="'+esc(rc.img)+'" alt="إشعار التحويل"></a>':'')
-    +'</div><div class="rc-ft">💧 تسوّق معنا واكسب 5% · <a href="'+esc(baseUrl()+"/?join=1")+'">انضم وسوّق معنا ←</a></div></div>';
+    +'</div><div class="rc-ft">💧 سوّق معنا واكسب عمولة · <a href="'+esc(baseUrl()+"/?join=1")+'">انضم الآن ←</a></div></div>';
   h+='<div class="grid2" style="margin-top:14px"><button class="btn btn-gold" onclick="rcShare()">📤 مشاركة</button><button class="btn btn-line" onclick="rcSaveImg()">🖼️ حفظ كصورة</button></div>';
   if(isAdmin){ var ph=m&&m.phone; h+='<button class="btn btn-ok btn-block" style="margin-top:10px" '+(ph?'':'disabled')+' onclick="rcSendMk()">💬 أرسل الإيصال للمسوّق على واتساب</button>'; }
   document.getElementById("rc-body").innerHTML=h;
 }
-function rcText(rc){ return "🧾 إيصال صرف عمولة من منصة الريان لخزانات المياه\nتم صرف "+money(rc.amount)+" لـ "+rc.name+" ✓\nسوّق معنا واكسب 5%: "+baseUrl()+"/?join=1"; }
+function rcText(rc){ return "🧾 إيصال صرف عمولة من منصة الريان لخزانات المياه\nتم صرف "+money(rc.amount)+" لـ "+rc.name+" ✓\nسوّق معنا واكسب عمولة: "+baseUrl()+"/?join=1"; }
 function rcSendMk(){
   var rc=rcCur; if(!rc) return; var m=mkById(rc.mid); if(!m||!m.phone) return;
   var msg="مرحباً "+m.name+" 👋\nتم تحويل عمولتك "+money(rc.amount)+" إلى حساب بنكك عن "+rc.count+" طلب ✓\nإيصالك:\n"+rcLink(rc.id)+"\nشكراً لجهودك مع منصة الريان لخزانات المياه 💧";
@@ -2184,10 +2184,10 @@ async function rcShare(){
   var rc=rcCur; if(!rc) return; var url=rcLink(rc.id), txt=rcText(rc);
   try{
     var blob=await rcBlob(rc);
-    if(blob && navigator.canShare){ var f=new File([blob],"rayan-receipt-"+rcNo(rc)+".png",{type:"image/png"}); if(navigator.canShare({files:[f]})){ await navigator.share({files:[f],text:txt+"\n"+url}); return; } }
+    if(blob && navigator.canShare){ var f=new File([blob],"rayan-receipt-"+rcNo(rc)+".png",{type:"image/png"}); if(navigator.canShare({files:[f]})){ await navigator.share({files:[f]}); return; } }
   }catch(e){ if(e&&e.name==="AbortError") return; }
-  if(navigator.share){ navigator.share({text:txt,url:url}).catch(function(){}); return; }
-  window.open("https://wa.me/?text="+encodeURIComponent(txt+"\n"+url),"_blank");
+  if(navigator.share){ navigator.share({url:url}).catch(function(){}); return; }
+  window.open("https://wa.me/?text="+encodeURIComponent(url),"_blank");
 }
 async function rcSaveImg(){
   var rc=rcCur; if(!rc) return;
@@ -2220,7 +2220,7 @@ function rcBlob(rc){ return new Promise(function(res){
     y+=6;
     items.forEach(function(it,k){ var lbl=(k+1)+". "+(it.d?new Date(it.d).toLocaleDateString("ar-EG",{day:"numeric",month:"short"}):"")+(it.t?" · "+it.t:""); x.textAlign="right"; x.fillStyle="#3A465C"; x.font="600 27px "+F; while(x.measureText(lbl).width>W-460&&lbl.length>8) lbl=lbl.slice(0,-2); x.fillText(lbl,W-100,y); x.textAlign="left"; x.font="800 28px "+F; x.fillText(money(it.c),100,y); y+=58; });
     x.save(); x.translate(175,145); x.rotate(-0.22); rr(-118,-46,236,86,20); x.fillStyle="#fff"; x.fill(); x.strokeStyle="#1E8E5A"; x.lineWidth=6; x.stroke(); x.fillStyle="#1E8E5A"; x.textAlign="center"; x.font="900 46px "+F; x.fillText("✓ مدفوع",0,14); x.restore();
-    x.fillStyle="#FFF6E3"; x.fillRect(40,H-170,W-80,130); x.textAlign="center"; x.fillStyle="#1A2744"; x.font="800 32px "+F; x.fillText("💧 سوّق معنا واكسب 5% · انضم الآن",W/2,H-112); x.fillStyle="#C9933A"; x.font="800 30px "+F; x.direction="ltr"; x.fillText(baseUrl().replace(/^https?:\/\//,"")+"/?join=1",W/2,H-66);
+    x.fillStyle="#FFF6E3"; x.fillRect(40,H-170,W-80,130); x.textAlign="center"; x.fillStyle="#1A2744"; x.font="800 32px "+F; x.fillText("💧 سوّق معنا واكسب عمولة · انضم الآن",W/2,H-112); x.fillStyle="#C9933A"; x.font="800 30px "+F; x.direction="ltr"; x.fillText(baseUrl().replace(/^https?:\/\//,"")+"/?join=1",W/2,H-66);
     x.restore();
     var lg=document.querySelector("#brand img");
     function done(){ cv.toBlob(function(b){ res(b); },"image/png"); }
@@ -2280,7 +2280,7 @@ function mkoTotals(){
 }
 function mkoSum(){
   var t=mkoTotals(), c=numIn(document.getElementById("mk-o-comm").value);
-  document.getElementById("mk-o-hint").textContent=t.sub?("العمولة المعتادة 5% = "+money(Math.round(t.sub*REF_RATE))+(c?" · ما كتبته يساوي "+(Math.round(c/t.sub*1000)/10)+"% من قيمة الخزانات":"")):"";
+  document.getElementById("mk-o-hint").textContent=(t.sub&&c)?("قيمة الخزانات "+money(t.sub)+" · عمولتك "+money(c)):"";
   document.getElementById("mk-o-sum").innerHTML='<div class="sum-row"><span>الخزانات</span><b class="num">'+money(t.sub)+'</b></div>'
     +'<div class="sum-row"><span>التوصيل</span>'+(!t.zone?'<span style="color:var(--muted)">اختر المنطقة</span>':t.fee===null?'<span style="color:var(--gold);font-weight:800">يُحدد عند التأكيد</span>':t.fee?'<b class="num">'+money(t.fee)+'</b>':'<span class="free">مجاني</span>')+'</div>'
     +'<div class="sum-row t"><span>الإجمالي</span><span class="num">'+money(t.sub+(t.fee||0))+'</span></div>'
