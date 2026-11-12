@@ -860,6 +860,24 @@ textarea.inp{height:auto;min-height:84px;padding:11px 13px;resize:vertical;line-
   </div>
 </div>
 
+<!-- ═══ زبون سابق (تسجيل عام / إضافة من المالك) ═══ -->
+<div class="page hidden" id="pg-old">
+  <div class="pbar"><div class="wrap"><button class="back" onclick="history.back()">→ رجوع</button><div class="pt" id="old-title">زبون سابق</div><div class="pa"></div></div></div>
+  <div class="pbody" style="max-width:520px">
+    <div class="card" id="old-intro" style="text-align:center;line-height:1.9"></div>
+    <div class="card" id="old-form">
+      <div class="fld"><label>الاسم</label><input class="inp" id="old-name" maxlength="60"></div>
+      <div class="fld"><label>رقم الهاتف</label><div class="phone-row"><select class="inp" id="old-cc"><option value="+249">🇸🇩 +249</option><option value="+966">🇸🇦 +966</option><option value="+971">🇦🇪 +971</option><option value="+20">🇪🇬 +20</option></select><input class="inp" id="old-phone" inputmode="tel" placeholder="912345678"></div></div>
+      <div class="fld"><label>الخزان الذي اشتريته</label><select class="inp" id="old-prod"></select></div>
+      <div class="grid2"><div class="fld"><label>العدد</label><input class="inp" id="old-qty" inputmode="numeric" value="1"></div><div class="fld"><label>تاريخ الشراء التقريبي</label><input class="inp" id="old-when" placeholder="مثال: مارس 2025"></div></div>
+      <div class="fld"><label>المدينة / المنطقة</label><input class="inp" id="old-city" maxlength="40" placeholder="مثال: بحري - الشعبية"></div>
+      <div class="fld"><label>ملاحظة <small>(اختياري)</small></label><input class="inp" id="old-note" maxlength="120"></div>
+    </div>
+    <div class="err" id="old-err"></div>
+    <button class="btn btn-gold btn-block" id="old-go" onclick="oldSave()">إرسال</button>
+  </div>
+</div>
+
 <!-- ═══ تقييم الطلب (رابط عام) ═══ -->
 <div class="page hidden" id="pg-rv">
   <div class="pbar"><div class="wrap"><button class="back" onclick="history.back()">→ رجوع</button><div class="pt">قيّم طلبك</div><div class="pa"></div></div></div>
@@ -1537,6 +1555,7 @@ function handleDeepLinks(){
   else if(sp.get("rc")) openReceipt(sp.get("rc"));
   else if(sp.get("dn")) openDelivery(sp.get("dn"));
   else if(sp.get("rv")) openRate(sp.get("rv"));
+  else if(sp.get("old")) openOld(false);
 }
 
 document.getElementById("yr").textContent=new Date().getFullYear();
@@ -1609,6 +1628,7 @@ function startAdmin(){
   startAdminRef();
   admUnsub.push(onSnapshot(collection(db,"tankQuotes"),function(snap){ quotes=snap.docs.map(function(d){return d.data();}).sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);}); renderAdminIfOpen(); },function(){}));
 }
+function realOrders(){ return orders.filter(function(o){return !o.legacy;}); }
 function isTankOrder(o){ return o.source==="tanks" || (storeId && (o.items||[]).some(function(i){return i.sellerId===storeId;})); }
 function openAdmin(){ openPage("pg-admin"); renderAdmin(); }
 function renderAdminIfOpen(){ if(!isOpen("pg-admin")) return; if(["settings","delivery","reviews"].indexOf(admTab)>-1){ var keep=document.getElementById("adm-body").innerHTML; renderAdmin(); if(admTab!=="reviews") document.getElementById("adm-body").innerHTML=keep; } else renderAdmin(); }
@@ -1616,7 +1636,7 @@ window.__admRender=renderAdminIfOpen;
 function setAdmTab(t){ admTab=t; renderAdmin(); document.getElementById("pg-admin").scrollTop=0; }
 function renderAdmin(){
   var nNew=orders.filter(function(o){return o.status==="new";}).length, nQ=quotes.filter(function(q){return q.status!=="done";}).length;
-  var tabs=[["orders","📦 الطلبات",nNew],["products","💧 الخزانات",0],["delivery","🚚 التوصيل",0],["settings","⚙️ الإعدادات",0],["reviews","⭐ التقييمات",allRevs.filter(function(r){return r.status==="pending";}).length],["quotes","🏗️ عروض الأسعار",nQ],["marketers","🤝 المسوّقون",mks.filter(function(m){return m.status==="pending"||(m.status==="approved"&&isPayReq(m));}).length],["stats","📊 الإحصائيات",0]];
+  var tabs=[["orders","📦 الطلبات",nNew],["products","💧 الخزانات",0],["delivery","🚚 التوصيل",0],["settings","⚙️ الإعدادات",0],["reviews","⭐ التقييمات",allRevs.filter(function(r){return r.status==="pending";}).length+oldRegs.filter(function(r){return r.status==="pending";}).length],["quotes","🏗️ عروض الأسعار",nQ],["marketers","🤝 المسوّقون",mks.filter(function(m){return m.status==="pending"||(m.status==="approved"&&isPayReq(m));}).length],["stats","📊 الإحصائيات",0]];
   document.getElementById("atabs").innerHTML=tabs.map(function(t){return '<button class="atab'+(admTab===t[0]?' on':'')+'" data-t="'+t[0]+'" onclick="setAdmTab(this.dataset.t)">'+t[1]+(t[2]?'<span class="dot">'+t[2]+'</span>':'')+'</button>';}).join("");
   var b=document.getElementById("adm-body");
   if(admTab==="orders") b.innerHTML=admOrders();
@@ -1633,9 +1653,11 @@ function renderAdmin(){
 const NEXT={new:["confirmed","✓ تأكيد الطلب","ok"],confirmed:["shipping","🚚 خرج للتوصيل","blue"],shipping:["delivered","✅ تم التسليم","ok"]};
 function setOrdFilter(f){ ordFilter=f; renderAdmin(); }
 function admOrders(){
-  var cnt=function(s){return orders.filter(function(o){return o.status===s;}).length;};
-  var F=[["active","النشطة",cnt("new")+cnt("confirmed")+cnt("shipping")],["new","جديد",cnt("new")],["confirmed","مؤكد",cnt("confirmed")],["shipping","في التوصيل",cnt("shipping")],["delivered","تم التسليم",cnt("delivered")],["cancelled","ملغي",cnt("cancelled")],["all","الكل",orders.length]];
-  var list=orders.filter(function(o){ return ordFilter==="all"||(ordFilter==="active"?["new","confirmed","shipping"].indexOf(o.status)>-1:o.status===ordFilter); });
+  var R=realOrders(), nL=orders.length-R.length;
+  var cnt=function(s){return R.filter(function(o){return o.status===s;}).length;};
+  var F=[["active","النشطة",cnt("new")+cnt("confirmed")+cnt("shipping")],["new","جديد",cnt("new")],["confirmed","مؤكد",cnt("confirmed")],["shipping","في التوصيل",cnt("shipping")],["delivered","تم التسليم",cnt("delivered")],["cancelled","ملغي",cnt("cancelled")],["all","الكل",R.length]];
+  if(nL) F.push(["legacy","🕓 قبل المنصة",nL]);
+  var list=ordFilter==="legacy"?orders.filter(function(o){return o.legacy;}):R.filter(function(o){ return ordFilter==="all"||(ordFilter==="active"?["new","confirmed","shipping"].indexOf(o.status)>-1:o.status===ordFilter); });
   return rateRemindHtml()+'<button class="btn btn-gold btn-block" onclick="openMOrder()" style="margin-bottom:12px;height:46px">➕ طلب يدوي (واتساب / اتصال)</button>'
     +'<div class="chips" style="margin-bottom:10px">'+F.map(function(f){return '<button class="chip'+(ordFilter===f[0]?' on':'')+'" data-f="'+f[0]+'" onclick="setOrdFilter(this.dataset.f)">'+f[1]+' ('+f[2]+')</button>';}).join("")+'</div>'
     +(list.length?list.map(ordCard).join(""):'<div class="empty"><div class="ei">📦</div><b>لا توجد طلبات هنا</b></div>');
@@ -1644,7 +1666,7 @@ function ordCard(o){
   var st=o.status||"new", nx=NEXT[st];
   var items=(o.items||[]).map(function(i){return '• '+esc(i.name)+' × '+i.qty+(i.priceOnRequest?' (عند الطلب)':' = '+money((i.price||0)*i.qty));}).join("<br>");
   return '<div class="ord s-'+esc(st)+'">'
-    +'<div class="oh"><b class="num" dir="ltr">'+esc(o.id)+'</b><span>'+((o.shipKind==="state"||isStateZ(zoneByName(o.city)))?'<span class="st" style="background:#E6F1FB;color:#1C5D99;margin-left:4px">🚛 ولاية</span>':'')+(o.byMk?'<span class="st" style="background:#F1E9FB;color:#6B3FA0;margin-left:4px">🤝 رفعه المسوّق</span>':o.manual?'<span class="st" style="background:#F1E9FB;color:#6B3FA0;margin-left:4px">✍️ يدوي</span>':'')+'<span class="st st-'+esc(st)+'">'+esc(ST_L[st]||st)+'</span></span></div>'
+    +'<div class="oh"><b class="num" dir="ltr">'+esc(o.id)+'</b><span>'+(o.legacy?'<span class="st" style="background:#EEE7DC;color:#7A5A2B;margin-left:4px">🕓 قبل المنصة</span>':'')+((o.shipKind==="state"||isStateZ(zoneByName(o.city)))?'<span class="st" style="background:#E6F1FB;color:#1C5D99;margin-left:4px">🚛 ولاية</span>':'')+(o.byMk?'<span class="st" style="background:#F1E9FB;color:#6B3FA0;margin-left:4px">🤝 رفعه المسوّق</span>':o.manual?'<span class="st" style="background:#F1E9FB;color:#6B3FA0;margin-left:4px">✍️ يدوي</span>':'')+'<span class="st st-'+esc(st)+'">'+esc(ST_L[st]||st)+'</span></span></div>'
     +'<div class="od">🕒 '+esc(fmtDate(o.createdAt))+'<br>👤 <b>'+esc(o.buyerName)+'</b> · <a href="tel:+'+waNum(o.buyerPhone)+'" dir="ltr" style="color:var(--water);font-weight:800">'+esc(o.buyerPhone)+'</a>'+(o.buyerPhone2?' · احتياطي <a href="tel:+'+waNum(o.buyerPhone2)+'" dir="ltr" style="color:var(--water);font-weight:800">'+esc(o.buyerPhone2)+'</a>':'')
     +'<br>📍 '+esc(o.buyerAddress||"")+(o.mapUrl?' · <a href="'+esc(o.mapUrl)+'" target="_blank" rel="noopener" style="color:var(--water);font-weight:800">الخريطة ↗</a>':'')
     +(o.notes?'<br>📝 '+esc(o.notes):'')
@@ -1655,7 +1677,7 @@ function ordCard(o){
     +'<div class="oa">'+(nx?'<button class="sbtn '+nx[2]+'" data-id="'+esc(o.id)+'" data-s="'+nx[0]+'" onclick="setOrderStatus(this.dataset.id,this.dataset.s)">'+nx[1]+'</button>':'')
     +'<button class="sbtn wa" data-id="'+esc(o.id)+'" onclick="waCustomer(this.dataset.id)">💬 واتساب الزبون</button>'
     +(st!=="cancelled"&&st!=="delivered"?'<button class="sbtn" data-id="'+esc(o.id)+'" onclick="editOrder(this.dataset.id)">✏️ تعديل</button>':'')
-    +(st==="delivered"?'<button class="sbtn ok" data-id="'+esc(o.id)+'" onclick="openDelivery(this.dataset.id)">📨 إشعار التسليم</button>'+(allRevs.some(function(r){return r.orderId===o.id;})?'<span class="sbtn" style="background:#FFF6E3;color:#A86F12">⭐ قيّمه الزبون</span>':'<button class="sbtn" style="background:#FFF6E3;color:#A86F12" data-id="'+esc(o.id)+'" onclick="shareRate(this.dataset.id)">⭐ مشاركة رابط التقييم</button>'):'')
+    +(st==="delivered"?(o.legacy?'':'<button class="sbtn ok" data-id="'+esc(o.id)+'" onclick="openDelivery(this.dataset.id)">📨 إشعار التسليم</button>')+(allRevs.some(function(r){return r.orderId===o.id;})?'<span class="sbtn" style="background:#FFF6E3;color:#A86F12">⭐ قيّمه الزبون</span>':'<button class="sbtn" style="background:#FFF6E3;color:#A86F12" data-id="'+esc(o.id)+'" onclick="shareRate(this.dataset.id)">⭐ مشاركة رابط التقييم</button>'):'')
     +(st!=="cancelled"&&st!=="delivered"?'<button class="sbtn bad" data-id="'+esc(o.id)+'" onclick="cancelOrder(this.dataset.id)">إلغاء</button>':'')
     +(st==="cancelled"?'<button class="sbtn" data-id="'+esc(o.id)+'" data-s="new" onclick="setOrderStatus(this.dataset.id,this.dataset.s)">↩ إرجاع</button>':'')
     +'</div></div>';
@@ -1829,7 +1851,7 @@ function testNotify(){ notifyAdmin("✅ تنبيه تجريبي من لوحة ا
 
 // ── آراء الزبائن ──
 var rvImg="";
-function admReviews(){ return admRevsHtml(); }
+function admReviews(){ return oldAdminHtml()+admRevsHtml(); }
 async function rvUpload(input){ var f=input.files[0]; if(!f) return; document.getElementById("rv-prev").textContent="⏳ جاري رفع الصورة…"; try{ rvImg=await uploadImage(f,1100); document.getElementById("rv-prev").innerHTML=rvImg?'<img src="'+esc(rvImg)+'" style="height:80px;border-radius:10px">':'فشل الرفع'; }catch(e){ document.getElementById("rv-prev").textContent="فشل الرفع"; } }
 async function rvSave(){
   var name=document.getElementById("rv-name").value.trim(), text=document.getElementById("rv-text").value.trim();
@@ -1854,7 +1876,7 @@ async function quoteDone(id){ try{ await updateDoc(doc(db,"tankQuotes",id),{stat
 // ── الإحصائيات ──
 function admStats(){
   var now=new Date(), d0=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime(), m0=new Date(now.getFullYear(),now.getMonth(),1).getTime();
-  var live=orders.filter(function(o){return o.status!=="cancelled";});
+  var live=realOrders().filter(function(o){return o.status!=="cancelled";});
   var today=live.filter(function(o){return (o.createdAt||0)>=d0;}), month=live.filter(function(o){return (o.createdAt||0)>=m0;});
   var deliveredM=month.filter(function(o){return o.status==="delivered";});
   var rev=deliveredM.reduce(function(s,o){return s+numIn(o.total);},0);
@@ -2053,6 +2075,7 @@ function startAdminRef(){
   admUnsub.push(onSnapshot(collection(db,"marketers"),function(s){ mks=s.docs.map(function(d){return d.data();}); renderAdminIfOpen(); },function(){}));
   admUnsub.push(onSnapshot(collection(db,"referrals"),function(s){ refs=s.docs.map(function(d){return d.data();}); renderAdminIfOpen(); },function(){}));
   admUnsub.push(onSnapshot(collection(db,"refStats"),function(s){ rstats={}; s.docs.forEach(function(d){ rstats[d.id]=numIn((d.data()||{}).clicks); }); renderAdminIfOpen(); },function(){}));
+  admUnsub.push(onSnapshot(collection(db,"oldCustomers"),function(s){ oldRegs=s.docs.map(function(d){return d.data();}); renderAdminIfOpen(); },function(){}));
   admUnsub.push(onSnapshot(collection(db,"reviews"),function(s){ allRevs=s.docs.map(function(d){return d.data();}); renderAdminIfOpen(); },function(){}));
   admUnsub.push(onSnapshot(collection(db,"payouts"),function(s){ pays=s.docs.map(function(d){return d.data();}); renderAdminIfOpen(); },function(){}));
   admUnsub.push(onSnapshot(collection(db,"refContacts"),function(s){ rcontacts=s.docs.map(function(d){return d.data();}).sort(function(a,b){return (b.at||0)-(a.at||0);}); renderAdminIfOpen(); if(isOpen("pg-morder")) moContacts(); },function(){}));
@@ -2419,7 +2442,7 @@ function admRevsHtml(){
         +(o&&o.buyerPhone?'<a class="sbtn" href="tel:+'+waNum(o.buyerPhone)+'">📞 اتصال</a>':'')+'<button class="sbtn bad" data-id="'+esc(r.orderId)+'" onclick="rvRemove(this.dataset.id)">🗑️</button></div></div>';
     }).join("");
 }
-function rateMsg(o){ return "السلام عليكم"+(o&&o.buyerName?" "+firstName(o.buyerName):"")+" 🌷\nنتمنى أن خزانك وصلك بخير 💧\nرأيك يهمنا — قيّم تجربتك مع منصة الريان لخزانات المياه في 10 ثوانٍ ⭐\n"+baseUrl()+"/?rv="+(o?o.id:""); }
+function rateMsg(o){ if(o&&o.legacy) return "السلام عليكم "+firstName(o.buyerName)+" 🌷\nاشتريت منا خزان سابقاً، وأطلقنا الآن منصة الريان لخزانات المياه 💧\nيسعدنا رأيك في الخزان والتعامل، والتقييم يأخذ 10 ثوانٍ ⭐\n"+baseUrl()+"/?rv="+o.id; return "السلام عليكم"+(o&&o.buyerName?" "+firstName(o.buyerName):"")+" 🌷\nنتمنى أن خزانك وصلك بخير 💧\nرأيك يهمنا — قيّم تجربتك مع منصة الريان لخزانات المياه في 10 ثوانٍ ⭐\n"+baseUrl()+"/?rv="+(o?o.id:""); }
 async function shareRate(id){
   var o=orders.find(function(x){return x.id===id;})||{id:id}, msg=rateMsg(o);
   if(navigator.share){ try{ await navigator.share({text:msg}); return; }catch(e){ if(e&&e.name==="AbortError") return; } }
@@ -2428,6 +2451,81 @@ async function shareRate(id){
 async function rvStatus(id,st){ try{ await updateDoc(doc(db,"reviews",id),{status:st}); toast(st==="shown"?"✓ ظهر التقييم":"✓ أُخفي التقييم"); }catch(e){ toast("تعذر التعديل"); } }
 async function rvRemove(id){ if(!confirm("حذف هذا التقييم نهائياً؟")) return; try{ await deleteDoc(doc(db,"reviews",id)); toast("تم الحذف"); }catch(e){ toast("تعذر الحذف"); } }
 Object.assign(window,{tellFriend,shareRate,openRate,rvSet,rvPick,rvSubmit,rvStatus,rvRemove});
+// ══════════════ الزبائن السابقون (قبل المنصة) ══════════════
+var oldRegs=[], oldAdminMode=false;
+function oldLink(){ return baseUrl()+"/?old=1"; }
+function openOld(admin){
+  oldAdminMode=!!admin && isAdmin;
+  document.getElementById("old-title").textContent=oldAdminMode?"دعوة زبون سابق للتقييم":"زبون سابق";
+  document.getElementById("old-intro").innerHTML=oldAdminMode
+    ?'<b>➕ زبون اشترى منك قبل المنصة</b><div style="color:var(--muted);font-size:0.84rem">نسجّله بوسم «قبل المنصة» (لا يدخل في المبيعات)، ثم يُفتح واتساب برابط التقييم لرقمه.</div>'
+    :'<div style="font-size:2.2rem">🌷</div><b>اشتريت منّا خزان قبل كده؟</b><div style="color:var(--muted);font-size:0.86rem">سجّل بياناتك، ونرسل لك رابط تقييم على واتساب بعد التأكد. رأيك يساعد غيرك يختار خزانه 💧</div>';
+  ["old-name","old-phone","old-when","old-city","old-note"].forEach(function(i){ document.getElementById(i).value=""; });
+  document.getElementById("old-qty").value="1"; document.getElementById("old-err").textContent="";
+  document.getElementById("old-prod").innerHTML='<option value="">— اختر الخزان —</option>'+moProducts().map(function(p){ var c=capOf(p); return '<option value="'+esc(p.id)+'">'+esc(p.name)+(c&&String(p.name).indexOf(String(c))<0?' · '+c+' لتر':'')+'</option>'; }).join("")+'<option value="other">خزان آخر / لا أذكر</option>';
+  document.getElementById("old-form").classList.remove("hidden");
+  var b=document.getElementById("old-go"); b.classList.remove("hidden"); b.disabled=false; b.textContent=oldAdminMode?"💾 حفظ وإرسال رابط التقييم":"📤 إرسال";
+  openPage("pg-old");
+}
+function oldRead(){
+  var g=function(i){return document.getElementById(i).value.trim();}, ph=toEn(g("old-phone")).replace(/\D/g,"").replace(/^0+/,"");
+  var pid=g("old-prod"), p=pid&&pid!=="other"?prodById(pid):null;
+  return {name:g("old-name").slice(0,60), phone:ph?document.getElementById("old-cc").value+ph:"", ok:/^\d{7,13}$/.test(ph), productId:p?p.id:"", productName:p?p.name:(pid==="other"?"خزان":""), qty:Math.max(1,Math.min(50,numIn(g("old-qty"))||1)), when:g("old-when").slice(0,30), city:g("old-city").slice(0,40), note:g("old-note").slice(0,120), pid:pid};
+}
+function oldOrderId(){ var A="23456789ABCDEFGHJKMNPQRSTUVWXYZ", r="", u=new Uint8Array(6); try{ crypto.getRandomValues(u); }catch(e){ for(var i=0;i<6;i++) u[i]=Math.floor(Math.random()*256); } for(var j=0;j<6;j++) r+=A[u[j]%A.length]; return "OLD-"+r; }
+async function oldMakeOrder(d){
+  var id=oldOrderId(), now=Date.now();
+  var o={id:id,source:"tanks",legacy:true,status:"delivered",buyerName:d.name,buyerPhone:d.phone,city:d.city,area:"",buyerAddress:d.city,legacyWhen:d.when||"",notes:d.note||"",
+    items:[{productId:d.productId||"",name:d.productName||"خزان",qty:d.qty||1,price:0,capacity:0}],subtotal:0,deliveryFee:0,deliveryState:"free",total:0,priceOnRequest:true,payment:"cod",
+    createdAt:now,deliveredAt:now,statusAt:now,rateAskedAt:now,date:new Date().toLocaleDateString("ar-EG")};
+  await setDoc(doc(db,"orders",id),o); return o;
+}
+async function oldSave(){
+  var d=oldRead(), e=document.getElementById("old-err"), b=document.getElementById("old-go");
+  if(!d.name){ e.textContent="اكتب الاسم"; return; }
+  if(!d.ok){ e.textContent="اكتب رقم هاتف صحيح"; return; }
+  if(!d.pid){ e.textContent="اختر الخزان"; return; }
+  if(!d.city){ e.textContent="اكتب المدينة أو المنطقة"; return; }
+  e.textContent=""; b.disabled=true; b.textContent="⏳ جارٍ الحفظ...";
+  try{
+    if(oldAdminMode){
+      var o=await oldMakeOrder(d);
+      window.open("https://wa.me/"+waNum(o.buyerPhone)+"?text="+encodeURIComponent(rateMsg(o)),"_blank");
+      history.back(); setTimeout(function(){ toast("✓ سُجّل الزبون وأُرسل له رابط التقييم"); },250); return;
+    }
+    var id="OC-"+Date.now().toString(36)+oldOrderId().slice(4,8);
+    await setDoc(doc(db,"oldCustomers",id),{id:id,name:d.name,phone:d.phone,productId:d.productId,productName:d.productName,qty:d.qty,when:d.when,city:d.city,note:d.note,status:"pending",createdAt:Date.now()});
+    notifyAdmin("🕓 زبون سابق سجّل نفسه\n"+d.name+" · "+d.phone+"\n"+d.productName+" × "+d.qty+(d.when?" · "+d.when:"")+"\n"+d.city+"\nأكّده من لوحة المالك ← التقييمات");
+    document.getElementById("old-form").classList.add("hidden"); b.classList.add("hidden");
+    document.getElementById("old-intro").innerHTML='<div style="font-size:2.4rem">✅</div><b>شكراً '+esc(firstName(d.name))+'، وصلتنا بياناتك.</b><div style="color:var(--muted);font-size:0.86rem">بعد التأكد نرسل لك رابط التقييم على واتساب 🌷</div>';
+  }catch(x){ b.disabled=false; b.textContent=oldAdminMode?"💾 حفظ وإرسال رابط التقييم":"📤 إرسال"; e.textContent="تعذر الحفظ، تأكد من الإنترنت وأعد المحاولة"; }
+}
+async function oldConfirm(id){
+  var r=oldRegs.find(function(x){return x.id===id;}); if(!r) return;
+  try{
+    var o=await oldMakeOrder(r);
+    await updateDoc(doc(db,"oldCustomers",id),{status:"confirmed",orderId:o.id,confirmedAt:Date.now()});
+    window.open("https://wa.me/"+waNum(o.buyerPhone)+"?text="+encodeURIComponent(rateMsg(o)),"_blank");
+    toast("✓ تم التأكيد وفُتح واتساب برابط التقييم");
+  }catch(e){ toast("تعذر التأكيد"); }
+}
+async function oldReject(id){ if(!confirm("رفض هذا التسجيل؟")) return; try{ await updateDoc(doc(db,"oldCustomers",id),{status:"rejected"}); toast("تم الرفض"); }catch(e){ toast("تعذر الرفض"); } }
+function oldAdminHtml(){
+  var P=oldRegs.filter(function(r){return r.status==="pending";}).sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);});
+  var nL=orders.filter(function(o){return o.legacy;}).length, nR=allRevs.filter(function(r){ return orders.some(function(o){return o.legacy&&o.id===r.orderId;}); }).length;
+  return '<div class="card"><h3>🕓 الزبائن السابقون (قبل المنصة)</h3>'
+    +'<div style="color:var(--muted);font-size:0.8rem;line-height:1.8;margin-bottom:8px">مسجّلون: '+nL+' · قيّموا: '+nR+'</div>'
+    +'<button class="btn btn-gold btn-block" style="height:44px" onclick="openOld(true)">➕ دعوة زبون سابق للتقييم</button>'
+    +'<div style="background:var(--bg);border-radius:12px;padding:10px;margin-top:10px;font-size:0.8rem;line-height:1.8">📣 رابط يسجّل به الزبائن السابقون أنفسهم، انشره في حالتك وقروباتك:<div dir="ltr" style="font-weight:800;word-break:break-all">'+esc(oldLink())+'</div><div class="grid2" style="margin-top:6px"><button class="sbtn" onclick="copyText(\''+esc(oldLink())+'\')">📋 نسخ الرابط</button><button class="sbtn ok" onclick="oldShareLink()">📤 مشاركة</button></div></div>'
+    +(P.length?'<h4 style="margin:12px 0 6px">⏳ بانتظار تأكيدك ('+P.length+')</h4>'+P.map(function(r){ return '<div style="border-top:1px solid var(--line);padding:8px 0;font-size:0.84rem;line-height:1.7"><b>'+esc(r.name)+'</b> · <a href="tel:+'+waNum(r.phone)+'" dir="ltr" style="color:var(--water);font-weight:800">'+esc(r.phone)+'</a><br>'+esc(r.productName)+' × '+(r.qty||1)+(r.when?' · '+esc(r.when):'')+' · '+esc(r.city)+(r.note?'<br><span style="color:var(--muted)">'+esc(r.note)+'</span>':'')+'<div style="display:flex;gap:6px;margin-top:6px"><button class="sbtn ok" data-id="'+esc(r.id)+'" onclick="oldConfirm(this.dataset.id)">✓ أعرفه — أرسل رابط التقييم</button><button class="sbtn bad" data-id="'+esc(r.id)+'" onclick="oldReject(this.dataset.id)">✕ رفض</button></div></div>'; }).join(""):'')
+    +'</div>';
+}
+function oldShareLink(){
+  var msg="🌷 اشتريت منّا خزان مياه قبل كده؟\nرأيك يهمنا ويساعد غيرك يختار خزانه 💧\nسجّل هنا ونرسل لك رابط التقييم:\n"+oldLink();
+  if(navigator.share){ navigator.share({text:msg}).catch(function(){}); return; }
+  window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank");
+}
+Object.assign(window,{openOld,oldSave,oldConfirm,oldReject,oldShareLink});
 // ══════════════ إضافات التقييم والنمو ══════════════
 var rvLast=null, mkRateCache=null;
 function renderGallery(){
@@ -2511,8 +2609,8 @@ async function loadMkRate(){
 // التقرير الأسبوعي على تيليجرام
 async function sendWeekly(manual){
   var now=Date.now(), from=now-7*864e5;
-  var L=orders.filter(function(o){return (o.createdAt||0)>=from && o.status!=="cancelled";});
-  var del=orders.filter(function(o){return o.status==="delivered" && (o.deliveredAt||o.statusAt||0)>=from;});
+  var RO=realOrders(), L=RO.filter(function(o){return (o.createdAt||0)>=from && o.status!=="cancelled";});
+  var del=RO.filter(function(o){return o.status==="delivered" && (o.deliveredAt||o.statusAt||0)>=from;});
   var sales=del.reduce(function(s,o){return s+numIn(o.total);},0);
   var byMk={}; refs.filter(function(r){return (r.createdAt||0)>=from && r.status!=="void";}).forEach(function(r){ byMk[r.mid]=(byMk[r.mid]||0)+1; });
   var top=Object.keys(byMk).sort(function(a,b){return byMk[b]-byMk[a];})[0], tm=top?mkById(top):null;
