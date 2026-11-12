@@ -1,7 +1,7 @@
 // netlify/edge-functions/channel-share.js
 // معاينة الروابط عند المشاركة (واتساب، فيسبوك، تيليجرام...)
 // تعمل لبوتات المعاينة فقط، ولا تغيّر شيئاً للزائر العادي.
-// الروابط المدعومة: ?p= خزان · ?calc= حاسبة · ?quote= عرض سعر · ?join= انضمام · ?rc= إيصال صرف · (القديمة: ?prop= ?req= ?ad= ?auc=)
+// الروابط المدعومة: ?p= خزان · ?calc= حاسبة · ?quote= عرض سعر · ?join= انضمام · ?rc= إيصال صرف · ?dn= إشعار تسليم · (القديمة: ?prop= ?req= ?ad= ?auc=)
 
 const FIREBASE_PROJECT_ID = "alrayan-15db4";
 const FIREBASE_API_KEY = "AIzaSyC7-MKB7Ix3k0gA7tGxCXNFaty5IQ-U3Xg";
@@ -43,9 +43,9 @@ export default async (request, context) => {
   const ua = request.headers.get("user-agent") || "";
   const url = new URL(request.url);
   const p = (k) => url.searchParams.get(k);
-  const tk = p("p"), calc = p("calc"), quote = p("quote"), join = p("join"), rc = p("rc");
+  const tk = p("p"), calc = p("calc"), quote = p("quote"), join = p("join"), rc = p("rc"), dn = p("dn");
   const auc = p("auc"), prop = p("prop"), req = p("req"), ad = p("ad"), vid = p("video"), poll = p("poll"), publish = p("publish");
-  if ((!tk && !calc && !quote && !join && !rc && !auc && !prop && !req && !ad && !vid && !poll && !publish) || !BOT.test(ua)) return context.next();
+  if ((!tk && !calc && !quote && !join && !rc && !dn && !auc && !prop && !req && !ad && !vid && !poll && !publish) || !BOT.test(ua)) return context.next();
 
   let ready = false; // صورة المعاينة جاهزة بالحجم المناسب (لا تحتاج تصغير)
   let title = SITE_NAME, desc = "أطلب من هنا واستلم في موقعك · خزانات أصلية بكل السعات · الدفع عند الاستلام", image = SITE_LOGO;
@@ -70,6 +70,12 @@ export default async (request, context) => {
       if (f) {
         title = "🧾 تم صرف " + (money(num(f, "amount")) || "عمولة") + " · منصة الريان";
         desc = "إيصال صرف عمولة تسويق لـ " + str(f, "name") + " عن " + num(f, "count") + " طلب ✓ · سوّق معنا واكسب عمولة على كل خزان";
+      }
+    } else if (dn) {
+      const f = await fireGet("orders", dn);
+      if (f && str(f, "status") === "delivered") {
+        title = "✅ تم تسليم الطلب " + dn + " · منصة الريان";
+        desc = "تم توصيل الخزان إلى " + (str(f, "city") || "موقع العميل") + " بنجاح 💧 أطلب من هنا واستلم في موقعك";
       }
     } else if (join) {
       title = "🤝 اكسب معنا · منصة الريان لخزانات المياه";
