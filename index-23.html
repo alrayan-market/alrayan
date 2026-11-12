@@ -1620,6 +1620,7 @@ onAuthStateChanged(auth,function(u){
 });
 function startAdmin(){
   if(admUnsub.length) return;
+  setTimeout(function(){ ensureStaticOg().then(ensureProductOg); },7000);
   admUnsub.push(onSnapshot(query(collection(db,"orders"),orderBy("createdAt","desc"),limit(400)),function(snap){
     var prevNew=orders.filter(function(o){return o.status==="new";}).length;
     orders=snap.docs.map(function(d){return d.data();}).filter(isTankOrder);
@@ -1684,7 +1685,7 @@ function ordCard(o){
 }
 async function setOrderStatus(id,s){
   var up={status:s,statusAt:Date.now()}; if(s==="delivered") up.deliveredAt=Date.now();
-  try{ await updateDoc(doc(db,"orders",id),up); toast("تم: "+ST_L[s]); syncRefStatus(id,s); if(s==="delivered") setTimeout(function(){ openDelivery(id); },350); }
+  try{ await updateDoc(doc(db,"orders",id),up); toast("تم: "+ST_L[s]); syncRefStatus(id,s); if(s==="delivered"){ setTimeout(function(){ openDelivery(id); },350); var od=orders.find(function(x){return x.id===id;}); if(od) ogForOrder(od); } }
   catch(e){ toast("تعذر التحديث، تأكد من الدخول"); }
 }
 function cancelOrder(id){ if(confirm("إلغاء هذا الطلب؟")) setOrderStatus(id,"cancelled"); }
@@ -1756,12 +1757,12 @@ async function pfSave(){
   err.textContent=""; btn.disabled=true; btn.textContent="جاري الحفظ…";
   var id=pfId||("TK-"+Date.now()+"-"+Math.random().toString(36).slice(2,5));
   var data={name:name,capacity:cap||0,tankType:g("type"),price:onReq?0:price,oldPrice:onReq?0:(old||0),priceOnRequest:onReq,layers:g("layers"),warranty:g("warranty"),height:g("height"),diameter:g("diam"),weight:g("weight"),color:g("color"),desc:g("desc"),
-    images:pfImgs.slice(),image:pfImgs[0]||"",ogImage:pfOg||"",featured:document.getElementById("pf-feat").checked,outOfStock:document.getElementById("pf-out").checked,hidden:document.getElementById("pf-hide").checked,
+    images:pfImgs.slice(),image:pfImgs[0]||"",ogImage:pfOg||"",ogV:0,featured:document.getElementById("pf-feat").checked,outOfStock:document.getElementById("pf-out").checked,hidden:document.getElementById("pf-hide").checked,
     category:"خزانات ومياه",tanksV2:true,updatedAt:Date.now()};
   try{
     if(pfId){ await updateDoc(doc(db,"products",id),data); }
     else{ data.id=id; data.sellerId=storeId||"RAYAN-TANKS"; data.sellerName=storeName; data.createdAt=Date.now(); data.views=0; await setDoc(doc(db,"products",id),data); }
-    history.back(); setTimeout(function(){ toast("✓ تم حفظ الخزان"); },200);
+    history.back(); setTimeout(function(){ toast("✓ تم حفظ الخزان"); },200); setTimeout(ensureProductOg,2500);
   }catch(e){ err.textContent="تعذر الحفظ. تأكد أنك داخل حساب المالك، وأن قواعد Firebase منشورة."; }
   btn.disabled=false; btn.textContent="💾 حفظ";
 }
@@ -2284,14 +2285,14 @@ async function confirmPay(){
     if(m.payoutRequestAt) await updateDoc(doc(db,"marketers",m.id),{payoutRequestAt:0,payoutRequestAmount:0}).catch(function(){});
   }catch(e){ b.disabled=false; b.textContent="✓ تأكيد وإصدار الإيصال"; err.textContent="تعذر التسجيل، تأكد من الإنترنت وأعد المحاولة"; return; }
   toast("✓ تم تسجيل الدفعة وإصدار الإيصال");
-  rcCur=rc; renderReceipt(rc,m); swapPage("pg-pay","pg-rc");
+  rcCur=rc; renderReceipt(rc,m); swapPage("pg-pay","pg-rc"); ogForReceipt(rc);
 }
 async function openPayReceipt(pid){
   var p=pays.filter(function(x){return x.id===pid;})[0]; if(!p) return;
   if(p.rid){ openReceipt(p.rid); return; }
   var m=mkById(p.mid), list=refs.filter(function(r){return r.payoutId===pid || (p.refIds||[]).indexOf(r.id)>-1;});
   var rid=rid20(), rc={id:rid,payoutId:pid,mid:p.mid,name:m?String(m.name||""):"",amount:numIn(p.amount),count:(p.refIds||[]).length||list.length,items:rcItemsFrom(list),bankRef:p.bankRef||"",bankMask:maskBank(m&&m.bank),img:p.img||"",paidAt:p.paidAt||Date.now()};
-  try{ await setDoc(doc(db,"receipts",rid),rc); await updateDoc(doc(db,"payouts",pid),{rid:rid}); }catch(e){ toast("تعذر إصدار الإيصال"); return; }
+  try{ await setDoc(doc(db,"receipts",rid),rc); await updateDoc(doc(db,"payouts",pid),{rid:rid}); ogForReceipt(rc); }catch(e){ toast("تعذر إصدار الإيصال"); return; }
   rcCur=rc; renderReceipt(rc,m); openPage("pg-rc");
 }
 async function openReceipt(id){
@@ -2451,6 +2452,90 @@ async function shareRate(id){
 async function rvStatus(id,st){ try{ await updateDoc(doc(db,"reviews",id),{status:st}); toast(st==="shown"?"✓ ظهر التقييم":"✓ أُخفي التقييم"); }catch(e){ toast("تعذر التعديل"); } }
 async function rvRemove(id){ if(!confirm("حذف هذا التقييم نهائياً؟")) return; try{ await deleteDoc(doc(db,"reviews",id)); toast("تم الحذف"); }catch(e){ toast("تعذر الحذف"); } }
 Object.assign(window,{tellFriend,shareRate,openRate,rvSet,rvPick,rvSubmit,rvStatus,rvRemove});
+// ══════════════ صور المعاينة عند مشاركة الروابط (1200×630) ══════════════
+const OGV=1;
+function ogLoad(url){ return new Promise(function(res){
+  if(!url) return res(null); var im=new Image(), done=false; im.crossOrigin="anonymous";
+  im.onload=function(){ if(!done){ done=true; res(im); } }; im.onerror=function(){ if(!done){ done=true; res(null); } };
+  im.src=/^data:/.test(url)?url:"https://wsrv.nl/?url="+encodeURIComponent(url)+"&w=720&h=720&fit=cover&a=attention&output=jpg&q=80";
+  setTimeout(function(){ if(!done){ done=true; res(null); } },9000);
+}); }
+async function ogCard(o){
+  try{
+    var W=1200,H=630,F='"Tajawal","Cairo","Noto Kufi Arabic","Segoe UI",sans-serif', cv=document.createElement("canvas"); cv.width=W; cv.height=H; var x=cv.getContext("2d");
+    function rr(px,py,w,h,r){ x.beginPath(); x.moveTo(px+r,py); x.arcTo(px+w,py,px+w,py+h,r); x.arcTo(px+w,py+h,px,py+h,r); x.arcTo(px,py+h,px,py,r); x.arcTo(px,py,px+w,py,r); x.closePath(); }
+    function wrap(t,max,font,n){ x.font=font; var out=[],cur=""; String(t||"").split(/\s+/).forEach(function(w){ var tt=cur?cur+" "+w:w; if(x.measureText(tt).width>max&&cur){ out.push(cur); cur=w; } else cur=tt; }); if(cur) out.push(cur); if(out.length>n){ out=out.slice(0,n); out[n-1]=out[n-1].replace(/\s*\S+$/,"")+"…"; } return out; }
+    var g=x.createLinearGradient(W,0,0,H); g.addColorStop(0,"#2B4A80"); g.addColorStop(1,"#0F1B31"); x.fillStyle=g; x.fillRect(0,0,W,H);
+    // اللوحة اليسرى: صورة أو أيقونة
+    var PX=40,PY=36,PW=470,PH=478, ph=o.photo?await ogLoad(o.photo):null;
+    x.save(); rr(PX,PY,PW,PH,34); x.clip();
+    if(ph){ var s=Math.max(PW/ph.naturalWidth,PH/ph.naturalHeight), w=ph.naturalWidth*s, h=ph.naturalHeight*s; x.drawImage(ph,PX+(PW-w)/2,PY+(PH-h)/2,w,h); }
+    else { x.fillStyle="#fff"; x.fillRect(PX,PY,PW,PH); x.textAlign="center"; x.direction="rtl";
+      if(o.panelBig){ x.fillStyle=o.panelColor||"#1E8E5A"; var fs=o.panelBigSize||84; x.font="900 "+fs+"px "+F; while(x.measureText(o.panelBig).width>PW-50&&fs>30){ fs-=4; x.font="900 "+fs+"px "+F; } x.fillText(o.panelBig,PX+PW/2,PY+PH/2+(o.panelSmall?-6:28)); if(o.panelSmall){ x.fillStyle="#6B7488"; x.font="800 34px "+F; x.fillText(o.panelSmall,PX+PW/2,PY+PH/2+60); } }
+      else { x.font="200px "+F; x.fillText(o.icon||"💧",PX+PW/2,PY+PH/2+70); } }
+    x.restore();
+    if(o.stamp){ x.save(); x.translate(PX+120,PY+PH-70); x.rotate(-0.2); rr(-108,-38,216,72,18); x.fillStyle="#fff"; x.fill(); x.strokeStyle="#1E8E5A"; x.lineWidth=5; x.stroke(); x.fillStyle="#1E8E5A"; x.textAlign="center"; x.font="900 36px "+F; x.fillText(o.stamp,0,12); x.restore(); }
+    // النصوص يميناً
+    var R=W-50, TW=W-PW-PX-90; x.direction="rtl"; x.textAlign="right";
+    var lg=document.querySelector("#brand img"); if(lg&&lg.complete&&lg.naturalWidth){ x.save(); rr(R-78,42,78,78,18); x.clip(); x.drawImage(lg,R-78,42,78,78); x.restore(); }
+    x.fillStyle="#fff"; x.font="900 30px "+F; x.fillText("منصة الريان لخزانات المياه",R-96,92);
+    var y=168;
+    if(o.badge){ x.font="900 30px "+F; var bw=x.measureText(o.badge).width+44; rr(R-bw,y-38,bw,54,27); x.fillStyle=o.badgeBg||"#1E8E5A"; x.fill(); x.fillStyle="#fff"; x.fillText(o.badge,R-22,y-2); y+=58; }
+    wrap(o.title,TW,"900 58px "+F,2).forEach(function(l){ x.fillStyle="#fff"; x.font="900 58px "+F; x.fillText(l,R,y+50); y+=70; });
+    if(o.sub){ wrap(o.sub,TW,"700 32px "+F,o.value?1:2).forEach(function(l){ x.fillStyle="#F2CE73"; x.font="700 32px "+F; x.fillText(l,R,y+36); y+=46; }); }
+    if(o.value){ x.fillStyle=o.valueColor||"#7EE2A8"; x.font="900 66px "+F; x.fillText(o.value,R,Math.min(y+84,H-112)); y+=96; }
+    if(o.stars){ x.fillStyle="#F5A524"; x.font="900 56px "+F; x.fillText("★★★★★",R,y+70); }
+    // الشريط السفلي
+    x.fillStyle="#C9933A"; x.fillRect(0,H-86,W,86); x.fillStyle="#12203A"; x.textAlign="center"; x.font="900 34px "+F; x.fillText(o.foot||"💧 أطلب من هنا واستلم في موقعك",W/2,H-48);
+    x.direction="ltr"; x.font="800 22px "+F; x.fillText(baseUrl().replace(/^https?:\/\//,""),W/2,H-16);
+    return await new Promise(function(r){ cv.toBlob(function(b){ r(b); },"image/jpeg",0.84); });
+  }catch(e){ return null; }
+}
+async function ogUpload(o){ var b=await ogCard(o); if(!b && o.photo){ var oo=Object.assign({},o,{photo:""}); b=await ogCard(oo); } if(!b) return ""; try{ return await imgbb(b); }catch(e){ return ""; } }
+function prodPhoto(id){ var p=prodById(id); return p?(imgsOf(p)[0]||""):""; }
+function itemsTitle(it){ return (it||[]).map(function(i){return i.name+(numIn(i.qty)>1?" × "+i.qty:"");}).join("، "); }
+async function ogForOrder(o,onlyRv){
+  if(!o||!o.id) return;
+  var it=o.items||[], photo=it.length?prodPhoto(it[0].productId):"", up={};
+  if(!onlyRv){ var dn=await ogUpload({photo:photo,icon:"🚚",stamp:"✓ تم التسليم",badge:"✓ تم التسليم بنجاح",title:"وصل الخزان لصاحبه 🎉",sub:itemsTitle(it)+(o.city?" · إلى "+o.city:"")}); if(dn) up.ogImg=dn; }
+  var rv=await ogUpload({photo:photo,icon:"⭐",badge:"⭐ قيّم طلبك",badgeBg:"#C9933A",title:"رأيك يهمنا ويساعد غيرك",sub:(it[0]?it[0].name+" · ":"")+"التقييم يأخذ 10 ثوانٍ فقط",stars:true});
+  if(rv) up.ogRv=rv;
+  if(Object.keys(up).length) updateDoc(doc(db,"orders",o.id),up).catch(function(){});
+}
+async function ogForReceipt(rc){
+  if(!rc||!rc.id) return;
+  var u=await ogUpload({panelBig:money(rc.amount),panelSmall:"✓ مدفوع",panelBigSize:rc.amount>=1e6?70:84,badge:"🧾 إيصال صرف عمولة",badgeBg:"#C9933A",title:"تم صرف عمولة تسويق",sub:"لـ "+(rc.name||"")+" عن "+(rc.count||0)+" طلب",foot:"💸 سوّق معنا واكسب عمولة على كل خزان"});
+  if(u) updateDoc(doc(db,"receipts",rc.id),{ogImg:u}).catch(function(){});
+}
+var ogBusy=false;
+async function ensureStaticOg(){
+  if(!isAdmin||ogBusy) return; if(S.og && S.og.v===OGV && S.og.home) return; ogBusy=true;
+  try{
+    var hero=(document.querySelector(".hero-photo img")||{}).src||"", free=khAllFree();
+    var og={v:OGV};
+    og.home=await ogUpload({photo:hero,title:"أطلب من هنا واستلم في موقعك",sub:"خزانات مياه أصلية بكل السعات"+(free?" · توصيل مجاني داخل ولاية الخرطوم":" · توصيل لحد موقعك")+" · الدفع عند الاستلام",badge:"💧 أول منصة لبيع الخزانات في السودان"});
+    og.join=await ogUpload({panelBig:"💸",panelBigSize:200,title:"اكسب عمولة على كل خزان يُباع عن طريقك",sub:"انشر الرابط فقط · تطلب صرف عمولتك متى شئت",badge:"🤝 انضم كمسوّق",badgeBg:"#C9933A",foot:"🤝 سجّل الآن وابدأ اليوم"});
+    og.old=await ogUpload({panelBig:"🌷",panelBigSize:200,title:"اشتريت منّا خزان قبل كده؟",sub:"سجّل بياناتك وقيّم تجربتك — رأيك يساعد غيرك",badge:"⭐ زبائننا القدامى",badgeBg:"#C9933A"});
+    og.mk=await ogUpload({panelBig:"📊",panelBigSize:200,title:"صفحة المسوّق",sub:"تابع زياراتك وطلباتك وعمولاتك، واطلب صرفها متى شئت",badge:"🤝 منصة الريان",badgeBg:"#C9933A",foot:"💸 سوّق معنا واكسب عمولة على كل خزان"});
+    og.calc=await ogUpload({panelBig:"🧮",panelBigSize:200,title:"أي خزان يناسب بيتك؟",sub:"اكتب عدد أفراد البيت وأيام انقطاع المياه، ونقترح لك السعة المناسبة"});
+    og.quote=await ogUpload({panelBig:"🏗️",panelBigSize:200,title:"عرض سعر خاص للكميات",sub:"للمقاولين والمشاريع والتجار · خزانات بكل السعات"});
+    if(og.home){ await setDoc(doc(db,"meta","tankSettings"),Object.assign({},S,{og:og})); }
+  }catch(e){}
+  ogBusy=false;
+}
+var pogBusy=false;
+async function ensureProductOg(){
+  if(!isAdmin||pogBusy) return; pogBusy=true;
+  try{
+    var free=khAllFree(), L=tanks(true).filter(function(p){ return imgsOf(p)[0] && (p.ogV!==OGV || numIn(p.ogPrice)!==(p.priceOnRequest?0:priceOf(p))); }).slice(0,15);
+    for(var i=0;i<L.length;i++){
+      var p=L[i], c=capOf(p), pr=p.priceOnRequest?0:priceOf(p);
+      var u=await ogUpload({photo:imgsOf(p)[0],title:p.name,sub:[c?"السعة "+c.toLocaleString("en-US")+" لتر":"",p.warranty?"ضمان "+p.warranty:"",free?"توصيل مجاني داخل الخرطوم":""].filter(Boolean).join(" · "),value:pr?money(pr):"السعر عند الطلب",valueColor:"#F2CE73",badge:p.oldPrice&&numIn(p.oldPrice)>pr?"🔥 عرض خاص":"💧 متوفر الآن"});
+      if(u) await updateDoc(doc(db,"products",p.id),{ogImage:u,ogV:OGV,ogPrice:pr}).catch(function(){});
+    }
+  }catch(e){}
+  pogBusy=false;
+}
 // ══════════════ الزبائن السابقون (قبل المنصة) ══════════════
 var oldRegs=[], oldAdminMode=false;
 function oldLink(){ return baseUrl()+"/?old=1"; }
@@ -2478,7 +2563,7 @@ async function oldMakeOrder(d){
   var o={id:id,source:"tanks",legacy:true,status:"delivered",buyerName:d.name,buyerPhone:d.phone,city:d.city,area:"",buyerAddress:d.city,legacyWhen:d.when||"",notes:d.note||"",
     items:[{productId:d.productId||"",name:d.productName||"خزان",qty:d.qty||1,price:0,capacity:0}],subtotal:0,deliveryFee:0,deliveryState:"free",total:0,priceOnRequest:true,payment:"cod",
     createdAt:now,deliveredAt:now,statusAt:now,rateAskedAt:now,date:new Date().toLocaleDateString("ar-EG")};
-  await setDoc(doc(db,"orders",id),o); return o;
+  await setDoc(doc(db,"orders",id),o); ogForOrder(o,true); return o;
 }
 async function oldSave(){
   var d=oldRead(), e=document.getElementById("old-err"), b=document.getElementById("old-go");
