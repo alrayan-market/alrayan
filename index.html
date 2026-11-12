@@ -200,6 +200,20 @@ a{color:inherit;text-decoration:none}
 .rev .rn{font-weight:900;font-size:0.82rem}
 .rev .rn span{color:var(--muted);font-weight:600}
 
+/* تقييم الزبائن */
+.rv-sum{display:flex;align-items:center;gap:12px;background:#fff;border-radius:var(--r);box-shadow:var(--shadow);padding:12px 14px;margin-bottom:10px}
+.rv-sum .big{font-size:2rem;font-weight:900;color:var(--navy)}
+.rv-sum .stars{color:#F5A524;font-size:1rem;letter-spacing:1px}
+.rv-ok{display:inline-block;background:var(--ok-soft);color:var(--ok);border-radius:999px;padding:1px 8px;font-size:0.68rem;font-weight:800;margin-inline-start:4px}
+.star-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
+.star-row b{font-size:0.9rem}
+.star-pick{display:flex;gap:2px;direction:rtl}
+.star-pick button{font-size:1.9rem;line-height:1;color:#D6DBE4;background:none;padding:0 2px}
+.star-pick button.on{color:#F5A524}
+.rv-bars div{display:flex;align-items:center;gap:8px;font-size:0.8rem;margin:4px 0}
+.rv-bars i{flex:1;height:7px;background:var(--line);border-radius:9px;overflow:hidden;display:block}
+.rv-bars i u{display:block;height:100%;background:#F5A524}
+
 /* faq */
 .faq details{background:#fff;border-radius:var(--r-sm);margin-bottom:8px;box-shadow:0 2px 10px rgba(18,32,58,.05);overflow:hidden}
 .faq summary{list-style:none;padding:14px 16px;font-weight:900;font-size:0.92rem;display:flex;justify-content:space-between;align-items:center;gap:10px;cursor:pointer}
@@ -520,7 +534,8 @@ textarea.inp{height:auto;min-height:84px;padding:11px 13px;resize:vertical;line-
 
   <!-- آراء الزبائن -->
   <section class="sec hidden" id="revs-sec">
-    <div class="sec-h"><div><h2>آراء زبائننا</h2><p>خزانات وصلت لأصحابها</p></div></div>
+    <div class="sec-h"><div><h2>آراء زبائننا</h2><p>تقييمات من زبائن استلموا خزاناتهم</p></div></div>
+    <div id="revs-sum"></div>
     <div class="revs" id="revs"></div>
   </section>
 
@@ -840,6 +855,12 @@ textarea.inp{height:auto;min-height:84px;padding:11px 13px;resize:vertical;line-
   </div>
 </div>
 
+<!-- ═══ تقييم الطلب (رابط عام) ═══ -->
+<div class="page hidden" id="pg-rv">
+  <div class="pbar"><div class="wrap"><button class="back" onclick="history.back()">→ رجوع</button><div class="pt">قيّم طلبك</div><div class="pa"></div></div></div>
+  <div class="pbody" style="max-width:520px" id="rv-body"></div>
+</div>
+
 <!-- ═══ إشعار تسليم (رابط عام للزبون / للمسوّق) ═══ -->
 <div class="page hidden" id="pg-dn">
   <div class="pbar"><div class="wrap"><button class="back" onclick="history.back()">→ رجوع</button><div class="pt">إشعار تسليم</div><div class="pa"></div></div></div>
@@ -980,7 +1001,7 @@ function notifyAdmin(text){
 
 // ══════════════ البيانات ══════════════
 var sellers=[], allProducts=[], storeId="", storeName="منصة الريان لخزانات المياه", storePhone="";
-var S={}, zones=[], reviews=[];
+var S={}, zones=[], reviews=[], creviews=[];
 var loaded={sellers:false,products:false};
 const DEF_ZONES=[{name:"الخرطوم",fee:null},{name:"بحري",fee:null},{name:"أم درمان",fee:null},{name:"ولايات أخرى",fee:null}];
 var filt={cap:"all",type:"all",sort:"pop"};
@@ -1020,6 +1041,7 @@ function startListeners(){
   onSnapshot(collection(db,"products"),function(snap){ allProducts=snap.docs.map(function(d){return d.data();}); loaded.products=true; renderAll(); refreshOpenPages(); },function(){ loaded.products=true; renderAll(); });
   onSnapshot(doc(db,"meta","tankSettings"),function(s){ S=(s.exists&&s.exists())?(s.data()||{}):{}; applySettings(); },function(){});
   onSnapshot(doc(db,"meta","tankZones"),function(s){ var z=(s.exists&&s.exists())?((s.data()||{}).zones||[]):[]; zones=z.length?z:DEF_ZONES; renderZonesFooter(); if(isOpen("pg-checkout")) fillZones(); },function(){ zones=DEF_ZONES; renderZonesFooter(); });
+  onSnapshot(query(collection(db,"reviews"),where("status","==","shown"),limit(300)),function(snap){ creviews=snap.docs.map(function(d){return d.data();}).sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);}); renderReviews(); refreshOpenPages&&refreshOpenPages(); },function(){});
   onSnapshot(collection(db,"tankReviews"),function(snap){ reviews=snap.docs.map(function(d){return d.data();}).sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);}); renderReviews(); if(window.__admRender) window.__admRender(); },function(){});
 }
 
@@ -1141,11 +1163,23 @@ function renderGrid(){
 function setCap(k){ filt.cap=(filt.cap===k?"all":k); renderCaps(); renderTypeChips(); renderGrid(); document.getElementById("shop").scrollIntoView({behavior:"smooth",block:"start"}); }
 function setType(k){ filt.type=k; renderTypeChips(); renderGrid(); }
 function setSort(v){ filt.sort=v; renderGrid(); }
+function starsTxt(n){ n=Math.max(0,Math.min(5,Math.round(n))); return "★".repeat(n)+"☆".repeat(5-n); }
+function rvAvg(list){ if(!list.length) return 0; return list.reduce(function(s,r){return s+numIn100(r.avg);},0)/list.length; }
+function numIn100(v){ return Number(v)||0; }
+function revCard(r){
+  var st=Math.round(numIn100(r.avg));
+  return '<div class="rev">'+(r.img?'<img loading="lazy" src="'+esc(r.img)+'" alt="" onerror="this.remove()">':'')+'<div class="rb"><div class="stars">'+starsTxt(st)+'</div>'+(r.text?'<p>'+esc(r.text)+'</p>':'<p style="color:var(--muted)">'+esc((r.productNames||[]).join("، "))+'</p>')+'<div class="rn">'+esc(r.name||"زبون")+(r.city?' <span>· '+esc(r.city)+'</span>':'')+'<span class="rv-ok">✓ مشترٍ مؤكد</span></div></div></div>';
+}
+function rvSumHtml(list){
+  var a=rvAvg(list); if(!list.length) return "";
+  return '<div class="rv-sum"><div class="big num">'+(Math.round(a*10)/10).toFixed(1)+'</div><div><div class="stars">'+starsTxt(a)+'</div><div style="color:var(--muted);font-size:0.8rem">من 5 · '+list.length+' تقييم من زبائن حقيقيين</div></div></div>';
+}
 function renderReviews(){
   var sec=document.getElementById("revs-sec"), box=document.getElementById("revs");
-  if(!reviews.length){ sec.classList.add("hidden"); return; }
+  if(!reviews.length && !creviews.length){ sec.classList.add("hidden"); return; }
   sec.classList.remove("hidden");
-  box.innerHTML=reviews.slice(0,12).map(function(r){
+  document.getElementById("revs-sum").innerHTML=rvSumHtml(creviews);
+  box.innerHTML=creviews.slice(0,12).map(revCard).join("")+reviews.slice(0,Math.max(0,12-creviews.length)).map(function(r){
     var st=Math.max(1,Math.min(5,numIn(r.stars)||5));
     return '<div class="rev">'+(r.image?'<img loading="lazy" src="'+esc(r.image)+'" alt="" onerror="this.remove()">':'')+'<div class="rb"><div class="stars">'+"★".repeat(st)+"☆".repeat(5-st)+'</div><p>'+esc(r.text)+'</p><div class="rn">'+esc(r.name)+(r.area?' <span>· '+esc(r.area)+'</span>':'')+'</div></div></div>';
   }).join("");
@@ -1208,6 +1242,7 @@ function renderProductPage(keep){
     +'<h1 class="pd-name">'+esc(p.name)+'</h1>'
     +'<div class="pd-price">'+(p.priceOnRequest?'<b style="color:var(--gold);font-size:1.25rem">السعر عند الطلب</b>':'<b class="num">'+money(pr)+'</b>'+(old>pr?'<s class="num">'+money(old)+'</s><span class="off">وفّر '+money(old-pr)+'</span>':''))+'</div>'
     +(p.outOfStock?'<div class="pd-ship" style="background:var(--bad-soft);color:var(--bad)">⏳ غير متوفر حالياً · راسلنا لنبلغك عند توفره</div>':'<div class="pd-ship">'+ship+'</div>')
+    +prodRevsHtml(p)
     +shipStatesHtml(p)
     +(specs.length?'<div class="card"><h3>📐 المواصفات</h3><table class="spec">'+specs.map(function(r){return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>';}).join("")+'</table></div>':'')
     +(p.desc?'<div class="card"><h3>📝 الوصف</h3><div class="pd-desc">'+esc(p.desc)+'</div></div>':'')
@@ -1494,6 +1529,7 @@ function handleDeepLinks(){
   else if(sp.get("m")) openMLogin();
   else if(sp.get("rc")) openReceipt(sp.get("rc"));
   else if(sp.get("dn")) openDelivery(sp.get("dn"));
+  else if(sp.get("rv")) openRate(sp.get("rv"));
 }
 
 document.getElementById("yr").textContent=new Date().getFullYear();
@@ -1573,7 +1609,7 @@ window.__admRender=renderAdminIfOpen;
 function setAdmTab(t){ admTab=t; renderAdmin(); document.getElementById("pg-admin").scrollTop=0; }
 function renderAdmin(){
   var nNew=orders.filter(function(o){return o.status==="new";}).length, nQ=quotes.filter(function(q){return q.status!=="done";}).length;
-  var tabs=[["orders","📦 الطلبات",nNew],["products","💧 الخزانات",0],["delivery","🚚 التوصيل",0],["settings","⚙️ الإعدادات",0],["reviews","⭐ الآراء",0],["quotes","🏗️ عروض الأسعار",nQ],["marketers","🤝 المسوّقون",mks.filter(function(m){return m.status==="pending"||(m.status==="approved"&&isPayReq(m));}).length],["stats","📊 الإحصائيات",0]];
+  var tabs=[["orders","📦 الطلبات",nNew],["products","💧 الخزانات",0],["delivery","🚚 التوصيل",0],["settings","⚙️ الإعدادات",0],["reviews","⭐ التقييمات",allRevs.filter(function(r){return r.status==="pending";}).length],["quotes","🏗️ عروض الأسعار",nQ],["marketers","🤝 المسوّقون",mks.filter(function(m){return m.status==="pending"||(m.status==="approved"&&isPayReq(m));}).length],["stats","📊 الإحصائيات",0]];
   document.getElementById("atabs").innerHTML=tabs.map(function(t){return '<button class="atab'+(admTab===t[0]?' on':'')+'" data-t="'+t[0]+'" onclick="setAdmTab(this.dataset.t)">'+t[1]+(t[2]?'<span class="dot">'+t[2]+'</span>':'')+'</button>';}).join("");
   var b=document.getElementById("adm-body");
   if(admTab==="orders") b.innerHTML=admOrders();
@@ -1787,13 +1823,13 @@ function testNotify(){ notifyAdmin("✅ تنبيه تجريبي من لوحة ا
 // ── آراء الزبائن ──
 var rvImg="";
 function admReviews(){
-  return '<div class="card"><h3>➕ إضافة رأي زبون</h3>'
+  return admRevsHtml()+'<details class="card"><summary style="font-weight:900;cursor:pointer">➕ إضافة رأي زبون يدوياً</summary><div style="margin-top:10px">'
     +'<div class="grid2"><div class="fld"><label>الاسم</label><input class="inp" id="rv-name"></div><div class="fld"><label>الحي / المدينة</label><input class="inp" id="rv-area"></div></div>'
     +'<div class="fld"><label>التقييم</label><select class="inp" id="rv-stars"><option value="5">★★★★★</option><option value="4">★★★★☆</option><option value="3">★★★☆☆</option></select></div>'
     +'<div class="fld"><label>الرأي</label><textarea class="inp" id="rv-text" rows="2" placeholder="كما قاله الزبون"></textarea></div>'
     +'<div class="fld"><label>صورة الخزان بعد التوصيل <small>(اختياري)</small></label><input type="file" accept="image/*" id="rv-file" onchange="rvUpload(this)" class="inp" style="padding-top:10px"><div id="rv-prev" style="margin-top:6px">'+(rvImg?'<img src="'+esc(rvImg)+'" style="height:80px;border-radius:10px">':'')+'</div></div>'
     +'<p style="color:var(--muted);font-size:0.76rem;margin-bottom:8px">أضف آراء زبائن حقيقيين فقط وبإذنهم.</p>'
-    +'<button class="btn btn-gold btn-block" id="rv-save" onclick="rvSave()">💾 نشر الرأي</button></div>'
+    +'<button class="btn btn-gold btn-block" id="rv-save" onclick="rvSave()">💾 نشر الرأي</button></div></details>'
     +(reviews.length?reviews.map(function(r){return '<div class="aprod"><div class="ci">'+(r.image?'<img src="'+esc(r.image)+'" alt="">':'⭐')+'</div><div class="ax"><b>'+esc(r.name)+(r.area?' · '+esc(r.area):'')+'</b><span>'+esc(r.text)+'</span></div><button class="sbtn bad" data-id="'+esc(r.id)+'" onclick="rvDel(this.dataset.id)">حذف</button></div>';}).join(""):'<div class="empty"><div class="ei">⭐</div><b>لا توجد آراء بعد</b><span>القسم لا يظهر في الصفحة الرئيسية حتى تضيف أول رأي</span></div>');
 }
 async function rvUpload(input){ var f=input.files[0]; if(!f) return; document.getElementById("rv-prev").textContent="⏳ جاري رفع الصورة…"; try{ rvImg=await uploadImage(f,1100); document.getElementById("rv-prev").innerHTML=rvImg?'<img src="'+esc(rvImg)+'" style="height:80px;border-radius:10px">':'فشل الرفع'; }catch(e){ document.getElementById("rv-prev").textContent="فشل الرفع"; } }
@@ -2016,6 +2052,7 @@ function startAdminRef(){
   admUnsub.push(onSnapshot(collection(db,"marketers"),function(s){ mks=s.docs.map(function(d){return d.data();}); renderAdminIfOpen(); },function(){}));
   admUnsub.push(onSnapshot(collection(db,"referrals"),function(s){ refs=s.docs.map(function(d){return d.data();}); renderAdminIfOpen(); },function(){}));
   admUnsub.push(onSnapshot(collection(db,"refStats"),function(s){ rstats={}; s.docs.forEach(function(d){ rstats[d.id]=numIn((d.data()||{}).clicks); }); renderAdminIfOpen(); },function(){}));
+  admUnsub.push(onSnapshot(collection(db,"reviews"),function(s){ allRevs=s.docs.map(function(d){return d.data();}); renderAdminIfOpen(); },function(){}));
   admUnsub.push(onSnapshot(collection(db,"payouts"),function(s){ pays=s.docs.map(function(d){return d.data();}); renderAdminIfOpen(); },function(){}));
   admUnsub.push(onSnapshot(collection(db,"refContacts"),function(s){ rcontacts=s.docs.map(function(d){return d.data();}).sort(function(a,b){return (b.at||0)-(a.at||0);}); renderAdminIfOpen(); if(isOpen("pg-morder")) moContacts(); },function(){}));
 }
@@ -2312,6 +2349,72 @@ function rcBlob(rc){ return new Promise(function(res){
   }catch(e){ res(null); }
 }); }
 Object.assign(window,{openPay,payImgPick,confirmPay,payToggle,payEdit,payCheck,payFit,openPayReceipt,openReceipt,rcShare,rcSaveImg,rcSendMk});
+// ══════════════ تقييم الزبائن ══════════════
+var rvOrder=null, rvStars={q:0,d:0,s:0}, rvPhoto=null, allRevs=[];
+const RV_DIMS=[["q","💧 جودة الخزان"],["d","🚚 التوصيل والالتزام بالموعد"],["s","🤝 التعامل"]];
+function prodRevsHtml(p){
+  var L=creviews.filter(function(r){ return (r.productIds||[]).indexOf(p.id)>-1; });
+  if(!L.length) return "";
+  return '<div class="card"><h3>⭐ تقييمات هذا الخزان</h3>'+rvSumHtml(L).replace('class="rv-sum"','class="rv-sum" style="box-shadow:none;padding:0 0 8px"')
+    +L.slice(0,4).map(function(r){ return '<div style="padding:8px 0;border-top:1px solid var(--line)"><div style="color:#F5A524">'+starsTxt(r.avg)+'</div>'+(r.text?'<div style="font-size:0.86rem;line-height:1.7">'+esc(r.text)+'</div>':'')+'<div style="font-size:0.78rem;font-weight:800;margin-top:2px">'+esc(r.name||"زبون")+(r.city?' <span style="color:var(--muted);font-weight:600">· '+esc(r.city)+'</span>':'')+'<span class="rv-ok">✓ مشترٍ مؤكد</span></div>'+(r.img?'<img src="'+esc(r.img)+'" alt="" loading="lazy" style="width:100%;max-height:220px;object-fit:cover;border-radius:10px;margin-top:6px" onerror="this.remove()">':'')+'</div>'; }).join("")+'</div>';
+}
+async function openRate(id){
+  id=String(id||""); var body=document.getElementById("rv-body");
+  if(!isOpen("pg-rv")) openPage("pg-rv");
+  body.innerHTML='<div class="card" style="text-align:center;color:var(--muted)">⏳ جارٍ الفتح...</div>';
+  var o=null, ex=null;
+  try{ var sn=await getDoc(doc(db,"orders",id)); o=sn.exists()?Object.assign({id:id},sn.data()):null; var rs=await getDoc(doc(db,"reviews",id)); ex=rs.exists()?rs.data():null; }catch(e){}
+  if(!o){ body.innerHTML='<div class="card" style="text-align:center">لم نجد هذا الطلب</div>'; return; }
+  if(ex){ body.innerHTML='<div class="card" style="text-align:center;line-height:2"><div style="font-size:2.4rem">🌷</div><b>شكراً لك، وصلنا تقييمك لهذا الطلب.</b><div style="color:#F5A524;font-size:1.3rem">'+starsTxt(ex.avg)+'</div></div>'; return; }
+  if(o.status!=="delivered"){ body.innerHTML='<div class="card" style="text-align:center;line-height:1.9">تستطيع تقييم الطلب بعد استلامه.<br><button class="btn btn-line" style="margin-top:10px" onclick="openTrack(\''+esc(o.id)+'\')">📦 تتبّع الطلب</button></div>'; return; }
+  rvOrder=o; rvStars={q:0,d:0,s:0}; rvPhoto=null;
+  body.innerHTML='<div class="card" style="text-align:center"><div style="font-size:2rem">⭐</div><h3 style="margin:4px 0">كيف كانت تجربتك؟</h3><div style="color:var(--muted);font-size:0.84rem">الطلب '+esc(o.id)+' · '+esc((o.items||[]).map(function(i){return i.name;}).join("، "))+'</div></div>'
+    +'<div class="card">'+RV_DIMS.map(function(d){ return '<div class="star-row"><b>'+d[1]+'</b><div class="star-pick" id="sp-'+d[0]+'">'+[1,2,3,4,5].map(function(n){ return '<button type="button" onclick="rvSet(\''+d[0]+'\','+n+')" aria-label="'+n+'">★</button>'; }).join("")+'</div></div>'; }).join("")+'</div>'
+    +'<div class="card"><div class="fld"><label>تعليقك <small>(اختياري)</small></label><textarea class="inp" id="rv-t" rows="3" maxlength="400" placeholder="مثال: الخزان ممتاز والتوصيل كان في الموعد"></textarea></div>'
+    +'<div class="fld"><label>📷 صورة الخزان بعد التركيب <small>(اختيارية)</small></label><input type="file" accept="image/*" class="inp" id="rv-ph" onchange="rvPick(this)" style="padding-top:9px"><img id="rv-pv" class="pay-prev hidden" alt=""></div>'
+    +'<div class="grid2"><div class="fld"><label>الاسم الظاهر</label><input class="inp" id="rv-n" value="'+esc(firstName(o.buyerName))+'"></div><div class="fld"><label>المدينة / المنطقة</label><input class="inp" id="rv-c" value="'+esc(o.city||"")+'"></div></div>'
+    +'<div class="fld"><label>آخر 4 أرقام من هاتفك <small>(للتأكد أنك صاحب الطلب)</small></label><input class="inp" id="rv-p4" inputmode="numeric" maxlength="4" dir="ltr" style="text-align:center;letter-spacing:6px;font-weight:900"></div></div>'
+    +'<div class="err" id="rv-e"></div><button class="btn btn-gold btn-block" id="rv-go" onclick="rvSubmit()">⭐ إرسال التقييم</button>';
+}
+function rvSet(k,n){ rvStars[k]=n; var b=document.querySelectorAll("#sp-"+k+" button"); for(var i=0;i<b.length;i++) b[i].classList.toggle("on",i<n); }
+function rvPick(inp){ rvPhoto=(inp.files&&inp.files[0])||null; var pv=document.getElementById("rv-pv"); if(rvPhoto){ pv.src=URL.createObjectURL(rvPhoto); pv.classList.remove("hidden"); } else pv.classList.add("hidden"); }
+async function rvSubmit(){
+  var o=rvOrder, e=document.getElementById("rv-e"), b=document.getElementById("rv-go"); if(!o) return;
+  if(!rvStars.q||!rvStars.d||!rvStars.s){ e.textContent="اختر عدد النجوم في البنود الثلاثة"; return; }
+  var p4=toEn(document.getElementById("rv-p4").value).replace(/\D/g,"");
+  var ok=[o.buyerPhone,o.buyerPhone2].filter(Boolean).some(function(p){ return waNum(p).slice(-4)===p4; });
+  if(p4.length!==4||!ok){ e.textContent="آخر 4 أرقام لا تطابق رقم الهاتف المسجّل في الطلب"; return; }
+  var avg=Math.round((rvStars.q+rvStars.d+rvStars.s)/3*10)/10;
+  e.textContent=""; b.disabled=true; b.textContent="⏳ جارٍ الإرسال...";
+  var img=""; if(rvPhoto){ try{ img=await uploadImage(rvPhoto,1200); }catch(x){} }
+  var r={orderId:o.id,q:rvStars.q,d:rvStars.d,s:rvStars.s,avg:avg,text:String(document.getElementById("rv-t").value||"").trim().slice(0,400),img:img||"",
+    name:String(document.getElementById("rv-n").value||"").trim().slice(0,30)||"زبون",city:String(document.getElementById("rv-c").value||"").trim().slice(0,40),
+    productIds:(o.items||[]).map(function(i){return i.productId;}).filter(Boolean).slice(0,20),productNames:(o.items||[]).map(function(i){return i.name;}).slice(0,20),
+    status:avg>=4?"shown":"pending",createdAt:Date.now()};
+  try{ await setDoc(doc(db,"reviews",o.id),r); }
+  catch(x){ b.disabled=false; b.textContent="⭐ إرسال التقييم"; e.textContent="تعذر الإرسال، تأكد من الإنترنت وأعد المحاولة"; return; }
+  if(avg<4) notifyAdmin("⚠️ تقييم منخفض "+avg+"/5\n"+o.id+" · "+(o.buyerName||"")+" · "+(o.buyerPhone||"")+"\nالخزان "+r.q+" · التوصيل "+r.d+" · التعامل "+r.s+(r.text?"\n«"+r.text+"»":""));
+  else notifyAdmin("⭐ تقييم جديد "+avg+"/5 · "+o.id+(r.text?"\n«"+r.text+"»":""));
+  document.getElementById("rv-body").innerHTML='<div class="card" style="text-align:center;line-height:2"><div style="font-size:2.6rem">🌷</div><b>شكراً لك! وصلنا تقييمك.</b><div style="color:#F5A524;font-size:1.4rem">'+starsTxt(avg)+'</div>'+(avg<4?'<div style="color:var(--muted);font-size:0.86rem">يؤسفنا أن التجربة لم تكن كاملة، سنتواصل معك قريباً لنعالج الأمر.</div>':'<div style="color:var(--muted);font-size:0.86rem">لو عندك معارف محتاجين خزان، أرسل لهم رابطنا 🙏</div><button class="btn btn-ok" style="margin-top:10px" onclick="window.open(\'https://wa.me/?text=\'+encodeURIComponent(baseUrl()+\'/\'),\'_blank\')">💬 أرسل الرابط لصديق</button>')+'</div>';
+}
+// ── لوحة المالك: التقييمات ──
+function admRevsHtml(){
+  var L=allRevs.slice().sort(function(a,b){ return (a.status==="pending"?0:1)-(b.status==="pending"?0:1)||(b.createdAt||0)-(a.createdAt||0); });
+  if(!L.length) return '<div class="card"><h3>⭐ تقييمات الزبائن</h3><div style="color:var(--muted);font-size:0.86rem;line-height:1.8">لا توجد تقييمات بعد. بعد تسليم أي طلب، أرسل للزبون «إشعار التسليم» على واتساب، وفيه رابط التقييم.</div></div>';
+  var shown=L.filter(function(r){return r.status==="shown";});
+  var bar=function(k,lab){ var a=L.length?L.reduce(function(s,r){return s+numIn100(r[k]);},0)/L.length:0; return '<div><span style="flex:0 0 150px">'+lab+'</span><i><u style="width:'+(a/5*100)+'%"></u></i><b class="num">'+a.toFixed(1)+'</b></div>'; };
+  return '<div class="card"><h3>⭐ تقييمات الزبائن ('+L.length+')</h3>'+rvSumHtml(L).replace('class="rv-sum"','class="rv-sum" style="box-shadow:none;padding:0 0 6px"')
+    +'<div class="rv-bars">'+RV_DIMS.map(function(d){return bar(d[0],d[1]);}).join("")+'</div><div style="color:var(--muted);font-size:0.76rem;margin-top:6px">الظاهر للزبائن: '+shown.length+' · تقييمات 4 و5 نجوم تظهر مباشرة، و3 فأقل تنتظر موافقتك.</div></div>'
+    +L.map(function(r){ var o=orders.find(function(x){return x.id===r.orderId;});
+      return '<div class="ord '+(r.status==="pending"?'s-new':r.status==="hidden"?'s-cancelled':'s-delivered')+'"><div class="oh"><b style="color:#F5A524">'+starsTxt(r.avg)+' <span class="num" style="color:var(--navy)">'+numIn100(r.avg).toFixed(1)+'</span></b><span class="st '+(r.status==="shown"?'st-delivered':r.status==="pending"?'st-new':'st-cancelled')+'">'+(r.status==="shown"?'ظاهر':r.status==="pending"?'ينتظر موافقتك':'مخفي')+'</span></div>'
+        +'<div class="od">'+esc(r.name||"")+(r.city?' · '+esc(r.city):'')+' · '+esc(fmtDate(r.createdAt))+'<br><span style="color:var(--muted)">الخزان '+r.q+' · التوصيل '+r.d+' · التعامل '+r.s+' · '+esc(r.orderId)+'</span>'+(r.text?'<br>«'+esc(r.text)+'»':'')+(r.img?'<br><img src="'+esc(r.img)+'" alt="" style="height:90px;border-radius:8px;margin-top:6px">':'')+'</div>'
+        +'<div class="oa">'+(r.status!=="shown"?'<button class="sbtn ok" data-id="'+esc(r.orderId)+'" onclick="rvStatus(this.dataset.id,\'shown\')">👁️ إظهار</button>':'<button class="sbtn" data-id="'+esc(r.orderId)+'" onclick="rvStatus(this.dataset.id,\'hidden\')">🙈 إخفاء</button>')
+        +(o&&o.buyerPhone?'<a class="sbtn" href="tel:+'+waNum(o.buyerPhone)+'">📞 اتصال</a>':'')+'<button class="sbtn bad" data-id="'+esc(r.orderId)+'" onclick="rvRemove(this.dataset.id)">🗑️</button></div></div>';
+    }).join("");
+}
+async function rvStatus(id,st){ try{ await updateDoc(doc(db,"reviews",id),{status:st}); toast(st==="shown"?"✓ ظهر التقييم":"✓ أُخفي التقييم"); }catch(e){ toast("تعذر التعديل"); } }
+async function rvRemove(id){ if(!confirm("حذف هذا التقييم نهائياً؟")) return; try{ await deleteDoc(doc(db,"reviews",id)); toast("تم الحذف"); }catch(e){ toast("تعذر الحذف"); } }
+Object.assign(window,{openRate,rvSet,rvPick,rvSubmit,rvStatus,rvRemove});
 // ══════════════ إشعار التسليم ══════════════
 var dnCur=null;
 function firstName(n){ return String(n||"").trim().split(/\s+/)[0]||""; }
@@ -2350,6 +2453,7 @@ function renderDn(c){
     +(c.total?'<div class="rc-row" style="border-bottom:0"><span>الإجمالي</span><b class="num" style="color:var(--ok)">'+esc(c.total)+'</b></div>':'')
     +'</div><div class="rc-ft">'+esc(c.foot1)+' · <a href="'+esc(c.footLink)+'">'+(c.kind==="mk"?'انضم ←':'اطلب الآن ←')+'</a></div></div>';
   h+='<div class="grid2" style="margin-top:14px"><button class="btn btn-gold" onclick="dnShare()">📤 مشاركة</button><button class="btn btn-line" onclick="dnSave()">🖼️ حفظ كصورة</button></div>';
+  if(c.kind==="cust") h+='<button class="btn btn-block" style="margin-top:10px;background:#FFF6E3;color:#A86F12;font-weight:900" onclick="openRate(\''+esc(c.id)+'\')">⭐ قيّم طلبك</button>';
   if(isAdmin && c.kind==="cust"){
     var r=refs.find(function(x){return x.id===c.id;}), m=r?mkById(r.mid):null;
     h+='<button class="btn btn-ok btn-block" style="margin-top:10px" onclick="dnSendCust()">💬 أرسل الإشعار للزبون على واتساب</button>';
@@ -2359,7 +2463,7 @@ function renderDn(c){
 }
 function dnSendCust(){
   var c=dnCur; if(!c||!c.o) return; var o=c.o;
-  var msg="السلام عليكم "+firstName(o.buyerName)+" 🌷\nتم تسليم طلبك رقم "+o.id+" بنجاح ✓\nشكراً لاختيارك منصة الريان لخزانات المياه 💧\n\nإشعار التسليم:\n"+c.link+"\n\nيسعدنا رأيك، ولو عندك معارف محتاجين خزان أرسل لهم رابطنا 🙏";
+  var msg="السلام عليكم "+firstName(o.buyerName)+" 🌷\nتم تسليم طلبك رقم "+o.id+" بنجاح ✓\nشكراً لاختيارك منصة الريان لخزانات المياه 💧\n\nإشعار التسليم:\n"+c.link+"\n\n⭐ قيّم تجربتك في 10 ثوانٍ:\n"+baseUrl()+"/?rv="+o.id+"\n\nولو عندك معارف محتاجين خزان أرسل لهم رابطنا 🙏";
   window.open("https://wa.me/"+waNum(o.buyerPhone)+"?text="+encodeURIComponent(msg),"_blank");
 }
 function dnSendMk(){
