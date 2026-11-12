@@ -600,7 +600,7 @@ textarea.inp{height:auto;min-height:84px;padding:11px 13px;resize:vertical;line-
       <div class="card">
         <h3>📍 موقع الاستلام</h3>
         <div class="fld"><label>المدينة / المنطقة</label><select class="inp" id="co-zone" onchange="renderSummary()"></select></div>
-        <div class="fld"><label>الحي / المربع</label><input class="inp" id="co-area" placeholder="مثال: الرياض مربع 12"></div>
+        <div class="fld"><label id="co-area-l">الحي / المربع</label><input class="inp" id="co-area" placeholder="مثال: الرياض مربع 12"></div>
         <div class="fld"><label>أقرب علامة مميزة <small>(مسجد، مدرسة، محل…)</small></label><input class="inp" id="co-landmark"></div>
         <div class="fld"><label>رابط الموقع من خرائط Google <small>(اختياري)</small></label><input class="inp" id="co-map" inputmode="url" dir="ltr" placeholder="https://maps.app.goo.gl/…"></div>
         <button class="btn btn-line btn-block" type="button" onclick="useMyLocation()" style="height:44px;font-size:0.86rem">📌 استخدم موقعي الحالي</button>
@@ -875,7 +875,7 @@ textarea.inp{height:auto;min-height:84px;padding:11px 13px;resize:vertical;line-
     <div class="card">
       <h3>🚚 التوصيل والدفع</h3>
       <div class="grid2">
-        <div class="fld"><label>سعر التوصيل <small>(فارغ = يُحدد)</small></label><input class="inp" id="mo-fee" inputmode="numeric" oninput="moSum()"></div>
+        <div class="fld"><label>سعر التوصيل <small>(فارغ = يُحدد)</small></label><input class="inp" id="mo-fee" inputmode="numeric" oninput="moFeeIn()"></div>
         <div class="fld"><label>الدفع</label><select class="inp" id="mo-pay"><option value="cod">💵 عند الاستلام</option><option value="bank">🏦 بنكك</option></select></div>
       </div>
       <div class="fld" id="mo-status-fld"><label>حالة الطلب</label><select class="inp" id="mo-status"><option value="confirmed">✓ مؤكد (اتفقنا)</option><option value="new">🆕 جديد</option></select></div>
@@ -1187,7 +1187,7 @@ function renderProductPage(keep){
   document.getElementById("pd-title").textContent=p.name||"الخزان";
   document.getElementById("pd-qty").textContent=pdQtyV;
   var specs=[["السعة",cap?cap.toLocaleString("en-US")+" لتر":""],["النوع",TYPE_L[typeOf(p)]||""],["عدد الطبقات",p.layers?esc(p.layers)+" طبقات":""],["الارتفاع",esc(p.height||"")],["القطر",esc(p.diameter||"")],["الوزن",esc(p.weight||"")],["اللون",esc(p.color||"")],["الضمان",esc(p.warranty||"")]].filter(function(r){return r[1];});
-  var ship=numIn(S.freeOver)?"🚚 توصيل لموقعك · مجاني للطلبات من "+money(S.freeOver):"🚚 توصيل لحد موقعك · "+(z.length?(Math.min.apply(null,z.map(function(x){return x.fee;}))===0?"مجاني لبعض المناطق":"من "+money(Math.min.apply(null,z.map(function(x){return x.fee;})))+" حسب منطقتك"):"يُحسب حسب منطقتك");
+  var ship=numIn(S.freeOver)?"🚚 توصيل لموقعك · مجاني للطلبات من "+money(S.freeOver):"🚚 توصيل لحد موقعك · "+(z.length?(Math.min.apply(null,z.map(function(x){return x.fee;}))===0?"مجاني لبعض المناطق":"من "+money(Math.min.apply(null,z.map(function(x){return x.fee;})))+" حسب منطقتك"):"يُحسب حسب منطقتك")+((zones||[]).some(isStateZ)?" · ونرحّل للولايات":"");
   var rel=sortList(tanks().filter(function(x){return x.id!==p.id;}),"pop").sort(function(a,b){return Math.abs(capOf(a)-cap)-Math.abs(capOf(b)-cap);}).slice(0,8);
   document.getElementById("pd-body").innerHTML=
     '<div class="gal"><div class="gal-track" id="gal-track">'+(ims.length?ims.map(function(u){return '<div><img src="'+esc(u)+'" alt="" onerror="this.remove()"></div>';}).join(""):'<div><span style="font-size:5rem">💧</span></div>')+'</div>'
@@ -1196,6 +1196,7 @@ function renderProductPage(keep){
     +'<h1 class="pd-name">'+esc(p.name)+'</h1>'
     +'<div class="pd-price">'+(p.priceOnRequest?'<b style="color:var(--gold);font-size:1.25rem">السعر عند الطلب</b>':'<b class="num">'+money(pr)+'</b>'+(old>pr?'<s class="num">'+money(old)+'</s><span class="off">وفّر '+money(old-pr)+'</span>':''))+'</div>'
     +(p.outOfStock?'<div class="pd-ship" style="background:var(--bad-soft);color:var(--bad)">⏳ غير متوفر حالياً · راسلنا لنبلغك عند توفره</div>':'<div class="pd-ship">'+ship+'</div>')
+    +shipStatesHtml(p)
     +(specs.length?'<div class="card"><h3>📐 المواصفات</h3><table class="spec">'+specs.map(function(r){return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>';}).join("")+'</table></div>':'')
     +(p.desc?'<div class="card"><h3>📝 الوصف</h3><div class="pd-desc">'+esc(p.desc)+'</div></div>':'')
     +'<div class="card" style="display:flex;gap:10px;align-items:center"><span style="font-size:1.6rem">💬</span><div style="flex:1;font-size:0.86rem"><b>عندك سؤال عن هذا الخزان؟</b><br><span style="color:var(--muted)">راسلنا ونرد عليك فوراً</span></div><button class="sbtn wa" onclick="askProductWA()">واتساب</button></div>'
@@ -1231,13 +1232,36 @@ function openWA(msg,noLog){
 }
 
 // ══════════════ إتمام الطلب ══════════════
-function zonesWithFee(){ return (zones||[]).filter(function(z){ return z.fee!==null && z.fee!=="" && z.fee!==undefined && isFinite(Number(z.fee)); }).map(function(z){ return {name:z.name,fee:Number(z.fee)}; }); }
+function isStateZ(z){ return !!z && (z.kind==="state" || Number(z.rate)>0); }
+function zoneByName(n){ return (zones||[]).find(function(x){return x.name===n;}); }
+function round500(v){ return Math.round(v/500)*500; }
+function stateTankFee(z,p){
+  if(!z||!p) return null;
+  var f=z.fees&&z.fees[p.id]; if(f!==undefined&&f!==null&&f!=="") return numIn(f);
+  var r=Number(z.rate)||0, pr=priceOf(p); if(!(r>0)||!pr) return null; return round500(pr*r/100);
+}
+// lines: [{p, qty}] — للولاية مجموع ترحيل كل خزان × الكمية، ولمنطقة الخرطوم المبلغ الثابت
+function zoneFee(z,lines){
+  if(!z) return null;
+  if(isStateZ(z)){ var t=0; lines=(lines||[]).filter(function(l){return l && l.p;}); if(!lines.length) return null;
+    for(var i=0;i<lines.length;i++){ var f=stateTankFee(z,lines[i].p); if(f===null) return null; t+=f*Math.max(1,numIn(lines[i].qty)||1); } return t; }
+  if(z.fee===null||z.fee===""||z.fee===undefined) return null; return Number(z.fee);
+}
+function shipStatesHtml(p){
+  var st=(zones||[]).filter(isStateZ).map(function(z){ return {n:z.name,f:stateTankFee(z,p),eta:z.eta}; }).filter(function(x){return x.f!==null;});
+  if(!st.length||p.priceOnRequest) return "";
+  return '<details class="card"><summary style="font-weight:900;cursor:pointer">🚛 سعر ترحيل هذا الخزان للولايات</summary><table class="spec" style="margin-top:8px">'
+    +st.map(function(x){ return '<tr><td>'+esc(x.n)+(x.eta?'<br><small style="color:var(--muted)">⏱️ '+esc(x.eta)+'</small>':'')+'</td><td class="num"><b>'+money(x.f)+'</b></td></tr>'; }).join("")+'</table></details>';
+}
+function zoneOptions(ph,withFee){
+  var city=(zones||[]).filter(function(z){return !isStateZ(z);}), st=(zones||[]).filter(isStateZ);
+  var o=function(z){ var f=""; if(withFee && !isStateZ(z) && !(z.fee===null||z.fee===""||z.fee===undefined)) f=Number(z.fee)===0?" · توصيل مجاني":" · التوصيل "+money(z.fee); return '<option value="'+esc(z.name)+'">'+esc(z.name)+f+'</option>'; };
+  return '<option value="">'+ph+'</option>'+(st.length?'<optgroup label="🏙️ الخرطوم">'+city.map(o).join("")+'</optgroup><optgroup label="🚛 الولايات">'+st.map(o).join("")+'</optgroup>':city.map(o).join(""));
+}
+function zonesWithFee(){ return (zones||[]).filter(function(z){ return !isStateZ(z) && z.fee!==null && z.fee!=="" && z.fee!==undefined && isFinite(Number(z.fee)); }).map(function(z){ return {name:z.name,fee:Number(z.fee)}; }); }
 function fillZones(){
   var sel=document.getElementById("co-zone"), cur=sel.value||lsGet("rayan_buyer",{}).zone||"";
-  sel.innerHTML='<option value="">— اختر منطقتك —</option>'+(zones||[]).map(function(z){
-    var f=(z.fee===null||z.fee===""||z.fee===undefined)?"":(Number(z.fee)===0?" · توصيل مجاني":" · التوصيل "+money(z.fee));
-    return '<option value="'+esc(z.name)+'">'+esc(z.name)+f+'</option>';
-  }).join("");
+  sel.innerHTML=zoneOptions("— اختر منطقتك أو ولايتك —",true);
   if(cur && (zones||[]).some(function(z){return z.name===cur;})) sel.value=cur;
 }
 function openCheckout(){
@@ -1268,17 +1292,21 @@ function renderCheckout(){
 function deliveryFor(sub){
   var zn=document.getElementById("co-zone").value, z=(zones||[]).find(function(x){return x.name===zn;});
   if(!zn) return {state:"pick"};
+  var st=isStateZ(z), base={zone:zn,kind:st?"state":"city",eta:st?String(z.eta||""):""};
   var free=numIn(S.freeOver);
-  if(free && sub>=free) return {state:"free",fee:0,zone:zn};
-  if(!z || z.fee===null || z.fee===""||z.fee===undefined) return {state:"later",zone:zn};
-  return Number(z.fee)===0?{state:"free",fee:0,zone:zn}:{state:"fee",fee:Number(z.fee),zone:zn};
+  if(!st && free && sub>=free) return Object.assign(base,{state:"free",fee:0});
+  var f=zoneFee(z,cartTotals().lines);
+  if(f===null) return Object.assign(base,{state:"later"});
+  return Object.assign(base,f===0?{state:"free",fee:0}:{state:"fee",fee:f});
 }
 function renderSummary(){
   var t=cartTotals(), d=deliveryFor(t.sub), h='';
   h+='<div class="sum-row"><span>المنتجات ('+t.n+')</span><b class="num">'+(t.sub?money(t.sub):'')+(t.onReq?(t.sub?' + ':'')+'سعر عند الطلب':'')+'</b></div>';
-  h+='<div class="sum-row"><span>التوصيل</span>'+(d.state==="pick"?'<span style="color:var(--muted)">اختر منطقتك</span>':d.state==="free"?'<span class="free">مجاني 🎉</span>':d.state==="later"?'<span style="color:var(--gold);font-weight:800">يُحدد عند التأكيد</span>':'<b class="num">'+money(d.fee)+'</b>')+'</div>';
+  h+='<div class="sum-row"><span>'+(d.kind==="state"?'🚛 الترحيل إلى '+esc(d.zone):'التوصيل')+'</span>'+(d.state==="pick"?'<span style="color:var(--muted)">اختر منطقتك</span>':d.state==="free"?'<span class="free">مجاني 🎉</span>':d.state==="later"?'<span style="color:var(--gold);font-weight:800">يُحدد عند التأكيد</span>':'<b class="num">'+money(d.fee)+'</b>')+'</div>';
+  if(d.kind==="state") h+='<div style="color:var(--muted);font-size:0.76rem;margin:-2px 0 4px">'+(d.eta?'⏱️ يصل خلال '+esc(d.eta)+' · ':'')+'ترحيل كل خزان حسب مقاسه</div>';
+  var lab=document.getElementById("co-area-l"); if(lab){ lab.textContent=d.kind==="state"?"المدينة والحي":"الحي / المربع"; document.getElementById("co-area").placeholder=d.kind==="state"?"مثال: ود مدني - حي الدرجة":"مثال: الرياض مربع 12"; }
   var free=numIn(S.freeOver);
-  if(free && t.sub<free && !t.onReq) h+='<div style="background:var(--ok-soft);color:var(--ok);border-radius:10px;padding:7px 10px;font-size:0.78rem;font-weight:800;margin:4px 0">أضف بـ '+money(free-t.sub)+' وأكثر ويصير التوصيل مجاناً</div>';
+  if(free && t.sub<free && !t.onReq && d.kind!=="state") h+='<div style="background:var(--ok-soft);color:var(--ok);border-radius:10px;padding:7px 10px;font-size:0.78rem;font-weight:800;margin:4px 0">أضف بـ '+money(free-t.sub)+' وأكثر ويصير التوصيل مجاناً</div>';
   var total=t.sub+(d.fee||0);
   h+='<div class="sum-row t"><span>الإجمالي</span><span class="num">'+(t.onReq||d.state==="later"||d.state==="pick"?(t.sub?money(total)+' + ':'')+'<small style="font-size:0.78rem;color:var(--gold)">'+(t.onReq?'يُحدد عند التواصل':(d.state==="pick"?'+ التوصيل':'+ التوصيل'))+'</small>':money(total))+'</span></div>';
   h+='<div style="color:var(--muted);font-size:0.76rem;margin-top:6px">'+(payMode==="cod"?'💵 تدفع عند استلام الخزان':'🏦 تحوّل عبر بنكك بعد أن نتواصل معك ونؤكد الطلب')+'</div>';
@@ -1321,7 +1349,7 @@ async function submitOrder(){
   var order={id:id,source:"tanks",status:"new",createdAt:Date.now(),date:new Date().toLocaleDateString("ar-EG"),
     buyerName:name,buyerPhone:phone,city:zone,area:area,landmark:landmark,mapUrl:map,notes:notes,
     buyerAddress:[zone,area,landmark].filter(Boolean).join(" - "),
-    payment:payMode,items:items,subtotal:t.sub,deliveryFee:fee,deliveryState:d.state,total:total,priceOnRequest:t.onReq};
+    payment:payMode,items:items,subtotal:t.sub,deliveryFee:fee,deliveryState:d.state,shipKind:d.kind||"city",total:total,priceOnRequest:t.onReq};
   var ref=await resolveRef(); if(ref) order.refCode=ref.code;
   try{
     await Promise.race([setDoc(doc(db,"orders",id),order),new Promise(function(_,rej){ setTimeout(function(){rej(new Error("timeout"));},12000); })]);
@@ -1561,7 +1589,7 @@ function ordCard(o){
   var st=o.status||"new", nx=NEXT[st];
   var items=(o.items||[]).map(function(i){return '• '+esc(i.name)+' × '+i.qty+(i.priceOnRequest?' (عند الطلب)':' = '+money((i.price||0)*i.qty));}).join("<br>");
   return '<div class="ord s-'+esc(st)+'">'
-    +'<div class="oh"><b class="num" dir="ltr">'+esc(o.id)+'</b><span>'+(o.byMk?'<span class="st" style="background:#F1E9FB;color:#6B3FA0;margin-left:4px">🤝 رفعه المسوّق</span>':o.manual?'<span class="st" style="background:#F1E9FB;color:#6B3FA0;margin-left:4px">✍️ يدوي</span>':'')+'<span class="st st-'+esc(st)+'">'+esc(ST_L[st]||st)+'</span></span></div>'
+    +'<div class="oh"><b class="num" dir="ltr">'+esc(o.id)+'</b><span>'+((o.shipKind==="state"||isStateZ(zoneByName(o.city)))?'<span class="st" style="background:#E6F1FB;color:#1C5D99;margin-left:4px">🚛 ولاية</span>':'')+(o.byMk?'<span class="st" style="background:#F1E9FB;color:#6B3FA0;margin-left:4px">🤝 رفعه المسوّق</span>':o.manual?'<span class="st" style="background:#F1E9FB;color:#6B3FA0;margin-left:4px">✍️ يدوي</span>':'')+'<span class="st st-'+esc(st)+'">'+esc(ST_L[st]||st)+'</span></span></div>'
     +'<div class="od">🕒 '+esc(fmtDate(o.createdAt))+'<br>👤 <b>'+esc(o.buyerName)+'</b> · <a href="tel:+'+waNum(o.buyerPhone)+'" dir="ltr" style="color:var(--water);font-weight:800">'+esc(o.buyerPhone)+'</a>'+(o.buyerPhone2?' · احتياطي <a href="tel:+'+waNum(o.buyerPhone2)+'" dir="ltr" style="color:var(--water);font-weight:800">'+esc(o.buyerPhone2)+'</a>':'')
     +'<br>📍 '+esc(o.buyerAddress||"")+(o.mapUrl?' · <a href="'+esc(o.mapUrl)+'" target="_blank" rel="noopener" style="color:var(--water);font-weight:800">الخريطة ↗</a>':'')
     +(o.notes?'<br>📝 '+esc(o.notes):'')
@@ -1666,21 +1694,52 @@ async function pfDelete(){
 }
 
 // ── التوصيل ──
-var zDraft=null;
+var zDraft=null, zSuggested=false, zOpen={};
+const SUG_STATES=[["نهر النيل - شندي",5],["نهر النيل - بقية المدن",10],["الشمالية",25],["الجزيرة",10],["كسلا",15],["القضارف",15],["سنار",20],["شمال كردفان",30]];
+function zTanks(){ return tanks(true).filter(function(p){return !p.priceOnRequest && priceOf(p);}).sort(function(a,b){return (capOf(a)-capOf(b))||(priceOf(a)-priceOf(b));}); }
+function zCalcFees(z){ var o={}; zTanks().forEach(function(p){ var r=Number(String(z.rate).replace(",","."))||0; if(r>0) o[p.id]=round500(priceOf(p)*r/100); }); return o; }
 function admDelivery(){
-  if(!zDraft) zDraft=(zones||[]).map(function(z){return {name:z.name,fee:(z.fee===null||z.fee===undefined)?"":z.fee};});
-  return '<div class="card"><h3>🚚 مناطق التوصيل وأسعارها</h3><p style="color:var(--muted);font-size:0.8rem;margin-bottom:10px">اترك السعر فارغاً ليظهر للزبون «يُحدد عند التأكيد»، واكتب 0 للتوصيل المجاني.</p>'
-    +'<div id="zrows">'+zDraft.map(function(z,i){return '<div class="zrow"><input class="inp zn" data-i="'+i+'" value="'+esc(z.name)+'" placeholder="المنطقة" oninput="zEdit(this.dataset.i,\'name\',this.value)"><input class="inp zf" data-i="'+i+'" value="'+esc(z.fee)+'" inputmode="numeric" placeholder="السعر" oninput="zEdit(this.dataset.i,\'fee\',this.value)"><button data-i="'+i+'" onclick="zDel(this.dataset.i)">✕</button></div>';}).join("")+'</div>'
-    +'<button class="btn btn-line btn-block" onclick="zAdd()" style="height:44px;margin-top:4px">+ إضافة منطقة</button></div>'
-    +'<div class="card"><div class="fld"><label>توصيل مجاني للطلبات من (ج.س) <small>· اتركه فارغاً لإلغائه</small></label><input class="inp" id="s-free" inputmode="numeric" value="'+(numIn(S.freeOver)||"")+'"></div>'
+  if(!zDraft){
+    zDraft=(zones||[]).map(function(z){ return isStateZ(z)?{kind:"state",name:z.name,rate:Number(z.rate)||"",eta:z.eta||"",fees:Object.assign({},z.fees||{})}:{kind:"city",name:z.name,fee:(z.fee===null||z.fee===undefined)?"":z.fee}; });
+    zSuggested=false; zOpen={};
+    if(!zDraft.some(function(z){return z.kind==="state";})){ zSuggested=true; SUG_STATES.forEach(function(x){ var z={kind:"state",name:x[0],rate:x[1],eta:""}; z.fees=zCalcFees(z); zDraft.push(z); }); }
+    zDraft.forEach(function(z){ if(z.kind==="state"){ var c=zCalcFees(z); for(var k in c) if(z.fees[k]===undefined||z.fees[k]==="") z.fees[k]=c[k]; } });
+  }
+  var T=zTanks();
+  var rows=function(kind){ return zDraft.map(function(z,i){ if(z.kind!==kind) return "";
+    if(kind==="city") return '<div class="zrow"><input class="inp zn" data-i="'+i+'" value="'+esc(z.name)+'" placeholder="المنطقة" oninput="zEdit(this.dataset.i,\'name\',this.value)"><input class="inp zf" data-i="'+i+'" value="'+esc(z.fee)+'" inputmode="numeric" placeholder="السعر" oninput="zEdit(this.dataset.i,\'fee\',this.value)"><button data-i="'+i+'" onclick="zDel(this.dataset.i)">✕</button></div>';
+    var fees=z.fees||{};
+    return '<div style="background:var(--bg);border-radius:12px;padding:10px;margin-bottom:8px"><div class="zrow" style="margin-bottom:6px"><input class="inp zn" data-i="'+i+'" value="'+esc(z.name)+'" placeholder="الولاية / المدينة" oninput="zEdit(this.dataset.i,\'name\',this.value)"><input class="inp" data-i="'+i+'" value="'+esc(z.eta)+'" placeholder="مدة الوصول" oninput="zEdit(this.dataset.i,\'eta\',this.value)" style="flex:1;font-size:0.8rem"><button data-i="'+i+'" onclick="zDel(this.dataset.i)">✕</button></div>'
+      +'<details'+(zOpen[i]?' open':'')+' ontoggle="zTog('+i+',this.open)"><summary style="font-weight:800;font-size:0.84rem;cursor:pointer;color:var(--navy2)">💧 سعر الترحيل لكل مقاس ('+T.length+')</summary>'
+      +(T.length?T.map(function(p){ var c=capOf(p); return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)"><span style="flex:1;font-size:0.8rem">'+esc(p.name)+(c&&String(p.name).indexOf(String(c))<0?' · '+c+' لتر':'')+'<br><small style="color:var(--muted)">سعر الخزان '+money(priceOf(p))+'</small></span><input class="inp num" data-i="'+i+'" data-p="'+esc(p.id)+'" value="'+esc(fees[p.id]===undefined?"":fees[p.id])+'" inputmode="numeric" placeholder="—" oninput="zFee(this.dataset.i,this.dataset.p,this.value)" style="width:110px;height:40px;text-align:left;direction:ltr"></div>'; }).join(""):'<div style="color:var(--muted);font-size:0.8rem;padding:6px 0">أضف خزانات بأسعار أولاً</div>')
+      +'<div style="display:flex;gap:8px;align-items:center;margin-top:8px;font-size:0.78rem;color:var(--muted)">حساب سريع لكل المقاسات بنسبة <input class="inp" data-i="'+i+'" value="'+esc(z.rate)+'" inputmode="decimal" oninput="zEdit(this.dataset.i,\'rate\',this.value)" style="width:64px;height:36px;text-align:center;direction:ltr">% <button class="sbtn" data-i="'+i+'" onclick="zRecalc(this.dataset.i)">↻ احسب</button></div></details></div>';
+  }).join(""); };
+  return '<div class="card"><h3>🏙️ مناطق الخرطوم وأسعارها</h3><p style="color:var(--muted);font-size:0.8rem;margin-bottom:10px">اترك السعر فارغاً ليظهر للزبون «يُحدد عند التأكيد»، واكتب 0 للتوصيل المجاني.</p>'
+    +'<div id="zrows">'+rows("city")+'</div>'
+    +'<button class="btn btn-line btn-block" onclick="zAdd(\'city\')" style="height:44px;margin-top:4px">+ إضافة منطقة</button></div>'
+    +'<div class="card"><h3>🚛 الترحيل للولايات</h3>'
+    +'<p style="color:var(--muted);font-size:0.8rem;margin-bottom:10px;line-height:1.8">لكل ولاية سعر ترحيل ثابت لكل مقاس خزان. افتح «سعر الترحيل لكل مقاس» لترى الأسعار وتعدّل أي سعر بيدك. الزبون يرى سعر ترحيل خزانه، ويُجمع في السلة حسب الكمية.</p>'
+    +(zSuggested?'<div style="background:var(--warn-soft);color:var(--warn);border-radius:10px;padding:9px 12px;font-weight:800;font-size:0.82rem;margin-bottom:10px">📝 حسبتُ أسعار الترحيل لكل مقاس من أسعار خزاناتك، ولم تُحفظ بعد. راجعها ثم اضغط «حفظ التوصيل» أسفل الصفحة لتفعيلها.</div>':'')
+    +rows("state")
+    +'<button class="btn btn-line btn-block" onclick="zAdd(\'state\')" style="height:44px;margin-top:4px">+ إضافة ولاية / مدينة</button></div>'
+    +'<div class="card"><div class="fld"><label>توصيل مجاني للطلبات من (ج.س) <small>· لمناطق الخرطوم فقط · اتركه فارغاً لإلغائه</small></label><input class="inp" id="s-free" inputmode="numeric" value="'+(numIn(S.freeOver)||"")+'"></div>'
     +'<div class="fld"><label>ملاحظة التوصيل <small>(تظهر في الصفحة الرئيسية)</small></label><input class="inp" id="s-ship" value="'+esc(S.shipNote||"")+'" placeholder="مثال: التوصيل خلال 24 ساعة داخل الخرطوم"></div></div>'
     +'<button class="btn btn-gold btn-block" id="z-save" onclick="zSave()">💾 حفظ التوصيل</button>';
 }
 function zEdit(i,k,v){ zDraft[Number(i)][k]=v; }
-function zAdd(){ zDraft.push({name:"",fee:""}); renderAdmin(); }
-function zDel(i){ zDraft.splice(Number(i),1); renderAdmin(); }
+function zFee(i,pid,v){ var z=zDraft[Number(i)]; z.fees=z.fees||{}; z.fees[pid]=String(v).trim()===""?"":numIn(v); }
+function zTog(i,o){ zOpen[i]=!!o; }
+function zRecalc(i){ var z=zDraft[Number(i)]; if(!(Number(String(z.rate).replace(",","."))>0)){ toast("اكتب النسبة أولاً"); return; } z.fees=zCalcFees(z); zOpen[i]=true; renderAdmin(); toast("✓ حُسبت الأسعار، راجعها ثم احفظ"); }
+function zAdd(kind){ zDraft.push(kind==="state"?{kind:"state",name:"",rate:"",eta:"",fees:{}}:{kind:"city",name:"",fee:""}); if(kind==="state") zOpen[zDraft.length-1]=true; renderAdmin(); }
+function zDel(i){ zDraft.splice(Number(i),1); zOpen={}; renderAdmin(); }
 async function zSave(){
-  var z=zDraft.map(function(x){ var f=String(x.fee).trim(); return {name:String(x.name||"").trim(),fee:f===""?null:numIn(f)}; }).filter(function(x){return x.name;});
+  var T=zTanks(), bad=zDraft.filter(function(x){ return x.kind==="state" && String(x.name||"").trim() && T.some(function(p){ var f=(x.fees||{})[p.id]; return f===undefined||f===""; }) && !(Number(String(x.rate).replace(",","."))>0); });
+  if(bad.length){ toast("أكمل أسعار الترحيل لـ «"+bad[0].name+"»"); return; }
+  var z=zDraft.map(function(x){
+    var name=String(x.name||"").trim();
+    if(x.kind==="state"){ var fees={}; Object.keys(x.fees||{}).forEach(function(k){ if(x.fees[k]!==""&&x.fees[k]!==undefined) fees[k]=numIn(x.fees[k]); }); return {name:name,kind:"state",rate:Number(String(x.rate).replace(",","."))||0,eta:String(x.eta||"").trim(),fees:fees,fee:null}; }
+    var f=String(x.fee).trim(); return {name:name,fee:f===""?null:numIn(f)};
+  }).filter(function(x){return x.name;});
   if(!z.length){ toast("أضف منطقة واحدة على الأقل"); return; }
   try{
     await setDoc(doc(db,"meta","tankZones"),{zones:z,updatedAt:Date.now()});
@@ -2360,7 +2419,7 @@ function openMkOrder(){
   if(!meMk||meMk.status!=="approved") return;
   ["mk-o-name","mk-o-ph1","mk-o-ph2","mk-o-area","mk-o-landmark","mk-o-comm","mk-o-notes"].forEach(function(i){ document.getElementById(i).value=""; });
   document.getElementById("mk-o-err").textContent="";
-  document.getElementById("mk-o-zone").innerHTML='<option value="">— اختر المنطقة —</option>'+(zones||[]).map(function(z){return '<option value="'+esc(z.name)+'">'+esc(z.name)+'</option>';}).join("");
+  document.getElementById("mk-o-zone").innerHTML=zoneOptions("— اختر المنطقة أو الولاية —",false);
   var b=document.getElementById("mk-o-save"); b.disabled=false; b.textContent="📤 إرسال الطلب";
   mkoItems=[]; mkoAddRow(); openPage("pg-mko");
 }
@@ -2380,8 +2439,8 @@ function mkoRender(){
 }
 function mkoTotals(){
   var sub=mkoItems.reduce(function(s,it){return s+numIn(it.price)*Math.max(1,numIn(it.qty)||1);},0);
-  var z=(zones||[]).find(function(x){return x.name===document.getElementById("mk-o-zone").value;});
-  var fee=(z && z.fee!==null && z.fee!==undefined && z.fee!=="")?numIn(z.fee):null;
+  var z=zoneByName(document.getElementById("mk-o-zone").value);
+  var fee=z?zoneFee(z,mkoItems.map(function(it){return {p:prodById(it.pid),qty:it.qty};})):null;
   return {sub:sub,fee:fee,zone:!!z};
 }
 function mkoSum(){
@@ -2444,17 +2503,17 @@ async function voidRef(id){
   var why=prompt("سبب إلغاء نسبة الطلب للمسوّق (مثلاً: الزبون جاء مباشرة)","الزبون ليس عن طريقه"); if(why===null) return;
   try{ await updateDoc(doc(db,"referrals",id),{status:"void",voidReason:String(why).slice(0,80),voidAt:Date.now()}); toast("✓ أُلغيت النسبة"); }catch(e){ toast("تعذر الإلغاء"); }
 }
-Object.assign(window,{moCommIn,openDelivery,openMkDelivery,dnShare,dnSave,dnSendCust,dnSendMk,editOrder,openMkOrder,mkoAddRow,mkoDel,mkoSet,mkoSum,mkoSave,voidRef});
+Object.assign(window,{zFee,zTog,zRecalc,moFeeIn,moCommIn,openDelivery,openMkDelivery,dnShare,dnSave,dnSendCust,dnSendMk,editOrder,openMkOrder,mkoAddRow,mkoDel,mkoSet,mkoSum,mkoSave,voidRef});
 // ══════════════ الطلب اليدوي ══════════════
 var moItems=[], moContactId="", moEditId="", moCommTouched=false, moCommLocked=false;
 function moCommIn(){ moCommTouched=true; moSum(); }
 function moCommVal(t){ var v=document.getElementById("mo-comm").value.trim(); return v===""?Math.round(t.sub*REF_RATE):numIn(v); }
 function openMOrder(){
-  moEditId=""; moCommTouched=false; moCommLocked=false; (function(c){ c.value=""; c.disabled=false; })(document.getElementById("mo-comm")); document.getElementById("mo-comm-note").textContent=""; document.getElementById("mo-title").textContent="طلب يدوي"; document.getElementById("mo-intro").classList.remove("hidden"); document.getElementById("mo-status-fld").classList.remove("hidden");
+  moEditId=""; moFeeAuto=false; moCommTouched=false; moCommLocked=false; (function(c){ c.value=""; c.disabled=false; })(document.getElementById("mo-comm")); document.getElementById("mo-comm-note").textContent=""; document.getElementById("mo-title").textContent="طلب يدوي"; document.getElementById("mo-intro").classList.remove("hidden"); document.getElementById("mo-status-fld").classList.remove("hidden");
   document.getElementById("mo-save").textContent="💾 حفظ الطلب"; document.getElementById("mo-mk").disabled=false; document.getElementById("mo-cc2").value="+249";
   ["mo-name","mo-phone","mo-phone2","mo-area","mo-landmark","mo-map","mo-fee","mo-notes"].forEach(function(i){ document.getElementById(i).value=""; });
   document.getElementById("mo-err").textContent=""; document.getElementById("mo-status").value="confirmed"; document.getElementById("mo-pay").value="cod";
-  document.getElementById("mo-zone").innerHTML='<option value="">— اختر المنطقة —</option>'+(zones||[]).map(function(z){return '<option value="'+esc(z.name)+'">'+esc(z.name)+'</option>';}).join("");
+  document.getElementById("mo-zone").innerHTML=zoneOptions("— اختر المنطقة أو الولاية —",false);
   var ap=mks.filter(function(m){return m.status==="approved";}).sort(function(a,b){return String(a.name).localeCompare(String(b.name),"ar");});
   document.getElementById("mo-mk").innerHTML='<option value="">— بدون مسوّق —</option>'+ap.map(function(m){return '<option value="'+esc(m.id)+'">'+esc(m.name)+' · '+esc(m.city||"")+'</option>';}).join("");
   moContactId=""; moItems=[]; moAddRow(true); moContacts(); openPage("pg-morder");
@@ -2478,9 +2537,15 @@ function moSet(i,k,v){
   it[k]=numIn(v); moSum();
 }
 function moDel(i){ moItems.splice(Number(i),1); moRender(); }
-function moZone(){ var z=(zones||[]).find(function(x){return x.name===document.getElementById("mo-zone").value;}); var f=document.getElementById("mo-fee"); if(z && z.fee!==null && z.fee!==undefined && z.fee!=="" && !f.value) f.value=Number(z.fee); moSum(); }
+var moFeeAuto=false;
+function moFeeIn(){ moFeeAuto=false; moSum(); }
+function moZone(){ var z=zoneByName(document.getElementById("mo-zone").value), f=document.getElementById("mo-fee");
+  if(isStateZ(z)){ moFeeAuto=true; } else { moFeeAuto=false; if(z && z.fee!==null && z.fee!==undefined && z.fee!=="" && !f.value) f.value=Number(z.fee); }
+  moSum(); }
 function moTotals(){
-  var sub=moItems.reduce(function(s,it){return s+numIn(it.price)*Math.max(1,numIn(it.qty)||1);},0), fv=document.getElementById("mo-fee").value.trim();
+  var sub=moItems.reduce(function(s,it){return s+numIn(it.price)*Math.max(1,numIn(it.qty)||1);},0);
+  if(moFeeAuto){ var zz=zoneByName(document.getElementById("mo-zone").value), af=zoneFee(zz,moItems.map(function(it){return {p:prodById(it.pid),qty:it.qty};})); document.getElementById("mo-fee").value=(af===null||!sub)?"":af; }
+  var fv=document.getElementById("mo-fee").value.trim();
   return {sub:sub,fee:fv===""?null:numIn(fv)};
 }
 function moSum(){
