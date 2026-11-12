@@ -840,6 +840,12 @@ textarea.inp{height:auto;min-height:84px;padding:11px 13px;resize:vertical;line-
   </div>
 </div>
 
+<!-- ═══ إشعار تسليم (رابط عام للزبون / للمسوّق) ═══ -->
+<div class="page hidden" id="pg-dn">
+  <div class="pbar"><div class="wrap"><button class="back" onclick="history.back()">→ رجوع</button><div class="pt">إشعار تسليم</div><div class="pa"></div></div></div>
+  <div class="pbody" style="max-width:520px" id="dn-body"></div>
+</div>
+
 <!-- ═══ إيصال صرف عمولة (رابط عام) ═══ -->
 <div class="page hidden" id="pg-rc">
   <div class="pbar"><div class="wrap"><button class="back" onclick="history.back()">→ رجوع</button><div class="pt">إيصال صرف عمولة</div><div class="pa"></div></div></div>
@@ -878,6 +884,7 @@ textarea.inp{height:auto;min-height:84px;padding:11px 13px;resize:vertical;line-
     <div class="card">
       <h3>🤝 عن طريق مسوّق؟ <small style="color:var(--muted);font-weight:600">(اختياري)</small></h3>
       <div class="fld"><select class="inp" id="mo-mk" onchange="moSum()"></select></div>
+      <div class="fld hidden" id="mo-comm-fld"><label>💰 عمولة المسوّق في هذا الطلب (ج.س)</label><input class="inp num" id="mo-comm" inputmode="numeric" dir="ltr" style="text-align:left" oninput="moCommIn()"><div id="mo-comm-note" style="color:var(--muted);font-size:0.76rem;margin-top:4px"></div></div>
       <div id="mo-contacts"></div>
     </div>
     <div class="card"><h3>🧾 الملخص</h3><div id="mo-sum"></div></div>
@@ -1446,6 +1453,7 @@ function handleDeepLinks(){
   else if(sp.get("join")) openJoin();
   else if(sp.get("m")) openMLogin();
   else if(sp.get("rc")) openReceipt(sp.get("rc"));
+  else if(sp.get("dn")) openDelivery(sp.get("dn"));
 }
 
 document.getElementById("yr").textContent=new Date().getFullYear();
@@ -1564,12 +1572,14 @@ function ordCard(o){
     +'<div class="oa">'+(nx?'<button class="sbtn '+nx[2]+'" data-id="'+esc(o.id)+'" data-s="'+nx[0]+'" onclick="setOrderStatus(this.dataset.id,this.dataset.s)">'+nx[1]+'</button>':'')
     +'<button class="sbtn wa" data-id="'+esc(o.id)+'" onclick="waCustomer(this.dataset.id)">💬 واتساب الزبون</button>'
     +(st!=="cancelled"&&st!=="delivered"?'<button class="sbtn" data-id="'+esc(o.id)+'" onclick="editOrder(this.dataset.id)">✏️ تعديل</button>':'')
+    +(st==="delivered"?'<button class="sbtn ok" data-id="'+esc(o.id)+'" onclick="openDelivery(this.dataset.id)">📨 إشعار التسليم</button>':'')
     +(st!=="cancelled"&&st!=="delivered"?'<button class="sbtn bad" data-id="'+esc(o.id)+'" onclick="cancelOrder(this.dataset.id)">إلغاء</button>':'')
     +(st==="cancelled"?'<button class="sbtn" data-id="'+esc(o.id)+'" data-s="new" onclick="setOrderStatus(this.dataset.id,this.dataset.s)">↩ إرجاع</button>':'')
     +'</div></div>';
 }
 async function setOrderStatus(id,s){
-  try{ await updateDoc(doc(db,"orders",id),{status:s,statusAt:Date.now()}); toast("تم: "+ST_L[s]); syncRefStatus(id,s); }
+  var up={status:s,statusAt:Date.now()}; if(s==="delivered") up.deliveredAt=Date.now();
+  try{ await updateDoc(doc(db,"orders",id),up); toast("تم: "+ST_L[s]); syncRefStatus(id,s); if(s==="delivered") setTimeout(function(){ openDelivery(id); },350); }
   catch(e){ toast("تعذر التحديث، تأكد من الدخول"); }
 }
 function cancelOrder(id){ if(confirm("إلغاء هذا الطلب؟")) setOrderStatus(id,"cancelled"); }
@@ -1922,7 +1932,7 @@ function renderMDash(){
       +'<div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-line" style="flex:1;height:40px;font-size:0.82rem" onclick="mkCopy(\'calc\')">🧮 نسخ رابط حاسبة السعة</button></div></div>'
     +'<div class="card"><h3>💧 شارك خزاناً محدداً</h3>'+(list.length?list.map(function(p){ var im=imgsOf(p)[0], cap=capOf(p); return '<div class="cl"><div class="ci">'+(im?'<img src="'+esc(im)+'" alt="">':'💧')+'</div><div class="cx"><b>'+esc(p.name)+'</b><span class="num">'+(cap?cap.toLocaleString("en-US")+' لتر · ':'')+(p.priceOnRequest?'السعر عند الطلب':money(priceOf(p)))+'</span></div><div style="display:flex;flex-direction:column;gap:5px"><button class="sbtn gold" data-id="'+esc(p.id)+'" onclick="mkShareProduct(this.dataset.id)">📤 شارك</button><button class="sbtn" data-id="'+esc(p.id)+'" onclick="mkCopy(\'p\',this.dataset.id)">📋 نسخ</button></div></div>'; }).join(""):'<div style="color:var(--muted)">لا توجد خزانات متاحة الآن</div>')+'</div>'
     +'<div class="card"><h3>✍️ منشورات جاهزة</h3>'+MK_TPL.map(function(t,i){ return '<div style="background:var(--bg);border-radius:12px;padding:11px;margin-bottom:8px;white-space:pre-wrap;font-size:0.84rem;line-height:1.85">'+esc(t.replace("{link}","🔗 (رابطك)"))+'<div style="margin-top:6px"><button class="sbtn blue" data-i="'+i+'" onclick="mkCopy(\'tpl\',this.dataset.i)">📋 نسخ المنشور مع رابطك</button></div></div>'; }).join("")+'</div>'
-    +'<div class="card"><h3>🧾 طلباتك</h3>'+(myRefs.length?myRefs.map(function(r){ var s=refState(r); return '<div class="cl" style="align-items:flex-start"><div class="cx"><b>'+esc((r.items||[]).map(function(i){return i.name+" × "+i.qty;}).join("، "))+'</b><span>'+esc(fmtDate(r.createdAt))+(r.byMk?' · 📝 سجّلته أنت'+(r.cust?' ('+esc(r.cust)+')':''):r.manual?' · 💬 عن طريق واتساب':'')+'</span><div style="font-size:0.78rem;font-weight:800;color:var(--navy2);margin-top:3px">مرحلة الطلب: '+esc(ORD_STAGE[r.orderStatus||"new"]||"")+'</div><div style="margin-top:4px"><span class="st '+s.c+'">العمولة: '+esc(s.l)+'</span></div></div><b class="num" style="white-space:nowrap">'+(r.priceOnRequest&&!numIn(r.commission)?'تُحدد':money(r.commission))+'</b></div>'; }).join(""):'<div style="color:var(--muted);font-size:0.86rem">لا توجد طلبات بعد. شارك رابطك وابدأ 🚀</div>')+'</div>'
+    +'<div class="card"><h3>🧾 طلباتك</h3>'+(myRefs.length?myRefs.map(function(r){ var s=refState(r); return '<div class="cl" style="align-items:flex-start"><div class="cx"><b>'+esc((r.items||[]).map(function(i){return i.name+" × "+i.qty;}).join("، "))+'</b><span>'+esc(fmtDate(r.createdAt))+(r.byMk?' · 📝 سجّلته أنت'+(r.cust?' ('+esc(r.cust)+')':''):r.manual?' · 💬 عن طريق واتساب':'')+'</span><div style="font-size:0.78rem;font-weight:800;color:var(--navy2);margin-top:3px">مرحلة الطلب: '+esc(ORD_STAGE[r.orderStatus||"new"]||"")+'</div><div style="margin-top:4px"><span class="st '+s.c+'">العمولة: '+esc(s.l)+'</span>'+((r.status==="delivered"||r.status==="paid")?' <button class="sbtn ok" style="height:26px;padding:0 9px;font-size:0.72rem" data-id="'+esc(r.id)+'" onclick="openMkDelivery(this.dataset.id)">📨 الإشعار</button>':'')+'</div></div><b class="num" style="white-space:nowrap">'+(r.priceOnRequest&&!numIn(r.commission)?'تُحدد':money(r.commission))+'</b></div>'; }).join(""):'<div style="color:var(--muted);font-size:0.86rem">لا توجد طلبات بعد. شارك رابطك وابدأ 🚀</div>')+'</div>'
     +'<div class="card"><h3>💸 سجل الدفعات</h3>'+(myPays.length?myPays.map(function(p){ return '<div class="sum-row" style="align-items:center"><span>'+esc(fmtDate(p.paidAt))+' · '+(p.refIds||[]).length+' طلب<br><b class="num">'+money(p.amount)+'</b></span>'+(p.rid?'<button class="sbtn" data-id="'+esc(p.rid)+'" onclick="openReceipt(this.dataset.id)">🧾 الإيصال</button>':'')+'</div>'; }).join(""):'<div style="color:var(--muted);font-size:0.86rem">لا توجد دفعات بعد</div>')+'</div>'
     +'<details class="card"><summary style="font-weight:900;cursor:pointer">📜 شروط المسوّق</summary><ol style="padding-inline-start:18px;font-size:0.82rem;line-height:1.95;color:#344054;margin-top:8px"><li>تُحسب العمولة على قيمة الخزانات بدون التوصيل، للطلبات التي تأتي عن طريق روابطك أو تسجّلها أنت.</li><li>تُستحق فور تسليم الطلب، وتُلغى إذا أُلغي الطلب.</li><li>تطلب صرف رصيدك المستحق متى شئت، دون حد أدنى.</li><li>تستطيع تسجيل طلب زبون اتفقت معه مباشرة (حتى '+MKO_DAY_MAX+' طلبات يومياً) وتكتب عمولتك فيه، وتُعتمد بعد تأكيد الزبون والتسليم. للمنصة تعديلها أو إلغاؤها إن تبيّن أن الزبون جاء من غيرك.</li><li>لا تقدّم نفسك موظفاً في المنصة، ولا تَعِد بأسعار أو خصومات غير المعلنة.</li><li>لا تطلب لنفسك عن طريق رابطك.</li><li>للمنصة حق تعديل العمولة بإشعار مسبق، وإيقاف الحساب عند المخالفة.</li></ol></details>';
 }
@@ -2229,6 +2239,102 @@ function rcBlob(rc){ return new Promise(function(res){
   }catch(e){ res(null); }
 }); }
 Object.assign(window,{openPay,payImgPick,confirmPay,payToggle,payEdit,payCheck,payFit,openPayReceipt,openReceipt,rcShare,rcSaveImg,rcSendMk});
+// ══════════════ إشعار التسليم ══════════════
+var dnCur=null;
+function firstName(n){ return String(n||"").trim().split(/\s+/)[0]||""; }
+function dnDate(t){ return t?fmtDate(t):""; }
+function itemsLine(it){ return (it||[]).map(function(i){return {l:i.name+(numIn(i.qty)>1?" × "+i.qty:""), v:i.price?money(numIn(i.price)*Math.max(1,numIn(i.qty)||1)):""};}); }
+async function openDelivery(id){
+  var body=document.getElementById("dn-body"); id=String(id||"");
+  var o=orders.find(function(x){return x.id===id;});
+  if(!isOpen("pg-dn")) openPage("pg-dn");
+  if(!o){ body.innerHTML='<div class="card" style="text-align:center;color:var(--muted)">⏳ جارٍ فتح الإشعار...</div>';
+    try{ var sn=await getDoc(doc(db,"orders",id)); o=sn.exists()?Object.assign({id:id},sn.data()):null; }catch(e){ o=null; } }
+  if(!o){ body.innerHTML='<div class="card" style="text-align:center">لم نجد هذا الطلب</div>'; return; }
+  if(o.status!=="delivered"){ body.innerHTML='<div class="card" style="text-align:center;line-height:1.9">لم يُسلَّم هذا الطلب بعد.<br><button class="btn btn-line" style="margin-top:10px" onclick="openTrack(\''+esc(o.id)+'\')">📦 تتبّع الطلب</button></div>'; return; }
+  var c={kind:"cust", id:o.id, sub:"إشعار تسليم طلب", head:"تم تسليم طلبك بنجاح 🎉", headSmall:"شكراً لثقتك "+firstName(o.buyerName)+"، نتمنى لك مياهاً لا تنقطع 💧",
+    rows:[["رقم الطلب",o.id],["تاريخ التسليم",dnDate(o.deliveredAt||o.statusAt)],["العميل",firstName(o.buyerName)],["الموقع",[o.city,o.area].filter(Boolean).join(" - ")],["الدفع",o.payment==="bank"?"بنكك":"عند الاستلام"]],
+    items:itemsLine(o.items), total:o.priceOnRequest?"":money(o.total), stamp:"✓ تم التسليم",
+    foot1:"💧 أطلب من هنا واستلم في موقعك", foot2:baseUrl().replace(/^https?:\/\//,""), footLink:baseUrl()+"/", link:baseUrl()+"/?dn="+o.id, o:o};
+  dnCur=c; renderDn(c);
+}
+function openMkDelivery(id){
+  var r=myRefs.find(function(x){return x.id===id;}); if(!r||!meMk) return;
+  var paid=r.status==="paid";
+  var c={kind:"mk", id:r.id, sub:"إشعار تسليم طلب عن طريقي", head:money(r.commission), headSmall:paid?"عمولة صُرفت ✓":"عمولة مستحقة — تطلب صرفها متى شئت",
+    rows:[["رقم الطلب",r.id],["تاريخ التسليم",dnDate(r.deliveredAt)],["المسوّق",String(meMk.name||"")],["حالة العمولة",paid?"مصروفة":"مستحقة"]],
+    items:itemsLine(r.items), total:"", stamp:"✓ تم التسليم", bigMoney:true,
+    foot1:"💧 سوّق معنا واكسب عمولة · انضم الآن", foot2:(baseUrl()+"/?join=1").replace(/^https?:\/\//,""), footLink:baseUrl()+"/?join=1", link:""};
+  dnCur=c; openPage("pg-dn"); renderDn(c);
+}
+function renderDn(c){
+  var logo=(document.querySelector("#brand img")||{}).src||"";
+  var h='<div class="rc"><div class="rc-hd">'+(logo?'<img src="'+logo+'" alt="">':'')+'<b>منصة الريان لخزانات المياه</b><small>'+esc(c.sub)+'</small></div>'
+    +'<div class="rc-stamp">'+esc(c.stamp)+'</div>'
+    +'<div class="rc-bd"><div class="rc-amt"><div class="v'+(c.bigMoney?' num':'')+'" style="'+(c.bigMoney?'':'font-size:1.3rem')+'">'+esc(c.head)+'</div><div class="w">'+esc(c.headSmall)+'</div></div>'
+    +c.rows.filter(function(r){return r[1];}).map(function(r){ return '<div class="rc-row"><span>'+esc(r[0])+'</span><b'+(/^ORD|^\d/.test(r[1])?' dir="ltr"':'')+'>'+esc(r[1])+'</b></div>'; }).join("")
+    +(c.items.length?'<div class="rc-ords">'+c.items.map(function(i){ return '<div><span>💧 '+esc(i.l)+'</span><b class="num">'+esc(i.v)+'</b></div>'; }).join("")+'</div>':'')
+    +(c.total?'<div class="rc-row" style="border-bottom:0"><span>الإجمالي</span><b class="num" style="color:var(--ok)">'+esc(c.total)+'</b></div>':'')
+    +'</div><div class="rc-ft">'+esc(c.foot1)+' · <a href="'+esc(c.footLink)+'">'+(c.kind==="mk"?'انضم ←':'اطلب الآن ←')+'</a></div></div>';
+  h+='<div class="grid2" style="margin-top:14px"><button class="btn btn-gold" onclick="dnShare()">📤 مشاركة</button><button class="btn btn-line" onclick="dnSave()">🖼️ حفظ كصورة</button></div>';
+  if(isAdmin && c.kind==="cust"){
+    var r=refs.find(function(x){return x.id===c.id;}), m=r?mkById(r.mid):null;
+    h+='<button class="btn btn-ok btn-block" style="margin-top:10px" onclick="dnSendCust()">💬 أرسل الإشعار للزبون على واتساب</button>';
+    if(m && r.status!=="void") h+='<button class="btn btn-block" style="margin-top:8px;background:#F1E9FB;color:#6B3FA0" onclick="dnSendMk()">🤝 أبلغ المسوّق '+esc(m.name)+' (عمولة '+money(r.commission)+')</button>';
+  }
+  document.getElementById("dn-body").innerHTML=h;
+}
+function dnSendCust(){
+  var c=dnCur; if(!c||!c.o) return; var o=c.o;
+  var msg="السلام عليكم "+firstName(o.buyerName)+" 🌷\nتم تسليم طلبك رقم "+o.id+" بنجاح ✓\nشكراً لاختيارك منصة الريان لخزانات المياه 💧\n\nإشعار التسليم:\n"+c.link+"\n\nيسعدنا رأيك، ولو عندك معارف محتاجين خزان أرسل لهم رابطنا 🙏";
+  window.open("https://wa.me/"+waNum(o.buyerPhone)+"?text="+encodeURIComponent(msg),"_blank");
+}
+function dnSendMk(){
+  var c=dnCur; if(!c) return; var r=refs.find(function(x){return x.id===c.id;}), m=r?mkById(r.mid):null; if(!m||!m.phone) return;
+  var msg="مرحباً "+m.name+" 👋\n✓ تم تسليم طلب جاء عن طريقك ("+(r.items||[]).map(function(i){return i.name+(i.qty>1?" × "+i.qty:"");}).join("، ")+")\nعمولتك "+money(r.commission)+" صارت مستحقة، وتطلب صرفها من صفحتك متى شئت 💸\n"+baseUrl()+"/?m=1\nبالتوفيق 🤝";
+  window.open("https://wa.me/"+waNum(m.phone)+"?text="+encodeURIComponent(msg),"_blank");
+}
+async function dnShare(){
+  var c=dnCur; if(!c) return;
+  try{ var blob=await cardBlob(c); if(blob && navigator.canShare){ var f=new File([blob],"rayan-delivery-"+c.id+".png",{type:"image/png"}); if(navigator.canShare({files:[f]})){ await navigator.share({files:[f]}); return; } } }
+  catch(e){ if(e&&e.name==="AbortError") return; }
+  if(c.link){ if(navigator.share){ navigator.share({url:c.link}).catch(function(){}); return; } window.open("https://wa.me/?text="+encodeURIComponent(c.link),"_blank"); }
+  else dnSave();
+}
+async function dnSave(){
+  var c=dnCur; if(!c) return; var blob=await cardBlob(c); if(!blob){ toast("تعذر إنشاء الصورة"); return; }
+  var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="rayan-delivery-"+c.id+".png"; document.body.appendChild(a); a.click(); setTimeout(function(){ a.remove(); },500);
+  toast("✓ حُفظت الصورة");
+}
+function cardBlob(c){ return new Promise(function(res){
+  try{
+    var W=1080, items=(c.items||[]).slice(0,10), rows=c.rows.filter(function(r){return r[1];});
+    var H=656+rows.length*70+items.length*58+(c.total?14:-58)+250;
+    var cv=document.createElement("canvas"); cv.width=W; cv.height=H; var x=cv.getContext("2d");
+    var F='"Tajawal","Cairo","Noto Kufi Arabic","Segoe UI",sans-serif';
+    function rr(px,py,w,h,r){ x.beginPath(); x.moveTo(px+r,py); x.arcTo(px+w,py,px+w,py+h,r); x.arcTo(px+w,py+h,px,py+h,r); x.arcTo(px,py+h,px,py,r); x.arcTo(px,py,px+w,py,r); x.closePath(); }
+    x.fillStyle="#EEF2F8"; x.fillRect(0,0,W,H);
+    rr(40,40,W-80,H-80,40); x.fillStyle="#fff"; x.fill(); x.save(); rr(40,40,W-80,H-80,40); x.clip();
+    var g=x.createLinearGradient(0,40,W,360); g.addColorStop(0,"#2B4A80"); g.addColorStop(1,"#12203A"); x.fillStyle=g; x.fillRect(40,40,W-80,330);
+    x.fillStyle="#C9933A"; x.fillRect(40,366,W-80,8);
+    x.direction="rtl"; x.textAlign="center"; x.fillStyle="#fff"; x.font="900 50px "+F; x.fillText("منصة الريان لخزانات المياه",W/2,270);
+    x.fillStyle="#F2CE73"; x.font="800 34px "+F; x.fillText(c.sub,W/2,325);
+    var y=480; x.fillStyle="#1E8E5A"; x.font=(c.bigMoney?"900 92px ":"900 60px ")+F; x.fillText(c.head,W/2,y);
+    x.fillStyle="#6B7488"; x.font="700 30px "+F; x.fillText(c.headSmall,W/2,y+58);
+    y+=100; x.strokeStyle="#DDE3EC"; x.setLineDash([12,10]); x.lineWidth=3; x.beginPath(); x.moveTo(90,y); x.lineTo(W-90,y); x.stroke(); x.setLineDash([]);
+    y+=70;
+    rows.forEach(function(r){ x.textAlign="right"; x.fillStyle="#6B7488"; x.font="700 32px "+F; x.fillText(r[0],W-100,y); x.textAlign="left"; x.fillStyle="#12203A"; x.font="800 34px "+F; var v=String(r[1]); while(x.measureText(v).width>W-480&&v.length>6) v=v.slice(0,-2); x.fillText(v,100,y); x.strokeStyle="#F1F3F7"; x.lineWidth=2; x.beginPath(); x.moveTo(90,y+24); x.lineTo(W-90,y+24); x.stroke(); y+=70; });
+    y+=6;
+    items.forEach(function(it){ var l="💧 "+it.l; x.textAlign="right"; x.fillStyle="#3A465C"; x.font="600 28px "+F; while(x.measureText(l).width>W-440&&l.length>8) l=l.slice(0,-2); x.fillText(l,W-100,y); x.textAlign="left"; x.font="800 28px "+F; x.fillText(it.v||"",100,y); y+=58; });
+    if(c.total){ y+=14; x.textAlign="right"; x.fillStyle="#12203A"; x.font="900 36px "+F; x.fillText("الإجمالي",W-100,y); x.textAlign="left"; x.fillStyle="#1E8E5A"; x.fillText(c.total,100,y); }
+    x.save(); x.translate(185,145); x.rotate(-0.22); rr(-140,-46,280,86,20); x.fillStyle="#fff"; x.fill(); x.strokeStyle="#1E8E5A"; x.lineWidth=6; x.stroke(); x.fillStyle="#1E8E5A"; x.textAlign="center"; x.font="900 42px "+F; x.fillText(c.stamp,0,14); x.restore();
+    x.fillStyle="#FFF6E3"; x.fillRect(40,H-170,W-80,130); x.textAlign="center"; x.fillStyle="#1A2744"; x.font="800 32px "+F; x.fillText(c.foot1,W/2,H-112); x.fillStyle="#C9933A"; x.font="800 30px "+F; x.direction="ltr"; x.fillText(c.foot2,W/2,H-66);
+    x.restore();
+    var lg=document.querySelector("#brand img");
+    if(lg&&lg.complete&&lg.naturalWidth){ x.save(); rr(W/2-70,82,140,140,30); x.clip(); x.drawImage(lg,W/2-70,82,140,140); x.restore(); }
+    cv.toBlob(function(b){ res(b); },"image/png");
+  }catch(e){ res(null); }
+}); }
 // ══════════════ طلب صرف العمولة من المسوّق ══════════════
 function isPayReq(m){ return !!(m && numIn(m.payoutRequestAt)); }
 function mkPayBox(due){
@@ -2338,11 +2444,13 @@ async function voidRef(id){
   var why=prompt("سبب إلغاء نسبة الطلب للمسوّق (مثلاً: الزبون جاء مباشرة)","الزبون ليس عن طريقه"); if(why===null) return;
   try{ await updateDoc(doc(db,"referrals",id),{status:"void",voidReason:String(why).slice(0,80),voidAt:Date.now()}); toast("✓ أُلغيت النسبة"); }catch(e){ toast("تعذر الإلغاء"); }
 }
-Object.assign(window,{editOrder,openMkOrder,mkoAddRow,mkoDel,mkoSet,mkoSum,mkoSave,voidRef});
+Object.assign(window,{moCommIn,openDelivery,openMkDelivery,dnShare,dnSave,dnSendCust,dnSendMk,editOrder,openMkOrder,mkoAddRow,mkoDel,mkoSet,mkoSum,mkoSave,voidRef});
 // ══════════════ الطلب اليدوي ══════════════
-var moItems=[], moContactId="", moEditId="";
+var moItems=[], moContactId="", moEditId="", moCommTouched=false, moCommLocked=false;
+function moCommIn(){ moCommTouched=true; moSum(); }
+function moCommVal(t){ var v=document.getElementById("mo-comm").value.trim(); return v===""?Math.round(t.sub*REF_RATE):numIn(v); }
 function openMOrder(){
-  moEditId=""; document.getElementById("mo-title").textContent="طلب يدوي"; document.getElementById("mo-intro").classList.remove("hidden"); document.getElementById("mo-status-fld").classList.remove("hidden");
+  moEditId=""; moCommTouched=false; moCommLocked=false; (function(c){ c.value=""; c.disabled=false; })(document.getElementById("mo-comm")); document.getElementById("mo-comm-note").textContent=""; document.getElementById("mo-title").textContent="طلب يدوي"; document.getElementById("mo-intro").classList.remove("hidden"); document.getElementById("mo-status-fld").classList.remove("hidden");
   document.getElementById("mo-save").textContent="💾 حفظ الطلب"; document.getElementById("mo-mk").disabled=false; document.getElementById("mo-cc2").value="+249";
   ["mo-name","mo-phone","mo-phone2","mo-area","mo-landmark","mo-map","mo-fee","mo-notes"].forEach(function(i){ document.getElementById(i).value=""; });
   document.getElementById("mo-err").textContent=""; document.getElementById("mo-status").value="confirmed"; document.getElementById("mo-pay").value="cod";
@@ -2377,10 +2485,12 @@ function moTotals(){
 }
 function moSum(){
   var t=moTotals(), mid=document.getElementById("mo-mk").value, m=mid?mkById(mid):null;
+  document.getElementById("mo-comm-fld").classList.toggle("hidden",!m);
+  if(m && !moCommTouched && !moCommLocked) document.getElementById("mo-comm").value=Math.round(t.sub*REF_RATE);
   document.getElementById("mo-sum").innerHTML='<div class="sum-row"><span>الخزانات</span><b class="num">'+money(t.sub)+'</b></div>'
     +'<div class="sum-row"><span>التوصيل</span>'+(t.fee===null?'<span style="color:var(--gold);font-weight:800">يُحدد</span>':t.fee?'<b class="num">'+money(t.fee)+'</b>':'<span class="free">مجاني</span>')+'</div>'
     +'<div class="sum-row t"><span>الإجمالي</span><span class="num">'+money(t.sub+(t.fee||0))+'</span></div>'
-    +(m?'<div style="color:#6B3FA0;font-weight:800;font-size:0.84rem;margin-top:6px">🤝 عمولة '+esc(m.name)+': '+money(Math.round(t.sub*REF_RATE))+' (تُستحق بعد التسليم)</div>':'');
+    +(m?'<div style="color:#6B3FA0;font-weight:800;font-size:0.84rem;margin-top:6px">🤝 عمولة '+esc(m.name)+': '+money(moCommVal(t))+' (تُستحق بعد التسليم)</div>':'');
 }
 function splitPhone(full){ full=String(full||""); var cc=["+249","+966","+971","+20"].filter(function(c){return full.indexOf(c)===0;})[0]; return cc?[cc,full.slice(cc.length)]:["+249",waNum(full).replace(/^249/,"")]; }
 function editOrder(id){
@@ -2396,7 +2506,12 @@ function editOrder(id){
   set("mo-name",o.buyerName); set("mo-zone",o.city||""); set("mo-area",o.area); set("mo-landmark",o.landmark); set("mo-map",o.mapUrl); set("mo-notes",o.notes);
   set("mo-fee",o.deliveryState==="later"?"":numIn(o.deliveryFee)); set("mo-pay",o.payment==="bank"?"bank":"cod");
   var r=refs.find(function(x){return x.id===id;}), mk=document.getElementById("mo-mk");
-  if(r){ var rm=mkById(r.mid); if(rm && !mk.querySelector('option[value="'+rm.id+'"]')) mk.insertAdjacentHTML("beforeend",'<option value="'+esc(rm.id)+'">'+esc(rm.name)+'</option>'); mk.value=rm?rm.id:""; mk.disabled=true; }
+  if(r){ var cm=document.getElementById("mo-comm"), cn=document.getElementById("mo-comm-note");
+    cm.value=numIn(r.commission); moCommTouched=!!(r.byMk||r.commissionEditedAt||numIn(r.commission)!==Math.round(numIn(r.subtotal)*REF_RATE));
+    if(r.status==="paid"){ moCommLocked=true; cm.disabled=true; cn.textContent="صُرفت هذه العمولة، فلا تُعدَّل."; }
+    else if(r.status==="void"){ moCommLocked=true; cm.disabled=true; cn.textContent="نسبة الطلب للمسوّق ملغاة."; }
+    else cn.textContent=r.byMk?"كتبها المسوّق عند تسجيل الطلب، وتستطيع تعديلها.":(moCommTouched?"عمولة معدّلة.":"تُحسب تلقائياً من قيمة الخزانات حتى تكتب مبلغاً آخر.");
+    var rm=mkById(r.mid); if(rm && !mk.querySelector('option[value="'+rm.id+'"]')) mk.insertAdjacentHTML("beforeend",'<option value="'+esc(rm.id)+'">'+esc(rm.name)+'</option>'); mk.value=rm?rm.id:""; mk.disabled=true; }
   moItems=(o.items||[]).map(function(i){ return {pid:i.productId,qty:Math.max(1,numIn(i.qty)||1),price:numIn(i.price),orig:prodById(i.productId)?null:{id:i.productId,name:i.name,capacity:i.capacity||0,sellerId:i.sellerId||""}}; });
   if(!moItems.length) moAddRow(true); else moRender();
 }
@@ -2411,10 +2526,12 @@ async function moUpdate(order,m,t,items){
     if(!r && m) up.refCode=m.code;
     await updateDoc(doc(db,"orders",id),up);
     if(!r && m){
-      await setDoc(doc(db,"referrals",id),{id:id,code:m.code,mid:m.id,subtotal:t.sub,commission:Math.round(t.sub*REF_RATE),items:items.map(function(i){return {name:i.name,qty:i.qty};}),priceOnRequest:false,status:"pending",orderStatus:o.status||"new",manual:true,createdAt:now});
+      var cv0=moCommVal(t), rd0={id:id,code:m.code,mid:m.id,subtotal:t.sub,commission:cv0,items:items.map(function(i){return {name:i.name,qty:i.qty};}),priceOnRequest:false,status:"pending",orderStatus:o.status||"new",manual:true,createdAt:now};
+      if(cv0!==Math.round(t.sub*REF_RATE)) rd0.commissionEditedAt=now;
+      await setDoc(doc(db,"referrals",id),rd0);
     }else if(r && r.status!=="paid" && r.status!=="void"){
       var ru={subtotal:t.sub,items:items.map(function(i){return {name:i.name,qty:i.qty};})};
-      if(!r.byMk && !r.commissionEditedAt && numIn(r.commission)===Math.round(numIn(r.subtotal)*REF_RATE)) ru.commission=Math.round(t.sub*REF_RATE);
+      var cv1=moCommVal(t); if(cv1!==numIn(r.commission)){ ru.commission=cv1; if(moCommTouched) ru.commissionEditedAt=now; }
       if(r.byMk && order.buyerName) ru.cust=order.buyerName;
       await updateDoc(doc(db,"referrals",id),ru);
     }
@@ -2464,7 +2581,9 @@ async function moSave(){
   try{
     await setDoc(doc(db,"orders",id),order);
     if(m){
-      await setDoc(doc(db,"referrals",id),{id:id,code:m.code,mid:m.id,subtotal:t.sub,commission:Math.round(t.sub*REF_RATE),items:items.map(function(i){return {name:i.name,qty:i.qty};}),priceOnRequest:false,status:"pending",orderStatus:st,manual:true,contactId:moContactId||"",createdAt:now});
+      var cv=moCommVal(t), rd={id:id,code:m.code,mid:m.id,subtotal:t.sub,commission:cv,items:items.map(function(i){return {name:i.name,qty:i.qty};}),priceOnRequest:false,status:"pending",orderStatus:st,manual:true,contactId:moContactId||"",createdAt:now};
+      if(cv!==Math.round(t.sub*REF_RATE)) rd.commissionEditedAt=now;
+      await setDoc(doc(db,"referrals",id),rd);
       if(moContactId) updateDoc(doc(db,"refContacts",moContactId),{orderId:id}).catch(function(){});
     }
     ordFilter="active"; history.back();
