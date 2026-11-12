@@ -1059,15 +1059,27 @@ function applySettings(){
   var o=document.getElementById("offer");
   if(S.offerOn && S.offerTitle){ document.getElementById("offer-t").textContent=S.offerTitle; document.getElementById("offer-s").textContent=S.offerSub||""; o.classList.remove("hidden"); }
   else o.classList.add("hidden");
-  if(S.shipNote){ document.getElementById("trust-ship").textContent=S.shipNote; }
-  if(S.shipNote || numIn(S.freeOver)){ document.getElementById("faq-ship").textContent="يختلف سعر التوصيل حسب منطقتك، ويظهر لك قبل تأكيد الطلب."+(numIn(S.freeOver)?" والتوصيل مجاني للطلبات من "+money(S.freeOver)+" فأكثر.":"")+(S.shipNote?" "+S.shipNote+".":""); }
+  updShipTexts();
   var ph=S.phone||("+"+waTarget());
   ["hdr-call","ft-phone"].forEach(function(id){ var a=document.getElementById(id); if(a) a.href="tel:"+String(ph).replace(/[^\d+]/g,""); });
   var fp=document.getElementById("ft-phone"); if(fp) fp.textContent=ph;
   if(isOpen("pg-checkout")) renderCheckout();
 }
+function cityZones(){ return (zones||[]).filter(function(z){return !isStateZ(z);}); }
+function khAllFree(){ var c=cityZones(); return c.length>0 && c.every(function(z){ return z.fee!==null && z.fee!=="" && z.fee!==undefined && Number(z.fee)===0; }); }
+function updShipTexts(){
+  var free=khAllFree(), st=(zones||[]).some(isStateZ);
+  var ts=document.getElementById("trust-ship"); if(ts) ts.textContent=S.shipNote||(free?"مجاناً داخل ولاية الخرطوم"+(st?" · وترحيل للولايات":""):"لكل الأحياء والمدن");
+  var fq=document.getElementById("faq-ship");
+  if(fq && (free||st||S.shipNote||numIn(S.freeOver))) fq.textContent=(free?"التوصيل مجاني داخل ولاية الخرطوم.":"يختلف سعر التوصيل حسب منطقتك، ويظهر لك قبل تأكيد الطلب."+(numIn(S.freeOver)?" والتوصيل مجاني للطلبات من "+money(S.freeOver)+" فأكثر.":""))
+    +(st?" وللولايات سعر ترحيل حسب مقاس الخزان، يظهر لك في صفحة الخزان وقبل تأكيد الطلب.":"")+(S.shipNote?" "+S.shipNote+".":"")+" ونتفق معك على موعد التوصيل.";
+}
 function renderZonesFooter(){
-  document.getElementById("ft-zones").innerHTML=(zones||[]).map(function(z){return '<span>'+esc(z.name)+'</span>';}).join("");
+  var free=khAllFree(), sz=(zones||[]).filter(isStateZ);
+  document.getElementById("ft-zones").innerHTML=free
+    ?'<span style="font-weight:800">🏙️ ولاية الخرطوم · توصيل مجاني</span>'+sz.map(function(z){return '<span>🚛 '+esc(z.name)+'</span>';}).join("")
+    :(zones||[]).map(function(z){return '<span>'+esc(z.name)+'</span>';}).join("");
+  updShipTexts();
 }
 function renderAll(){
   renderCaps(); renderTypeChips(); renderGrid(); updateCartUI();
@@ -1187,7 +1199,7 @@ function renderProductPage(keep){
   document.getElementById("pd-title").textContent=p.name||"الخزان";
   document.getElementById("pd-qty").textContent=pdQtyV;
   var specs=[["السعة",cap?cap.toLocaleString("en-US")+" لتر":""],["النوع",TYPE_L[typeOf(p)]||""],["عدد الطبقات",p.layers?esc(p.layers)+" طبقات":""],["الارتفاع",esc(p.height||"")],["القطر",esc(p.diameter||"")],["الوزن",esc(p.weight||"")],["اللون",esc(p.color||"")],["الضمان",esc(p.warranty||"")]].filter(function(r){return r[1];});
-  var ship=numIn(S.freeOver)?"🚚 توصيل لموقعك · مجاني للطلبات من "+money(S.freeOver):"🚚 توصيل لحد موقعك · "+(z.length?(Math.min.apply(null,z.map(function(x){return x.fee;}))===0?"مجاني لبعض المناطق":"من "+money(Math.min.apply(null,z.map(function(x){return x.fee;})))+" حسب منطقتك"):"يُحسب حسب منطقتك")+((zones||[]).some(isStateZ)?" · ونرحّل للولايات":"");
+  var ship=khAllFree()?"🚚 توصيل مجاني داخل ولاية الخرطوم"+((zones||[]).some(isStateZ)?" · وترحيل للولايات حسب المقاس":""):numIn(S.freeOver)?"🚚 توصيل لموقعك · مجاني للطلبات من "+money(S.freeOver):"🚚 توصيل لحد موقعك · "+(z.length?(Math.min.apply(null,z.map(function(x){return x.fee;}))===0?"مجاني إلى "+z.filter(function(x){return x.fee===0;}).slice(0,3).map(function(x){return x.name;}).join(" و"):"من "+money(Math.min.apply(null,z.map(function(x){return x.fee;})))+" حسب منطقتك"):"يُحسب حسب منطقتك")+((zones||[]).some(isStateZ)?" · ونرحّل للولايات":"");
   var rel=sortList(tanks().filter(function(x){return x.id!==p.id;}),"pop").sort(function(a,b){return Math.abs(capOf(a)-cap)-Math.abs(capOf(b)-cap);}).slice(0,8);
   document.getElementById("pd-body").innerHTML=
     '<div class="gal"><div class="gal-track" id="gal-track">'+(ims.length?ims.map(function(u){return '<div><img src="'+esc(u)+'" alt="" onerror="this.remove()"></div>';}).join(""):'<div><span style="font-size:5rem">💧</span></div>')+'</div>'
@@ -1302,7 +1314,7 @@ function deliveryFor(sub){
 function renderSummary(){
   var t=cartTotals(), d=deliveryFor(t.sub), h='';
   h+='<div class="sum-row"><span>المنتجات ('+t.n+')</span><b class="num">'+(t.sub?money(t.sub):'')+(t.onReq?(t.sub?' + ':'')+'سعر عند الطلب':'')+'</b></div>';
-  h+='<div class="sum-row"><span>'+(d.kind==="state"?'🚛 الترحيل إلى '+esc(d.zone):'التوصيل')+'</span>'+(d.state==="pick"?'<span style="color:var(--muted)">اختر منطقتك</span>':d.state==="free"?'<span class="free">مجاني 🎉</span>':d.state==="later"?'<span style="color:var(--gold);font-weight:800">يُحدد عند التأكيد</span>':'<b class="num">'+money(d.fee)+'</b>')+'</div>';
+  h+='<div class="sum-row"><span>'+(d.kind==="state"?'🚛 الترحيل إلى '+esc(d.zone):'التوصيل')+'</span>'+(d.state==="pick"?'<span style="color:var(--muted)">اختر منطقتك</span>':d.state==="free"?'<span class="free">'+(d.kind!=="state"&&khAllFree()?'مجاني داخل ولاية الخرطوم 🎉':'مجاني 🎉')+'</span>':d.state==="later"?'<span style="color:var(--gold);font-weight:800">يُحدد عند التأكيد</span>':'<b class="num">'+money(d.fee)+'</b>')+'</div>';
   if(d.kind==="state") h+='<div style="color:var(--muted);font-size:0.76rem;margin:-2px 0 4px">'+(d.eta?'⏱️ يصل خلال '+esc(d.eta)+' · ':'')+'ترحيل كل خزان حسب مقاسه</div>';
   var lab=document.getElementById("co-area-l"); if(lab){ lab.textContent=d.kind==="state"?"المدينة والحي":"الحي / المربع"; document.getElementById("co-area").placeholder=d.kind==="state"?"مثال: ود مدني - حي الدرجة":"مثال: الرياض مربع 12"; }
   var free=numIn(S.freeOver);
@@ -1716,7 +1728,8 @@ function admDelivery(){
   }).join(""); };
   return '<div class="card"><h3>🏙️ مناطق الخرطوم وأسعارها</h3><p style="color:var(--muted);font-size:0.8rem;margin-bottom:10px">اترك السعر فارغاً ليظهر للزبون «يُحدد عند التأكيد»، واكتب 0 للتوصيل المجاني.</p>'
     +'<div id="zrows">'+rows("city")+'</div>'
-    +'<button class="btn btn-line btn-block" onclick="zAdd(\'city\')" style="height:44px;margin-top:4px">+ إضافة منطقة</button></div>'
+    +'<button class="btn btn-line btn-block" onclick="zAdd(\'city\')" style="height:44px;margin-top:4px">+ إضافة منطقة</button>'
+    +'<button class="btn btn-block" onclick="zKhFree()" style="height:44px;margin-top:8px;background:var(--ok-soft);color:var(--ok)">🎁 اجعل التوصيل مجانياً لكل مناطق الخرطوم</button></div>'
     +'<div class="card"><h3>🚛 الترحيل للولايات</h3>'
     +'<p style="color:var(--muted);font-size:0.8rem;margin-bottom:10px;line-height:1.8">لكل ولاية سعر ترحيل ثابت لكل مقاس خزان. افتح «سعر الترحيل لكل مقاس» لترى الأسعار وتعدّل أي سعر بيدك. الزبون يرى سعر ترحيل خزانه، ويُجمع في السلة حسب الكمية.</p>'
     +(zSuggested?'<div style="background:var(--warn-soft);color:var(--warn);border-radius:10px;padding:9px 12px;font-weight:800;font-size:0.82rem;margin-bottom:10px">📝 حسبتُ أسعار الترحيل لكل مقاس من أسعار خزاناتك، ولم تُحفظ بعد. راجعها ثم اضغط «حفظ التوصيل» أسفل الصفحة لتفعيلها.</div>':'')
@@ -1728,6 +1741,7 @@ function admDelivery(){
 }
 function zEdit(i,k,v){ zDraft[Number(i)][k]=v; }
 function zFee(i,pid,v){ var z=zDraft[Number(i)]; z.fees=z.fees||{}; z.fees[pid]=String(v).trim()===""?"":numIn(v); }
+function zKhFree(){ zDraft.forEach(function(z){ if(z.kind==="city") z.fee=0; }); setAdmTab("delivery"); toast("✓ كل مناطق الخرطوم مجانية، اضغط «حفظ التوصيل»"); }
 function zTog(i,o){ zOpen[i]=!!o; }
 function zRecalc(i){ var z=zDraft[Number(i)]; if(!(Number(String(z.rate).replace(",","."))>0)){ toast("اكتب النسبة أولاً"); return; } z.fees=zCalcFees(z); zOpen[i]=true; renderAdmin(); toast("✓ حُسبت الأسعار، راجعها ثم احفظ"); }
 function zAdd(kind){ zDraft.push(kind==="state"?{kind:"state",name:"",rate:"",eta:"",fees:{}}:{kind:"city",name:"",fee:""}); if(kind==="state") zOpen[zDraft.length-1]=true; renderAdmin(); }
@@ -2503,7 +2517,7 @@ async function voidRef(id){
   var why=prompt("سبب إلغاء نسبة الطلب للمسوّق (مثلاً: الزبون جاء مباشرة)","الزبون ليس عن طريقه"); if(why===null) return;
   try{ await updateDoc(doc(db,"referrals",id),{status:"void",voidReason:String(why).slice(0,80),voidAt:Date.now()}); toast("✓ أُلغيت النسبة"); }catch(e){ toast("تعذر الإلغاء"); }
 }
-Object.assign(window,{zFee,zTog,zRecalc,moFeeIn,moCommIn,openDelivery,openMkDelivery,dnShare,dnSave,dnSendCust,dnSendMk,editOrder,openMkOrder,mkoAddRow,mkoDel,mkoSet,mkoSum,mkoSave,voidRef});
+Object.assign(window,{zKhFree,zFee,zTog,zRecalc,moFeeIn,moCommIn,openDelivery,openMkDelivery,dnShare,dnSave,dnSendCust,dnSendMk,editOrder,openMkOrder,mkoAddRow,mkoDel,mkoSet,mkoSum,mkoSave,voidRef});
 // ══════════════ الطلب اليدوي ══════════════
 var moItems=[], moContactId="", moEditId="", moCommTouched=false, moCommLocked=false;
 function moCommIn(){ moCommTouched=true; moSum(); }
