@@ -1,7 +1,7 @@
 // netlify/edge-functions/channel-share.js
 // معاينة الروابط عند المشاركة (واتساب، فيسبوك، تيليجرام...)
 // تعمل لبوتات المعاينة فقط، ولا تغيّر شيئاً للزائر العادي.
-// الروابط المدعومة: ?p= خزان · ?calc= حاسبة · ?quote= عرض سعر · ?join= انضمام · ?rc= إيصال صرف · ?dn= إشعار تسليم · ?rv= تقييم · ?old= زبون سابق · (القديمة: ?prop= ?req= ?ad= ?auc=)
+// الروابط المدعومة: ?p= خزان · ?calc= حاسبة · ?quote= عرض سعر · ?join= انضمام · ?rc= إيصال صرف · ?dn= إشعار تسليم · ?rv= تقييم · ?old= زبون سابق · ?m= صفحة المسوّق · الرئيسية بدون رابط · (القديمة: ?prop= ?req= ?ad= ?auc=)
 
 const FIREBASE_PROJECT_ID = "alrayan-15db4";
 const FIREBASE_API_KEY = "AIzaSyC7-MKB7Ix3k0gA7tGxCXNFaty5IQ-U3Xg";
@@ -31,6 +31,14 @@ function ogImg(u) {
 }
 function money(n) { return n > 0 ? n.toLocaleString("en-US") + " ج.س" : ""; }
 
+function mapStr(f, k, sub) { try { return f[k].mapValue.fields[sub].stringValue || ""; } catch (e) { return ""; } }
+let OG_CACHE = null;
+async function staticOg(key) {
+  if (!OG_CACHE) OG_CACHE = (await fireGet("meta", "tankSettings")) || {};
+  return mapStr(OG_CACHE, "og", key);
+}
+function firstItemPid(f) { try { return f.items.arrayValue.values[0].mapValue.fields.productId.stringValue || ""; } catch (e) { return ""; } }
+
 async function fireGet(col, id) {
   const u = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/${col}/${encodeURIComponent(id)}?key=${FIREBASE_API_KEY}`;
   const r = await fetch(u);
@@ -43,14 +51,23 @@ export default async (request, context) => {
   const ua = request.headers.get("user-agent") || "";
   const url = new URL(request.url);
   const p = (k) => url.searchParams.get(k);
-  const tk = p("p"), calc = p("calc"), quote = p("quote"), join = p("join"), rc = p("rc"), dn = p("dn"), rv = p("rv"), old = p("old");
+  const tk = p("p"), calc = p("calc"), quote = p("quote"), join = p("join"), rc = p("rc"), dn = p("dn"), rv = p("rv"), old = p("old"), mk = p("m");
   const auc = p("auc"), prop = p("prop"), req = p("req"), ad = p("ad"), vid = p("video"), poll = p("poll"), publish = p("publish");
-  if ((!tk && !calc && !quote && !join && !rc && !dn && !rv && !old && !auc && !prop && !req && !ad && !vid && !poll && !publish) || !BOT.test(ua)) return context.next();
+  if (!BOT.test(ua)) return context.next();
+  const home = !tk && !calc && !quote && !join && !rc && !dn && !rv && !old && !mk && !auc && !prop && !req && !ad && !vid && !poll && !publish;
+  if (home && [...url.searchParams.keys()].some((k) => !["s", "v", "fbclid", "utm_source", "utm_medium", "utm_campaign"].includes(k))) return context.next();
 
   let ready = false; // صورة المعاينة جاهزة بالحجم المناسب (لا تحتاج تصغير)
   let title = SITE_NAME, desc = "أطلب من هنا واستلم في موقعك · خزانات أصلية بكل السعات · الدفع عند الاستلام", image = SITE_LOGO;
   try {
-    if (tk) {
+    const useStatic = async (key) => { const u = await staticOg(key); if (u) { image = u; ready = true; } };
+    if (home) {
+      await useStatic("home");
+    } else if (mk) {
+      title = "📊 صفحة المسوّق · منصة الريان لخزانات المياه";
+      desc = "تابع زياراتك وطلباتك وعمولاتك، واطلب صرفها متى شئت";
+      await useStatic("mk");
+    } else if (tk) {
       const f = await fireGet("products", tk);
       if (f) {
         const name = str(f, "name");
@@ -65,30 +82,42 @@ export default async (request, context) => {
     } else if (calc) {
       title = "🧮 أي خزان يناسب بيتك؟";
       desc = "اكتب عدد أفراد البيت وأيام انقطاع المياه، ونقترح لك السعة المناسبة · منصة الريان لخزانات المياه";
+      await useStatic("calc");
     } else if (rc) {
       const f = await fireGet("receipts", rc);
       if (f) {
         title = "🧾 تم صرف " + (money(num(f, "amount")) || "عمولة") + " · منصة الريان";
         desc = "إيصال صرف عمولة تسويق لـ " + str(f, "name") + " عن " + num(f, "count") + " طلب ✓ · سوّق معنا واكسب عمولة على كل خزان";
+        const og = str(f, "ogImg"); if (og) { image = og; ready = true; }
       }
     } else if (old) {
       title = "🌷 اشتريت منّا خزان قبل كده؟ · منصة الريان";
       desc = "سجّل بياناتك وقيّم تجربتك — رأيك يساعد غيرك يختار خزانه 💧";
+      await useStatic("old");
     } else if (rv) {
       title = "⭐ قيّم طلبك · منصة الريان لخزانات المياه";
       desc = "رأيك يهمنا ويساعد غيرك يختار خزانه — التقييم يأخذ 10 ثوانٍ فقط";
+      const f = await fireGet("orders", rv);
+      if (f) {
+        const og = str(f, "ogRv");
+        if (og) { image = og; ready = true; }
+        else { const pid = firstItemPid(f); if (pid) { const pf = await fireGet("products", pid); if (pf) { const im = firstImg(pf, "image", "images"); if (im) image = im; } } }
+      }
     } else if (dn) {
       const f = await fireGet("orders", dn);
       if (f && str(f, "status") === "delivered") {
         title = "✅ تم تسليم الطلب " + dn + " · منصة الريان";
         desc = "تم توصيل الخزان إلى " + (str(f, "city") || "موقع العميل") + " بنجاح 💧 أطلب من هنا واستلم في موقعك";
+        const og = str(f, "ogImg"); if (og) { image = og; ready = true; }
       }
     } else if (join) {
       title = "🤝 اكسب معنا · منصة الريان لخزانات المياه";
       desc = "شارك روابط خزاناتنا واكسب عمولة على كل خزان يُطلب عن طريقك، وتطلب صرفها على بنكك متى شئت";
+      await useStatic("join");
     } else if (quote) {
       title = "🏗️ عرض سعر خاص للكميات";
       desc = "للمقاولين والمشاريع والتجار · خزانات مياه بكل السعات · منصة الريان لخزانات المياه";
+      await useStatic("quote");
     } else if (auc) {
       const f = await fireGet("auctions", auc);
       if (f) {
@@ -167,8 +196,9 @@ export default async (request, context) => {
   html = html.replace(/<meta property="og:description" content=".*?">/, `<meta property="og:description" content="${sD}">`);
   html = html.replace(/<meta property="og:image" content=".*?">/,
     `<meta property="og:image" content="${sI}"><meta property="og:image:secure_url" content="${sI}">` +
-    (big && !/ytimg\.com/.test(image) ? `<meta property="og:image:type" content="image/jpeg"><meta property="og:image:width" content="800"><meta property="og:image:height" content="420">` : "") +
-    `<meta property="og:url" content="${sU}"><meta name="twitter:image" content="${sI}">`);
+    (big && !/ytimg\.com/.test(image) ? `<meta property="og:image:type" content="image/jpeg"><meta property="og:image:width" content="${ready ? 1200 : 800}"><meta property="og:image:height" content="${ready ? 630 : 420}">` : "") +
+    `<meta property="og:image:alt" content="${sT}"><meta property="og:url" content="${sU}"><meta property="og:site_name" content="منصة الريان لخزانات المياه"><meta property="og:locale" content="ar_AR">` +
+    `<meta name="twitter:title" content="${sT}"><meta name="twitter:description" content="${sD}"><meta name="twitter:image" content="${sI}">`);
   return new Response(html, { status: res.status, headers: res.headers });
 };
 
