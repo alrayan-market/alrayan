@@ -2377,6 +2377,11 @@ async function openRate(id){
     +'<div class="fld"><label>آخر 4 أرقام من هاتفك <small>(للتأكد أنك صاحب الطلب)</small></label><input class="inp" id="rv-p4" inputmode="numeric" maxlength="4" dir="ltr" style="text-align:center;letter-spacing:6px;font-weight:900"></div></div>'
     +'<div class="err" id="rv-e"></div><button class="btn btn-gold btn-block" id="rv-go" onclick="rvSubmit()">⭐ إرسال التقييم</button>';
 }
+function tellFriend(){
+  var msg="💧 لو محتاج خزان مياه، جرّب منصة الريان لخزانات المياه — طلبت منهم ووصلني لحد موقعي 👍\nأطلب من هنا واستلم في موقعك:\n"+baseUrl()+"/";
+  if(navigator.share){ navigator.share({text:msg}).catch(function(e){ if(!(e&&e.name==="AbortError")) window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank"); }); return; }
+  window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank");
+}
 function rvSet(k,n){ rvStars[k]=n; var b=document.querySelectorAll("#sp-"+k+" button"); for(var i=0;i<b.length;i++) b[i].classList.toggle("on",i<n); }
 function rvPick(inp){ rvPhoto=(inp.files&&inp.files[0])||null; var pv=document.getElementById("rv-pv"); if(rvPhoto){ pv.src=URL.createObjectURL(rvPhoto); pv.classList.remove("hidden"); } else pv.classList.add("hidden"); }
 async function rvSubmit(){
@@ -2397,7 +2402,7 @@ async function rvSubmit(){
   if(avg<4) notifyAdmin("⚠️ تقييم منخفض "+avg+"/5\n"+o.id+" · "+(o.buyerName||"")+" · "+(o.buyerPhone||"")+"\nالخزان "+r.q+" · التوصيل "+r.d+" · التعامل "+r.s+(r.text?"\n«"+r.text+"»":""));
   else notifyAdmin("⭐ تقييم جديد "+avg+"/5 · "+o.id+(r.text?"\n«"+r.text+"»":""));
   rvLast=r;
-  document.getElementById("rv-body").innerHTML='<div class="card" style="text-align:center;line-height:2"><div style="font-size:2.6rem">🌷</div><b>شكراً لك! وصلنا تقييمك.</b>'+(avg>=4?'<div><button class="btn btn-gold" style="margin:8px 0" onclick="rvShareMine()">📤 شارك تقييمك كصورة</button></div>':'')+'<div style="color:#F5A524;font-size:1.4rem">'+starsTxt(avg)+'</div>'+(avg<4?'<div style="color:var(--muted);font-size:0.86rem">يؤسفنا أن التجربة لم تكن كاملة، سنتواصل معك قريباً لنعالج الأمر.</div>':'<div style="color:var(--muted);font-size:0.86rem">لو عندك معارف محتاجين خزان، أرسل لهم رابطنا 🙏</div><button class="btn btn-ok" style="margin-top:10px" onclick="window.open(\'https://wa.me/?text=\'+encodeURIComponent(baseUrl()+\'/\'),\'_blank\')">💬 أرسل الرابط لصديق</button>')+'</div>';
+  document.getElementById("rv-body").innerHTML='<div class="card" style="text-align:center;line-height:2"><div style="font-size:2.6rem">🌷</div><b>شكراً لك! وصلنا تقييمك.</b>'+(avg>=4?'<div><button class="btn btn-gold" style="margin:8px 0" onclick="rvShareMine()">📤 شارك تقييمك كصورة</button></div>':'')+'<div style="color:#F5A524;font-size:1.4rem">'+starsTxt(avg)+'</div>'+(avg<4?'<div style="color:var(--muted);font-size:0.86rem">يؤسفنا أن التجربة لم تكن كاملة، سنتواصل معك قريباً لنعالج الأمر.</div>':'<div style="color:var(--muted);font-size:0.86rem">لو عندك معارف محتاجين خزان، أرسل لهم رابطنا 🙏</div><button class="btn btn-ok" style="margin-top:10px" onclick="tellFriend()">💬 أرسل الرابط لصديق</button>')+'</div>';
 }
 // ── لوحة المالك: التقييمات ──
 function admRevsHtml(){
@@ -2422,7 +2427,7 @@ async function shareRate(id){
 }
 async function rvStatus(id,st){ try{ await updateDoc(doc(db,"reviews",id),{status:st}); toast(st==="shown"?"✓ ظهر التقييم":"✓ أُخفي التقييم"); }catch(e){ toast("تعذر التعديل"); } }
 async function rvRemove(id){ if(!confirm("حذف هذا التقييم نهائياً؟")) return; try{ await deleteDoc(doc(db,"reviews",id)); toast("تم الحذف"); }catch(e){ toast("تعذر الحذف"); } }
-Object.assign(window,{shareRate,openRate,rvSet,rvPick,rvSubmit,rvStatus,rvRemove});
+Object.assign(window,{tellFriend,shareRate,openRate,rvSet,rvPick,rvSubmit,rvStatus,rvRemove});
 // ══════════════ إضافات التقييم والنمو ══════════════
 var rvLast=null, mkRateCache=null;
 function renderGallery(){
