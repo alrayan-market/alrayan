@@ -873,6 +873,12 @@ textarea.inp{height:auto;min-height:84px;padding:11px 13px;resize:vertical;line-
       <div class="fld"><label>المدينة / المنطقة</label><input class="inp" id="old-city" maxlength="40" placeholder="مثال: بحري - الشعبية"></div>
       <div class="fld"><label>ملاحظة <small>(اختياري)</small></label><input class="inp" id="old-note" maxlength="120"></div>
     </div>
+    <div class="card" id="old-rate">
+      <h3 style="text-align:center">⭐ قيّم تجربتك معنا</h3>
+      <div id="old-stars"></div>
+      <div class="fld" style="margin-top:10px"><label>تعليقك <small>(اختياري)</small></label><textarea class="inp" id="old-t" rows="3" maxlength="400" placeholder="مثال: الخزان معانا من سنة وما فيه أي مشكلة"></textarea></div>
+      <div class="fld"><label>📷 صورة الخزان بعد التركيب <small>(اختيارية)</small></label><input type="file" accept="image/*" class="inp" id="old-ph" onchange="oldPick(this)" style="padding-top:9px"><img id="old-pv" class="pay-prev hidden" alt=""></div>
+    </div>
     <div class="err" id="old-err"></div>
     <button class="btn btn-gold btn-block" id="old-go" onclick="oldSave()">إرسال</button>
   </div>
@@ -1191,7 +1197,7 @@ function rvAvg(list){ if(!list.length) return 0; return list.reduce(function(s,r
 function numIn100(v){ return Number(v)||0; }
 function revCard(r){
   var st=Math.round(numIn100(r.avg));
-  return '<div class="rev">'+(r.img?'<img loading="lazy" src="'+esc(r.img)+'" alt="" onerror="this.remove()">':'')+'<div class="rb"><div class="stars">'+starsTxt(st)+'</div>'+(r.text?'<p>'+esc(r.text)+'</p>':'<p style="color:var(--muted)">'+esc((r.productNames||[]).join("، "))+'</p>')+'<div class="rn">'+esc(r.name||"زبون")+(r.city?' <span>· '+esc(r.city)+'</span>':'')+'<span class="rv-ok">✓ مشترٍ مؤكد</span></div></div></div>';
+  return '<div class="rev">'+(r.img?'<img loading="lazy" src="'+esc(r.img)+'" alt="" onerror="this.remove()">':'')+'<div class="rb"><div class="stars">'+starsTxt(st)+'</div>'+(r.text?'<p>'+esc(r.text)+'</p>':'<p style="color:var(--muted)">'+esc((r.productNames||[]).join("، "))+'</p>')+'<div class="rn">'+esc(r.name||"زبون")+(r.city?' <span>· '+esc(r.city)+'</span>':'')+'<span class="rv-ok">✓ مشترٍ مؤكد</span>'+sinceTag(r)+'</div></div></div>';
 }
 function rvSumHtml(list){
   var a=rvAvg(list); if(!list.length) return "";
@@ -2381,7 +2387,7 @@ function prodRevsHtml(p){
   var L=creviews.filter(function(r){ return (r.productIds||[]).indexOf(p.id)>-1; });
   if(!L.length) return "";
   return '<div class="card"><h3>⭐ تقييمات هذا الخزان</h3>'+rvSumHtml(L).replace('class="rv-sum"','class="rv-sum" style="box-shadow:none;padding:0 0 8px"')
-    +L.slice(0,4).map(function(r){ return '<div style="padding:8px 0;border-top:1px solid var(--line)"><div style="color:#F5A524">'+starsTxt(r.avg)+'</div>'+(r.text?'<div style="font-size:0.86rem;line-height:1.7">'+esc(r.text)+'</div>':'')+'<div style="font-size:0.78rem;font-weight:800;margin-top:2px">'+esc(r.name||"زبون")+(r.city?' <span style="color:var(--muted);font-weight:600">· '+esc(r.city)+'</span>':'')+'<span class="rv-ok">✓ مشترٍ مؤكد</span></div>'+(r.img?'<img src="'+esc(r.img)+'" alt="" loading="lazy" style="width:100%;max-height:220px;object-fit:cover;border-radius:10px;margin-top:6px" onerror="this.remove()">':'')+'</div>'; }).join("")+'</div>';
+    +L.slice(0,4).map(function(r){ return '<div style="padding:8px 0;border-top:1px solid var(--line)"><div style="color:#F5A524">'+starsTxt(r.avg)+'</div>'+(r.text?'<div style="font-size:0.86rem;line-height:1.7">'+esc(r.text)+'</div>':'')+'<div style="font-size:0.78rem;font-weight:800;margin-top:2px">'+esc(r.name||"زبون")+(r.city?' <span style="color:var(--muted);font-weight:600">· '+esc(r.city)+'</span>':'')+'<span class="rv-ok">✓ مشترٍ مؤكد</span>'+sinceTag(r)+'</div>'+(r.img?'<img src="'+esc(r.img)+'" alt="" loading="lazy" style="width:100%;max-height:220px;object-fit:cover;border-radius:10px;margin-top:6px" onerror="this.remove()">':'')+'</div>'; }).join("")+'</div>';
 }
 async function openRate(id){
   id=String(id||""); var body=document.getElementById("rv-body");
@@ -2537,19 +2543,27 @@ async function ensureProductOg(){
   pogBusy=false;
 }
 // ══════════════ الزبائن السابقون (قبل المنصة) ══════════════
-var oldRegs=[], oldAdminMode=false;
+var oldRegs=[], oldAdminMode=false, oldStars={q:0,d:0,s:0}, oldPhoto=null;
+function oldSince(when){ var m=toEn(when||"").match(/(19|20)\d{2}/); return m?m[0]:""; }
+function sinceTag(r){ return r&&r.since?'<span class="rv-ok" style="background:#EEE7DC;color:#7A5A2B">🕓 زبون منذ '+esc(r.since)+'</span>':''; }
+function oldSet(k,n){ oldStars[k]=n; var b=document.querySelectorAll("#os-"+k+" button"); for(var i=0;i<b.length;i++) b[i].classList.toggle("on",i<n); }
+function oldPick(inp){ oldPhoto=(inp.files&&inp.files[0])||null; var pv=document.getElementById("old-pv"); if(oldPhoto){ pv.src=URL.createObjectURL(oldPhoto); pv.classList.remove("hidden"); } else pv.classList.add("hidden"); }
 function oldLink(){ return baseUrl()+"/?old=1"; }
 function openOld(admin){
   oldAdminMode=!!admin && isAdmin;
   document.getElementById("old-title").textContent=oldAdminMode?"دعوة زبون سابق للتقييم":"زبون سابق";
   document.getElementById("old-intro").innerHTML=oldAdminMode
     ?'<b>➕ زبون اشترى منك قبل المنصة</b><div style="color:var(--muted);font-size:0.84rem">نسجّله بوسم «قبل المنصة» (لا يدخل في المبيعات)، ثم يُفتح واتساب برابط التقييم لرقمه.</div>'
-    :'<div style="font-size:2.2rem">🌷</div><b>اشتريت منّا خزان قبل كده؟</b><div style="color:var(--muted);font-size:0.86rem">سجّل بياناتك، ونرسل لك رابط تقييم على واتساب بعد التأكد. رأيك يساعد غيرك يختار خزانه 💧</div>';
+    :'<div style="font-size:2.2rem">🌷</div><b>اشتريت منّا خزان قبل كده؟</b><div style="color:var(--muted);font-size:0.86rem">اكتب بياناتك وقيّم تجربتك في خطوة واحدة. رأيك يساعد غيرك يختار خزانه 💧</div>';
+  oldStars={q:0,d:0,s:0}; oldPhoto=null;
+  document.getElementById("old-rate").classList.toggle("hidden",oldAdminMode);
+  document.getElementById("old-t").value=""; document.getElementById("old-ph").value=""; document.getElementById("old-pv").classList.add("hidden");
+  document.getElementById("old-stars").innerHTML=RV_DIMS.map(function(d){ return '<div class="star-row"><b>'+d[1]+'</b><div class="star-pick" id="os-'+d[0]+'">'+[1,2,3,4,5].map(function(n){ return '<button type="button" onclick="oldSet(\''+d[0]+'\','+n+')">★</button>'; }).join("")+'</div></div>'; }).join("");
   ["old-name","old-phone","old-when","old-city","old-note"].forEach(function(i){ document.getElementById(i).value=""; });
   document.getElementById("old-qty").value="1"; document.getElementById("old-err").textContent="";
   document.getElementById("old-prod").innerHTML='<option value="">— اختر الخزان —</option>'+moProducts().map(function(p){ var c=capOf(p); return '<option value="'+esc(p.id)+'">'+esc(p.name)+(c&&String(p.name).indexOf(String(c))<0?' · '+c+' لتر':'')+'</option>'; }).join("")+'<option value="other">خزان آخر / لا أذكر</option>';
   document.getElementById("old-form").classList.remove("hidden");
-  var b=document.getElementById("old-go"); b.classList.remove("hidden"); b.disabled=false; b.textContent=oldAdminMode?"💾 حفظ وإرسال رابط التقييم":"📤 إرسال";
+  var b=document.getElementById("old-go"); b.classList.remove("hidden"); b.disabled=false; b.textContent=oldAdminMode?"💾 حفظ وإرسال رابط التقييم":"⭐ إرسال تقييمي";
   openPage("pg-old");
 }
 function oldRead(){
@@ -2563,7 +2577,7 @@ async function oldMakeOrder(d){
   var o={id:id,source:"tanks",legacy:true,status:"delivered",buyerName:d.name,buyerPhone:d.phone,city:d.city,area:"",buyerAddress:d.city,legacyWhen:d.when||"",notes:d.note||"",
     items:[{productId:d.productId||"",name:d.productName||"خزان",qty:d.qty||1,price:0,capacity:0}],subtotal:0,deliveryFee:0,deliveryState:"free",total:0,priceOnRequest:true,payment:"cod",
     createdAt:now,deliveredAt:now,statusAt:now,rateAskedAt:now,date:new Date().toLocaleDateString("ar-EG")};
-  await setDoc(doc(db,"orders",id),o); ogForOrder(o,true); return o;
+  await setDoc(doc(db,"orders",id),o); if(!d.noOg) ogForOrder(o,true); return o;
 }
 async function oldSave(){
   var d=oldRead(), e=document.getElementById("old-err"), b=document.getElementById("old-go");
@@ -2571,6 +2585,7 @@ async function oldSave(){
   if(!d.ok){ e.textContent="اكتب رقم هاتف صحيح"; return; }
   if(!d.pid){ e.textContent="اختر الخزان"; return; }
   if(!d.city){ e.textContent="اكتب المدينة أو المنطقة"; return; }
+  if(!oldAdminMode && (!oldStars.q||!oldStars.d||!oldStars.s)){ e.textContent="اختر عدد النجوم في البنود الثلاثة"; return; }
   e.textContent=""; b.disabled=true; b.textContent="⏳ جارٍ الحفظ...";
   try{
     if(oldAdminMode){
@@ -2579,19 +2594,29 @@ async function oldSave(){
       history.back(); setTimeout(function(){ toast("✓ سُجّل الزبون وأُرسل له رابط التقييم"); },250); return;
     }
     var id="OC-"+Date.now().toString(36)+oldOrderId().slice(4,8);
-    await setDoc(doc(db,"oldCustomers",id),{id:id,name:d.name,phone:d.phone,productId:d.productId,productName:d.productName,qty:d.qty,when:d.when,city:d.city,note:d.note,status:"pending",createdAt:Date.now()});
-    notifyAdmin("🕓 زبون سابق سجّل نفسه\n"+d.name+" · "+d.phone+"\n"+d.productName+" × "+d.qty+(d.when?" · "+d.when:"")+"\n"+d.city+"\nأكّده من لوحة المالك ← التقييمات");
-    document.getElementById("old-form").classList.add("hidden"); b.classList.add("hidden");
-    document.getElementById("old-intro").innerHTML='<div style="font-size:2.4rem">✅</div><b>شكراً '+esc(firstName(d.name))+'، وصلتنا بياناتك.</b><div style="color:var(--muted);font-size:0.86rem">بعد التأكد نرسل لك رابط التقييم على واتساب 🌷</div>';
+    var avg=Math.round((oldStars.q+oldStars.d+oldStars.s)/3*10)/10, img="";
+    if(oldPhoto){ try{ img=await uploadImage(oldPhoto,1200); }catch(x){} }
+    var txt=String(document.getElementById("old-t").value||"").trim().slice(0,400);
+    await setDoc(doc(db,"oldCustomers",id),{id:id,name:d.name,phone:d.phone,productId:d.productId,productName:d.productName,qty:d.qty,when:d.when,city:d.city,note:d.note,q:oldStars.q,d:oldStars.d,s:oldStars.s,avg:avg,text:txt,img:img||"",status:"pending",createdAt:Date.now()});
+    notifyAdmin("🕓 زبون سابق سجّل وقيّم "+starsTxt(avg)+" "+avg+"/5\n"+d.name+" · "+d.phone+"\n"+d.productName+" × "+d.qty+(d.when?" · "+d.when:"")+" · "+d.city+(txt?"\n«"+txt.slice(0,200)+"»":"")+"\nأكّده من لوحة المالك ← التقييمات");
+    document.getElementById("old-form").classList.add("hidden"); document.getElementById("old-rate").classList.add("hidden"); b.classList.add("hidden");
+    rvLast={avg:avg,text:txt,name:firstName(d.name),city:d.city};
+    document.getElementById("old-intro").innerHTML='<div style="font-size:2.4rem">🌷</div><b>شكراً '+esc(firstName(d.name))+'! وصلنا تقييمك.</b><div style="color:#F5A524;font-size:1.4rem">'+starsTxt(avg)+'</div><div style="color:var(--muted);font-size:0.86rem">'+(avg>=4?'سيظهر تقييمك في المنصة بعد مراجعته.':'يؤسفنا أن التجربة لم تكن كاملة، سنتواصل معك قريباً.')+'</div>'+(avg>=4?'<button class="btn btn-gold" style="margin-top:10px" onclick="rvShareMine()">📤 شارك تقييمك كصورة</button><br>':'')+'<button class="btn btn-ok" style="margin-top:8px" onclick="tellFriend()">💬 أرسل رابطنا لصديق</button>';
   }catch(x){ b.disabled=false; b.textContent=oldAdminMode?"💾 حفظ وإرسال رابط التقييم":"📤 إرسال"; e.textContent="تعذر الحفظ، تأكد من الإنترنت وأعد المحاولة"; }
 }
 async function oldConfirm(id){
   var r=oldRegs.find(function(x){return x.id===id;}); if(!r) return;
+  var rated=!!(r.q&&r.d&&r.s);
   try{
-    var o=await oldMakeOrder(r);
+    var o=await oldMakeOrder(Object.assign({},r,{noOg:rated}));
+    if(rated){
+      var avg=Math.round((r.q+r.d+r.s)/3*10)/10, rv={orderId:o.id,q:r.q,d:r.d,s:r.s,avg:avg,text:String(r.text||"").slice(0,400),img:r.img||"",name:firstName(r.name)||"زبون",city:String(r.city||"").slice(0,40),
+        productIds:r.productId?[r.productId]:[],productNames:[r.productName||"خزان"],status:avg>=4?"shown":"pending",since:oldSince(r.when)||"",createdAt:Date.now()};
+      await setDoc(doc(db,"reviews",o.id),rv);
+    }
     await updateDoc(doc(db,"oldCustomers",id),{status:"confirmed",orderId:o.id,confirmedAt:Date.now()});
-    window.open("https://wa.me/"+waNum(o.buyerPhone)+"?text="+encodeURIComponent(rateMsg(o)),"_blank");
-    toast("✓ تم التأكيد وفُتح واتساب برابط التقييم");
+    if(rated) toast(avg>=4?"✓ تم التأكيد ونُشر التقييم":"✓ تم التأكيد — التقييم ينتظر موافقتك في القائمة أدناه");
+    else { window.open("https://wa.me/"+waNum(o.buyerPhone)+"?text="+encodeURIComponent(rateMsg(o)),"_blank"); toast("✓ تم التأكيد وفُتح واتساب برابط التقييم"); }
   }catch(e){ toast("تعذر التأكيد"); }
 }
 async function oldReject(id){ if(!confirm("رفض هذا التسجيل؟")) return; try{ await updateDoc(doc(db,"oldCustomers",id),{status:"rejected"}); toast("تم الرفض"); }catch(e){ toast("تعذر الرفض"); } }
@@ -2602,7 +2627,7 @@ function oldAdminHtml(){
     +'<div style="color:var(--muted);font-size:0.8rem;line-height:1.8;margin-bottom:8px">مسجّلون: '+nL+' · قيّموا: '+nR+'</div>'
     +'<button class="btn btn-gold btn-block" style="height:44px" onclick="openOld(true)">➕ دعوة زبون سابق للتقييم</button>'
     +'<div style="background:var(--bg);border-radius:12px;padding:10px;margin-top:10px;font-size:0.8rem;line-height:1.8">📣 رابط يسجّل به الزبائن السابقون أنفسهم، انشره في حالتك وقروباتك:<div dir="ltr" style="font-weight:800;word-break:break-all">'+esc(oldLink())+'</div><div class="grid2" style="margin-top:6px"><button class="sbtn" onclick="copyText(\''+esc(oldLink())+'\')">📋 نسخ الرابط</button><button class="sbtn ok" onclick="oldShareLink()">📤 مشاركة</button></div></div>'
-    +(P.length?'<h4 style="margin:12px 0 6px">⏳ بانتظار تأكيدك ('+P.length+')</h4>'+P.map(function(r){ return '<div style="border-top:1px solid var(--line);padding:8px 0;font-size:0.84rem;line-height:1.7"><b>'+esc(r.name)+'</b> · <a href="tel:+'+waNum(r.phone)+'" dir="ltr" style="color:var(--water);font-weight:800">'+esc(r.phone)+'</a><br>'+esc(r.productName)+' × '+(r.qty||1)+(r.when?' · '+esc(r.when):'')+' · '+esc(r.city)+(r.note?'<br><span style="color:var(--muted)">'+esc(r.note)+'</span>':'')+'<div style="display:flex;gap:6px;margin-top:6px"><button class="sbtn ok" data-id="'+esc(r.id)+'" onclick="oldConfirm(this.dataset.id)">✓ أعرفه — أرسل رابط التقييم</button><button class="sbtn bad" data-id="'+esc(r.id)+'" onclick="oldReject(this.dataset.id)">✕ رفض</button></div></div>'; }).join(""):'')
+    +(P.length?'<h4 style="margin:12px 0 6px">⏳ بانتظار تأكيدك ('+P.length+')</h4>'+P.map(function(r){ return '<div style="border-top:1px solid var(--line);padding:8px 0;font-size:0.84rem;line-height:1.7"><b>'+esc(r.name)+'</b> · <a href="tel:+'+waNum(r.phone)+'" dir="ltr" style="color:var(--water);font-weight:800">'+esc(r.phone)+'</a><br>'+esc(r.productName)+' × '+(r.qty||1)+(r.when?' · '+esc(r.when):'')+' · '+esc(r.city)+(r.note?'<br><span style="color:var(--muted)">'+esc(r.note)+'</span>':'')+(r.q?'<div style="margin-top:4px"><b style="color:#F5A524">'+starsTxt(r.avg)+'</b> <b class="num">'+numIn100(r.avg).toFixed(1)+'</b> <span style="color:var(--muted)">· الخزان '+r.q+' · التوصيل '+r.d+' · التعامل '+r.s+'</span>'+(r.text?'<br>«'+esc(r.text)+'»':'')+(r.img?'<br><img src="'+esc(r.img)+'" alt="" style="height:80px;border-radius:8px;margin-top:4px">':'')+'</div>':'')+'<div style="display:flex;gap:6px;margin-top:6px"><button class="sbtn ok" data-id="'+esc(r.id)+'" onclick="oldConfirm(this.dataset.id)">'+(r.q?'✓ أعرفه — انشر تقييمه':'✓ أعرفه — أرسل رابط التقييم')+'</button><button class="sbtn bad" data-id="'+esc(r.id)+'" onclick="oldReject(this.dataset.id)">✕ رفض</button></div></div>'; }).join(""):'')
     +'</div>';
 }
 function oldShareLink(){
@@ -2610,7 +2635,7 @@ function oldShareLink(){
   if(navigator.share){ navigator.share({text:msg}).catch(function(){}); return; }
   window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank");
 }
-Object.assign(window,{openOld,oldSave,oldConfirm,oldReject,oldShareLink});
+Object.assign(window,{oldSet,oldPick,openOld,oldSave,oldConfirm,oldReject,oldShareLink});
 // ══════════════ إضافات التقييم والنمو ══════════════
 var rvLast=null, mkRateCache=null;
 function renderGallery(){
