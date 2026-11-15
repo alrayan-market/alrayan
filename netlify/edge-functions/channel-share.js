@@ -1,7 +1,7 @@
 // netlify/edge-functions/channel-share.js
 // معاينة الروابط عند المشاركة (واتساب، فيسبوك، تيليجرام...)
 // تعمل لبوتات المعاينة فقط، ولا تغيّر شيئاً للزائر العادي.
-// الروابط المدعومة: ?p= خزان · ?calc= حاسبة · ?quote= عرض سعر · ?join= انضمام · ?rc= إيصال صرف · ?dn= إشعار تسليم · ?rv= تقييم · ?old= زبون سابق · ?m= صفحة المسوّق · الرئيسية بدون رابط · (القديمة: ?prop= ?req= ?ad= ?auc=)
+// الروابط المدعومة: ?p= خزان · ?calc= حاسبة · ?quote= عرض سعر · ?join= انضمام · ?rc= إيصال صرف · ?dn= إشعار تسليم · ?rv= تقييم · ?old= زبون سابق · ?m= صفحة المسوّق · ?b= خزانات مصنع · ?revs= آراء الزبائن · الرئيسية بدون رابط · (القديمة: ?prop= ?req= ?ad= ?auc=)
 
 const FIREBASE_PROJECT_ID = "alrayan-15db4";
 const FIREBASE_API_KEY = "AIzaSyC7-MKB7Ix3k0gA7tGxCXNFaty5IQ-U3Xg";
@@ -51,10 +51,10 @@ export default async (request, context) => {
   const ua = request.headers.get("user-agent") || "";
   const url = new URL(request.url);
   const p = (k) => url.searchParams.get(k);
-  const tk = p("p"), calc = p("calc"), quote = p("quote"), join = p("join"), rc = p("rc"), dn = p("dn"), rv = p("rv"), old = p("old"), mk = p("m");
+  const tk = p("p"), calc = p("calc"), quote = p("quote"), join = p("join"), rc = p("rc"), dn = p("dn"), rv = p("rv"), old = p("old"), mk = p("m"), br = p("b"), revs = p("revs");
   const auc = p("auc"), prop = p("prop"), req = p("req"), ad = p("ad"), vid = p("video"), poll = p("poll"), publish = p("publish");
   if (!BOT.test(ua)) return context.next();
-  const home = !tk && !calc && !quote && !join && !rc && !dn && !rv && !old && !mk && !auc && !prop && !req && !ad && !vid && !poll && !publish;
+  const home = !tk && !calc && !quote && !join && !rc && !dn && !rv && !old && !mk && !br && !revs && !auc && !prop && !req && !ad && !vid && !poll && !publish;
   if (home && [...url.searchParams.keys()].some((k) => !["s", "v", "fbclid", "utm_source", "utm_medium", "utm_campaign"].includes(k))) return context.next();
 
   let ready = false; // صورة المعاينة جاهزة بالحجم المناسب (لا تحتاج تصغير)
@@ -67,6 +67,16 @@ export default async (request, context) => {
       title = "📊 صفحة المسوّق · منصة الريان لخزانات المياه";
       desc = "تابع زياراتك وطلباتك وعمولاتك، واطلب صرفها متى شئت";
       await useStatic("mk");
+    } else if (br) {
+      const BN = { gt: "النمر الذهبي", nakhla: "النخلة", thuraya: "الثريا", asia: "آسيا", farouq: "الفاروق", kurd: "كرد بلاست", baraka: "البركة" };
+      const n = BN[br] || "المصنع";
+      title = "🏭 خزانات " + n + (br === "gt" ? " ⭐ الموصى بها" : "") + " · منصة الريان";
+      desc = "كل مقاسات خزانات " + n + " بأسعارها · توصيل لحد موقعك · الدفع عند الاستلام";
+      await useStatic("b_" + br);
+    } else if (revs) {
+      title = "⭐ آراء زبائننا · منصة الريان لخزانات المياه";
+      desc = "تقييمات حقيقية من زبائن استلموا خزاناتهم · أطلب من هنا واستلم في موقعك";
+      await useStatic("revs");
     } else if (tk) {
       const f = await fireGet("products", tk);
       if (f) {
