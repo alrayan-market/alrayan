@@ -1107,12 +1107,25 @@ const BRANDS_DEF=[
   {id:"baraka",name:"البركة",color:"#7A5A2B",markup:0}];
 // أسعار المصانع كما أرسلها المالك (سعر المصنع). النخلة: الأسعار كما هي
 const SEED={
-  nakhla:{asIs:true,v:[[100,360000],[150,460000],[250,550000],[500,1000000],[750,1400000],[1000,1650000],[1500,2000000],[2000,2700000],[3000,3900000],[4000,5500000],[5000,7000000],[7500,11000000],[10000,13500000],[15000,21000000],[20000,28000000]],h:[[300,975000],[350,1200000],[500,1750000],[750,2150000],[1000,2400000],[1500,4000000],[2000,4750000]]},
+  nakhla:{asIs:true,v:[[100,390000],[150,550000],[250,650000],[500,1150000],[750,1450000],[1000,1900000],[1500,2300000],[2000,3100000],[3000,4500000],[4000,6500000],[5000,8000000],[7500,12500000],[10000,16000000],[15000,24000000],[20000,32000000]],h:[[300,975000],[350,1200000],[500,1750000],[750,2150000],[1000,2400000],[1500,4000000],[2000,4750000]]},
   thuraya:{v:[[500,770000],[750,1050000],[1000,1350000],[1500,1800000],[2000,2250000],[3000,3900000],[5000,6600000],[10000,14500000]],h:[]},
   asia:{v:[[500,730000],[750,930000],[1000,1250000],[1500,1600000],[2000,2000000],[3000,3200000],[4000,5000000],[5000,6000000]],h:[[1000,1650000],[2000,3800000]]},
   farouq:{v:[[500,700000],[1000,1200000],[1500,1600000],[2000,1900000],[3000,3200000],[5000,5800000]],h:[]},
   kurd:{v:[[500,569800],[750,773300],[1000,976800],[1500,1465200],[2000,1831500],[3000,2645500]],h:[]}
 };
+// صور جاهزة لخزانات بعض المصانع (مرفوعة بجانب index.html في GitHub)
+const BR_IMGS={nakhla:{v:{500:"nakhla-v500.jpg",750:"nakhla-v750.jpg",1000:"nakhla-v1000.jpg",1500:"nakhla-v1500.jpg",2000:"nakhla-v2000.jpg"},h:{300:"nakhla-h300.jpg",350:"nakhla-h350.jpg",500:"nakhla-h500.jpg",750:"nakhla-h750.jpg",1000:"nakhla-h1000.jpg",1500:"nakhla-h1500.jpg",2000:"nakhla-h2000.jpg"}}};
+function brImgTargets(bid){ var m=BR_IMGS[bid]; if(!m) return []; return tanks(true).filter(function(p){ return bidOf(p)===bid && !imgsOf(p).length && (isHoriz(p)?m.h:m.v)[capOf(p)]; }).map(function(p){ return {p:p,f:(isHoriz(p)?m.h:m.v)[capOf(p)]}; }); }
+async function attachImgs(bid,quiet){
+  var T=brImgTargets(bid); if(!T.length){ if(!quiet) toast("كل الخزانات التي لها صور جاهزة عندها صور"); return; }
+  var base=location.origin, ok=0, miss=0;
+  for(var i=0;i<T.length;i++){ var u=base+"/"+T[i].f;
+    try{ var r=await fetch(u,{method:"HEAD",cache:"no-store"}); var ct=r.headers.get("content-type")||""; if(!r.ok||ct.indexOf("image")<0){ miss++; continue; } }catch(e){ miss++; continue; }
+    try{ await updateDoc(doc(db,"products",T[i].p.id),{images:[u],image:u,ogImage:"",ogV:0,updatedAt:Date.now()}); ok++; }catch(e){} }
+  if(ok) toast("📷 وُضعت "+ok+" صورة على خزانات "+brById(bid).name);
+  else if(!quiet) toast(miss?"لم نجد ملفات الصور، ارفعها مع index.html في GitHub":"تعذر وضع الصور");
+  setTimeout(function(){ if(admTab==="factories") renderAdmin(); ensureProductOg(); },900);
+}
 var brCfg={};
 function numOr(v,d){ if(v===undefined||v===null||v==="") return d; var n=Number(toEn(String(v)).replace(/[^\d.\-]/g,"")); return isFinite(n)?n:d; }
 function brands(){ return BRANDS_DEF.map(function(b,i){ var c=brCfg[b.id]||{}; return Object.assign({},b,{i:i,logo:c.logo||BR_LOGO[b.id]||"",desc:c.desc||"",warranty:c.warranty||"",hidden:!!c.hidden,markup:numOr(c.markup,b.markup),link:numOr(c.link,b.link)}); }); }
@@ -1171,6 +1184,7 @@ async function seedBrand(bid){
     try{ await setDoc(doc(db,"products",id),data); n++; }catch(e){}
   }
   toast(n?"✓ أُضيف "+n+" خزان من "+b.name:"تعذر الإضافة، تأكد من الدخول");
+  if(n && BR_IMGS[bid]) setTimeout(function(){ attachImgs(bid,true); },1200);
   setTimeout(function(){ if(admTab==="factories") renderAdmin(); },700);
 }
 function renderBrands(){
@@ -1706,7 +1720,7 @@ function handleDeepLinks(){
 }
 
 document.getElementById("yr").textContent=new Date().getFullYear();
-Object.assign(window,{seedPrices,setBrand,goBrand,brEd,brSave,seedBrand,brShare,admBrandFilter,brLogoPick,pfCalc,rvShareOne,revsLinkShare,mkShareBrand,setAdmPBrand,openTrackLast,setCap,setType,setSort,openProduct,quickAdd,pdQty,pdAdd,shareProduct,askProductWA,openWA,openCheckout,setLineQty,removeLine,renderSummary,setPay,useMyLocation,submitOrder,sendOrderWA,openTrack,trackOrder,openCalc,calcSet,calcDays,calcExtra,openQuote,submitQuote,installApp});
+Object.assign(window,{attachImgs,seedPrices,setBrand,goBrand,brEd,brSave,seedBrand,brShare,admBrandFilter,brLogoPick,pfCalc,rvShareOne,revsLinkShare,mkShareBrand,setAdmPBrand,openTrackLast,setCap,setType,setSort,openProduct,quickAdd,pdQty,pdAdd,shareProduct,askProductWA,openWA,openCheckout,setLineQty,removeLine,renderSummary,setPay,useMyLocation,submitOrder,sendOrderWA,openTrack,trackOrder,openCalc,calcSet,calcDays,calcExtra,openQuote,submitQuote,installApp});
 
 // ══════════════════════════ لوحة المالك ══════════════════════════
 const OWNER_KEY_HASH="9b2c1da9bccdaea24085989c43de016ac0d70d2214d8bbc78a6803d73669e8f6";
@@ -1885,6 +1899,7 @@ function admFactories(){
         +'<div class="tgl">إخفاء المصنع وخزاناته من المتجر<label class="sw"><input type="checkbox" data-b="'+b.id+'" '+(d.hidden?'checked ':'')+'onchange="brEd(this.dataset.b,\'hidden\',this.checked)"><i></i></label></div>'
         +(miss.length?'<button class="btn btn-gold btn-block" style="height:44px;margin-top:6px" data-b="'+b.id+'" onclick="seedBrand(this.dataset.b)">➕ أضف خزانات '+esc(b.name)+' الجاهزة ('+miss.length+')</button><div style="color:var(--muted);font-size:0.72rem;margin-top:4px">'+miss.map(function(r){return r.cap+(r.h?" أفقي":"")+": "+r.price.toLocaleString("en-US")+(r.linked?" 🔗":"");}).join(" · ")+'</div>':'')
         +(rows.some(function(r){return r.stale;})?'<button class="btn btn-line btn-block" style="height:42px;margin-top:6px" data-b="'+b.id+'" onclick="seedPrices(this.dataset.b)">🔄 حدّث الأسعار حسب آخر قائمة ('+rows.filter(function(r){return r.stale;}).length+')</button>':'')
+        +(brImgTargets(b.id).length?'<button class="btn btn-line btn-block" style="height:42px;margin-top:6px" data-b="'+b.id+'" onclick="attachImgs(this.dataset.b)">📷 ضع صور '+esc(b.name)+' ('+brImgTargets(b.id).length+')</button>':'')
         +'<div style="display:flex;gap:8px;margin-top:8px"><button class="sbtn" data-b="'+b.id+'" onclick="admBrandFilter(this.dataset.b)">💧 خزاناته</button>'+(vis?'<button class="sbtn gold" data-b="'+b.id+'" onclick="brShare(this.dataset.b)">📤 رابط المصنع</button>':'')+'</div></div>';
     }).join("")
     +'<button class="btn btn-gold btn-block" onclick="brSave()" style="position:sticky;bottom:10px">💾 حفظ إعدادات المصانع</button>';
