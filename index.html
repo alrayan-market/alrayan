@@ -1123,8 +1123,25 @@ async function attachImgs(bid,quiet){
     try{ var r=await fetch(u,{method:"HEAD",cache:"no-store"}); var ct=r.headers.get("content-type")||""; if(!r.ok||ct.indexOf("image")<0){ miss++; continue; } }catch(e){ miss++; continue; }
     try{ await updateDoc(doc(db,"products",T[i].p.id),{images:[u],image:u,ogImage:"",ogV:0,updatedAt:Date.now()}); ok++; }catch(e){} }
   if(ok) toast("📷 وُضعت "+ok+" صورة على خزانات "+brById(bid).name);
-  else if(!quiet) toast(miss?"لم نجد ملفات الصور، ارفعها مع index.html في GitHub":"تعذر وضع الصور");
+  else if(!quiet && miss){ if(confirm("لم نجد الصور على الموقع.\nاختر الصور من جوالك الآن؟ (يمكنك تحديدها كلها مرة واحدة)")) pickBrImgs(bid); return; }
+  else if(!quiet) toast("تعذر وضع الصور");
   setTimeout(function(){ if(admTab==="factories") renderAdmin(); ensureProductOg(); },900);
+}
+// اختيار الصور من الجوال: يُطابق الاسم nakhla-v500 / nakhla-h1000 … ويرفعها
+function pickBrImgs(bid){
+  var inp=document.createElement("input"); inp.type="file"; inp.accept="image/*"; inp.multiple=true; inp.style.display="none";
+  inp.onchange=async function(){
+    var fs=[].slice.call(inp.files||[]); inp.remove(); if(!fs.length) return;
+    var T=brImgTargets(bid), ok=0, unk=0; toast("⏳ جاري رفع "+fs.length+" صورة…");
+    for(var i=0;i<fs.length;i++){ var m=String(fs[i].name).toLowerCase().match(/([vh])\s*-?\s*(\d{3,5})/);
+      var t=m?T.find(function(x){ return x.f.indexOf("-"+m[1]+m[2]+".")>-1; }):null;
+      if(!t){ unk++; continue; }
+      try{ var u=await uploadImage(fs[i],1000); if(!u) throw 0; await updateDoc(doc(db,"products",t.p.id),{images:[u],image:u,ogImage:"",ogV:0,updatedAt:Date.now()}); ok++; T=T.filter(function(x){return x!==t;}); }catch(e){}
+    }
+    toast(ok?"📷 وُضعت "+ok+" صورة"+(unk?" · "+unk+" صورة لم نعرف مقاسها":""):"لم نتعرف على الصور، اختر الصور التي أسماؤها تبدأ بـ nakhla");
+    setTimeout(function(){ if(admTab==="factories") renderAdmin(); ensureProductOg(); },900);
+  };
+  document.body.appendChild(inp); inp.click();
 }
 var brCfg={};
 function numOr(v,d){ if(v===undefined||v===null||v==="") return d; var n=Number(toEn(String(v)).replace(/[^\d.\-]/g,"")); return isFinite(n)?n:d; }
