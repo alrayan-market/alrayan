@@ -1224,25 +1224,37 @@ function renderBrands(){
 function setBrand(k){ filt.brand=(filt.brand===k?"all":k); renderBrands(); renderTypeChips(); renderGrid(); document.getElementById("shop").scrollIntoView({behavior:"smooth",block:"start"}); }
 function goBrand(k){ if(isOpen("pg-product")) history.back(); setTimeout(function(){ filt.brand="all"; setBrand(k); },300); }
 
-// ── مميزات النمر الذهبي (من بروشور المصنع) ──
-function gtWhyHtml(p){
-  if(bidOf(p)!=="gt") return "";
-  var it=[["🛡️","ضمان 10 سنوات","إصلاح أو استبدال مجاني ضد عيوب الصناعة"],["🧱","3 طبقات","أول خزان في السودان بثلاث طبقات"],["✅","مادة HDPE","معتمدة عالمياً لحفظ المياه والأغذية"],["🌿","بدون طحالب","الطبقة السوداء تمنع نفاذ الضوء"],["💪","لا ينكسر","بتقنية البلومولد: خفيف وقوي"],["🔒","غطاءان","يمنعان دخول الأتربة والحشرات"],["☀️","مقاوم للشمس","طبقة خارجية ضد الأشعة فوق البنفسجية"],["🚫","ضد الشق والصدأ","وضد التسريب"]];
-  return '<div class="card why"><h3>💪 لماذا النمر الذهبي؟</h3><div style="font-size:0.8rem;color:#8A5A00;font-weight:800">صحية وقوية ومضمونة 100%</div><div class="why-g">'+it.map(function(x){return '<div><b>'+x[0]+' '+x[1]+'</b>'+x[2]+'</div>';}).join("")+'</div>'
-    +'<details><summary>🧱 كيف تحمي الطبقات الثلاث مياهك؟</summary><div>⚪ <b>الداخلية بيضاء:</b> لترى نقاء المياه داخل الخزان.<br>⚫ <b>الوسطى سوداء:</b> تمنع نفاذ الضوء فلا تتكوّن الطحالب.<br>🟡 <b>الخارجية بلون الخزان:</b> مقاومة للأشعة فوق البنفسجية لإطالة عمر الخزان.<br>🎨 <b>الألوان المتوفرة:</b> الأزرق · الذهبي</div></details></div>';
+// ── مميزات ومواصفات المصانع (من بروشورات المصانع) ──
+const BR_INFO={
+  gt:{title:"💪 لماذا النمر الذهبي؟",slogan:"صحية وقوية ومضمونة 100%",
+    why:[["🛡️","ضمان 10 سنوات","إصلاح أو استبدال مجاني ضد عيوب الصناعة"],["🧱","3 طبقات","أول خزان في السودان بثلاث طبقات"],["✅","مادة HDPE","معتمدة عالمياً لحفظ المياه والأغذية"],["🌿","بدون طحالب","الطبقة السوداء تمنع نفاذ الضوء"],["💪","لا ينكسر","بتقنية البلومولد: خفيف وقوي"],["🔒","غطاءان","يمنعان دخول الأتربة والحشرات"],["☀️","مقاوم للشمس","طبقة خارجية ضد الأشعة فوق البنفسجية"],["🚫","ضد الشق والصدأ","وضد التسريب"]],
+    more:'⚪ <b>الداخلية بيضاء:</b> لترى نقاء المياه داخل الخزان.<br>⚫ <b>الوسطى سوداء:</b> تمنع نفاذ الضوء فلا تتكوّن الطحالب.<br>🟡 <b>الخارجية بلون الخزان:</b> مقاومة للأشعة فوق البنفسجية لإطالة عمر الخزان.<br>🎨 <b>الألوان المتوفرة:</b> الأزرق · الذهبي',
+    spec:{layers:"3",warranty:"10 سنوات ضد عيوب الصناعة",color:"الأزرق · الذهبي",material:"HDPE صحي (بولي إيثيلين عالي الكثافة)"},open:"43.3",
+    dim:{v:{500:{h:94,d:93},750:{h:119,d:97},1000:{h:135,d:105},1500:{h:156,d:125},2000:{h:169,d:132},2500:{h:194,d:137}},h:{750:{l:133,w:95,h:100},1000:{l:150,w:105,h:95}}}},
+  nakhla:{title:"🌴 لماذا خزانات النخلة؟",slogan:"خزانات النخلة… أصل الخزانات · صحية 100%",
+    why:[["🛡️","ضمان 10 سنوات","ضد عيوب الصناعة"],["🧱","3 طبقات لكل المقاسات","المصنع الوحيد بثلاث طبقات من 250 حتى 20,000 لتر"],["✅","مواد خام نقية 100%","بولي إيثيلين نقي بدون مواد معاد تصنيعها"],["🔥","تقنية الروتومولد","تُصنع تحت حرارة فوق 250 درجة: تجانس وصلابة"],["💧","بدون طعم أو رائحة","لا يتفاعل مع المياه والمشروبات"],["🌿","بدون طحالب","الطبقة السوداء تمنع اختراق الضوء"],["🔒","غطاءان محكمان","يمنعان الضوء والأتربة والحشرات"],["☀️","يلائم الأجواء السودانية","طبقة خارجية مقاومة للأشعة فوق البنفسجية"]],
+    more:'⚪ <b>الداخلية بيضاء:</b> لرؤية نقاء المياه داخل الخزان.<br>⚫ <b>الوسطى سوداء:</b> تمنع اختراق الضوء فلا تتكوّن الطحالب.<br>🔵 <b>الخارجية بلون الخزان:</b> مقاومة للأشعة فوق البنفسجية لعمر أطول.<br>🛢️ لا يتآكل، ويصلح أيضاً لحفظ المواد البترولية وبعض المواد الكيميائية.<br>🏆 خزان 20,000 لتر هو أكبر خزان بلاستيكي في السودان.',
+    spec:{layers:"3",warranty:"10 سنوات ضد عيوب الصناعة",material:"بولي إيثيلين نقي 100% (بدون إسكراب)"},open:"40",
+    dim:{v:{100:{l:53,w:53,h:45},150:{l:53,w:55,h:65},250:{h:90,d:65},500:{h:100,d:89},750:{h:110,d:102},1000:{h:123,d:113},1500:{h:137,d:128},2000:{h:150,d:137},3000:{h:173,d:158},4000:{h:183,d:173},5000:{h:194,d:185},7500:{h:235,d:230},10000:{h:300,d:215},15000:{h:310,d:257},20000:{h:350,d:280,o:"54"}},
+         h:{500:{l:118,w:83,h:92},750:{l:118,w:94,h:102},1000:{l:133,w:103,h:109},1500:{l:173,w:114,h:123},2000:{l:185,w:127,h:136}}}}
+};
+function brWhyHtml(p){
+  var I=BR_INFO[bidOf(p)]; if(!I) return "";
+  return '<div class="card why"><h3>'+I.title+'</h3><div style="font-size:0.8rem;color:#8A5A00;font-weight:800">'+I.slogan+'</div><div class="why-g">'+I.why.map(function(x){return '<div><b>'+x[0]+' '+x[1]+'</b>'+x[2]+'</div>';}).join("")+'</div>'
+    +'<details><summary>🧱 كيف تحمي الطبقات الثلاث مياهك؟</summary><div>'+I.more+'</div></details></div>';
 }
-const GT_DIM={v:{500:{h:94,d:93},750:{h:119,d:97},1000:{h:135,d:105},1500:{h:156,d:125},2000:{h:169,d:132},2500:{h:194,d:137}},h:{750:{l:133,w:95,h:100},1000:{l:150,w:105,h:95}}};
-function gtSpecPatch(p){
-  var c=capOf(p), hz=isHoriz(p), d=(hz?GT_DIM.h:GT_DIM.v)[c], o={}, set=function(k,v){ if(v && !String(p[k]||"").trim()) o[k]=v; };
-  set("layers","3"); set("warranty","10 سنوات ضد عيوب الصناعة"); set("color","الأزرق · الذهبي"); set("material","HDPE صحي (بولي إيثيلين عالي الكثافة)");
-  if(d){ set("height",d.h+" سم"); if(hz){ set("length",d.l+" سم"); set("width",d.w+" سم"); } else set("diameter",d.d+" سم"); set("opening","43.3 سم"); }
+function specPatch(p){
+  var I=BR_INFO[bidOf(p)]; if(!I) return {};
+  var c=capOf(p), hz=isHoriz(p), d=(hz?I.dim.h:I.dim.v)[c], o={}, set=function(k,v){ if(v && !String(p[k]||"").trim()) o[k]=v; };
+  Object.keys(I.spec).forEach(function(k){ set(k,I.spec[k]); });
+  if(d){ set("height",d.h+" سم"); if(d.l){ set("length",d.l+" سم"); set("width",d.w+" سم"); } else set("diameter",d.d+" سم"); set("opening",(d.o||I.open)+" سم"); }
   return o;
 }
-function gtSpecTargets(){ return tanks(true).filter(function(p){ return bidOf(p)==="gt" && Object.keys(gtSpecPatch(p)).length; }); }
-async function gtSpecFill(){
-  var L=gtSpecTargets(); if(!L.length){ toast("مواصفات النمر الذهبي مكتملة"); return; }
-  if(!confirm("إكمال مواصفات "+L.length+" خزان من النمر الذهبي من بروشور المصنع؟\n(3 طبقات · HDPE · ضمان 10 سنوات · الأزرق والذهبي · الارتفاع والقطر لكل مقاس)\nالخانات التي كتبتها بنفسك لا تتغير.")) return;
-  var n=0; for(var i=0;i<L.length;i++){ try{ await updateDoc(doc(db,"products",L[i].id),Object.assign(gtSpecPatch(L[i]),{updatedAt:Date.now()})); n++; }catch(e){} }
+function specTargets(bid){ return tanks(true).filter(function(p){ return bidOf(p)===bid && Object.keys(specPatch(p)).length; }); }
+async function specFill(bid){
+  var L=specTargets(bid), b=brById(bid); if(!L.length){ toast("مواصفات "+b.name+" مكتملة"); return; }
+  if(!confirm("إكمال مواصفات "+L.length+" خزان من "+b.name+" من بروشور المصنع؟\n(الطبقات · المادة · الضمان · الأبعاد لكل مقاس)\nالخانات التي كتبتها بنفسك لا تتغير.")) return;
+  var n=0; for(var i=0;i<L.length;i++){ try{ await updateDoc(doc(db,"products",L[i].id),Object.assign(specPatch(L[i]),{updatedAt:Date.now()})); n++; }catch(e){} }
   toast(n?"✓ اكتملت مواصفات "+n+" خزان":"تعذر الحفظ"); setTimeout(function(){ if(admTab==="factories") renderAdmin(); },700);
 }
 function brandCardHtml(p){
@@ -1471,7 +1483,7 @@ function renderProductPage(keep){
     +'<div class="pd-price">'+(p.priceOnRequest?'<b style="color:var(--gold);font-size:1.25rem">السعر عند الطلب</b>':'<b class="num">'+money(pr)+'</b>'+(old>pr?'<s class="num">'+money(old)+'</s><span class="off">وفّر '+money(old-pr)+'</span>':''))+'</div>'
     +(p.outOfStock?'<div class="pd-ship" style="background:var(--bad-soft);color:var(--bad)">⏳ غير متوفر حالياً · راسلنا لنبلغك عند توفره</div>':'<div class="pd-ship">'+ship+'</div>')
     +brandCardHtml(p)
-    +gtWhyHtml(p)
+    +brWhyHtml(p)
     +prodRevsHtml(p)
     +compareHtml(p)
     +shipStatesHtml(p)
@@ -1768,7 +1780,7 @@ function handleDeepLinks(){
 }
 
 document.getElementById("yr").textContent=new Date().getFullYear();
-Object.assign(window,{gtSpecFill,attachImgs,seedPrices,setBrand,goBrand,brEd,brSave,seedBrand,brShare,admBrandFilter,brLogoPick,pfCalc,rvShareOne,revsLinkShare,mkShareBrand,setAdmPBrand,openTrackLast,setCap,setType,setSort,openProduct,quickAdd,pdQty,pdAdd,shareProduct,askProductWA,openWA,openCheckout,setLineQty,removeLine,renderSummary,setPay,useMyLocation,submitOrder,sendOrderWA,openTrack,trackOrder,openCalc,calcSet,calcDays,calcExtra,openQuote,submitQuote,installApp});
+Object.assign(window,{specFill,attachImgs,seedPrices,setBrand,goBrand,brEd,brSave,seedBrand,brShare,admBrandFilter,brLogoPick,pfCalc,rvShareOne,revsLinkShare,mkShareBrand,setAdmPBrand,openTrackLast,setCap,setType,setSort,openProduct,quickAdd,pdQty,pdAdd,shareProduct,askProductWA,openWA,openCheckout,setLineQty,removeLine,renderSummary,setPay,useMyLocation,submitOrder,sendOrderWA,openTrack,trackOrder,openCalc,calcSet,calcDays,calcExtra,openQuote,submitQuote,installApp});
 
 // ══════════════════════════ لوحة المالك ══════════════════════════
 const OWNER_KEY_HASH="9b2c1da9bccdaea24085989c43de016ac0d70d2214d8bbc78a6803d73669e8f6";
@@ -1947,7 +1959,7 @@ function admFactories(){
         +'<div class="tgl">إخفاء المصنع وخزاناته من المتجر<label class="sw"><input type="checkbox" data-b="'+b.id+'" '+(d.hidden?'checked ':'')+'onchange="brEd(this.dataset.b,\'hidden\',this.checked)"><i></i></label></div>'
         +(miss.length?'<button class="btn btn-gold btn-block" style="height:44px;margin-top:6px" data-b="'+b.id+'" onclick="seedBrand(this.dataset.b)">➕ أضف خزانات '+esc(b.name)+' الجاهزة ('+miss.length+')</button><div style="color:var(--muted);font-size:0.72rem;margin-top:4px">'+miss.map(function(r){return r.cap+(r.h?" أفقي":"")+": "+r.price.toLocaleString("en-US")+(r.linked?" 🔗":"");}).join(" · ")+'</div>':'')
         +(rows.some(function(r){return r.stale;})?'<button class="btn btn-line btn-block" style="height:42px;margin-top:6px" data-b="'+b.id+'" onclick="seedPrices(this.dataset.b)">🔄 حدّث الأسعار حسب آخر قائمة ('+rows.filter(function(r){return r.stale;}).length+')</button>':'')
-        +(b.id==="gt"&&gtSpecTargets().length?'<button class="btn btn-gold btn-block" style="height:44px;margin-top:6px" onclick="gtSpecFill()">✨ أكمل مواصفات النمر الذهبي ('+gtSpecTargets().length+')</button>':'')
+        +(BR_INFO[b.id]&&specTargets(b.id).length?'<button class="btn btn-gold btn-block" style="height:44px;margin-top:6px" data-b="'+b.id+'" onclick="specFill(this.dataset.b)">✨ أكمل مواصفات '+esc(b.name)+' ('+specTargets(b.id).length+')</button>':'')
         +(brImgTargets(b.id).length?'<button class="btn btn-line btn-block" style="height:42px;margin-top:6px" data-b="'+b.id+'" onclick="attachImgs(this.dataset.b)">📷 ضع صور '+esc(b.name)+' ('+brImgTargets(b.id).length+')</button>':'')
         +'<div style="display:flex;gap:8px;margin-top:8px"><button class="sbtn" data-b="'+b.id+'" onclick="admBrandFilter(this.dataset.b)">💧 خزاناته</button>'+(vis?'<button class="sbtn gold" data-b="'+b.id+'" onclick="brShare(this.dataset.b)">📤 رابط المصنع</button>':'')+'</div></div>';
     }).join("")
