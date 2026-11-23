@@ -1188,6 +1188,26 @@ async function applyPriceLists(){
   for(var k in PRICE_LISTS){ try{ var res=await applyPriceList(k); if(res[0]||res[1]) msg.push(brById(k).name+": "+res[0]+" سعر"+(res[1]?" و"+res[1]+" مقاس جديد":"")); }catch(e){} }
   if(msg.length){ toast("✅ "+msg.join(" · ")+" · والبيع مفتوح"); setTimeout(syncLinked,1500); setTimeout(autoImgs,3000); }
 }
+
+// تعديل إعدادات المصانع مرة واحدة (23 نوفمبر 2026): آسيا والفاروق أقل من النمر الذهبي بـ2%، واستئناف بيع الفاروق
+const CFG_V="cfg-2026-11-23";
+var cfgV="";
+async function applyCfg(){
+  if(!isAdmin||cfgV===CFG_V) return;
+  var pct=-2, now=Date.now(), n=0, add=0;
+  try{ await setDoc(doc(db,"meta","tankBrands"),{list:{asia:{link:pct},farouq:{link:pct,paused:false}},cfgV:CFG_V},{merge:true}); }catch(e){ return; }
+  var bl=["asia","farouq"];
+  for(var b=0;b<bl.length;b++){ var bid=bl[b], L=tanks(true).filter(function(p){return bidOf(p)===bid;});
+    for(var i=0;i<L.length;i++){ var g=gtMatch(L[i]); if(!g) continue;
+      try{ await updateDoc(doc(db,"products",L[i].id),{priceLink:{pct:pct},price:round500(priceOf(g)*(1+pct/100)),updatedAt:now}); n++; }catch(e){} }
+    if(bid==="farouq" && !L.length){ var sd=SEED.farouq, br=brById("farouq");
+      for(var j=0;j<sd.v.length;j++){ var cap=sd.v[j][0], fp=sd.v[j][1], tmp={capacity:cap,tankType:"upper"}, gm=gtMatch(tmp);
+        var price=gm?round500(priceOf(gm)*(1+pct/100)):round500(fp*1.35), id="TK-farouq-"+cap+"-"+Math.random().toString(36).slice(2,6);
+        try{ await setDoc(doc(db,"products",id),{id:id,name:"خزان الفاروق "+cap.toLocaleString("en-US")+" لتر",capacity:cap,tankType:gm&&typeOf(gm)&&typeOf(gm)!=="horizontal"?typeOf(gm):"upper",brand:"farouq",factoryPrice:fp,price:price,priceLink:gm?{pct:pct}:null,oldPrice:0,priceOnRequest:false,
+          layers:"",warranty:"",height:"",diameter:"",weight:"",color:"",desc:"",images:[],image:"",ogImage:"",ogV:0,featured:false,outOfStock:false,hidden:false,category:"خزانات ومياه",tanksV2:true,sellerId:storeId||"RAYAN-TANKS",sellerName:storeName,createdAt:now+j,updatedAt:now,views:0}); add++; }catch(e){} } }
+  }
+  toast("✅ آسيا والفاروق: أقل من النمر الذهبي بـ2% ("+n+" سعر"+(add?"، وأُضيف "+add+" خزان فاروق":"")+") · وبيع الفاروق مفتوح");
+}
 var brOpenV={};
 async function renameUpper(){
   if(!isAdmin) return; var L=tanks(true).filter(function(p){ return /علوي/.test(String(p.name||"")); }), n=0;
@@ -1200,8 +1220,8 @@ const BRANDS_DEF=[
   {id:"gt",name:"النمر الذهبي",color:"#B7791F",rec:true,markup:0,paused:true},
   {id:"nakhla",name:"النخلة",color:"#2E7D32",markup:0,paused:true},
   {id:"thuraya",name:"الثريا",color:"#1F3C88",markup:25,link:0,paused:true},
-  {id:"asia",name:"آسيا",color:"#0B2B6B",markup:25,link:0},
-  {id:"farouq",name:"الفاروق",color:"#1565C0",markup:35,link:-5,paused:true},
+  {id:"asia",name:"آسيا",color:"#0B2B6B",markup:25,link:-2},
+  {id:"farouq",name:"الفاروق",color:"#1565C0",markup:35,link:-2,paused:true},
   {id:"kurd",name:"كرد بلاست",color:"#2E7D32",markup:35,link:-5,paused:true},
   {id:"baraka",name:"البركة",color:"#7A5A2B",markup:0,paused:true}];
 // أسعار المصانع كما أرسلها المالك (سعر المصنع). النخلة: الأسعار كما هي
@@ -1365,7 +1385,7 @@ function startListeners(){
   onSnapshot(collection(db,"sellers"),function(snap){ sellers=snap.docs.map(function(d){return d.data();}); findStore(); loaded.sellers=true; renderAll(); },function(){ loaded.sellers=true; renderAll(); });
   onSnapshot(collection(db,"products"),function(snap){ allProducts=snap.docs.map(function(d){return d.data();}); loaded.products=true; renderAll(); refreshOpenPages(); },function(){ loaded.products=true; renderAll(); });
   onSnapshot(doc(db,"meta","mkNotice"),function(s){ mkNotice=(s.exists&&s.exists())?s.data():null; if(isOpen("pg-mdash")) renderMDash(); },function(){});
-  onSnapshot(doc(db,"meta","tankBrands"),function(s){ var bd=(s.exists&&s.exists())?(s.data()||{}):{}; brCfg=bd.list||{}; gtOpenV=bd.gtOpenV||""; brOpenV=bd.openV||{}; if(loaded.products) renderAll(); refreshOpenPages(); },function(){});
+  onSnapshot(doc(db,"meta","tankBrands"),function(s){ var bd=(s.exists&&s.exists())?(s.data()||{}):{}; brCfg=bd.list||{}; gtOpenV=bd.gtOpenV||""; brOpenV=bd.openV||{}; cfgV=bd.cfgV||""; if(loaded.products) renderAll(); refreshOpenPages(); },function(){});
   onSnapshot(doc(db,"meta","tankSettings"),function(s){ S=(s.exists&&s.exists())?(s.data()||{}):{}; applySettings(); },function(){});
   onSnapshot(doc(db,"meta","tankZones"),function(s){ var z=(s.exists&&s.exists())?((s.data()||{}).zones||[]):[]; zones=z.length?z:DEF_ZONES; renderZonesFooter(); if(isOpen("pg-checkout")) fillZones(); },function(){ zones=DEF_ZONES; renderZonesFooter(); });
   onSnapshot(query(collection(db,"reviews"),where("status","==","shown"),limit(300)),function(snap){ creviews=snap.docs.map(function(d){return d.data();}).sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);}); renderReviews(); refreshOpenPages&&refreshOpenPages(); },function(){});
@@ -1947,7 +1967,7 @@ onAuthStateChanged(auth,function(u){
 function startAdmin(){
   if(admUnsub.length) return;
   setTimeout(function(){ ensureStaticOg().then(ensureProductOg).then(function(){ return new Promise(function(r){ setTimeout(r,1500); }); }).then(ensureExtraOg); },7000);
-  setTimeout(applyPriceLists,3000); setTimeout(renameUpper,2000); setTimeout(syncLinked,6000); setTimeout(autoImgs,8000);
+  setTimeout(applyPriceLists,3000); setTimeout(renameUpper,2000); setTimeout(applyCfg,7000); setTimeout(syncLinked,10000); setTimeout(autoImgs,12000);
   admUnsub.push(onSnapshot(query(collection(db,"orders"),orderBy("createdAt","desc"),limit(400)),function(snap){
     var prevNew=orders.filter(function(o){return o.status==="new";}).length;
     orders=snap.docs.map(function(d){return d.data();}).filter(isTankOrder);
