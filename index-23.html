@@ -1208,6 +1208,16 @@ async function applyCfg(){
   }
   toast("✅ آسيا والفاروق: أقل من النمر الذهبي بـ2% ("+n+" سعر"+(add?"، وأُضيف "+add+" خزان فاروق":"")+") · وبيع الفاروق مفتوح");
 }
+
+// ولايات تُضاف مرة واحدة لقائمة التوصيل المحفوظة (عند فتح لوحة المالك)
+const ZONE_ADD_V="z-2026-11-23", ZONE_ADDS=[["النيل الأبيض",10]];
+var zonesSaved=false, zonesAddV="";
+async function applyZoneAdds(){
+  if(!isAdmin||!zonesSaved||zonesAddV===ZONE_ADD_V) return;
+  var cur=(zones||[]).slice(), added=[];
+  ZONE_ADDS.forEach(function(a){ if(cur.some(function(z){return String(z.name).trim()===a[0];})) return; var z={name:a[0],kind:"state",rate:a[1],eta:"",fee:null}; z.fees=zCalcFees(z); cur.push(z); added.push(a[0]); });
+  try{ await setDoc(doc(db,"meta","tankZones"),{zones:cur,addV:ZONE_ADD_V,updatedAt:Date.now()},{merge:true}); if(added.length) toast("🚛 أُضيفت ولاية "+added.join(" و")+" للتوصيل"); }catch(e){}
+}
 var brOpenV={};
 async function renameUpper(){
   if(!isAdmin) return; var L=tanks(true).filter(function(p){ return /علوي/.test(String(p.name||"")); }), n=0;
@@ -1387,7 +1397,7 @@ function startListeners(){
   onSnapshot(doc(db,"meta","mkNotice"),function(s){ mkNotice=(s.exists&&s.exists())?s.data():null; if(isOpen("pg-mdash")) renderMDash(); },function(){});
   onSnapshot(doc(db,"meta","tankBrands"),function(s){ var bd=(s.exists&&s.exists())?(s.data()||{}):{}; brCfg=bd.list||{}; gtOpenV=bd.gtOpenV||""; brOpenV=bd.openV||{}; cfgV=bd.cfgV||""; if(loaded.products) renderAll(); refreshOpenPages(); },function(){});
   onSnapshot(doc(db,"meta","tankSettings"),function(s){ S=(s.exists&&s.exists())?(s.data()||{}):{}; applySettings(); },function(){});
-  onSnapshot(doc(db,"meta","tankZones"),function(s){ var z=(s.exists&&s.exists())?((s.data()||{}).zones||[]):[]; zones=z.length?z:DEF_ZONES; renderZonesFooter(); if(isOpen("pg-checkout")) fillZones(); },function(){ zones=DEF_ZONES; renderZonesFooter(); });
+  onSnapshot(doc(db,"meta","tankZones"),function(s){ var zd=(s.exists&&s.exists())?(s.data()||{}):{}; var z=zd.zones||[]; zonesSaved=z.length>0; zonesAddV=zd.addV||""; zones=z.length?z:DEF_ZONES; renderZonesFooter(); if(isOpen("pg-checkout")) fillZones(); },function(){ zones=DEF_ZONES; renderZonesFooter(); });
   onSnapshot(query(collection(db,"reviews"),where("status","==","shown"),limit(300)),function(snap){ creviews=snap.docs.map(function(d){return d.data();}).sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);}); renderReviews(); refreshOpenPages&&refreshOpenPages(); },function(){});
   onSnapshot(collection(db,"tankReviews"),function(snap){ reviews=snap.docs.map(function(d){return d.data();}).sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);}); renderReviews(); if(window.__admRender) window.__admRender(); },function(){});
 }
@@ -1967,7 +1977,7 @@ onAuthStateChanged(auth,function(u){
 function startAdmin(){
   if(admUnsub.length) return;
   setTimeout(function(){ ensureStaticOg().then(ensureProductOg).then(function(){ return new Promise(function(r){ setTimeout(r,1500); }); }).then(ensureExtraOg); },7000);
-  setTimeout(applyPriceLists,3000); setTimeout(renameUpper,2000); setTimeout(applyCfg,7000); setTimeout(syncLinked,10000); setTimeout(autoImgs,12000);
+  setTimeout(applyPriceLists,3000); setTimeout(renameUpper,2000); setTimeout(applyCfg,7000); setTimeout(applyZoneAdds,13000); setTimeout(syncLinked,10000); setTimeout(autoImgs,12000);
   admUnsub.push(onSnapshot(query(collection(db,"orders"),orderBy("createdAt","desc"),limit(400)),function(snap){
     var prevNew=orders.filter(function(o){return o.status==="new";}).length;
     orders=snap.docs.map(function(d){return d.data();}).filter(isTankOrder);
@@ -2100,7 +2110,7 @@ async function brLogoPick(id,inp){
 async function brSave(){
   var o={};
   Object.keys(brDraft||{}).forEach(function(id){ var d=brDraft[id]; o[id]={desc:String(d.desc||"").slice(0,200),warranty:String(d.warranty||"").slice(0,40),hidden:!!d.hidden,paused:!!d.paused,markup:numOr(d.markup,0),link:(d.link===""||d.link===undefined||d.link===null)?"":numOr(d.link,0),logo:d.logo||""}; });
-  try{ await setDoc(doc(db,"meta","tankBrands"),{list:o,updatedAt:Date.now()}); toast("✓ تم حفظ المصانع"); setTimeout(syncLinked,1200); }catch(e){ toast("تعذر الحفظ، تأكد من الدخول"); }
+  try{ await setDoc(doc(db,"meta","tankBrands"),{list:o,updatedAt:Date.now()},{merge:true}); toast("✓ تم حفظ المصانع"); setTimeout(syncLinked,1200); }catch(e){ toast("تعذر الحفظ، تأكد من الدخول"); }
 }
 function brShare(id){
   var b=brById(id), url=baseUrl()+"/?b="+id+"&s="+Date.now().toString(36);
@@ -2204,7 +2214,7 @@ async function pfDelete(){
 
 // ── التوصيل ──
 var zDraft=null, zSuggested=false, zOpen={};
-const SUG_STATES=[["نهر النيل - شندي",5],["نهر النيل - بقية المدن",10],["الشمالية",25],["الجزيرة",10],["كسلا",15],["القضارف",15],["سنار",20],["شمال كردفان",30]];
+const SUG_STATES=[["نهر النيل - شندي",5],["نهر النيل - بقية المدن",10],["الشمالية",25],["الجزيرة",10],["كسلا",15],["القضارف",15],["سنار",20],["شمال كردفان",30],["النيل الأبيض",10]];
 function zTanks(){ return tanks(true).filter(function(p){return !p.priceOnRequest && priceOf(p);}).sort(function(a,b){return (capOf(a)-capOf(b))||(priceOf(a)-priceOf(b));}); }
 function zCalcFees(z){ var o={}; zTanks().forEach(function(p){ var r=Number(String(z.rate).replace(",","."))||0; if(r>0) o[p.id]=round500(priceOf(p)*r/100); }); return o; }
 function admDelivery(){
@@ -2253,7 +2263,7 @@ async function zSave(){
   }).filter(function(x){return x.name;});
   if(!z.length){ toast("أضف منطقة واحدة على الأقل"); return; }
   try{
-    await setDoc(doc(db,"meta","tankZones"),{zones:z,updatedAt:Date.now()});
+    await setDoc(doc(db,"meta","tankZones"),{zones:z,updatedAt:Date.now()},{merge:true});
     await setDoc(doc(db,"meta","tankSettings"),Object.assign({},S,{freeOver:numIn(document.getElementById("s-free").value)||0,shipNote:document.getElementById("s-ship").value.trim(),updatedAt:Date.now()}));
     zDraft=null; toast("✓ تم حفظ التوصيل");
   }catch(e){ toast("تعذر الحفظ، تأكد من الدخول ومن نشر القواعد"); }
