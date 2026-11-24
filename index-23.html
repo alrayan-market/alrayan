@@ -3360,6 +3360,8 @@ async function mkoSave(){
   if(waNum(p1.full)===waNum(p2.full)){ e.textContent="الرقم الاحتياطي يجب أن يختلف عن الأساسي"; return; }
   var mine=waNum(meMk.phone).slice(-9);
   if(waNum(p1.full).slice(-9)===mine||waNum(p2.full).slice(-9)===mine){ e.textContent="لا يمكن تسجيل طلب برقمك أنت، اكتب أرقام الزبون"; return; }
+  var badP=mkoItems.find(function(it){ var p=prodById(it.pid), mk=mkPriceOf(p); return p && mk && !p.priceOnRequest && (numIn(it.price)<mk || numIn(it.price)>priceOf(p)); });
+  if(badP){ var bp=prodById(badP.pid); e.textContent="💰 سعر «"+bp.name+"» يكون بين "+money(mkPriceOf(bp))+" و"+money(priceOf(bp)); return; }
   var smallM=mkoItems.find(function(it){ var p=prodById(it.pid); return p && it.qty<minQty(p); });
   if(smallM){ e.textContent="📦 أقل طلب من «"+prodById(smallM.pid).name+"» هو "+minQty(prodById(smallM.pid))+" حبات"; return; }
   if(mkoItems.some(function(it){ return unavail(prodById(it.pid)); })){ e.textContent="⏸️ أحد الخزانات البيع متوقف له مؤقتاً، اختر خزاناً متوفراً"; return; }
