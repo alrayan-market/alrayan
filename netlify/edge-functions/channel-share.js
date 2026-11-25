@@ -67,7 +67,7 @@ export default async (request, context) => {
   if (home && [...url.searchParams.keys()].some((k) => !["s", "v", "fbclid", "utm_source", "utm_medium", "utm_campaign"].includes(k))) return context.next();
 
   let ready = false; // صورة المعاينة جاهزة بالحجم المناسب (لا تحتاج تصغير)
-  let title = SITE_NAME, desc = "أطلب من هنا واستلم في موقعك · خزانات أصلية بكل السعات · الدفع عند الاستلام", image = SITE_LOGO;
+  let title = SITE_NAME, desc = "أطلب من هنا واستلم في موقعك · خزانات أصلية بكل السعات · الدفع عند الاستلام داخل الخرطوم", image = SITE_LOGO;
   try {
     const useStatic = async (key) => { const u = await staticOg(key); if (u) { image = u; ready = true; } };
     if (home) {
@@ -80,7 +80,7 @@ export default async (request, context) => {
       const BN = { gt: "النمر الذهبي", nakhla: "النخلة", thuraya: "الثريا", asia: "آسيا", farouq: "الفاروق", kurd: "كرد بلاست", baraka: "البركة" };
       const n = BN[br] || "المصنع";
       title = "🏭 خزانات " + n + (br === "gt" ? " ⭐ الموصى بها" : "") + " · منصة الريان";
-      desc = "كل مقاسات خزانات " + n + " بأسعارها · توصيل لحد موقعك · الدفع عند الاستلام";
+      desc = "كل مقاسات خزانات " + n + " بأسعارها · توصيل لحد موقعك · الدفع عند الاستلام داخل الخرطوم";
       await useStatic("b_" + br);
       if (!ready && BR_OG[br]) { image = url.origin + "/?ogl=" + br; ready = true; }
     } else if (revs) {
